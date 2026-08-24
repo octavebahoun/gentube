@@ -76,12 +76,19 @@ Ces tâches bloquent les autres ou coûtent une migration si on les reporte.
 
 Ce ne sont pas des tâches à déléguer.
 
-- [ ] **720p à 4 crédits/s** alors que les specs disent 2 — lequel gagne ?
+- [x] **720p : 4 crédits/s** — tranché. Le 720p ne peut pas coûter le même
+      prix que le 480p (2 crédits/s). Le code était déjà à 4 : rien à changer,
+      les specs sont périmées sur ce point.
 - [ ] **Recharge 5 000 FCFA / 3 000 crédits** — elle perd de l'argent.
-- [ ] **Expiration des crédits de plan** — non implémentée. Ils expirent ou pas ?
+- [x] **Crédits de plan : ils expirent** — tranché. Ils disparaissent à la fin
+      du cycle, ils ne s'accumulent pas.
+      **Conséquence :** les crédits achetés en recharge, eux, ne doivent PAS
+      expirer. Il faut donc distinguer deux poches dans le solde, alors que
+      `credit_ledger` n'en connaît qu'une aujourd'hui.
 - [x] **Images : Flux via Cloudflare Workers AI** — tranché. Replicate ne
       sert plus qu'aux clips vidéo.
-- [ ] **Studio embarqué ou UI maison ?** — dépend des deux vérifications P0.
+- [x] **Studio embarqué** — tranché. Les deux vérifications P0 deviennent des
+      prérequis bloquants, plus des questions ouvertes.
 - [ ] **Qui relit Yannick** — Mourchid ou toi ? (≈20-30 % du temps du relecteur)
 - [ ] **Landing publique maintenant ou plus tard ?**
 - [ ] **Rendu Lambda → R2** — le rendu Lambda écrit vers S3, on stocke sur R2.

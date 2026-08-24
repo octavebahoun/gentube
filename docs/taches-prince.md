@@ -104,6 +104,13 @@ jamais en tapant un nombre.
       C'est l'aperçu, gratuit.
 - [ ] Indiquer clairement le passage estimé → mesuré (c'est là que l'argent
       se décide)
+- [ ] **Embarquer `@hyperframes/studio`** — décision actée. C'est une vraie
+      bibliothèque React 19 + Tailwind, avec timeline visuelle et scrub.
+      Deux prérequis avant de commencer, on les vérifie :
+      son serveur (`@hyperframes/studio-server`) doit pouvoir lire par tenant,
+      et son panneau de code CodeMirror doit pouvoir être masqué — on ne donne
+      pas un éditeur HTML/JS aux clients.
+      24 Mo décompressés : à charger en lazy, et version épinglée à l'exact.
 
 ---
 

@@ -129,7 +129,23 @@ transaction avec une clé d'idempotence.
 
 ---
 
-## 7. Propriétaire du schéma
+## 7. Deux poches de crédits
+
+Décision actée : **les crédits de plan expirent à la fin du cycle**, ils ne
+s'accumulent pas.
+
+Conséquence directe sur le schéma : les crédits **achetés en recharge** ne
+doivent pas expirer, eux. Or `credit_ledger` ne connaît qu'un seul solde.
+
+Il faut donc séparer les deux poches, et décider laquelle est débitée en
+premier — logiquement celle qui expire.
+
+Le grand livre est sur le chemin monétaire : écritures en transaction, clé
+d'idempotence, et un test par cas de bord.
+
+---
+
+## 8. Propriétaire du schéma
 
 Quatre devs qui lancent `drizzle-kit` = conflit sur `_journal.json` à chaque
 fois. Les autres te **demandent** leurs colonnes, tu produis la migration.
@@ -139,7 +155,7 @@ Idéalement : une migration consolidée maintenant pour ce qu'on sait déjà
 
 ---
 
-## 8. CI
+## 9. CI
 
 Le projet a 236 tests et personne ne les fait tourner automatiquement.
 `pnpm test`, `pnpm typecheck`, `pnpm build` sur chaque PR.
@@ -149,7 +165,7 @@ régressions, tu relis la logique.
 
 ---
 
-## 9. Relecture du code de Yannick
+## 10. Relecture du code de Yannick
 
 Budgète **20 à 30 % de ton temps**. Si ce n'est pas budgété explicitement, ça
 mange le planning en silence.

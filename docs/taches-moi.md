@@ -9,16 +9,15 @@ séquence. Et les décisions que personne d'autre ne peut prendre.
 
 Une ligne chacune. Tant qu'elles ne sont pas tranchées, quelqu'un attend.
 
-- [ ] **720p : 4 crédits/s ou 2 ?** Le code dit 4, les specs disent 2.
-      → bloque le prix affiché
+- [x] **720p : 4 crédits/s** — tranché. Le double du 480p, c'est voulu.
 - [ ] **Recharge 5 000 FCFA / 3 000 crédits** — elle perd de l'argent.
       → bloque la page tarifs de Prince
-- [ ] **Les crédits de plan expirent-ils ?** Non implémenté aujourd'hui.
-      → bloque Mourchid (schéma)
+- [x] **Les crédits de plan expirent** — tranché. Reste à distinguer les
+      crédits de recharge, qui n'expirent pas.
 - [x] **Images : Cloudflare Workers AI** — tranché. Replicate reste pour les
       clips vidéo uniquement.
-- [ ] **Studio embarqué ou UI maison ?** Dépend de deux vérifications P0.
-      → bloque Prince
+- [x] **Studio embarqué** — tranché. Les deux vérifications deviennent
+      bloquantes.
 - [ ] **Qui relit Yannick — Mourchid ou moi ?** (≈25 % du temps du relecteur)
 - [ ] **Landing publique maintenant ou plus tard ?**
       → bloque Prince
