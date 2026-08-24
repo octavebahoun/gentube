@@ -33,7 +33,7 @@ async function startPostgres() {
   console.log('Postgres is up on localhost:54322.');
 }
 
-/** Fills the blank secrets in .env.example and writes .env. */
+/** Remplit les secrets vides de .env.example et écrit .env. */
 async function writeEnvFile() {
   if (await exists(ENV_PATH)) {
     console.log('.env already exists — leaving it untouched.');

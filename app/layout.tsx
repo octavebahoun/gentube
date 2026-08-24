@@ -29,8 +29,8 @@ export default function RootLayout({
         <SWRConfig
           value={{
             fallback: {
-              // We do NOT await here
-              // Only components that read this data will suspend
+              // On n'attend PAS ici
+              // Seuls les composants qui lisent ces données se suspendront
               '/api/user': getUser(),
               '/api/tenant': getTenantForUser()
             }

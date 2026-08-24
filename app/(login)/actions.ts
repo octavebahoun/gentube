@@ -46,8 +46,8 @@ const signInSchema = z.object({
 export const signIn = validatedAction(signInSchema, async (data) => {
   const { email, password } = data;
 
-  // Pre-authentication lookup: the tenant is not known until the credentials
-  // check out, so this one query is keyed on the unique email instead.
+  // Recherche pré-authentification : le tenant n'est connu qu'une fois les
+  // identifiants validés, cette requête est donc clé sur l'email unique.
   const [foundUser] = await db
     .select()
     .from(users)
@@ -108,9 +108,10 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
 
   const passwordHash = await hashPassword(password);
 
-  // Tenant bootstrap: joining an existing tenant through an invitation, or
-  // creating a brand new one. Both branches run unscoped by necessity — the
-  // caller has no tenant yet — and both end by handing off to tenantDb().
+  // Amorçage du tenant : rejoindre un tenant existant via une invitation, ou
+  // en créer un nouveau. Les deux branches tournent sans scope par nécessité —
+  // l'appelant n'a pas encore de tenant — et finissent toutes deux par un
+  // transfert à tenantDb().
   let createdUser: User;
   let tenantId: number;
   let joinedExistingTenant = false;
@@ -121,8 +122,8 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
       return { error: 'Invalid or expired invitation.', email, password };
     }
 
-    // Keyed on the invitation id *and* the invited email, so an invitation
-    // cannot be redeemed by anyone else.
+    // Clé sur l'id d'invitation *et* l'email invité, pour qu'une invitation
+    // ne puisse pas être utilisée par quelqu'un d'autre.
     const [invitation] = await db
       .select()
       .from(invitations)
@@ -181,7 +182,8 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
     tenantId = result.tenant.id;
     createdUser = result.user;
 
-    // Starter allowance, booked through the ledger like any other movement.
+    // Dotation de démarrage, passée par le grand livre comme tout autre
+    // mouvement.
     await grantCredits(tenantDb(tenantId), {
       amount: PLAN_MONTHLY_CREDITS.starter,
       reason: 'signup_grant',
@@ -297,7 +299,7 @@ export const deleteAccount = validatedActionWithUser(
 
     await logActivity(user.tenantId, user.id, ActivityType.DELETE_ACCOUNT);
 
-    // Soft delete, with the email freed up for re-registration.
+    // Suppression douce, avec libération de l'email pour réinscription.
     await tenantDb(user.tenantId).update(
       users,
       {
@@ -348,8 +350,8 @@ export const removeTenantMember = validatedActionWithUser(
       return { error: 'Only an owner or admin can remove a member.' };
     }
 
-    // tenantDb scopes the update, so a member id from another tenant matches
-    // nothing rather than deleting someone else's user.
+    // tenantDb scope la mise à jour : un id de membre d'un autre tenant ne
+    // matche rien au lieu de supprimer l'utilisateur de quelqu'un d'autre.
     const removed = await tenantDb(user.tenantId).update(
       users,
       {
@@ -418,7 +420,7 @@ export const inviteTenantMember = validatedActionWithUser(
       ActivityType.INVITE_TENANT_MEMBER
     );
 
-    // TODO: Send invitation email and include ?inviteId={id} in the sign-up URL
+    // TODO : envoyer l'email d'invitation avec ?inviteId={id} dans l'URL d'inscription
     return { success: 'Invitation sent successfully' };
   }
 );

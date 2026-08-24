@@ -3,12 +3,12 @@ import { processGeniusPayWebhook } from '@/lib/billing/webhook';
 import { BillingNotConfiguredError } from '@/lib/billing/config';
 
 /**
- * GeniusPay → GenTube payment callbacks.
+ * Callbacks de paiement GeniusPay → GenTube.
  *
- * This handler only adapts the request: the raw body is read as text (it is
- * what the signature covers — parsing it first and re-serialising would break
- * verification), headers are lowercased, and everything else happens in
- * lib/billing/webhook.ts, which is where the tests point.
+ * Ce handler ne fait qu'adapter la requête : le corps brut est lu en texte
+ * (c'est ce que couvre la signature — le parser puis re-sérialiser casserait
+ * la vérification), les en-têtes sont passés en minuscules, et tout le reste
+ * se passe dans lib/billing/webhook.ts, là où pointent les tests.
  */
 export async function POST(request: NextRequest) {
   const headers: Record<string, string> = {};
@@ -33,8 +33,9 @@ export async function POST(request: NextRequest) {
     return Response.json(result.body, { status: result.status });
   } catch (error) {
     if (error instanceof BillingNotConfiguredError) {
-      // Never silently 200 a payment the instance cannot verify: the gateway
-      // must keep retrying until the secret is in place.
+      // Ne jamais répondre 200 en silence à un paiement que l'instance ne
+      // peut pas vérifier : la passerelle doit continuer de réessayer jusqu'à
+      // ce que le secret soit en place.
       console.error('GeniusPay webhook rejected:', error.message);
       return Response.json(
         { ok: false, message: 'Billing is not configured.' },
@@ -42,7 +43,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // No detail on the wire, and no 200 either — a redelivery is what we want.
+    // Aucun détail sur le fil, et pas de 200 non plus — c'est une
+    // redelivery qu'on veut.
     console.error('GeniusPay webhook failed:', error);
     return Response.json(
       { ok: false, message: 'Webhook processing failed.' },

@@ -153,6 +153,144 @@ change dans `pricing.ts` et nulle part ailleurs.
 
 ---
 
+## Projets
+
+Un projet porte le **style**, la **voix**, la **chaîne YouTube** et le
+**pipeline par défaut** ; chaque vidéo est créée dedans et en hérite. Tout est
+dans `lib/projects/`, et les pages sont sous `/dashboard/projects`.
+
+```ts
+await listProjects(tdb);              // + nombre de vidéos par projet
+await createProject(tdb, input);      // zod : nom requis, pipeline dans l'enum
+await updateProject(tdb, id, patch);  // champ absent = inchangé
+await deleteProject(tdb, id);         // refusé si le projet contient des vidéos
+```
+
+Quatre règles, chacune testée :
+
+- **« Not found », jamais « forbidden ».** Un id appartenant à un autre tenant
+  répond exactement comme un id inexistant, en lecture, en écriture et en
+  suppression : la page ne peut pas servir à deviner ce qui existe ailleurs.
+- **Champ vide = champ effacé.** Un formulaire poste toujours tous ses champs ;
+  une valeur vide devient `null`, jamais la chaîne vide. Sur une mise à jour, un
+  champ *absent* reste inchangé.
+- **Suppression refusée si le projet contient des vidéos.** Elles portent des
+  crédits consommés, des assets rendus et des ids YouTube publiés — un clic ne
+  doit pas détruire du travail payé. Le message donne le nombre de vidéos.
+- **Suppression réservée aux `owner` / `admin`.** Créer et configurer reste
+  ouvert à tout membre du workspace.
+
+`voice_id` et `youtube_channel_id` sont stockés mais **pas encore consommés** :
+la voix off et l'OAuth YouTube arrivent plus tard. L'UI le dit, plutôt que de
+laisser croire qu'un champ rempli déclenche quelque chose.
+
+---
+
+## Storyboard
+
+Un storyboard est une liste de scènes attachée à une vidéo. Chaque scène porte
+**la narration** (le texte lu), un **prompt visuel** en anglais, un type
+(`image` ou `video`), et son habillage : zoom, transition, mouvement de caméra,
+bruitages. `lib/llm/`, `lib/voice/`, `lib/videos/`, `lib/storyboard/`, et
+l'éditeur sur `/dashboard/videos/[id]`.
+
+### L'ordre du pipeline, et pourquoi il compte
+
+```
+1. le LLM écrit la NARRATION de chaque scène (+ prompt visuel, effets, sons)
+2. la voix off est générée  → sa longueur réelle devient la durée de la scène
+3. c'est cette durée qui donne le prix EXACT
+4. seulement ensuite : génération des visuels, qui coûtent cher
+```
+
+**Une durée n'est jamais écrite à la main.** Avant que l'audio existe, elle est
+*estimée* depuis le texte (~14 caractères/seconde, calibré sur des voix off
+réellement mesurées : 69 caractères pour 5,28 s, 64 pour 4,82 s, 104 pour
+6,79 s). Après, elle est *mesurée* sur l'alignement renvoyé par ElevenLabs.
+La colonne `shots.duration_source` dit laquelle des deux, et
+`validateStoryboard()` **refuse de débiter** tant qu'une seule scène est encore
+une estimation.
+
+La conséquence est le seul vrai arbitrage de cette étape : la voix off tourne
+**avant** le paiement. Elle coûte des centimes là où un clip vidéo coûte des
+dizaines de centimes, et en échange le montant affiché sur le bouton est le
+montant débité — pas d'écriture de correction dans le ledger d'un client.
+
+### Le LLM : DeepSeek
+
+API compatible OpenAI. Deux choses ont été **vérifiées sur le compte** plutôt
+que supposées, et les deux comptent :
+
+- Les modèles sont `deepseek-v4-flash` et `deepseek-v4-pro`. `deepseek-chat`
+  n'existe pas ici.
+- Ce sont des **modèles à raisonnement**. Avec un budget serré, tout part dans
+  le raisonnement et l'appel revient en HTTP 200, `finish_reason: "length"`,
+  **contenu vide**. D'où `DEEPSEEK_MAX_TOKENS` large (8 000) et un message
+  d'erreur qui nomme ce cas au lieu de rapporter « réponse vide ».
+
+Le prompt système est invariant et placé en premier, pour que le cache de
+prompt du fournisseur puisse le réutiliser.
+
+### Ce qui n'est jamais laissé au modèle
+
+- **Le type des scènes.** Sur un projet `image`, une scène revenue en `video`
+  est ramenée à `image` côté serveur : le modèle n'a pas le droit de quadrupler
+  la facture du client.
+- **Les durées.** Il lui est explicitement interdit d'en écrire une.
+- **Les chemins de sons.** Un `src` absent de la bibliothèque est supprimé. Un
+  son inventé ne casserait pas ici mais dans Lambda, plusieurs minutes plus tard.
+- **La forme.** Validation zod ; une réponse inutilisable lève une erreur claire
+  et **ne touche pas au storyboard existant**.
+
+### La bibliothèque de sons
+
+`sound_assets` est un catalogue **au niveau plateforme** : SFX, ambiances et
+nappes musicales, avec leurs pics d'impact en secondes. C'est la deuxième et
+dernière table sans `tenant_id` — elle n'appartient à personne, comme une liste
+de polices, et le test d'isolation l'énumère comme telle.
+
+Le catalogue voyage dans le prompt (borné à 60 entrées) pour que le modèle
+choisisse dedans. Import depuis un catalogue généré :
+
+```bash
+pnpm tsx lib/sounds/import-catalog.ts ../pipevideo/public/sounds/CATALOG.md
+```
+
+Importer les lignes rend les sons **choisissables** ; les fichiers doivent
+encore atteindre R2 sous les mêmes clés pour être **jouables**.
+
+### Le contrat de rendu
+
+`lib/storyboard/render.ts` est le portage fidèle du schéma de storyboard déjà en
+production dans le pipeline pipevideo : `effects` (9 transitions, zoom, shake,
+matchCut, cameraMotion, flash), `overlayText`, `kineticTitle`, `card`, `sounds`,
+volumes, et le modèle de temps (30 fps, 1 s de silence après chaque narration,
+transitions qui se chevauchent). `toRemotionStoryboard()` sérialise
+`videos` + `shots` vers exactement ce JSON, pour que la composition Remotion
+existante soit réutilisée sans traduction.
+
+L'habillage vit dans une colonne `render` en jsonb, validée par zod : ajouter
+une transition ou une variante de titre est un déploiement, pas une migration.
+
+### Règles d'édition
+
+- Seule une vidéo en `draft` est modifiable.
+- **Réécrire la narration invalide la voix off** : l'audio ne dit plus ce que la
+  scène dit, donc la durée redevient une estimation et la piste enregistrée est
+  effacée. Changer seulement le visuel ne touche pas à l'audio.
+- Chaque mutation repropose le prix dans la même transaction.
+- Une suppression recompacte les positions 1..n.
+- Le réordonnancement exige la liste **exacte** des scènes.
+- Une scène appartenant à une autre vidéo du même tenant est refusée en 404.
+
+### Le kanban
+
+Réordonnancement par flèches ↑/↓, pas de glisser-déposer. Le drag reste à faire
+(`@dnd-kit/sortable`) et se posera par-dessus `reorderShots(videoId, orderedIds)`
+sans toucher au serveur.
+
+---
+
 ## Facturation — GeniusPay
 
 Abonnements mensuels (Starter 15 000 / Pro 30 000 FCFA) et recharges ponctuelles,
@@ -338,8 +476,22 @@ Webhook à déclarer côté GeniusPay : `${BASE_URL}/api/webhooks/geniuspay`.
 ## Pas encore implémenté
 
 Volontairement hors périmètre pour l'instant : Replicate, Remotion, YouTube,
-ElevenLabs, le CRUD projets/vidéos et le kanban de storyboard. Le schéma, les
-crédits, l'isolation et la facturation sont en place pour les recevoir.
+ElevenLabs et l'orchestration n8n. Le schéma, les crédits, l'isolation, la
+facturation, les projets et le storyboard sont en place pour les recevoir.
+
+**Stockage R2 — le blocage numéro un.** `lib/storage/index.ts` fige le contrat
+(`AssetStore`, `assetKey` avec préfixe `tenant_id/` obligatoire) et lève
+`StorageNotConfiguredError` tant qu'aucune implémentation R2 n'existe. La voix
+off, les images, les clips et le rendu final en dépendent tous. C'est la
+première chose à écrire, et elle débloque quatre chantiers d'un coup.
+
+**Glisser-déposer du kanban.** Le réordonnancement se fait aux flèches ; le
+drag-and-drop des specs reste à poser par-dessus le même appel serveur.
+
+**Composition Remotion.** Le contrat est porté (`lib/storyboard/render.ts`),
+la composition elle-même — `Main.tsx`, `Scene.tsx`, `Subtitles.tsx`,
+`transitions.tsx`, `KineticTitle.tsx` — reste à recopier depuis pipevideo, avec
+ses dépendances `remotion` et `@remotion/*`.
 
 **Expiration du quota de plan.** Les specs §1 disent que les crédits achetés
 n'expirent pas mais que le quota du plan expire en fin de cycle. Le crédit du

@@ -25,17 +25,19 @@ import {
 } from './schema';
 
 /**
- * Tenant isolation wrapper.
+ * Wrapper d'isolation par tenant.
  *
- * Rule: no query reaches Postgres without a tenant_id filter. Application code
- * never imports `db` directly — it calls `tenantDb(tenantId)` and every read,
- * write and delete is rewritten to carry `WHERE tenant_id = $tenantId`.
+ * Règle : aucune requête n'atteint Postgres sans filtre tenant_id. Le code
+ * applicatif n'importe jamais `db` directement — il appelle
+ * `tenantDb(tenantId)` et chaque lecture, écriture et suppression est
+ * réécrite pour porter `WHERE tenant_id = $tenantId`.
  *
- * A table is usable through this wrapper only if it exposes a `tenantId`
- * column; anything else throws `TenantScopeViolationError` at call time rather
- * than silently running unscoped. The one table without a `tenant_id` column
- * is `tenants` itself, which is reachable only through `getTenant()` /
- * `updateTenant()` — both filtered on its primary key, which *is* the tenant.
+ * Une table n'est utilisable via ce wrapper que si elle expose une colonne
+ * `tenantId` ; tout le reste lève une `TenantScopeViolationError` à l'appel
+ * plutôt que de tourner silencieusement sans scope. La seule table sans
+ * colonne `tenant_id` est `tenants` elle-même, joignable uniquement via
+ * getTenant() / updateTenant() — toutes deux filtrées sur sa clé primaire,
+ * qui *est* le tenant.
  */
 
 export class TenantScopeViolationError extends Error {
@@ -45,8 +47,9 @@ export class TenantScopeViolationError extends Error {
   }
 }
 
-/** Every tenant-owned table. The completeness test asserts this list matches
- *  the schema, so a new table cannot be added without a tenant_id column. */
+/** Toutes les tables appartenant à un tenant. Le test de complétude garantit
+ *  que cette liste matche le schéma, donc une nouvelle table ne peut pas être
+ *  ajoutée sans colonne tenant_id. */
 export const TENANT_SCOPED_TABLES = [
   users,
   invitations,
@@ -61,15 +64,15 @@ export const TENANT_SCOPED_TABLES = [
   billingCycles,
   paymentIntents,
   paymentAttempts,
-  // Readable through the wrapper like any other table; the webhook intake path
-  // is the one writer that runs unscoped, because it is what resolves the
-  // tenant. See the table's comment in schema.ts.
+  // Lisible via le wrapper comme n'importe quelle autre table ; le chemin
+  // d'ingestion webhook est le seul écrivain qui tourne sans scope, car c'est
+  // lui qui résout le tenant. Voir le commentaire de la table dans schema.ts.
   paymentWebhookEvents,
 ] as const;
 
 export type TenantScopedTable = PgTable & { tenantId: AnyPgColumn };
 
-/** Insert payload with `tenantId` made optional — the wrapper supplies it. */
+/** Payload d'insertion avec `tenantId` rendu optionnel — le wrapper le fournit. */
 export type TenantInsert<T extends TenantScopedTable> = Omit<
   T['$inferInsert'],
   'tenantId'
@@ -155,13 +158,13 @@ function assertTenantId(tenantId: number): void {
 export function tenantDb(tenantId: number, executor: Executor = db): TenantDb {
   assertTenantId(tenantId);
 
-  /** ANDs the caller's predicate with the mandatory tenant filter. */
+  /** Combine avec AND le prédicat de l'appelant et le filtre tenant obligatoire. */
   function scope(table: TenantScopedTable, where?: SQL): SQL {
     const tenantFilter = eq(tenantColumn(table), tenantId);
     return where ? (and(tenantFilter, where) as SQL) : tenantFilter;
   }
 
-  /** Rejects a payload trying to write or move a row into another tenant. */
+  /** Rejette un payload tentant d'écrire ou de déplacer une ligne vers un autre tenant. */
   function assertOwnTenant(values: Record<string, unknown>): void {
     const declared = values.tenantId;
     if (declared !== undefined && declared !== tenantId) {
@@ -171,10 +174,11 @@ export function tenantDb(tenantId: number, executor: Executor = db): TenantDb {
     }
   }
 
-  // The internal `as any` casts below are the price of accepting an arbitrary
-  // generic table: drizzle's builders are typed per concrete table. Every
-  // public signature stays fully typed, and the tenant filter is applied
-  // before the cast, so no caller can bypass it.
+  // Les casts internes `as any` ci-dessous sont le prix à payer pour accepter
+  // une table générique arbitraire : les builders de drizzle sont typés par
+  // table concrète. Chaque signature publique reste entièrement typée, et le
+  // filtre tenant est appliqué avant le cast, donc aucun appelant ne peut
+  // l'esquiver.
   const handle: TenantDb = {
     tenantId,
 
@@ -243,7 +247,7 @@ export function tenantDb(tenantId: number, executor: Executor = db): TenantDb {
         .returning();
     },
 
-    /** The tenant row itself, filtered on its primary key. */
+    /** La ligne du tenant elle-même, filtrée sur sa clé primaire. */
     async getTenant() {
       const [row] = await (executor as any)
         .select()
@@ -254,8 +258,9 @@ export function tenantDb(tenantId: number, executor: Executor = db): TenantDb {
     },
 
     /**
-     * Updates the tenant row. `extraWhere` lets callers add a guard predicate
-     * (the credit ledger uses it for its atomic `balance >= amount` check).
+     * Met à jour la ligne du tenant. `extraWhere` permet aux appelants
+     * d'ajouter un prédicat de garde (le grand livre de crédits l'utilise
+     * pour sa vérification atomique `balance >= amount`).
      */
     async updateTenant(set, extraWhere) {
       const where = eq(tenants.id, tenantId);
@@ -266,10 +271,10 @@ export function tenantDb(tenantId: number, executor: Executor = db): TenantDb {
         .returning()) as Tenant[];
     },
 
-    /** Runs `fn` in a transaction with a tenant-scoped handle bound to it. */
+    /** Exécute `fn` dans une transaction avec un handle scopé au tenant lié à elle. */
     async transaction(fn) {
       if (executor !== db) {
-        // Already inside a transaction — reuse it rather than nesting.
+        // Déjà dans une transaction — la réutilise plutôt que d'imbriquer.
         return await fn(handle);
       }
       return await db.transaction(async (tx) => fn(tenantDb(tenantId, tx)));

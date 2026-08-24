@@ -15,6 +15,20 @@
       "when": 1787591267592,
       "tag": "0001_lame_fantastic_four",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787598976988,
+      "tag": "0002_acoustic_la_nuit",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787600756154,
+      "tag": "0003_keen_sphinx",
+      "breakpoints": true
     }
   ]
 }

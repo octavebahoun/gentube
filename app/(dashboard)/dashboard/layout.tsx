@@ -10,6 +10,7 @@ import {
   Shield,
   Activity,
   CreditCard,
+  Film,
   Menu,
 } from 'lucide-react';
 
@@ -21,8 +22,15 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // `/dashboard/projects/42` appartient toujours à l'entrée Projets.
+  // `/dashboard` lui-même est exclu, sinon il matcherait toutes les pages de
+  // la section.
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/dashboard' && pathname.startsWith(`${href}/`));
+
   const navItems = [
     { href: '/dashboard', icon: Users, label: 'Team' },
+    { href: '/dashboard/projects', icon: Film, label: 'Projects' },
     { href: '/dashboard/general', icon: Settings, label: 'General' },
     { href: '/dashboard/billing', icon: CreditCard, label: 'Billing' },
     { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
@@ -31,7 +39,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex flex-col min-h-[calc(100dvh-68px)] max-w-7xl mx-auto w-full">
-      {/* Mobile header */}
+      {/* En-tête mobile */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4">
         <div className="flex items-center">
           <span className="font-medium">Settings</span>
@@ -47,7 +55,7 @@ export default function DashboardLayout({
       </div>
 
       <div className="flex flex-1 overflow-hidden h-full">
-        {/* Sidebar */}
+        {/* Barre latérale */}
         <aside
           className={`w-64 bg-white lg:bg-gray-50 border-r border-gray-200 lg:block ${
             isSidebarOpen ? 'block' : 'hidden'
@@ -59,9 +67,9 @@ export default function DashboardLayout({
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} passHref>
                 <Button
-                  variant={pathname === item.href ? 'secondary' : 'ghost'}
+                  variant={isActive(item.href) ? 'secondary' : 'ghost'}
                   className={`shadow-none my-1 w-full justify-start ${
-                    pathname === item.href ? 'bg-gray-100' : ''
+                    isActive(item.href) ? 'bg-gray-100' : ''
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >
@@ -73,7 +81,7 @@ export default function DashboardLayout({
           </nav>
         </aside>
 
-        {/* Main content */}
+        {/* Contenu principal */}
         <main className="flex-1 overflow-y-auto p-0 lg:p-4">{children}</main>
       </div>
     </div>

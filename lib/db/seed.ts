@@ -7,17 +7,19 @@ import {
   grantCredits,
   PLAN_MONTHLY_CREDITS,
 } from '@/lib/credits';
+import { estimateNarrationSeconds } from '@/lib/storyboard';
 
 /**
- * Seeds two tenants so tenant isolation is visible from the first run:
- * anything done as one must never surface for the other.
+ * Insère deux tenants pour que l'isolation soit visible dès le premier
+ * lancement : toute action faite sur l'un ne doit jamais apparaître chez
+ * l'autre.
  *
- * Login for both accounts: password `admin123`.
+ * Connexion des deux comptes : mot de passe `admin123`.
  */
 async function seed() {
   const passwordHash = await hashPassword('admin123');
 
-  // --- Tenant bootstrap (the one place that legitimately runs unscoped) ---
+  // --- Amorçage des tenants (le seul endroit légitimement sans scope) ---
   const [studio, demo] = await db
     .insert(tenants)
     .values([
@@ -51,7 +53,7 @@ async function seed() {
   ]);
   console.log(`Created tenants ${studio.id} (pro) and ${demo.id} (starter).`);
 
-  // --- Everything below goes through the tenant-scoped wrapper ---
+  // --- Tout ce qui suit passe par le wrapper scopé au tenant ---
   const studioDb = tenantDb(studio.id);
   const demoDb = tenantDb(demo.id);
 
@@ -82,39 +84,50 @@ async function seed() {
     resolution: '480p',
   });
 
+  // Narration en français, prompts visuels en anglais, durées dérivées de la
+  // narration — la même règle que suit le générateur. Elles restent
+  // `estimated` tant que la voix off ne les a pas mesurées.
   await studioDb.insert(
     shots,
     [
       {
         order: 1,
         type: 'image' as const,
+        narration:
+          "Au XVIIe siècle, un royaume d'Afrique de l'Ouest confie sa garde à des femmes.",
         prompt: 'Wide establishing shot of the royal palace of Abomey at dawn.',
-        durationS: 6,
       },
       {
         order: 2,
         type: 'video' as const,
+        narration:
+          'On les appelle les Amazones. Elles s\'entraînent chaque jour, pieds nus, dans la poussière.',
         prompt: 'Amazon warriors training in formation, dust rising, slow motion.',
-        durationS: 8,
       },
       {
         order: 3,
         type: 'video' as const,
+        narration:
+          'Pendant deux ans, elles ont tenu tête à l\'armée française.',
         prompt: 'Close-up of a warrior tightening her belt, determined gaze.',
-        durationS: 5,
       },
       {
         order: 4,
         type: 'image' as const,
+        narration: 'Aujourd\'hui, il ne reste que des murs. Et leur nom.',
         prompt: 'Sunset over the palace walls, silhouettes of guards.',
-        durationS: 6,
       },
-    ].map((shot) => ({ ...shot, videoId: video.id }))
+    ].map((shot) => ({
+      ...shot,
+      videoId: video.id,
+      durationS: estimateNarrationSeconds(shot.narration),
+    }))
   );
 
   const { creditsEstimated } = await estimateVideo(studioDb, video.id);
 
-  // A second tenant with its own project, to make isolation testable by hand.
+  // Un second tenant avec son propre projet, pour que l'isolation soit
+  // vérifiable à la main.
   const [demoProject] = await demoDb.insert(projects, {
     name: 'Demo Shorts',
     defaultPipeline: 'image',

@@ -16,14 +16,18 @@ import {
   resetDb,
 } from '@/lib/test/fixtures';
 
-// One shared postgres client per worker: close it once, after every suite in
-// this file has run.
+// Un client postgres partagé par worker : fermé une fois, après l'exécution
+// de toutes les suites de ce fichier.
 afterAll(async () => {
   await closeDb();
 });
 
-/** Tables that legitimately have no tenant_id column. */
-const UNSCOPED_TABLES = new Set(['tenants']);
+/**
+ * Tables légitimement sans colonne tenant_id : la ligne du tenant elle-même,
+ * et la bibliothèque de sons partagée — un catalogue d'actifs plateforme
+ * n'appartenant à aucun client et lisible par tous.
+ */
+const UNSCOPED_TABLES = new Set(['tenants', 'sound_assets']);
 
 describe('tenantDb — schema coverage', () => {
   it('registers every tenant-owned table', () => {

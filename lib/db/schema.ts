@@ -8,13 +8,14 @@ import {
   integer,
   jsonb,
   boolean,
+  real,
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // ---------------------------------------------------------------------------
-// Enums
+// Énums
 // ---------------------------------------------------------------------------
 
 export const planEnum = pgEnum('plan', ['starter', 'pro', 'business']);
@@ -22,8 +23,9 @@ export const userRoleEnum = pgEnum('user_role', ['owner', 'admin', 'member']);
 export const pipelineEnum = pgEnum('pipeline', ['image', 'video', 'mixed']);
 export const resolutionEnum = pgEnum('resolution', ['480p', '720p']);
 
-// `failed` is not in the spec but every other state is non-terminal on error,
-// so a pipeline crash would otherwise leave a video stuck in `generating`.
+// `failed` n'est pas dans le cahier des charges mais tous les autres états
+// sont non terminaux en cas d'erreur : sans lui, un crash de pipeline
+// laisserait une vidéo bloquée dans `generating`.
 export const videoStatusEnum = pgEnum('video_status', [
   'draft',
   'validated',
@@ -33,6 +35,27 @@ export const videoStatusEnum = pgEnum('video_status', [
   'published',
   'failed',
 ]);
+
+export const ratioEnum = pgEnum('ratio', ['16:9', '9:16']);
+
+export const subtitleStyleEnum = pgEnum('subtitle_style', [
+  'karaoke',
+  'fondant',
+  'cinematic',
+]);
+
+/**
+ * La provenance de la durée d'un plan. `estimated` est déduit du texte de
+ * narration avant l'existence de la voix off ; `measured` est la longueur
+ * réelle de l'audio généré. Seul un storyboard mesuré peut être facturé au
+ * prix exact.
+ */
+export const durationSourceEnum = pgEnum('duration_source', [
+  'estimated',
+  'measured',
+]);
+
+export const soundKindEnum = pgEnum('sound_kind', ['sfx', 'ambient', 'music']);
 
 export const shotTypeEnum = pgEnum('shot_type', ['image', 'video']);
 export const shotStatusEnum = pgEnum('shot_status', [
@@ -60,15 +83,15 @@ export const creditReasonEnum = pgEnum('credit_reason', [
 ]);
 
 // ---------------------------------------------------------------------------
-// Tenancy
+// Multi-tenance
 // ---------------------------------------------------------------------------
 
 export const tenants = pgTable('tenants', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 100 }).notNull(),
   plan: planEnum('plan').notNull().default('starter'),
-  // Denormalised running total of `credit_ledger`. Only ever mutated through
-  // lib/credits — see the invariant test in lib/credits/credits.test.ts.
+  // Total courant dénormalisé de `credit_ledger`. Uniquement muté via
+  // lib/credits — voir le test d'invariant dans lib/credits/credits.test.ts.
   creditsBalance: integer('credits_balance').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -126,12 +149,12 @@ export const activityLogs = pgTable(
 );
 
 // ---------------------------------------------------------------------------
-// Video generation domain
+// Domaine de génération vidéo
 //
-// Every table below carries `tenant_id` even when it is reachable through a
-// parent FK (shots -> videos -> projects -> tenant). That denormalisation is
-// what makes tenantDb() enforceable as a single WHERE clause instead of a
-// join chain, and it is what the isolation tests assert against.
+// Chaque table ci-dessous porte `tenant_id` même quand elle est joignable via
+// une FK parente (shots -> videos -> projects -> tenant). Cette dénormalisation
+// est ce qui permet à tenantDb() d'imposer une simple clause WHERE au lieu
+// d'une chaîne de jointures, et c'est ce que les tests d'isolation vérifient.
 // ---------------------------------------------------------------------------
 
 export const projects = pgTable(
@@ -163,10 +186,28 @@ export const videos = pgTable(
       .notNull()
       .references(() => projects.id),
     title: varchar('title', { length: 200 }).notNull(),
+    // Le prompt/thème à partir duquel le storyboard est généré (cahier des
+    // charges §4.2). Conservé pour qu'une régénération pose la même question,
+    // au lieu de le redériver du titre modifié depuis par quelqu'un.
+    theme: text('theme'),
     status: videoStatusEnum('status').notNull().default('draft'),
     pipelineOverride: pipelineEnum('pipeline_override'),
-    // Drives credit pricing: 1 credit/s at 480p, 4 credits/s at 720p.
+    // Détermine la tarification en crédits : 1 crédit/s en 480p,
+    // 4 crédits/s en 720p.
     resolution: resolutionEnum('resolution').notNull().default('480p'),
+    // --- Réglages de rendu, sérialisés dans le storyboard Remotion --------
+    ratio: ratioEnum('ratio').notNull().default('16:9'),
+    /** Nom de la voix ou id du fournisseur. Null hérite de la voix du projet. */
+    voice: varchar('voice', { length: 60 }),
+    subtitles: boolean('subtitles').notNull().default(true),
+    subtitleStyle: subtitleStyleEnum('subtitle_style')
+      .notNull()
+      .default('karaoke'),
+    /** Musique de fond : clé R2. Les volumes sont des gains 0..1, pas de l'argent. */
+    musicUrl: text('music_url'),
+    musicVolume: real('music_volume').notNull().default(0.09),
+    /** Multiplicateur global sur tous les sons de scène. 0 coupe tous les SFX d'un coup. */
+    sfxVolume: real('sfx_volume').notNull().default(1),
     creditsEstimated: integer('credits_estimated').notNull().default(0),
     creditsConsumed: integer('credits_consumed').notNull().default(0),
     youtubeVideoId: varchar('youtube_video_id', { length: 32 }),
@@ -192,8 +233,40 @@ export const shots = pgTable(
       .references(() => videos.id),
     order: integer('order').notNull(),
     type: shotTypeEnum('type').notNull(),
+    /** Prompt visuel, en anglais : les modèles image et vidéo l'exigent. */
     prompt: text('prompt').notNull(),
-    durationS: integer('duration_s').notNull(),
+    /**
+     * La ligne que la voix lit, dans la langue propre de la vidéo. C'est le
+     * champ à partir duquel tout le reste est dérivé : l'audio, donc la
+     * durée, donc le prix.
+     */
+    narration: text('narration'),
+    /** Texte du sous-titre quand il doit différer de la narration. */
+    subtitle: text('subtitle'),
+    /** Clé R2 de la voix off générée. */
+    audioUrl: text('audio_url'),
+    /**
+     * Secondes. Fractionnaires, car une piste audio mesurée fait 5,28 s,
+     * pas 5. Écrite par l'estimateur avant la voix off puis écrasée par la
+     * longueur réelle ensuite — voir `durationSource`.
+     */
+    durationS: real('duration_s').notNull(),
+    durationSource: durationSourceEnum('duration_source')
+      .notNull()
+      .default('estimated'),
+    /**
+     * Timings mot à mot pour les sous-titres karaoké, sous la forme
+     * `[{ text, start, duration }]` en secondes depuis le début de la scène.
+     * Produits par l'étape voix off — jamais écrits à la main.
+     */
+    words: jsonb('words'),
+    /**
+     * Mise en scène et sound design : zoom, transition, mouvement caméra,
+     * overlays et titres animés, sons par scène, cartes, volumes. Validé par
+     * le contrat zod de lib/storyboard/render.ts, qui est la même forme que
+     * consomme la composition Remotion — donc extensible sans migration.
+     */
+    render: jsonb('render'),
     assetUrl: text('asset_url'),
     status: shotStatusEnum('status').notNull().default('pending'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -216,8 +289,8 @@ export const jobs = pgTable(
       .notNull()
       .references(() => videos.id),
     step: varchar('step', { length: 60 }).notNull(),
-    // Provider-side id (Replicate prediction, Lambda render, ...). Unique so a
-    // replayed webhook resolves to exactly one job.
+    // Id côté fournisseur (prédiction Replicate, rendu Lambda, ...). Unique
+    // pour qu'un webhook rejoué ne résolve qu'exactement un job.
     externalId: varchar('external_id', { length: 120 }),
     status: jobStatusEnum('status').notNull().default('queued'),
     payload: jsonb('payload'),
@@ -240,13 +313,13 @@ export const creditLedger = pgTable(
     tenantId: integer('tenant_id')
       .notNull()
       .references(() => tenants.id),
-    // Negative for a debit, positive for a grant/top-up/refund.
+    // Négatif pour un débit, positif pour une dotation/recharge/remboursement.
     delta: integer('delta').notNull(),
     reason: creditReasonEnum('reason').notNull(),
     videoId: integer('video_id').references(() => videos.id),
     balanceAfter: integer('balance_after').notNull(),
-    // Set by webhook-driven writes (GeniusPay, Replicate) so a replay is a
-    // no-op rather than a double credit.
+    // Posé par les écritures pilotées par webhook (GeniusPay, Replicate) pour
+    // qu'un replay soit un no-op plutôt qu'un double crédit.
     idempotencyKey: varchar('idempotency_key', { length: 120 }),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
@@ -263,8 +336,8 @@ export const youtubeTokens = pgTable(
     tenantId: integer('tenant_id')
       .notNull()
       .references(() => tenants.id),
-    // AES-256-GCM ciphertext produced by lib/crypto/encryption.ts.
-    // Never log these columns, never expose them through an API route.
+    // Texte chiffré AES-256-GCM produit par lib/crypto/encryption.ts.
+    // Ne jamais logger ces colonnes, ne jamais les exposer via une route API.
     accessToken: text('access_token').notNull(),
     refreshToken: text('refresh_token').notNull(),
     expiresAt: timestamp('expires_at').notNull(),
@@ -275,15 +348,52 @@ export const youtubeTokens = pgTable(
   (t) => [uniqueIndex('youtube_tokens_tenant_id_uq').on(t.tenantId)]
 );
 
+/**
+ * Bibliothèque de sons — SFX, ambiances et nappes musicales disponibles pour
+ * tous les tenants.
+ *
+ * Niveau plateforme volontairement : elle ne porte pas de `tenant_id` et est
+ * donc la seule table hors `tenants` que tenantDb() ne scope pas. C'est un
+ * catalogue d'actifs partagés, comme une liste de polices — rien de ce qu'elle
+ * contient n'appartient à un client, et chaque ligne est lisible par tous.
+ *
+ * `impacts` porte les secondes où le son frappe réellement, ce qui permet à
+ * une scène de caler un effet sur une coupe au lieu de deviner.
+ */
+export const soundAssets = pgTable(
+  'sound_assets',
+  {
+    id: serial('id').primaryKey(),
+    /** Clé R2, aussi l'identifiant référencé par le storyboard. */
+    key: varchar('key', { length: 200 }).notNull(),
+    name: varchar('name', { length: 120 }).notNull(),
+    kind: soundKindEnum('kind').notNull(),
+    /** Tags d'ambiance libres, séparés par virgules, tels qu'écrits par le catalogue. */
+    mood: varchar('mood', { length: 200 }),
+    loopable: boolean('loopable').notNull().default(false),
+    durationS: real('duration_s'),
+    musicalKey: varchar('musical_key', { length: 20 }),
+    bpm: integer('bpm'),
+    /** Secondes où le son culmine : `[0.14, 0.86, 1.51]`. */
+    impacts: jsonb('impacts'),
+    /** À quoi il sert, en des mots que le modèle peut rapprocher d'une scène. */
+    usage: text('usage'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('sound_assets_key_uq').on(t.key)]
+);
+
 // ---------------------------------------------------------------------------
-// Billing (GeniusPay — mobile money + card, XOF)
+// Facturation (GeniusPay — mobile money + carte, XOF)
 //
-// The platform holds ONE merchant account: its keys live in the environment,
-// not in the database. There is deliberately no per-tenant credentials table —
-// tenants pay the platform, they do not collect payments themselves.
+// La plateforme détient UN compte marchand : ses clés vivent dans
+// l'environnement, pas dans la base. Il n'y a volontairement pas de table de
+// credentials par tenant — les tenants paient la plateforme, ils n'encaissent
+// pas eux-mêmes.
 //
-// Money is stored as `amount_xof` integers. XOF has no minor unit, so there is
-// no cents column anywhere and no float ever touches an amount.
+// L'argent est stocké en entiers `amount_xof`. Le XOF n'a pas de sous-unité,
+// donc il n'y a aucune colonne de centimes et aucun float ne touche un montant.
 // ---------------------------------------------------------------------------
 
 export const paymentKindEnum = pgEnum('payment_kind', [
@@ -292,9 +402,10 @@ export const paymentKindEnum = pgEnum('payment_kind', [
 ]);
 
 export const paymentStatusEnum = pgEnum('payment_status', [
-  // Local row created, gateway not called yet.
+  // Ligne locale créée, passerelle pas encore appelée.
   'created',
-  // Checkout URL handed to the user, waiting for the gateway's word.
+  // URL de checkout remise à l'utilisateur, en attente du verdict de la
+  // passerelle.
   'pending',
   'succeeded',
   'failed',
@@ -303,12 +414,12 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 ]);
 
 export const subscriptionStatusEnum = pgEnum('subscription_status', [
-  // Created at checkout, before the first payment confirms.
+  // Créée au checkout, avant confirmation du premier paiement.
   'pending',
   'active',
   'past_due',
-  // Retries exhausted (specs §3.A): the tenant keeps its balance but the
-  // subscription no longer renews.
+  // Réessais épuisés (cahier des charges §3.A) : le tenant garde son solde
+  // mais l'abonnement ne se renouvelle plus.
   'suspended',
   'canceled',
 ]);
@@ -329,8 +440,8 @@ export const subscriptions = pgTable(
   'subscriptions',
   {
     id: serial('id').primaryKey(),
-    // One subscription per tenant: a plan change reuses this row rather than
-    // stacking a second one.
+    // Un abonnement par tenant : un changement de plan réutilise cette ligne
+    // au lieu d'en empiler une seconde.
     tenantId: integer('tenant_id')
       .notNull()
       .references(() => tenants.id),
@@ -338,7 +449,7 @@ export const subscriptions = pgTable(
     status: subscriptionStatusEnum('status').notNull().default('pending'),
     currentPeriodStart: timestamp('current_period_start'),
     currentPeriodEnd: timestamp('current_period_end'),
-    // Set when a downgrade is scheduled; the paid period still runs out.
+    // Posé quand un downgrade est programmé ; la période payée va à son terme.
     cancelAt: timestamp('cancel_at'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -360,8 +471,8 @@ export const billingCycles = pgTable(
     periodStart: timestamp('period_start').notNull(),
     periodEnd: timestamp('period_end').notNull(),
     amountXof: integer('amount_xof').notNull(),
-    // The plan allowance this cycle buys, recorded so the grant is auditable
-    // against the price that was actually charged.
+    // La dotation en crédits que ce cycle achète, enregistrée pour que la
+    // dotation soit auditable face au prix réellement facturé.
     creditsGranted: integer('credits_granted').notNull(),
     status: billingCycleStatusEnum('status').notNull().default('pending'),
     paidAt: timestamp('paid_at'),
@@ -382,19 +493,21 @@ export const paymentIntents = pgTable(
       .notNull()
       .references(() => tenants.id),
     kind: paymentKindEnum('kind').notNull(),
-    // Subscription payments only.
+    // Paiements d'abonnement uniquement.
     plan: planEnum('plan'),
     billingCycleId: integer('billing_cycle_id').references(
       () => billingCycles.id
     ),
     amountXof: integer('amount_xof').notNull(),
     creditsGranted: integer('credits_granted').notNull(),
-    // GeniusPay's own id for the transaction. Unique because it is what the
-    // webhook resolves a tenant from — one reference, one intent, one tenant.
+    // Id propre de GeniusPay pour la transaction. Unique car c'est ce qui
+    // permet au webhook de résoudre un tenant — une référence, une intention,
+    // un tenant.
     gatewayReference: varchar('gateway_reference', { length: 120 }),
     checkoutUrl: text('checkout_url'),
     status: paymentStatusEnum('status').notNull().default('created'),
-    // The gateway's own words, kept verbatim for support and reconciliation.
+    // Les mots de la passerelle elle-même, conservés verbatim pour le support
+    // et la réconciliation.
     gatewayStatus: varchar('gateway_status', { length: 40 }),
     paymentMethod: varchar('payment_method', { length: 60 }),
     feesXof: integer('fees_xof'),
@@ -442,15 +555,16 @@ export const paymentAttempts = pgTable(
 );
 
 /**
- * Audit log of every webhook that got past signature verification, and the
- * idempotency guard for the money path.
+ * Journal d'audit de chaque webhook passé la vérification de signature, et
+ * garde-fou d'idempotence du chemin monétaire.
  *
- * `tenant_id` is nullable here and only here: an event is written before it is
- * known which tenant it belongs to — the tenant is *resolved* from the intent
- * behind `gateway_reference`, and an event matching no intent belongs to no
- * tenant. It is the same exception as `getUser()` in lib/db/queries.ts, and it
- * is why the webhook path is the one place allowed to touch this table
- * unscoped (see lib/billing/webhook.ts).
+ * `tenant_id` est nullable ici et seulement ici : un événement est écrit
+ * avant de savoir à quel tenant il appartient — le tenant est *résolu* depuis
+ * l'intention derrière `gateway_reference`, et un événement ne matchant aucune
+ * intention n'appartient à aucun tenant. C'est la même exception que
+ * getUser() dans lib/db/queries.ts, et c'est pourquoi le chemin webhook est le
+ * seul endroit autorisé à toucher cette table sans scope (voir
+ * lib/billing/webhook.ts).
  */
 export const paymentWebhookEvents = pgTable(
   'payment_webhook_events',
@@ -464,15 +578,16 @@ export const paymentWebhookEvents = pgTable(
     gatewayReference: varchar('gateway_reference', { length: 120 }),
     payload: jsonb('payload').notNull(),
     signatureValid: boolean('signature_valid').notNull().default(false),
-    // Null while the event has not been acted upon. A replay of an unprocessed
-    // event is allowed to run again; a replay of a processed one is a no-op.
+    // Null tant que l'événement n'a pas été traité. Un replay d'un événement
+    // non traité peut repartir ; un replay d'un événement traité est un no-op.
     processedAt: timestamp('processed_at'),
     processingError: text('processing_error'),
     receivedAt: timestamp('received_at').notNull().defaultNow(),
     receivedFromIp: varchar('received_from_ip', { length: 45 }),
   },
   (t) => [
-    // The idempotency guarantee: one gateway event credits at most once.
+    // La garantie d'idempotence : un événement passerelle crédite au plus
+    // une fois.
     uniqueIndex('payment_webhook_events_provider_event_id_uq').on(
       t.provider,
       t.eventId
@@ -667,6 +782,8 @@ export type NewCreditLedgerEntry = typeof creditLedger.$inferInsert;
 export type YoutubeToken = typeof youtubeTokens.$inferSelect;
 export type NewYoutubeToken = typeof youtubeTokens.$inferInsert;
 
+export type SoundAsset = typeof soundAssets.$inferSelect;
+export type NewSoundAsset = typeof soundAssets.$inferInsert;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
 export type BillingCycle = typeof billingCycles.$inferSelect;
@@ -682,6 +799,10 @@ export type Plan = (typeof planEnum.enumValues)[number];
 export type Resolution = (typeof resolutionEnum.enumValues)[number];
 export type Pipeline = (typeof pipelineEnum.enumValues)[number];
 export type VideoStatus = (typeof videoStatusEnum.enumValues)[number];
+export type Ratio = (typeof ratioEnum.enumValues)[number];
+export type SubtitleStyle = (typeof subtitleStyleEnum.enumValues)[number];
+export type DurationSource = (typeof durationSourceEnum.enumValues)[number];
+export type SoundKind = (typeof soundKindEnum.enumValues)[number];
 export type PaymentKind = (typeof paymentKindEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];
 export type SubscriptionStatus =
