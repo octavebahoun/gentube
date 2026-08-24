@@ -8,6 +8,10 @@ prêts à coller dans un générateur d'interface.
 Dernière mise à jour : 24 août 2026 — état du dépôt : J1–J5 + J12 livrés,
 plus la voix off et le contrat de rendu. 236 tests verts.
 
+**Wireframes finaux** (thème sombre, accent rouge YouTube) :
+`docs/wireframes/index.html`. Ce sont eux que le frontend implémente ; la
+partie 2 ci-dessous reste la référence pour les états et les libellés.
+
 ---
 
 # Partie 1 — Le produit
@@ -269,25 +273,34 @@ fait par mobile money.
 
 Système de design, à respecter sur tous les écrans :
 - Stack : Next.js App Router, Tailwind CSS, composants shadcn/ui.
-- Thème clair uniquement. Fond blanc, bordures gris clair (gray-200), texte
-  gris très foncé, texte secondaire en gris moyen.
-- Couleur d'accent : orange 500 (#f97316), survol orange 600. Utilisée pour
-  l'action principale de chaque écran, et pour rien d'autre.
-- Badges d'état sous forme de pastilles arrondies : vert = terminé/actif,
-  ambre = en cours/en attente, rouge = échec/bloqué, gris = brouillon.
-- Typographie sans-serif, hiérarchie sobre : titre de page 20–24 px, titres de
-  carte 16 px, corps 14 px. Chiffres en tabulaire quand ils s'alignent.
-- Structure : barre de navigation supérieure fine avec le logo et l'avatar,
-  puis une sidebar gauche de 256 px et le contenu à droite. Entrées de la
-  sidebar : Équipe, Projets, Facturation, Activité, Sécurité.
-- Contenu organisé en cartes empilées, séparées par 32 px, largeur maximale
-  de 672 px pour les formulaires et pleine largeur pour les listes.
+- Thème sombre cinématique. Fond noir profond (#000000), cartes gris anthracite
+  (#1C1C1E) bordées (#2A2A2D), texte blanc, secondaire #A5A5AA, tertiaire
+  #6E6E73, discret #4A4A4A.
+- Couleur d'accent : rouge YouTube (#FF0000). Les boutons principaux portent un
+  dégradé (#FF453A → #CC0000) avec un léger halo rouge. L'accent est réservé à
+  l'action principale de chaque écran, aux liens, aux éléments actifs — et à
+  rien d'autre.
+- Typographie : Plus Jakarta Sans. Titre de page 20–24 px en 800, titres de
+  carte 15–16 px en 700, corps 13–14 px, légendes 11 px. Chiffres tabulaires
+  quand ils s'alignent.
+- Badges d'état en pastilles arrondies, fond teinté à ~13 % : vert (#32D74B) =
+  terminé/actif, ambre (#FFD60A) = en cours/en attente, rouge (#FF453A) =
+  échec/bloqué, gris (#8E8E93) = brouillon.
+- Structure : barre supérieure fine (logo GenTube — « Gen » blanc, « Tube »
+  rouge — et l'avatar), puis une sidebar gauche de 256 px sur fond #0B0B0C et
+  le contenu à droite. Entrées de la sidebar : Équipe, Projets, Général,
+  Facturation, Activité, Sécurité. L'entrée active porte un fond #1C1C1E et
+  son icône en rouge.
+- Contenu organisé en cartes empilées séparées de 24–32 px, largeur maximale
+  de 672 px pour les formulaires, pleine largeur pour les listes.
 - Sur mobile : la sidebar devient un menu hamburger, les cartes passent en
   pleine largeur, les lignes de tableau deviennent des blocs empilés.
 
-Contraintes de fidélité : wireframe haute fidélité en niveaux de gris plus
-l'accent orange. Pas d'images décoratives, pas de dégradés, pas d'ombres
-lourdes. Chaque écran doit montrer ses états vides, de chargement et d'erreur.
+Contraintes de fidélité : wireframes finaux, prêts à implémenter. Les vignettes
+de vidéos sont des rectangles en dégradé sombre à dominante rouge (#1a0508 →
+#450a0f). Pas d'images décoratives hors vignettes ; les halos rouges sont
+réservés au hero et aux actions principales. Chaque écran doit montrer ses
+états vides, de chargement et d'erreur.
 
 Contenu : rédige tous les libellés en français, et utilise des données
 d'exemple crédibles pour le marché (noms béninois et ivoiriens, montants en
@@ -415,10 +428,11 @@ Carte 1 — "Configuration", formulaire de 672 px maximum :
   redéfinir."
 - "Prompt de style" : zone de texte multiligne, avec l'explication "ajouté
   devant chaque prompt de plan — le rendu que tout le projet partage".
-- "Voix" : champ texte, avec la mention que l'étape de voix off n'est pas
-  encore branchée et que la valeur est stockée sans être utilisée.
-- "Chaîne YouTube" : champ texte pour un identifiant de chaîne, avec la mention
-  que la connexion par OAuth arrivera plus tard.
+- "Voix" : sélecteur déroulant des voix disponibles (George, Liam, Antoni,
+  Anaïs, Rachel — ou un identifiant ElevenLabs personnalisé).
+- "Chaîne YouTube" : chip de chaîne connectée (« ✓ Histoires du Bénin ») avec
+  un lien « gérer les chaînes » vers l'écran 10 ; si aucune chaîne n'est
+  connectée, un bouton « Connecter ma chaîne ».
 - Bouton orange "Enregistrer".
 
 Carte 2 — "Vidéos" : en-tête avec le titre à gauche et un bouton orange
@@ -698,7 +712,7 @@ un générateur d'images, il faut une formulation plus visuelle et beaucoup plus
 courte, un écran à la fois :
 
 ```
-Wireframe d'interface web haute fidélité, thème clair, style Tailwind et
+Wireframe d'interface web haute fidélité, thème sombre, style Tailwind et
 shadcn/ui : éditeur de storyboard vidéo. Sidebar gauche étroite avec cinq
 entrées de menu, contenu principal à droite. En haut, une carte affichant un
 grand chiffre "25" avec la légende "crédits estimés" et un bouton orange vif
@@ -706,9 +720,9 @@ grand chiffre "25" avec la légende "crédits estimés" et un bouton orange vif
 identiques : chacune avec un numéro de plan, deux boutons radio "Image" et
 "Vidéo", un petit champ de durée, trois icônes à droite (flèche haut, flèche
 bas, corbeille), et une grande zone de texte contenant une description de plan.
-Palette : blanc, gris clair, gris foncé, un seul accent orange. Pas de photo,
-pas de dégradé, pas d'ombre marquée. Vue de face, capture d'écran à plat,
-proportions 16:10.
+Palette : noir profond, anthracite, blanc, un seul accent rouge avec dégradé
+sur les boutons ; vignettes en dégradé sombre à dominante rouge. Vue de face,
+capture d'écran à plat, proportions 16:10.
 ```
 
 Règles pour décliner cette variante sur les autres écrans : un seul écran par

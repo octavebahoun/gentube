@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1720" viewBox="0 0 1440 1720" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7f1d1d"/><stop offset=".55" stop-color="#FF1E1E"/><stop offset="1" stop-color="#FF9A9A"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:21px;font-weight:800;fill:#fff}
+    .h2{font-size:15px;font-weight:700;fill:#fff}
+    .big{font-size:38px;font-weight:800;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:11px;font-weight:600;fill:#8A8A92;letter-spacing:.08em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .btnT{font-size:14px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .field{fill:#0A0A0B;stroke:#2E2E32}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .link{font-size:12px;font-weight:700;fill:#FF453A}
+    .num{font-size:14px;font-weight:800;fill:#fff}
+  </style>
+  <rect width="1440" height="1720" fill="#000000"/>
+
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M14 7 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <rect x="0" y="64" width="256" height="1656" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="1720" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(30,98)" stroke="#6E6E73"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="nav">Équipe</text>
+    <rect x="14" y="134" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,144)" stroke="#FF453A"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="navOn">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <g transform="translate(30,236)" stroke="#6E6E73"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="nav">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="110" class="link">←  Histoires du Bénin</text>
+  <text x="296" y="144" class="h1">Les Amazones du Dahomey</text>
+  <rect x="530" y="126" width="96" height="24" rx="12" fill="#8E8E93" fill-opacity=".15"/>
+  <circle cx="544" cy="138" r="3" fill="#8E8E93"/>
+  <text x="552" y="142" font-size="11" font-weight="600" fill="#C9C9CE">brouillon</text>
+  <text x="1400" y="142" text-anchor="end" class="mut">480p · 16:9 · pipeline mixte</text>
+
+  <!-- thème -->
+  <g transform="translate(296,168)">
+    <rect width="1104" height="76" rx="14" class="card"/>
+    <text x="24" y="30" class="lbl">THÈME</text>
+    <text x="24" y="54" class="body">Les femmes guerrières du royaume du Dahomey, de leur fondation à la conquête française.</text>
+  </g>
+
+  <!-- en-tête storyboard -->
+  <g transform="translate(296,260)">
+    <rect width="1104" height="210" rx="14" class="card"/>
+    <text x="24" y="62" class="big">25</text>
+    <text x="24" y="88" class="mut">crédits estimés</text>
+    <text x="24" y="114" class="sub">25 s de narration · 5 scènes · 480p</text>
+    <rect x="920" y="24" width="160" height="38" rx="10" class="ghost"/>
+    <text x="1000" y="48" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">⟳  Régénérer</text>
+    <text x="1080" y="82" text-anchor="end" class="tiny">Régénérer remplace toutes les scènes ci-dessous.</text>
+    <rect x="24" y="130" width="1056" height="48" rx="12" fill="url(#red)"/>
+    <text x="552" y="160" text-anchor="middle" class="btnT">🎙  Enregistrer la voix off</text>
+    <text x="552" y="198" text-anchor="middle" class="tiny">Tant que la voix n'existe pas, le prix ci-dessus n'est qu'une estimation lue sur le texte. L'enregistrer mesure chaque scène — le montant devient exact.</text>
+  </g>
+
+  <!-- scène 1 (mesurée) -->
+  <g transform="translate(296,486)">
+    <rect width="1104" height="360" rx="14" class="card"/>
+    <text x="24" y="34" class="num">#1</text>
+    <g transform="translate(64,16)">
+      <circle cx="8" cy="10" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="10" r="3.5" fill="#FF453A"/>
+      <text x="26" y="14" class="body" font-weight="600">Image</text>
+      <circle cx="118" cy="10" r="8" class="ghost" stroke-width="1.6"/>
+      <text x="136" y="14" class="body">Vidéo</text>
+    </g>
+    <text x="300" y="34" class="num">5,28 s</text>
+    <rect x="366" y="16" width="88" height="24" rx="12" fill="#32D74B" fill-opacity=".13"/>
+    <circle cx="380" cy="28" r="3" fill="#32D74B"/>
+    <text x="388" y="32" font-size="11" font-weight="600" fill="#32D74B">mesurée</text>
+    <g transform="translate(1200,14)" stroke="#8A8A92" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="0" y="0" width="30" height="30" rx="8"/><path d="M15 20V10M10.5 14.5 15 10l4.5 4.5"/>
+      <rect x="40" y="0" width="30" height="30" rx="8"/><path d="M55 10v10M50.5 15.5 55 20l4.5-4.5"/>
+      <rect x="80" y="0" width="30" height="30" rx="8" stroke="#FF453A" stroke-opacity=".6"/><g stroke="#FF453A"><path d="M90 8h10M93 8V6h4v2M91.5 8l.8 11h5.4l.8-11"/></g>
+    </g>
+    <line x1="24" y1="52" x2="1080" y2="52" stroke="#26262A"/>
+
+    <text x="24" y="80" class="lbl">NARRATION</text>
+    <text x="120" y="80" class="tiny">Ce que la voix lit. Sa longueur fait la durée — et le prix. La réécrire efface l'audio.</text>
+    <rect x="24" y="90" width="1056" height="62" rx="10" class="field"/>
+    <text x="40" y="116" class="body">Au XVIIᵉ siècle, un royaume d'Afrique de l'Ouest confie sa garde à des femmes.</text>
+
+    <text x="24" y="182" class="lbl">PROMPT VISUEL</text>
+    <text x="140" y="182" class="tiny">En anglais : les modèles d'image et de vidéo sont entraînés dessus.</text>
+    <rect x="24" y="192" width="1056" height="48" rx="10" class="field"/>
+    <text x="40" y="221" class="body">Wide establishing shot of the royal palace of Abomey at dawn, warm light, mist over the walls.</text>
+
+    <text x="24" y="272" font-size="12" font-weight="700" fill="#fff">⌄  Sound design</text>
+    <text x="140" y="272" class="mut">2 sons</text>
+    <text x="1080" y="272" text-anchor="end" class="link" font-size="11">+ Ajouter un son</text>
+    <g transform="translate(24,284)">
+      <rect width="330" height="40" rx="10" fill="#141416" stroke="#2A2A2D"/>
+      <circle cx="22" cy="20" r="9" fill="#FF453A" fill-opacity=".15"/><path d="M19 15 L27 20 L19 25 Z" fill="#FF453A"/>
+      <text x="40" y="24" class="sub" font-weight="600">pop · sfx · 2,8 s</text>
+      <rect x="180" y="17" width="90" height="6" rx="3" fill="#2A2A2D"/><rect x="180" y="17" width="56" height="6" rx="3" fill="url(#bar)"/><circle cx="236" cy="20" r="6" fill="#fff"/>
+      <text x="310" y="25" text-anchor="end" font-size="11" fill="#8A8A92">✕</text>
+    </g>
+    <g transform="translate(366,284)">
+      <rect width="330" height="40" rx="10" fill="#141416" stroke="#2A2A2D"/>
+      <circle cx="22" cy="20" r="9" fill="#FF453A" fill-opacity=".15"/><path d="M19 15 L27 20 L19 25 Z" fill="#FF453A"/>
+      <text x="40" y="24" class="sub" font-weight="600">ambiance marché · 33 s</text>
+      <rect x="200" y="17" width="70" height="6" rx="3" fill="#2A2A2D"/><rect x="200" y="17" width="40" height="6" rx="3" fill="url(#bar)"/><circle cx="240" cy="20" r="6" fill="#fff"/>
+      <text x="310" y="25" text-anchor="end" font-size="11" fill="#8A8A92">✕</text>
+    </g>
+  </g>
+  <g transform="translate(320,856)">
+    <rect width="190" height="34" rx="9" fill="none" stroke="#3A3A3E"/>
+    <text x="95" y="22" text-anchor="middle" font-size="12" font-weight="600" fill="#E8E8ED">Enregistrer la scène</text>
+  </g>
+
+  <!-- scène 2 (estimée) -->
+  <g transform="translate(296,910)">
+    <rect width="1104" height="330" rx="14" class="card"/>
+    <text x="24" y="34" class="num">#2</text>
+    <g transform="translate(64,16)">
+      <circle cx="8" cy="10" r="8" class="ghost" stroke-width="1.6"/><text x="26" y="14" class="body">Image</text>
+      <circle cx="118" cy="10" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="118" cy="10" r="3.5" fill="#FF453A"/>
+      <text x="136" y="14" class="body" font-weight="600">Vidéo</text>
+    </g>
+    <text x="300" y="34" class="num">5 s</text>
+    <rect x="352" y="16" width="82" height="24" rx="12" fill="#8E8E93" fill-opacity=".15"/>
+    <circle cx="366" cy="28" r="3" fill="#8E8E93"/>
+    <text x="374" y="32" font-size="11" font-weight="600" fill="#C9C9CE">estimée</text>
+    <g transform="translate(1200,14)" stroke="#8A8A92" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="0" y="0" width="30" height="30" rx="8"/><path d="M15 20V10M10.5 14.5 15 10l4.5 4.5"/>
+      <rect x="40" y="0" width="30" height="30" rx="8"/><path d="M55 10v10M50.5 15.5 55 20l4.5-4.5"/>
+      <rect x="80" y="0" width="30" height="30" rx="8" stroke="#FF453A" stroke-opacity=".6"/><g stroke="#FF453A"><path d="M90 8h10M93 8V6h4v2M91.5 8l.8 11h5.4l.8-11"/></g>
+    </g>
+    <line x1="24" y1="52" x2="1080" y2="52" stroke="#26262A"/>
+
+    <text x="24" y="80" class="lbl">NARRATION</text>
+    <rect x="24" y="90" width="1056" height="62" rx="10" class="field"/>
+    <text x="40" y="116" class="body">On les appelle les Amazones. Elles s'entraînent chaque jour, pieds nus, dans la poussière.</text>
+
+    <text x="24" y="182" class="lbl">PROMPT VISUEL</text>
+    <rect x="24" y="192" width="1056" height="48" rx="10" class="field"/>
+    <text x="40" y="221" class="body">Amazon warriors training in formation, dust rising, slow motion.</text>
+
+    <text x="24" y="278" font-size="12" font-weight="700" fill="#8A8A92">›  Sound design</text>
+    <text x="140" y="278" class="mut">aucun son</text>
+    <text x="1080" y="278" text-anchor="end" class="link" font-size="11">+ Ajouter un son</text>
+  </g>
+  <g transform="translate(320,1256)">
+    <rect width="190" height="34" rx="9" fill="none" stroke="#3A3A3E"/>
+    <text x="95" y="22" text-anchor="middle" font-size="12" font-weight="600" fill="#E8E8ED">Enregistrer la scène</text>
+  </g>
+
+  <!-- ajouter une scène -->
+  <g transform="translate(296,1272)">
+    <rect width="1104" height="200" rx="14" class="card"/>
+    <text x="24" y="34" class="h2">Ajouter une scène</text>
+    <g transform="translate(24,52)">
+      <circle cx="8" cy="10" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="10" r="3.5" fill="#FF453A"/>
+      <text x="26" y="14" class="body" font-weight="600">Image</text>
+      <circle cx="118" cy="10" r="8" class="ghost" stroke-width="1.6"/><text x="136" y="14" class="body">Vidéo</text>
+    </g>
+    <text x="24" y="102" class="lbl">NARRATION</text>
+    <rect x="24" y="112" width="516" height="42" rx="10" class="field"/>
+    <text x="40" y="138" class="mut">Ce que la voix lira…</text>
+    <text x="564" y="102" class="lbl">PROMPT VISUEL (EN)</text>
+    <rect x="564" y="112" width="516" height="42" rx="10" class="field"/>
+    <text x="580" y="138" class="mut">Wide shot, golden hour…</text>
+  </g>
+  <g transform="translate(320,1452)">
+    <rect width="170" height="36" rx="9" fill="none" stroke="#3A3A3E"/>
+    <text x="85" y="23" text-anchor="middle" font-size="12" font-weight="600" fill="#E8E8ED">+ Ajouter la scène</text>
+  </g>
+
+  <text x="848" y="1530" text-anchor="middle" class="tiny">Aucun champ de durée nulle part : la durée se lit sur la narration, puis se mesure sur l'audio.</text>
+  <text x="848" y="1560" text-anchor="middle" class="tiny">Scènes 3–5 identiques à la scène 2. Réordonner : flèches aujourd'hui, glisser-déposer demain (l'API accepte déjà une liste ordonnée).</text>
+  <text x="848" y="1600" text-anchor="middle" class="lbl">MOBILE</text>
+  <text x="848" y="1624" text-anchor="middle" class="tiny">Carte scène pleine largeur : zones de texte pleine largeur, type + durée sur une ligne, flèches atteignables au pouce (bas de carte).</text>
+  <text x="848" y="1660" text-anchor="middle" class="tiny">États : voir 08-storyboard-etats.svg (vide, écriture, voix en cours, voix partielle, solde insuffisant, validée).</text>
+</svg>

@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="940" viewBox="0 0 1440 940" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7f1d1d"/><stop offset=".55" stop-color="#FF1E1E"/><stop offset="1" stop-color="#FF9A9A"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:22px;font-weight:800;fill:#fff}
+    .h2{font-size:15px;font-weight:700;fill:#fff}
+    .big{font-size:40px;font-weight:800;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:11px;font-weight:600;fill:#8A8A92;letter-spacing:.08em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .btnT{font-size:13px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .field{fill:#0A0A0B;stroke:#2E2E32}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .link{font-size:12px;font-weight:700;fill:#FF453A}
+  </style>
+  <rect width="1440" height="940" fill="#000000"/>
+
+  <!-- barre supérieure -->
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M18 8 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A" transform="translate(-4,-1)"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <!-- sidebar -->
+  <rect x="0" y="64" width="256" height="876" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="940" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="14" y="88" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,98)" stroke="#FF453A"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="navOn">Équipe</text>
+    <g transform="translate(30,144)" stroke="#6E6E73"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="nav">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <g transform="translate(30,236)" stroke="#6E6E73"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="nav">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="120" class="h1">Workspace</text>
+
+  <!-- plan et crédits -->
+  <g transform="translate(296,148)">
+    <rect width="1104" height="180" rx="16" class="card"/>
+    <text x="24" y="36" class="h2">Plan et crédits</text>
+    <text x="24" y="82" font-size="20" font-weight="800" fill="#fff">Plan : Pro</text>
+    <rect x="104" y="64" width="52" height="22" rx="11" fill="#32D74B" fill-opacity=".13"/>
+    <circle cx="118" cy="75" r="3" fill="#32D74B"/>
+    <text x="126" y="79" font-size="11" font-weight="600" fill="#32D74B">actif</text>
+    <text x="24" y="106" class="mut">Renouvellement le 12 septembre 2026.</text>
+    <text x="24" y="140" class="link">Gérer mon plan et mes crédits  →</text>
+    <text x="1080" y="76" text-anchor="end" class="big">3 000</text>
+    <text x="1080" y="100" text-anchor="end" class="sub">crédits ≈ 50 min en 480p · 12 min en 720p</text>
+    <rect x="760" y="114" width="320" height="8" rx="4" fill="#2A2A2D"/>
+    <rect x="760" y="114" width="208" height="8" rx="4" fill="url(#bar)"/>
+    <text x="1080" y="140" text-anchor="end" class="tiny">1 950 / 3 000 crédits utilisés ce cycle</text>
+    <text x="24" y="166" class="tiny">1 crédit = 1 s en 480p · 4 crédits = 1 s en 720p</text>
+  </g>
+
+  <!-- membres -->
+  <g transform="translate(296,352)">
+    <rect width="1104" height="250" rx="16" class="card"/>
+    <text x="24" y="36" class="h2">Membres du workspace</text>
+    <g transform="translate(24,58)">
+      <circle cx="20" cy="24" r="20" fill="#3a1d20"/><text x="20" y="29" text-anchor="middle" font-size="12" font-weight="800" fill="#FF9A9A">AM</text>
+      <text x="56" y="20" class="body" font-weight="700">Awa Mensah</text>
+      <text x="56" y="38" class="mut">awa@studio.test</text>
+      <rect x="920" y="8" width="160" height="24" rx="12" fill="#8E8E93" fill-opacity=".15"/>
+      <text x="1000" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#C9C9CE">Propriétaire</text>
+    </g>
+    <line x1="24" y1="118" x2="1080" y2="118" stroke="#26262A"/>
+    <g transform="translate(24,126)">
+      <circle cx="20" cy="24" r="20" fill="#1f2a1c"/><text x="20" y="29" text-anchor="middle" font-size="12" font-weight="800" fill="#8ee08a">KD</text>
+      <text x="56" y="20" class="body" font-weight="700">Koffi Dossou</text>
+      <text x="56" y="38" class="mut">koffi@studio.test</text>
+      <rect x="760" y="8" width="120" height="24" rx="12" fill="#8E8E93" fill-opacity=".15"/>
+      <text x="820" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#C9C9CE">Membre</text>
+      <rect x="960" y="6" width="120" height="30" rx="8" class="ghost"/>
+      <text x="1020" y="26" text-anchor="middle" font-size="12" font-weight="600" fill="#E8E8ED">Retirer</text>
+    </g>
+    <line x1="24" y1="186" x2="1080" y2="186" stroke="#26262A"/>
+    <g transform="translate(24,192)">
+      <circle cx="20" cy="24" r="20" fill="#1c233a"/><text x="20" y="29" text-anchor="middle" font-size="12" font-weight="800" fill="#9ab0ff">SB</text>
+      <text x="56" y="20" class="body" font-weight="700">Sika Bodjona</text>
+      <text x="56" y="38" class="mut">sika@studio.test</text>
+      <rect x="760" y="8" width="120" height="24" rx="12" fill="#8E8E93" fill-opacity=".15"/>
+      <text x="820" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#C9C9CE">Admin</text>
+      <rect x="960" y="6" width="120" height="30" rx="8" class="ghost"/>
+      <text x="1020" y="26" text-anchor="middle" font-size="12" font-weight="600" fill="#E8E8ED">Retirer</text>
+    </g>
+    <text x="1080" y="52" text-anchor="end" class="tiny">Pas de « Retirer » sur soi-même ; invisible pour un membre.</text>
+  </g>
+
+  <!-- inviter -->
+  <g transform="translate(296,626)">
+    <rect width="1104" height="250" rx="16" class="card"/>
+    <text x="24" y="36" class="h2">Inviter un membre</text>
+    <text x="24" y="76" class="lbl">EMAIL</text>
+    <rect x="24" y="86" width="440" height="44" rx="10" class="field"/>
+    <text x="40" y="113" class="mut">prenom@exemple.com</text>
+    <text x="24" y="164" class="lbl">RÔLE</text>
+    <g transform="translate(24,176)">
+      <circle cx="8" cy="8" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="8" r="3.5" fill="#FF453A"/>
+      <text x="26" y="13" class="body">Membre</text>
+      <circle cx="128" cy="8" r="8" class="ghost" stroke-width="1.6"/><text x="146" y="13" class="body">Administrateur</text>
+      <circle cx="292" cy="8" r="8" class="ghost" stroke-width="1.6"/><text x="310" y="13" class="body">Propriétaire</text>
+    </g>
+    <rect x="24" y="196" width="150" height="42" rx="10" fill="url(#red)"/>
+    <text x="99" y="222" text-anchor="middle" class="btnT">Inviter</text>
+    <text x="1080" y="52" text-anchor="end" class="tiny">Sans le droit : champs inertes + « Seul un propriétaire ou un administrateur peut inviter. »</text>
+  </g>
+
+  <!-- état de chargement -->
+  <g transform="translate(296,900)" opacity=".55">
+    <rect width="1104" height="0" fill="none"/>
+  </g>
+  <text x="848" y="920" text-anchor="middle" class="tiny">Chargement : cartes en squelette gris animé (barres #26262A arrondies, shimmer).</text>
+</svg>

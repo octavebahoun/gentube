@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1120" viewBox="0 0 1440 1120" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+    <linearGradient id="thumb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a0508"/><stop offset=".55" stop-color="#450a0f"/><stop offset="1" stop-color="#12060a"/>
+    </linearGradient>
+    <linearGradient id="thumb2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#101c1a"/><stop offset="1" stop-color="#0a0508"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:22px;font-weight:800;fill:#fff}
+    .name{font-size:15px;font-weight:700;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:11px;font-weight:600;fill:#8A8A92;letter-spacing:.08em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .btnT{font-size:13px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .val{font-size:14px;font-weight:700;fill:#fff}
+  </style>
+  <rect width="1440" height="1120" fill="#000000"/>
+
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M14 7 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <rect x="0" y="64" width="256" height="1056" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="1120" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(30,98)" stroke="#6E6E73"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="nav">Équipe</text>
+    <rect x="14" y="134" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,144)" stroke="#FF453A"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="navOn">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <g transform="translate(30,236)" stroke="#6E6E73"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="nav">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="120" class="h1">Projets</text>
+  <rect x="1180" y="94" width="220" height="42" rx="10" fill="url(#red)"/>
+  <text x="1290" y="120" text-anchor="middle" class="btnT">+ Nouveau projet</text>
+
+  <!-- projet 1 -->
+  <g transform="translate(296,160)">
+    <rect width="1104" height="120" rx="16" class="card"/>
+    <g transform="translate(24,28)">
+      <rect width="96" height="64" rx="8" fill="url(#thumb)"/>
+      <rect x="104" width="96" height="64" rx="8" fill="url(#thumb2)"/>
+      <rect x="208" width="96" height="64" rx="8" fill="url(#thumb)"/>
+      <path d="M40 22 L60 32 L40 42 Z" fill="#fff" opacity=".85"/>
+    </g>
+    <text x="360" y="50" class="name">Histoires du Bénin</text>
+    <text x="360" y="74" class="mut">Cinematic documentary, warm golden light, West African landscapes, 35mm…</text>
+    <text x="360" y="98" class="tiny">Créé le 2 août 2026</text>
+    <text x="920" y="52" text-anchor="end" class="val">Mixte</text><text x="920" y="72" text-anchor="end" class="tiny">pipeline</text>
+    <text x="1030" y="52" text-anchor="end" class="val">4</text><text x="1030" y="72" text-anchor="end" class="tiny">vidéos</text>
+    <text x="1080" y="52" text-anchor="end" class="val" font-size="13">il y a 2 j</text><text x="1080" y="72" text-anchor="end" class="tiny">modifié</text>
+  </g>
+  <!-- projet 2 -->
+  <g transform="translate(296,296)">
+    <rect width="1104" height="120" rx="16" class="card"/>
+    <g transform="translate(24,28)">
+      <rect width="96" height="64" rx="8" fill="url(#thumb2)"/>
+      <rect x="104" width="96" height="64" rx="8" fill="url(#thumb)"/>
+      <rect x="208" width="96" height="64" rx="8" fill="url(#thumb2)"/>
+      <path d="M256 22 L276 32 L256 42 Z" fill="#fff" opacity=".85"/>
+    </g>
+    <text x="360" y="50" class="name">Recettes rapides</text>
+    <text x="360" y="74" class="mut">Flat vector illustration, bold colours, top-down food shots.</text>
+    <text x="360" y="98" class="tiny">Créé le 18 juillet 2026</text>
+    <text x="920" y="52" text-anchor="end" class="val">Images</text><text x="920" y="72" text-anchor="end" class="tiny">pipeline</text>
+    <text x="1030" y="52" text-anchor="end" class="val">12</text><text x="1030" y="72" text-anchor="end" class="tiny">vidéos</text>
+    <text x="1080" y="52" text-anchor="end" class="val" font-size="13">il y a 5 j</text><text x="1080" y="72" text-anchor="end" class="tiny">modifié</text>
+  </g>
+  <!-- projet 3 -->
+  <g transform="translate(296,432)">
+    <rect width="1104" height="120" rx="16" class="card"/>
+    <g transform="translate(24,28)">
+      <rect width="96" height="64" rx="8" fill="url(#thumb)"/>
+      <rect x="104" width="96" height="64" rx="8" fill="url(#thumb2)"/>
+      <rect x="208" width="96" height="64" rx="8" fill="url(#thumb)"/>
+    </g>
+    <text x="360" y="50" class="name">Actu tech Abidjan</text>
+    <text x="360" y="74" class="mut">Neon cyberpunk newsroom, dynamic camera moves.</text>
+    <text x="360" y="98" class="tiny">Créé le 22 août 2026</text>
+    <text x="920" y="52" text-anchor="end" class="val">Vidéo</text><text x="920" y="72" text-anchor="end" class="tiny">pipeline</text>
+    <text x="1030" y="52" text-anchor="end" class="val">0</text><text x="1030" y="72" text-anchor="end" class="tiny">vidéos</text>
+    <text x="1080" y="52" text-anchor="end" class="val" font-size="13">hier</text><text x="1080" y="72" text-anchor="end" class="tiny">modifié</text>
+  </g>
+  <text x="296" y="592" class="tiny">Survol : bordure #FF453A à 40 % · Clic : ouvre /dashboard/projects/[id]</text>
+
+  <!-- état vide -->
+  <text x="296" y="650" class="lbl">ÉTAT VIDE</text>
+  <g transform="translate(296,670)">
+    <rect width="1104" height="330" rx="16" class="card"/>
+    <g transform="translate(552,110)">
+      <circle r="46" fill="#1a0508" stroke="#FF453A" stroke-opacity=".55"/>
+      <g transform="translate(-15,-15)" stroke="#FF453A" stroke-width="1.8" fill="none"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    </g>
+    <text x="552" y="196" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">Aucun projet</text>
+    <text x="552" y="222" text-anchor="middle" class="sub">Un projet porte un style visuel, une voix, une chaîne YouTube et un pipeline</text>
+    <text x="552" y="240" text-anchor="middle" class="sub">par défaut. Chaque vidéo que vous créez en hérite.</text>
+    <rect x="452" y="262" width="200" height="44" rx="10" fill="url(#red)"/>
+    <text x="552" y="289" text-anchor="middle" class="btnT">Créer le premier</text>
+  </g>
+</svg>

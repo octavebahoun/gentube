@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1480" viewBox="0 0 1440 1480" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7f1d1d"/><stop offset=".55" stop-color="#FF1E1E"/><stop offset="1" stop-color="#FF9A9A"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:22px;font-weight:800;fill:#fff}
+    .h2{font-size:15px;font-weight:700;fill:#fff}
+    .big{font-size:38px;font-weight:800;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:11px;font-weight:600;fill:#8A8A92;letter-spacing:.08em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .btnT{font-size:13px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .price{font-size:16px;font-weight:800;fill:#FF453A}
+  </style>
+  <rect width="1440" height="1480" fill="#000000"/>
+
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M14 7 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <rect x="0" y="64" width="256" height="1416" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="1480" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(30,98)" stroke="#6E6E73"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="nav">Équipe</text>
+    <g transform="translate(30,144)" stroke="#6E6E73"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="nav">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <rect x="14" y="226" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,236)" stroke="#FF453A"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="navOn">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="120" class="h1">Facturation</text>
+
+  <!-- bandeau retour paiement -->
+  <g transform="translate(296,144)">
+    <rect width="1104" height="48" rx="10" fill="#32D74B" fill-opacity=".1" stroke="#32D74B" stroke-opacity=".4"/>
+    <text x="40" y="30" font-size="12" font-weight="700" fill="#32D74B">✓  Paiement reçu. Les crédits apparaissent dès que GeniusPay confirme — quelques secondes en général.</text>
+  </g>
+
+  <!-- plan courant -->
+  <g transform="translate(296,216)">
+    <rect width="1104" height="170" rx="16" class="card"/>
+    <text x="24" y="36" class="h2">Plan courant</text>
+    <text x="24" y="84" font-size="20" font-weight="800" fill="#fff">Pro</text>
+    <rect x="66" y="66" width="52" height="22" rx="11" fill="#32D74B" fill-opacity=".13"/>
+    <circle cx="80" cy="77" r="3" fill="#32D74B"/>
+    <text x="88" y="81" font-size="11" font-weight="600" fill="#32D74B">actif</text>
+    <text x="24" y="110" class="mut">Renouvellement le 12 septembre 2026 · 30 000 FCFA/mois</text>
+    <text x="24" y="144" class="link">Voir les factures et les mouvements de crédits  →</text>
+    <text x="1080" y="78" text-anchor="end" class="big">3 000</text>
+    <text x="1080" y="102" text-anchor="end" class="sub">crédits ≈ 50 min en 480p · 12 min en 720p</text>
+    <rect x="760" y="116" width="320" height="8" rx="4" fill="#2A2A2D"/>
+    <rect x="760" y="116" width="208" height="8" rx="4" fill="url(#bar)"/>
+    <text x="1080" y="142" text-anchor="end" class="tiny">1 950 / 3 000 crédits utilisés ce cycle</text>
+  </g>
+
+  <!-- plans -->
+  <g transform="translate(296,410)">
+    <rect width="1104" height="270" rx="16" class="card"/>
+    <text x="24" y="38" class="h2">Plans</text>
+    <g transform="translate(24,58)">
+      <text x="0" y="22" class="body" font-weight="700">Starter</text>
+      <text x="0" y="42" class="mut">Pour démarrer seul.</text>
+      <text x="480" y="26" class="price">15 000 FCFA <tspan font-size="10" fill="#8A8A92" font-weight="600">/MOIS</tspan></text>
+      <text x="480" y="46" class="tiny">1 333 crédits ≈ 22 min en 480p</text>
+      <rect x="900" y="4" width="180" height="38" rx="10" fill="url(#red)"/>
+      <text x="990" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Payer 15 000 FCFA</text>
+    </g>
+    <line x1="24" y1="118" x2="1080" y2="118" stroke="#26262A"/>
+    <g transform="translate(24,130)">
+      <text x="0" y="22" class="body" font-weight="700">Pro <tspan fill="#FF453A" font-size="10" font-weight="800"> · PLAN ACTUEL</tspan></text>
+      <text x="0" y="42" class="mut">Pour publier chaque semaine.</text>
+      <text x="480" y="26" class="price">30 000 FCFA <tspan font-size="10" fill="#8A8A92" font-weight="600">/MOIS</tspan></text>
+      <text x="480" y="46" class="tiny">3 000 crédits ≈ 50 min en 480p</text>
+      <text x="1080" y="28" text-anchor="end" class="mut" font-weight="600">Plan actuel</text>
+    </g>
+    <line x1="24" y1="190" x2="1080" y2="190" stroke="#26262A"/>
+    <g transform="translate(24,202)">
+      <text x="0" y="22" class="body" font-weight="700">Business</text>
+      <text x="0" y="42" class="mut">Pour les agences, plusieurs chaînes.</text>
+      <text x="480" y="26" font-size="16" font-weight="800" fill="#fff">Sur devis</text>
+      <text x="480" y="46" class="tiny">Crédits négociés par contrat</text>
+      <rect x="900" y="4" width="180" height="38" rx="10" class="ghost"/>
+      <text x="990" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Nous contacter</text>
+    </g>
+    <text x="24" y="262" class="tiny">Mobile money ou carte, en XOF, via GeniusPay. Un changement de plan prend effet au paiement confirmé.</text>
+  </g>
+
+  <!-- recharge -->
+  <g transform="translate(296,704)">
+    <rect width="1104" height="120" rx="16" class="card"/>
+    <text x="24" y="36" class="h2">Recharger des crédits</text>
+    <text x="24" y="72" class="body" font-weight="700">3 000 crédits — 5 000 FCFA</text>
+    <text x="24" y="94" class="tiny">Les crédits achetés n'expirent pas, contrairement au quota mensuel du plan.</text>
+    <rect x="900" y="38" width="180" height="44" rx="10" fill="none" stroke="#FF453A" stroke-opacity=".65"/>
+    <text x="990" y="65" text-anchor="middle" font-size="13" font-weight="700" fill="#FF453A">Payer 5 000 FCFA</text>
+  </g>
+
+  <!-- historique -->
+  <g transform="translate(296,848)">
+    <rect width="1104" height="250" rx="16" class="card"/>
+    <text x="24" y="38" class="h2">Historique des paiements</text>
+    <g transform="translate(24,58)">
+      <text x="0" y="20" class="body" font-weight="700">Abonnement — Pro</text>
+      <text x="0" y="40" class="mut">12 août 2026 · 3 000 crédits accordés</text>
+      <text x="820" y="20" text-anchor="end" class="body" font-weight="700">30 000 FCFA</text>
+      <rect x="960" y="2" width="76" height="24" rx="12" fill="#32D74B" fill-opacity=".13"/>
+      <circle cx="974" cy="14" r="3" fill="#32D74B"/>
+      <text x="982" y="18" font-size="11" font-weight="600" fill="#32D74B">réussi</text>
+    </g>
+    <line x1="24" y1="112" x2="1080" y2="112" stroke="#26262A"/>
+    <g transform="translate(24,124)">
+      <text x="0" y="20" class="body" font-weight="700">Recharge de crédits</text>
+      <text x="0" y="40" class="mut">28 juillet 2026 · 3 000 crédits accordés</text>
+      <text x="820" y="20" text-anchor="end" class="body" font-weight="700">5 000 FCFA</text>
+      <rect x="960" y="2" width="76" height="24" rx="12" fill="#32D74B" fill-opacity=".13"/>
+      <circle cx="974" cy="14" r="3" fill="#32D74B"/>
+      <text x="982" y="18" font-size="11" font-weight="600" fill="#32D74B">réussi</text>
+    </g>
+    <line x1="24" y1="178" x2="1080" y2="178" stroke="#26262A"/>
+    <g transform="translate(24,190)">
+      <text x="0" y="20" class="body" font-weight="700">Abonnement — Starter</text>
+      <text x="0" y="40" class="mut">12 juillet 2026 · relancé avec succès le même jour</text>
+      <text x="820" y="20" text-anchor="end" class="body" font-weight="700">15 000 FCFA</text>
+      <rect x="960" y="2" width="76" height="24" rx="12" fill="#FF453A" fill-opacity=".13"/>
+      <circle cx="974" cy="14" r="3" fill="#FF453A"/>
+      <text x="982" y="18" font-size="11" font-weight="600" fill="#FF453A">échoué</text>
+    </g>
+    <text x="24" y="240" class="tiny">État vide : « Aucun paiement pour l'instant. »</text>
+  </g>
+
+  <!-- variante suspendu -->
+  <text x="296" y="1140" class="lbl">VARIANTE · ABONNEMENT SUSPENDU (3 TENTATIVES ÉCHOUÉES)</text>
+  <g transform="translate(296,1156)">
+    <rect width="1104" height="180" rx="16" fill="#1C1C1E" stroke="#FF453A" stroke-opacity=".35"/>
+    <text x="24" y="38" class="h2">Plan courant</text>
+    <text x="24" y="86" font-size="20" font-weight="800" fill="#fff">Pro</text>
+    <rect x="66" y="68" width="104" height="22" rx="11" fill="#FF453A" fill-opacity=".13"/>
+    <circle cx="80" cy="79" r="3" fill="#FF453A"/>
+    <text x="88" y="83" font-size="11" font-weight="600" fill="#FF453A">suspendu</text>
+    <text x="24" y="118" class="sub">Le paiement a échoué 3 fois : le renouvellement est arrêté. Tes crédits déjà achetés</text>
+    <text x="24" y="136" class="sub">restent intacts — un nouveau paiement relance tout immédiatement.</text>
+    <rect x="860" y="66" width="220" height="48" rx="12" fill="url(#red)"/>
+    <text x="970" y="95" text-anchor="middle" class="btnT">Réactiver — payer maintenant</text>
+  </g>
+  <text x="848" y="1370" text-anchor="middle" class="tiny">Simple membre : tous les boutons de paiement inertes + « Seul un propriétaire ou un administrateur peut payer pour ce workspace. » · Mobile prioritaire : c'est cet écran qui est utilisé au téléphone.</text>
+</svg>

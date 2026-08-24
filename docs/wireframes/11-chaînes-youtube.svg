@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1240" viewBox="0 0 1440 1240" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:22px;font-weight:800;fill:#fff}
+    .h2{font-size:15px;font-weight:700;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:10px;font-weight:700;fill:#6E6E73;letter-spacing:.12em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .btnT{font-size:13px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .link{font-size:12px;font-weight:700;fill:#FF453A}
+  </style>
+  <rect width="1440" height="1240" fill="#000000"/>
+
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M14 7 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <rect x="0" y="64" width="256" height="1176" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="1240" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(30,98)" stroke="#6E6E73"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="nav">Équipe</text>
+    <rect x="14" y="134" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,144)" stroke="#FF453A"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="navOn">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <g transform="translate(30,236)" stroke="#6E6E73"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="nav">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="120" class="h1">Chaînes YouTube</text>
+  <text x="296" y="146" class="sub">GenTube publie au nom de tes chaînes. Le jeton est chiffré côté serveur, jamais réaffiché.</text>
+
+  <!-- état vide -->
+  <text x="296" y="192" class="lbl">ÉTAT VIDE</text>
+  <g transform="translate(296,208)">
+    <rect width="1104" height="280" rx="16" class="card"/>
+    <g transform="translate(552,90)">
+      <circle r="44" fill="#1a0508" stroke="#FF453A" stroke-opacity=".55"/>
+      <g transform="translate(-14,-14)" stroke="#FF453A" stroke-width="1.8" fill="none" stroke-linejoin="round"><path d="M8 5 L26 14 L8 23 Z"/><rect x="4" y="2" width="24" height="24" rx="6" stroke-opacity=".4"/></g>
+    </g>
+    <text x="552" y="172" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">Aucune chaîne connectée</text>
+    <text x="552" y="196" text-anchor="middle" class="sub">Connecte ta chaîne pour publier directement tes vidéos et suivre tes statistiques.</text>
+    <rect x="432" y="214" width="240" height="44" rx="11" fill="url(#red)"/>
+    <text x="552" y="241" text-anchor="middle" class="btnT">Connecter ma chaîne YouTube</text>
+    <text x="552" y="278" text-anchor="middle" class="tiny">GenTube pourra : publier des vidéos · lire les infos de la chaîne · lire les statistiques.</text>
+  </g>
+
+  <!-- chaînes connectées -->
+  <text x="296" y="540" class="lbl">CHAÎNES CONNECTÉES (CAS NORMAL : PLUSIEURS CHAÎNES)</text>
+  <g transform="translate(296,556)">
+    <rect width="540" height="120" rx="16" class="card"/>
+    <rect x="24" y="28" width="64" height="64" rx="14" fill="#1a0508" stroke="#FF453A" stroke-opacity=".4"/>
+    <path d="M48 50 L66 60 L48 70 Z" fill="#FF453A"/>
+    <text x="108" y="52" class="body" font-weight="700">Histoires du Bénin</text>
+    <text x="108" y="74" class="mut">Connectée le 12 août 2026</text>
+    <rect x="108" y="84" width="88" height="22" rx="11" fill="#32D74B" fill-opacity=".13"/>
+    <circle cx="122" cy="95" r="3" fill="#32D74B"/>
+    <text x="130" y="99" font-size="10" font-weight="600" fill="#32D74B">connectée</text>
+    <rect x="396" y="40" width="120" height="36" rx="9" class="ghost"/>
+    <text x="456" y="63" text-anchor="middle" font-size="12" font-weight="600" fill="#E8E8ED">Déconnecter</text>
+  </g>
+  <g transform="translate(860,556)">
+    <rect width="540" height="120" rx="16" class="card"/>
+    <rect x="24" y="28" width="64" height="64" rx="14" fill="#101c1a" stroke="#2E2E32"/>
+    <text x="56" y="66" text-anchor="middle" font-size="20" font-weight="800" fill="#8ee08a">C</text>
+    <text x="108" y="52" class="body" font-weight="700">Cuisine d'Awa</text>
+    <text x="108" y="74" class="mut">Connectée le 2 septembre 2026</text>
+    <rect x="108" y="84" width="88" height="22" rx="11" fill="#32D74B" fill-opacity=".13"/>
+    <circle cx="122" cy="95" r="3" fill="#32D74B"/>
+    <text x="130" y="99" font-size="10" font-weight="600" fill="#32D74B">connectée</text>
+    <rect x="396" y="40" width="120" height="36" rx="9" class="ghost"/>
+    <text x="456" y="63" text-anchor="middle" font-size="12" font-weight="600" fill="#E8E8ED">Déconnecter</text>
+  </g>
+  <g transform="translate(296,700)">
+    <rect width="1104" height="56" rx="12" fill="none" stroke="#3A3A3E" stroke-dasharray="5 5"/>
+    <text x="552" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#C9C9CE">+  Connecter une autre chaîne</text>
+  </g>
+
+  <!-- quota -->
+  <text x="296" y="816" class="lbl">RÈGLE DU JEU · QUOTA DE PUBLICATION</text>
+  <g transform="translate(296,832)">
+    <rect width="1104" height="72" rx="12" fill="#141416" stroke="#2A2A2D"/>
+    <circle cx="48" cy="36" r="4" fill="#FFD60A"/>
+    <text x="64" y="31" class="sub">6 publications par jour maximum, toutes chaînes confondues sur la plateforme.</text>
+    <text x="64" y="51" class="sub">Au-delà, les vidéos sont mises en file et publiées le lendemain — c'est une file d'attente, pas une panne.</text>
+  </g>
+
+  <!-- erreur -->
+  <text x="296" y="952" class="lbl">VARIANTE · CONNEXION EXPIRÉE</text>
+  <g transform="translate(296,968)">
+    <rect width="1104" height="130" rx="16" fill="#1C1C1E" stroke="#FF453A" stroke-opacity=".35"/>
+    <rect x="24" y="28" width="64" height="64" rx="14" fill="#1a0508" stroke="#FF453A" stroke-opacity=".4"/>
+    <path d="M48 50 L66 60 L48 70 Z" fill="#FF453A"/>
+    <text x="108" y="52" class="body" font-weight="700">Actu tech Abidjan</text>
+    <rect x="108" y="62" width="76" height="22" rx="11" fill="#FF453A" fill-opacity=".13"/>
+    <circle cx="122" cy="73" r="3" fill="#FF453A"/>
+    <text x="130" y="77" font-size="10" font-weight="600" fill="#FF453A">expirée</text>
+    <text x="108" y="106" class="sub">La connexion a expiré, reconnecte ta chaîne pour publier à nouveau.</text>
+    <rect x="900" y="42" width="180" height="44" rx="10" fill="url(#red)"/>
+    <text x="990" y="69" text-anchor="middle" class="btnT">Reconnecter</text>
+  </g>
+
+  <!-- déconnexion -->
+  <text x="296" y="1146" class="lbl">DÉCONNEXION · CONFIRMATION EN DEUX TEMPS</text>
+  <g transform="translate(296,1162)">
+    <rect width="1104" height="56" rx="12" class="card"/>
+    <text x="24" y="34" class="sub">Déconnecter « Histoires du Bénin » ? L'autorisation sera révoquée côté Google puis effacée chez nous. Tes vidéos déjà publiées ne sont pas touchées.</text>
+    <rect x="800" y="12" width="120" height="32" rx="8" class="ghost"/>
+    <text x="860" y="33" text-anchor="middle" font-size="12" font-weight="600" fill="#E8E8ED">Annuler</text>
+    <rect x="932" y="12" width="148" height="32" rx="8" fill="none" stroke="#FF453A" stroke-opacity=".65"/>
+    <text x="1006" y="33" text-anchor="middle" font-size="12" font-weight="700" fill="#FF453A">Déconnecter</text>
+  </g>
+</svg>

@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1240" viewBox="0 0 1440 1240" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+    <linearGradient id="thumb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a0508"/><stop offset=".55" stop-color="#450a0f"/><stop offset="1" stop-color="#12060a"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:22px;font-weight:800;fill:#fff}
+    .h2{font-size:15px;font-weight:700;fill:#fff}
+    .kpi{font-size:22px;font-weight:800;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:11px;font-weight:600;fill:#8A8A92;letter-spacing:.08em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .btnT{font-size:13px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .field{fill:#0A0A0B;stroke:#2E2E32}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .up{font-size:10px;font-weight:700;fill:#32D74B}
+  </style>
+  <rect width="1440" height="1240" fill="#000000"/>
+
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M14 7 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <rect x="0" y="64" width="256" height="1176" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="1240" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(30,98)" stroke="#6E6E73"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="nav">Équipe</text>
+    <rect x="14" y="134" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,144)" stroke="#FF453A"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="navOn">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <g transform="translate(30,236)" stroke="#6E6E73"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="nav">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="110" class="link">←  Histoires du Bénin</text>
+  <text x="296" y="144" class="h1">Les Amazones du Dahomey</text>
+  <rect x="530" y="126" width="90" height="24" rx="12" fill="#32D74B" fill-opacity=".13"/>
+  <circle cx="544" cy="138" r="3" fill="#32D74B"/>
+  <text x="552" y="142" font-size="11" font-weight="600" fill="#32D74B">rendue</text>
+
+  <!-- ===== publication ===== -->
+  <text x="296" y="192" class="lbl">PUBLIER</text>
+  <g transform="translate(296,208)">
+    <rect width="640" height="960" rx="16" class="card"/>
+    <rect x="24" y="24" width="592" height="260" rx="12" fill="url(#thumb)"/>
+    <circle cx="320" cy="140" r="44" fill="url(#red)"/>
+    <path d="M305 120 L348 140 L305 160 Z" fill="#fff"/>
+    <rect x="24" y="240" width="592" height="44" fill="#000" fill-opacity=".55"/>
+    <text x="40" y="268" class="sub" font-weight="700">2:04 · 480p · MP4 final sur R2</text>
+    <text x="24" y="322" class="lbl">TITRE YOUTUBE</text>
+    <rect x="24" y="332" width="592" height="42" rx="10" class="field"/>
+    <text x="40" y="358" class="body">Les Amazones du Dahomey — l'armée de femmes oubliée</text>
+    <text x="24" y="404" class="lbl">DESCRIPTION</text>
+    <rect x="24" y="414" width="592" height="88" rx="10" class="field"/>
+    <text x="40" y="440" class="body">L'histoire des Agojié, les guerrières du royaume du Dahomey,</text>
+    <text x="40" y="460" class="body">de leur fondation à la conquête française. #histoire #bénin</text>
+    <text x="24" y="532" class="lbl">MOTS-CLÉS</text>
+    <rect x="24" y="542" width="592" height="42" rx="10" class="field"/>
+    <text x="40" y="568" class="mut">histoire, dahomey, bénin, amazones…</text>
+    <text x="24" y="620" class="lbl">VISIBILITÉ</text>
+    <g transform="translate(24,634)">
+      <circle cx="8" cy="10" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="10" r="3.5" fill="#FF453A"/>
+      <text x="26" y="14" class="body">Publique</text>
+      <circle cx="140" cy="10" r="8" class="ghost" stroke-width="1.6"/><text x="158" y="14" class="body">Non répertoriée</text>
+      <circle cx="322" cy="10" r="8" class="ghost" stroke-width="1.6"/><text x="340" y="14" class="body">Privée</text>
+    </g>
+    <text x="24" y="698" class="lbl">QUAND</text>
+    <g transform="translate(24,712)">
+      <circle cx="8" cy="10" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="10" r="3.5" fill="#FF453A"/>
+      <text x="26" y="14" class="body" font-weight="600">Publier maintenant</text>
+      <circle cx="228" cy="10" r="8" class="ghost" stroke-width="1.6"/><text x="246" y="14" class="body">Programmer</text>
+      <rect x="352" y="-6" width="240" height="36" rx="9" class="field" opacity=".5"/>
+      <text x="368" y="18" class="mut" opacity=".7">14 sept. 2026 · 09:00</text>
+    </g>
+    <rect x="24" y="776" width="592" height="48" rx="12" fill="url(#red)"/>
+    <text x="320" y="806" text-anchor="middle" class="btnT">Publier sur la chaîne</text>
+    <text x="24" y="856" class="tiny">Destination : <tspan fill="#32D74B" font-weight="700">✓ Histoires du Bénin</tspan> — chaîne connectée. Aucun doute sur où ça part.</text>
+    <text x="24" y="896" class="lbl">VARIANTE · PROGRAMMÉE</text>
+    <rect x="24" y="906" width="592" height="36" rx="9" fill="#FFD60A" fill-opacity=".1" stroke="#FFD60A" stroke-opacity=".4"/>
+    <text x="40" y="929" font-size="11" font-weight="700" fill="#FFD60A">⏱  Programmée — publiera le 14 sept. à 09:00.</text>
+    <text x="600" y="929" text-anchor="end" font-size="11" font-weight="700" fill="#FFD60A">Annuler</text>
+  </g>
+
+  <!-- ===== statistiques ===== -->
+  <text x="976" y="192" class="lbl">STATISTIQUES (RAFRAÎCHIES 1×/JOUR)</text>
+  <g transform="translate(976,208)">
+    <rect width="424" height="960" rx="16" class="card"/>
+    <g transform="translate(24,24)">
+      <rect width="184" height="92" rx="12" fill="#141416" stroke="#2A2A2D"/>
+      <text x="16" y="30" class="mut">Vues</text>
+      <text x="16" y="62" class="kpi">12 480</text>
+      <text x="16" y="82" class="up">▲ 8 % / 24 h</text>
+      <rect x="216" width="184" height="92" rx="12" fill="#141416" stroke="#2A2A2D"/>
+      <text x="16" y="30" class="mut">Likes</text>
+      <text x="16" y="62" class="kpi">940</text>
+      <text x="16" y="82" class="up">▲ 5 % / 24 h</text>
+    </g>
+    <g transform="translate(24,132)">
+      <rect width="184" height="92" rx="12" fill="#141416" stroke="#2A2A2D"/>
+      <text x="16" y="30" class="mut">Commentaires</text>
+      <text x="16" y="62" class="kpi">132</text>
+      <text x="16" y="82" class="up">▲ 2 % / 24 h</text>
+      <rect x="216" width="184" height="92" rx="12" fill="#141416" stroke="#2A2A2D"/>
+      <text x="16" y="30" class="mut">Visionnage</text>
+      <text x="16" y="62" class="kpi">382 h</text>
+      <text x="16" y="82" class="up">▲ 11 % / 24 h</text>
+    </g>
+    <text x="24" y="278" class="h2">Vues — 30 derniers jours</text>
+    <rect x="24" y="292" width="376" height="140" rx="10" fill="#141416" stroke="#26262A"/>
+    <polyline points="44,410 84,396 124,402 164,380 204,368 244,372 284,350 324,332 364,318" fill="none" stroke="#FF453A" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="364" cy="318" r="4" fill="#FF453A"/>
+    <text x="44" y="424" class="tiny">J-30</text>
+    <text x="364" y="424" text-anchor="end" class="tiny">aujourd'hui</text>
+    <text x="24" y="470" class="h2">Vidéos publiées</text>
+    <g font-size="10" font-weight="700" fill="#6E6E73">
+      <text x="24" y="494">TITRE</text><text x="300" y="494">VUES</text><text x="360" y="494">LIKES</text>
+    </g>
+    <line x1="24" y1="504" x2="400" y2="504" stroke="#26262A"/>
+    <g transform="translate(24,514)">
+      <text x="0" y="18" class="sub">Les Amazones du Dahomey</text>
+      <text x="300" y="18" class="sub">12 480</text><text x="360" y="18" class="sub">940</text>
+    </g>
+    <line x1="24" y1="542" x2="400" y2="542" stroke="#26262A"/>
+    <g transform="translate(24,552)">
+      <text x="0" y="18" class="sub">Les marchés de Cotonou</text>
+      <text x="300" y="18" class="sub">8 214</text><text x="360" y="18" class="sub">610</text>
+    </g>
+    <line x1="24" y1="580" x2="400" y2="580" stroke="#26262A"/>
+    <g transform="translate(24,590)">
+      <text x="0" y="18" class="sub">Démo — Abomey en 60 s</text>
+      <text x="300" y="18" class="sub">1 902</text><text x="360" y="18" class="sub">154</text>
+    </g>
+    <text x="24" y="660" class="tiny">État vide : « Aucune vidéo publiée pour l'instant. »</text>
+    <text x="24" y="680" class="tiny">Rafraîchissement : « Statistiques en cours de récupération — mises à jour une fois par jour. »</text>
+    <text x="24" y="720" class="lbl">HISTORIQUE DATÉ</text>
+    <text x="24" y="744" class="tiny">Chaque jour est archivé : la courbe compte plus que le chiffre du jour.</text>
+  </g>
+</svg>

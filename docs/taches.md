@@ -82,9 +82,12 @@ Ce ne sont pas des tâches à déléguer.
 - [ ] **Recharge 5 000 FCFA / 3 000 crédits** — elle perd de l'argent.
 - [x] **Crédits de plan : ils expirent** — tranché. Ils disparaissent à la fin
       du cycle, ils ne s'accumulent pas.
-      **Conséquence :** les crédits achetés en recharge, eux, ne doivent PAS
-      expirer. Il faut donc distinguer deux poches dans le solde, alors que
+- [x] **Les crédits achetés en recharge n'expirent jamais** — tranché, et non
+      négociable : faire expirer ce qu'un client a payé, c'est du vol.
+      **Conséquence :** deux poches distinctes dans le solde, alors que
       `credit_ledger` n'en connaît qu'une aujourd'hui.
+- [x] **Ordre de débit : la poche qui expire d'abord** — tranché. Sinon le
+      client perd de la valeur qu'il aurait pu consommer.
 - [x] **Images : Flux via Cloudflare Workers AI** — tranché. Replicate ne
       sert plus qu'aux clips vidéo.
 - [x] **Studio embarqué** — tranché. Les deux vérifications P0 deviennent des

@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1000" viewBox="0 0 1440 1000" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:22px;font-weight:800;fill:#fff}
+    .h2{font-size:15px;font-weight:700;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:11px;font-weight:600;fill:#8A8A92;letter-spacing:.08em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .btnT{font-size:13px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .field{fill:#0A0A0B;stroke:#2E2E32}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .link{font-size:12px;font-weight:700;fill:#FF453A}
+  </style>
+  <rect width="1440" height="1000" fill="#000000"/>
+
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M14 7 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <rect x="0" y="64" width="256" height="936" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="1000" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(30,98)" stroke="#6E6E73"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="nav">Équipe</text>
+    <rect x="14" y="134" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,144)" stroke="#FF453A"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="navOn">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <g transform="translate(30,236)" stroke="#6E6E73"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="nav">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="112" class="link">←  Histoires du Bénin</text>
+  <text x="296" y="148" class="h1">Nouvelle vidéo</text>
+
+  <g transform="translate(296,176)">
+    <rect width="1104" height="700" rx="16" class="card"/>
+    <text x="24" y="42" class="h2">On fait quoi ?</text>
+
+    <text x="24" y="82" class="lbl">TITRE</text>
+    <rect x="24" y="92" width="672" height="42" rx="10" class="field"/>
+    <text x="40" y="118" class="body">Les Amazones du Dahomey</text>
+
+    <text x="24" y="166" class="lbl">THÈME</text>
+    <rect x="24" y="176" width="1056" height="80" rx="10" class="field"/>
+    <text x="40" y="202" class="body">Les femmes guerrières du royaume du Dahomey, de leur fondation</text>
+    <text x="40" y="222" class="body">à la conquête française.</text>
+    <text x="24" y="282" class="tiny">C'est à partir de ça que le storyboard est écrit. Laissé vide, le titre est utilisé.</text>
+
+    <text x="24" y="320" class="lbl">RÉSOLUTION</text>
+    <g transform="translate(24,334)">
+      <circle cx="8" cy="10" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="10" r="3.5" fill="#FF453A"/>
+      <text x="28" y="8" class="body" font-weight="700">480p</text>
+      <text x="80" y="8" class="mut">1 crédit par seconde</text>
+      <circle cx="248" cy="10" r="8" class="ghost" stroke-width="1.6"/>
+      <text x="268" y="8" class="body" font-weight="700">720p</text>
+      <text x="320" y="8" class="mut">4 crédits par seconde</text>
+    </g>
+
+    <text x="24" y="414" class="lbl">PIPELINE</text>
+    <g transform="translate(24,428)">
+      <circle cx="8" cy="10" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="10" r="3.5" fill="#FF453A"/>
+      <text x="28" y="8" class="body" font-weight="700">Hériter du projet</text>
+      <text x="160" y="8" class="mut">mixte</text>
+      <circle cx="308" cy="10" r="8" class="ghost" stroke-width="1.6"/><text x="328" y="14" class="body">Images seulement</text>
+      <circle cx="8" cy="52" r="8" class="ghost" stroke-width="1.6"/><text x="28" y="56" class="body">Vidéo seulement</text>
+      <circle cx="308" cy="52" r="8" class="ghost" stroke-width="1.6"/><text x="328" y="56" class="body">Mixte</text>
+    </g>
+
+    <rect x="24" y="548" width="230" height="48" rx="12" fill="url(#red)"/>
+    <text x="139" y="578" text-anchor="middle" class="btnT">Créer la vidéo</text>
+
+    <rect x="24" y="620" width="1056" height="52" rx="10" fill="#141416" stroke="#2A2A2D"/>
+    <circle cx="50" cy="646" r="4" fill="#FFD60A"/>
+    <text x="66" y="651" class="sub">Aucun crédit n'est débité à cette étape — le débit a lieu à la validation du storyboard.</text>
+  </g>
+</svg>

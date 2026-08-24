@@ -1,0 +1,237 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="2160" viewBox="0 0 1440 2160" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+    <linearGradient id="thumb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a0508"/><stop offset=".55" stop-color="#450a0f"/><stop offset="1" stop-color="#12060a"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#FF0000" stop-opacity=".35"/><stop offset="1" stop-color="#FF0000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <style>
+    .navL{font-size:13px;font-weight:600;fill:#C9C9CE}
+    .eyebrow{font-size:11px;font-weight:800;fill:#FF453A;letter-spacing:.22em}
+    .h1{font-size:40px;font-weight:800;fill:#fff}
+    .h2{font-size:28px;font-weight:800;fill:#fff}
+    .cardT{font-size:14px;font-weight:700;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .btnT{font-size:14px;font-weight:700;fill:#fff}
+    .price{font-size:26px;font-weight:800;fill:#FF453A}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .ghost{fill:none;stroke:#3A3A3E}
+  </style>
+  <rect width="1440" height="2160" fill="#000000"/>
+
+  <!-- ===== NAV ===== -->
+  <g transform="translate(48,16)">
+    <rect width="40" height="40" rx="11" fill="url(#red)"/>
+    <path d="M16 12 L29 20 L16 28 Z" fill="#fff"/>
+    <text x="50" y="28" font-size="22" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <text x="600" y="42" class="navL">Fonctionnalités</text>
+  <text x="750" y="42" class="navL">Comment ça marche</text>
+  <text x="930" y="42" class="navL">Tarifs</text>
+  <text x="1010" y="42" class="navL">FAQ</text>
+  <text x="1180" y="42" class="navL">Se connecter</text>
+  <rect x="1264" y="16" width="128" height="40" rx="20" fill="url(#red)"/>
+  <text x="1328" y="41" text-anchor="middle" class="btnT">Commencer</text>
+
+  <!-- ===== HERO ===== -->
+  <rect x="620" y="60" width="820" height="520" fill="url(#glow)"/>
+  <rect x="48" y="124" width="252" height="28" rx="14" fill="#1a0508" stroke="#FF453A" stroke-opacity=".6"/>
+  <text x="174" y="142" text-anchor="middle" font-size="11" font-weight="800" fill="#FF453A" letter-spacing=".18em">✦ CRÉATION VIDÉO PAR IA</text>
+  <text x="48" y="216" class="h1">Créez des vidéos spectaculaires</text>
+  <text x="48" y="266" class="h1" fill="#FF453A">en quelques minutes.</text>
+  <text x="48" y="304" font-size="14" fill="#A5A5AA">GenTube transforme un thème en vidéo YouTube complète : storyboard écrit</text>
+  <text x="48" y="326" font-size="14" fill="#A5A5AA">par l'IA, voix off, sous-titres, montage et publication. Sans compétences en montage.</text>
+  <rect x="48" y="360" width="238" height="50" rx="12" fill="url(#red)"/>
+  <text x="167" y="391" text-anchor="middle" class="btnT">Créer gratuitement  →</text>
+  <rect x="302" y="360" width="176" height="50" rx="12" class="ghost"/>
+  <text x="390" y="391" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">▶  Voir la démo</text>
+  <g font-size="12" fill="#A5A5AA">
+    <text x="48" y="452" fill="#FF453A" font-weight="800">✓</text><text x="64" y="452">Paiement mobile money</text>
+    <text x="252" y="452" fill="#3A3A3E">|</text>
+    <text x="272" y="452" fill="#FF453A" font-weight="800">✓</text><text x="288" y="452">Sans carte bancaire</text>
+    <text x="446" y="452" fill="#3A3A3E">|</text>
+    <text x="466" y="452" fill="#FF453A" font-weight="800">✓</text><text x="482" y="452">Dès 15 000 FCFA/mois</text>
+  </g>
+
+  <!-- vignette hero -->
+  <rect x="736" y="112" width="656" height="392" rx="22" fill="none" stroke="#FF0000" stroke-opacity=".22" stroke-width="10"/>
+  <g transform="translate(744,120)">
+    <rect width="640" height="376" rx="18" fill="url(#thumb)" stroke="#FF453A" stroke-opacity=".55"/>
+    <rect x="80" y="240" width="90" height="136" fill="#2b0b10"/>
+    <rect x="200" y="200" width="70" height="176" fill="#38101a"/>
+    <rect x="300" y="256" width="110" height="120" fill="#2b0b10"/>
+    <rect x="440" y="216" width="80" height="160" fill="#38101a"/>
+    <rect x="0" y="296" width="640" height="80" fill="url(#fade)"/>
+    <circle cx="320" cy="180" r="52" fill="url(#red)"/>
+    <path d="M304 152 L356 180 L304 208 Z" fill="#fff"/>
+    <g transform="translate(24,316)">
+      <rect width="30" height="20" rx="5" fill="#FF453A"/>
+      <path d="M12 5 L22 10 L12 15 Z" fill="#fff"/>
+      <text x="42" y="15" font-size="12" font-weight="700" fill="#fff">Néon Tokyo — généré en 6 minutes</text>
+      <text x="42" y="31" font-size="10" fill="#C9C9CE">storyboard · voix off · sous-titres · montage automatiques</text>
+    </g>
+  </g>
+
+  <!-- ===== 3 ÉTAPES ===== -->
+  <text x="720" y="640" text-anchor="middle" class="eyebrow">SIMPLE. RAPIDE. PUISSANT.</text>
+  <text x="720" y="680" text-anchor="middle" class="h2">Créez votre vidéo en 3 étapes</text>
+  <line x1="360" y1="772" x2="580" y2="772" stroke="#FF453A" stroke-opacity=".45" stroke-dasharray="2 7" stroke-width="2"/>
+  <line x1="860" y1="772" x2="1080" y2="772" stroke="#FF453A" stroke-opacity=".45" stroke-dasharray="2 7" stroke-width="2"/>
+  <g transform="translate(244,736)">
+    <circle cx="36" cy="36" r="36" fill="#1a0508" stroke="#FF453A" stroke-opacity=".7"/>
+    <g transform="translate(22,22)" stroke="#FF453A" stroke-width="1.8" fill="none" stroke-linecap="round"><path d="M4 24l2-7L20 3l5 5L11 22z"/><path d="M16 7l5 5"/></g>
+    <text x="36" y="102" text-anchor="middle" font-size="12" font-weight="800" fill="#FF453A">01</text>
+    <text x="36" y="124" text-anchor="middle" class="cardT" font-size="15">Décris ton thème</text>
+    <text x="36" y="146" text-anchor="middle" class="mut">Une phrase suffit. L'IA écrit les scènes,</text>
+    <text x="36" y="162" text-anchor="middle" class="mut">la narration et les prompts visuels.</text>
+  </g>
+  <g transform="translate(684,736)">
+    <circle cx="36" cy="36" r="36" fill="#1a0508" stroke="#FF453A" stroke-opacity=".7"/>
+    <g transform="translate(22,22)" stroke="#FF453A" stroke-width="1.8" fill="none" stroke-linecap="round"><path d="M12 3v5M12 16v5M3 12h5M16 12h5M5.6 5.6l3.5 3.5M14.9 14.9l3.5 3.5M18.4 5.6l-3.5 3.5M9.1 14.9l-3.5 3.5"/></g>
+    <text x="36" y="102" text-anchor="middle" font-size="12" font-weight="800" fill="#FF453A">02</text>
+    <text x="36" y="124" text-anchor="middle" class="cardT" font-size="15">L'IA produit la vidéo</text>
+    <text x="36" y="146" text-anchor="middle" class="mut">Voix off mesurée, sous-titres karaoké,</text>
+    <text x="36" y="162" text-anchor="middle" class="mut">images et clips, montage automatique.</text>
+  </g>
+  <g transform="translate(1124,736)">
+    <circle cx="36" cy="36" r="36" fill="#1a0508" stroke="#FF453A" stroke-opacity=".7"/>
+    <g transform="translate(22,22)" stroke="#FF453A" stroke-width="1.8" fill="none" stroke-linejoin="round"><path d="M7 4 L25 14 L7 24 Z"/></g>
+    <text x="36" y="102" text-anchor="middle" font-size="12" font-weight="800" fill="#FF453A">03</text>
+    <text x="36" y="124" text-anchor="middle" class="cardT" font-size="15">Publie sur ta chaîne</text>
+    <text x="36" y="146" text-anchor="middle" class="mut">Validation, débit des crédits, publication</text>
+    <text x="36" y="162" text-anchor="middle" class="mut">YouTube — même depuis le téléphone.</text>
+  </g>
+
+  <!-- ===== FONCTIONNALITÉS ===== -->
+  <text x="720" y="920" text-anchor="middle" class="eyebrow">TOUT EST INTÉGRÉ</text>
+  <text x="720" y="958" text-anchor="middle" class="h2">Tout ce dont tu as besoin</text>
+  <g transform="translate(48,986)">
+    <rect width="426" height="104" rx="14" class="card"/>
+    <circle cx="44" cy="52" r="24" fill="#1a0508" stroke="#FF453A" stroke-opacity=".6"/>
+    <g transform="translate(33,41)" stroke="#FF453A" stroke-width="1.6" fill="none"><rect x="2" y="3.5" width="16" height="13" rx="2.5"/><path d="M8.5 7l5 3-5 3z"/></g>
+    <text x="84" y="46" class="cardT">Storyboard IA</text>
+    <text x="84" y="66" class="mut">Scènes, narration et prompts visuels écrits</text>
+    <text x="84" y="81" class="mut">à partir d'un simple thème.</text>
+  </g>
+  <g transform="translate(507,986)">
+    <rect width="426" height="104" rx="14" class="card"/>
+    <circle cx="44" cy="52" r="24" fill="#1a0508" stroke="#FF453A" stroke-opacity=".6"/>
+    <g transform="translate(33,41)" stroke="#FF453A" stroke-width="1.6" fill="none" stroke-linecap="round"><rect x="8" y="2.5" width="8" height="15" rx="4"/><path d="M4.5 11.5c0 5 3.4 8 7.5 8s7.5-3 7.5-8"/></g>
+    <text x="84" y="46" class="cardT">Voix off multilingue</text>
+    <text x="84" y="66" class="mut">Des voix réalistes, mesurées à la seconde :</text>
+    <text x="84" y="81" class="mut">le prix affiché est le prix débité.</text>
+  </g>
+  <g transform="translate(966,986)">
+    <rect width="426" height="104" rx="14" class="card"/>
+    <circle cx="44" cy="52" r="24" fill="#1a0508" stroke="#FF453A" stroke-opacity=".6"/>
+    <g transform="translate(33,41)" stroke="#FF453A" stroke-width="1.6" fill="none"><rect x="2" y="3.5" width="16" height="13" rx="2.5"/><path d="M6 8.5h2.5M11 8.5h3M6 12h7" stroke-linecap="round"/></g>
+    <text x="84" y="46" class="cardT">Sous-titres karaoké</text>
+    <text x="84" y="66" class="mut">Mot à mot, synchronisés sur la voix,</text>
+    <text x="84" y="81" class="mut">plusieurs styles au choix.</text>
+  </g>
+  <g transform="translate(48,1106)">
+    <rect width="426" height="104" rx="14" class="card"/>
+    <circle cx="44" cy="52" r="24" fill="#1a0508" stroke="#FF453A" stroke-opacity=".6"/>
+    <g transform="translate(33,41)" stroke="#FF453A" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M7 16V6l10-2v10"/><circle cx="4.8" cy="16.5" r="2.4"/><circle cx="14.8" cy="14.5" r="2.4"/></g>
+    <text x="84" y="46" class="cardT">Sound design intégré</text>
+    <text x="84" y="66" class="mut">Bruitages, ambiances et musiques, calés</text>
+    <text x="84" y="81" class="mut">sur les coupes de chaque scène.</text>
+  </g>
+  <g transform="translate(507,1106)">
+    <rect width="426" height="104" rx="14" class="card"/>
+    <circle cx="44" cy="52" r="24" fill="#1a0508" stroke="#FF453A" stroke-opacity=".6"/>
+    <g transform="translate(33,41)" stroke="#FF453A" stroke-width="1.6" fill="none"><rect x="2" y="2.5" width="16" height="15" rx="2.5"/><path d="M2 12l4.5-4 4 3.5 3-2.5 4.5 4"/><circle cx="12.5" cy="7" r="1.6"/></g>
+    <text x="84" y="46" class="cardT">Images et clips</text>
+    <text x="84" y="66" class="mut">Plans fixes ou animés, 480p et 720p,</text>
+    <text x="84" y="81" class="mut">formats 16:9 et 9:16.</text>
+  </g>
+  <g transform="translate(966,1106)">
+    <rect width="426" height="104" rx="14" class="card"/>
+    <circle cx="44" cy="52" r="24" fill="#1a0508" stroke="#FF453A" stroke-opacity=".6"/>
+    <g transform="translate(33,41)" stroke="#FF453A" stroke-width="1.6" fill="none" stroke-linejoin="round"><path d="M8 5 L20 12 L8 19 Z"/></g>
+    <text x="84" y="46" class="cardT">Publication YouTube</text>
+    <text x="84" y="66" class="mut">Connexion de ta chaîne, publication</text>
+    <text x="84" y="81" class="mut">immédiate ou programmée, statistiques.</text>
+  </g>
+
+  <!-- ===== TARIFS ===== -->
+  <text x="720" y="1300" text-anchor="middle" class="eyebrow">TARIFS</text>
+  <text x="720" y="1338" text-anchor="middle" class="h2">Simple et transparent</text>
+  <g transform="translate(48,1372)">
+    <rect width="426" height="290" rx="16" class="card"/>
+    <text x="28" y="44" font-size="16" font-weight="700" fill="#fff">Starter</text>
+    <text x="28" y="84" class="price">15 000 FCFA <tspan font-size="12" fill="#8A8A92" font-weight="600">/mois</tspan></text>
+    <g font-size="12" fill="#C9C9CE">
+      <text x="28" y="126" fill="#FF453A" font-weight="800">✓</text><text x="46" y="126">1 333 crédits ≈ 22 min en 480p</text>
+      <text x="28" y="154" fill="#FF453A" font-weight="800">✓</text><text x="46" y="154">Voix off et sous-titres inclus</text>
+      <text x="28" y="182" fill="#FF453A" font-weight="800">✓</text><text x="46" y="182">Publication sur ta chaîne YouTube</text>
+    </g>
+    <rect x="28" y="216" width="370" height="44" rx="10" class="ghost"/>
+    <text x="213" y="243" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Commencer</text>
+  </g>
+  <g transform="translate(507,1356)">
+    <rect x="0" y="16" width="426" height="290" rx="16" fill="#1C1C1E" stroke="#FF453A" stroke-width="1.5"/>
+    <rect x="153" y="0" width="120" height="30" rx="15" fill="url(#red)"/>
+    <text x="213" y="20" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">POPULAIRE</text>
+    <text x="28" y="60" font-size="16" font-weight="700" fill="#fff">Pro</text>
+    <text x="28" y="100" class="price">30 000 FCFA <tspan font-size="12" fill="#8A8A92" font-weight="600">/mois</tspan></text>
+    <g font-size="12" fill="#C9C9CE">
+      <text x="28" y="142" fill="#FF453A" font-weight="800">✓</text><text x="46" y="142">3 000 crédits ≈ 50 min en 480p</text>
+      <text x="28" y="170" fill="#FF453A" font-weight="800">✓</text><text x="46" y="170">Voix premium et styles multiples</text>
+      <text x="28" y="198" fill="#FF453A" font-weight="800">✓</text><text x="46" y="198">Publication et statistiques</text>
+    </g>
+    <rect x="28" y="232" width="370" height="44" rx="10" fill="url(#red)"/>
+    <text x="213" y="259" text-anchor="middle" class="btnT">Commencer</text>
+  </g>
+  <g transform="translate(966,1372)">
+    <rect width="426" height="290" rx="16" class="card"/>
+    <text x="28" y="44" font-size="16" font-weight="700" fill="#fff">Business</text>
+    <text x="28" y="84" font-size="26" font-weight="800" fill="#fff">Sur devis</text>
+    <g font-size="12" fill="#C9C9CE">
+      <text x="28" y="126" fill="#FF453A" font-weight="800">✓</text><text x="46" y="126">Crédits négociés par contrat</text>
+      <text x="28" y="154" fill="#FF453A" font-weight="800">✓</text><text x="46" y="154">Accompagnement dédié</text>
+      <text x="28" y="182" fill="#FF453A" font-weight="800">✓</text><text x="46" y="182">Facturation sur mesure</text>
+    </g>
+    <rect x="28" y="216" width="370" height="44" rx="10" class="ghost"/>
+    <text x="213" y="243" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Nous contacter</text>
+  </g>
+  <text x="720" y="1710" text-anchor="middle" class="sub">1 crédit = 1 seconde de vidéo en 480p (4 crédits en 720p) · Mobile money ou carte, en XOF · Les crédits achetés n'expirent pas.</text>
+
+  <!-- ===== FAQ ===== -->
+  <text x="720" y="1770" text-anchor="middle" class="h2" font-size="24">Questions fréquentes</text>
+  <g transform="translate(168,1796)">
+    <rect width="1104" height="48" rx="10" class="card"/>
+    <text x="24" y="30" class="body" font-weight="600">Combien coûte une vidéo ?</text>
+    <text x="1076" y="31" text-anchor="end" font-size="16" font-weight="700" fill="#FF453A">+</text>
+  </g>
+  <g transform="translate(168,1856)">
+    <rect width="1104" height="48" rx="10" class="card"/>
+    <text x="24" y="30" class="body" font-weight="600">Est-ce que ça marche depuis un téléphone ?</text>
+    <text x="1076" y="31" text-anchor="end" font-size="16" font-weight="700" fill="#FF453A">+</text>
+  </g>
+  <g transform="translate(168,1916)">
+    <rect width="1104" height="48" rx="10" class="card"/>
+    <text x="24" y="30" class="body" font-weight="600">Puis-je modifier le storyboard écrit par l'IA ?</text>
+    <text x="1076" y="31" text-anchor="end" font-size="16" font-weight="700" fill="#FF453A">+</text>
+  </g>
+
+  <!-- ===== CTA + FOOTER ===== -->
+  <g transform="translate(48,1990)">
+    <rect width="1344" height="104" rx="18" fill="#1C1C1E" stroke="#FF453A" stroke-opacity=".3"/>
+    <text x="40" y="46" font-size="21" font-weight="800" fill="#fff">Prêt à créer ta première vidéo ?</text>
+    <text x="40" y="74" class="sub">Rejoins GenTube et publie dès cette semaine — depuis 15 000 FCFA par mois.</text>
+    <rect x="1040" y="28" width="264" height="48" rx="12" fill="url(#red)"/>
+    <text x="1172" y="58" text-anchor="middle" class="btnT">Créer gratuitement  →</text>
+  </g>
+  <text x="720" y="2124" text-anchor="middle" class="tiny">© 2026 GenTube — Fait en Afrique de l'Ouest, pour les créateurs d'Afrique de l'Ouest.</text>
+</svg>

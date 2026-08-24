@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1400" viewBox="0 0 1440 1400" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:22px;font-weight:800;fill:#fff}
+    .h2{font-size:15px;font-weight:700;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:11px;font-weight:600;fill:#8A8A92;letter-spacing:.08em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .btnT{font-size:13px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .field{fill:#0A0A0B;stroke:#2E2E32}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .link{font-size:12px;font-weight:700;fill:#FF453A}
+  </style>
+  <rect width="1440" height="1400" fill="#000000"/>
+
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M14 7 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <rect x="0" y="64" width="256" height="1336" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="1400" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(30,98)" stroke="#6E6E73"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="nav">Équipe</text>
+    <rect x="14" y="134" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,144)" stroke="#FF453A"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="navOn">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <g transform="translate(30,236)" stroke="#6E6E73"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="nav">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="112" class="link">←  Projets</text>
+  <text x="296" y="148" class="h1">Histoires du Bénin</text>
+
+  <!-- configuration -->
+  <g transform="translate(296,176)">
+    <rect width="1104" height="620" rx="16" class="card"/>
+    <text x="24" y="38" class="h2">Configuration</text>
+
+    <text x="24" y="76" class="lbl">NOM</text>
+    <rect x="24" y="86" width="672" height="42" rx="10" class="field"/>
+    <text x="40" y="112" class="body">Histoires du Bénin</text>
+
+    <text x="24" y="164" class="lbl">PIPELINE PAR DÉFAUT</text>
+    <g transform="translate(24,178)">
+      <circle cx="8" cy="10" r="8" class="ghost" stroke-width="1.6"/>
+      <text x="28" y="8" class="body" font-weight="700">Images</text>
+      <text x="90" y="8" class="mut">Plans fixes sur une voix off — le moins cher par minute.</text>
+      <circle cx="8" cy="52" r="8" class="ghost" stroke-width="1.6"/>
+      <text x="28" y="50" class="body" font-weight="700">Vidéo</text>
+      <text x="82" y="50" class="mut">Clips animés — 1 crédit/s en 480p, 4 crédits/s en 720p.</text>
+      <circle cx="8" cy="94" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="94" r="3.5" fill="#FF453A"/>
+      <text x="28" y="92" class="body" font-weight="700">Mixte</text>
+      <text x="80" y="92" class="mut">Décidé plan par plan dans le storyboard.</text>
+    </g>
+    <text x="24" y="308" class="tiny">Chaque nouvelle vidéo part de ce réglage et peut le redéfinir.</text>
+
+    <text x="24" y="344" class="lbl">PROMPT DE STYLE</text>
+    <rect x="24" y="354" width="1056" height="68" rx="10" class="field"/>
+    <text x="40" y="380" class="body">Cinematic documentary, warm golden light, West African landscapes, 35mm film grain.</text>
+    <text x="24" y="446" class="tiny">Ajouté devant chaque prompt de plan — le rendu que tout le projet partage.</text>
+
+    <text x="24" y="482" class="lbl">VOIX</text>
+    <rect x="24" y="492" width="360" height="42" rx="10" class="field"/>
+    <text x="40" y="518" class="body">Rachel — chaleureuse, française</text>
+    <path d="M364 508 l6 7 6-7" stroke="#8A8A92" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <text x="404" y="502" class="lbl">CHAÎNE YOUTUBE</text>
+    <g transform="translate(404,492)">
+      <rect width="300" height="42" rx="10" fill="#32D74B" fill-opacity=".1" stroke="#32D74B" stroke-opacity=".4"/>
+      <text x="16" y="26" font-size="12" font-weight="700" fill="#32D74B">✓  Histoires du Bénin</text>
+      <text x="284" y="26" text-anchor="end" class="link" font-size="11">gérer</text>
+    </g>
+    <text x="724" y="518" class="link" font-size="11">Connecter une autre chaîne</text>
+    <rect x="920" y="496" width="160" height="42" rx="10" fill="url(#red)"/>
+    <text x="1000" y="522" text-anchor="middle" class="btnT">Enregistrer</text>
+    <text x="24" y="576" class="tiny">Voix : liste = George, Liam, Antoni, Anaïs, Rachel, ou un identifiant ElevenLabs personnalisé.</text>
+    <text x="24" y="594" class="tiny">Chaîne : si aucune n'est connectée → bouton « Connecter ma chaîne » (écran 10).</text>
+  </g>
+
+  <!-- vidéos -->
+  <g transform="translate(296,820)">
+    <rect width="1104" height="240" rx="16" class="card"/>
+    <text x="24" y="38" class="h2">Vidéos</text>
+    <rect x="944" y="16" width="136" height="34" rx="9" fill="url(#red)"/>
+    <text x="1012" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">+ Nouvelle vidéo</text>
+    <g transform="translate(24,64)">
+      <text x="0" y="20" class="body" font-weight="700">Les Amazones du Dahomey</text>
+      <text x="640" y="20" class="mut">25 crédits débités · 2:04</text>
+      <rect x="900" y="2" width="82" height="24" rx="12" fill="#FFD60A" fill-opacity=".13"/>
+      <circle cx="914" cy="14" r="3" fill="#FFD60A"/>
+      <text x="922" y="18" font-size="11" font-weight="600" fill="#FFD60A">validée</text>
+    </g>
+    <line x1="24" y1="110" x2="1080" y2="110" stroke="#26262A"/>
+    <g transform="translate(24,124)">
+      <text x="0" y="20" class="body" font-weight="700">Démo — Abomey en 60 s</text>
+      <text x="640" y="20" class="mut">12 crédits est.</text>
+      <rect x="900" y="2" width="92" height="24" rx="12" fill="#8E8E93" fill-opacity=".15"/>
+      <circle cx="914" cy="14" r="3" fill="#8E8E93"/>
+      <text x="922" y="18" font-size="11" font-weight="600" fill="#C9C9CE">brouillon</text>
+    </g>
+    <line x1="24" y1="170" x2="1080" y2="170" stroke="#26262A"/>
+    <g transform="translate(24,184)">
+      <text x="0" y="20" class="body" font-weight="700">Les marchés de Cotonou</text>
+      <text x="640" y="20" class="mut">60 crédits débités · 1:12</text>
+      <rect x="900" y="2" width="86" height="24" rx="12" fill="#32D74B" fill-opacity=".13"/>
+      <circle cx="914" cy="14" r="3" fill="#32D74B"/>
+      <text x="922" y="18" font-size="11" font-weight="600" fill="#32D74B">publiée</text>
+    </g>
+    <text x="24" y="228" class="tiny">État vide : « Aucune vidéo. Une vidéo part d'un thème ; son storyboard est généré depuis le style du projet. »</text>
+  </g>
+
+  <!-- zone dangereuse -->
+  <g transform="translate(296,1084)">
+    <rect width="1104" height="200" rx="16" fill="#1C1C1E" stroke="#FF453A" stroke-opacity=".3"/>
+    <text x="24" y="38" class="h2" fill="#FF453A">Zone dangereuse</text>
+    <text x="24" y="66" class="sub">Un projet contenant des vidéos ne peut pas être supprimé : ces vidéos portent des crédits</text>
+    <text x="24" y="84" class="sub">consommés et des identifiants publiés. Videz le projet d'abord.</text>
+    <rect x="24" y="110" width="210" height="44" rx="10" fill="none" stroke="#FF453A" stroke-opacity=".65"/>
+    <text x="129" y="137" text-anchor="middle" font-size="13" font-weight="700" fill="#FF453A">Supprimer le projet</text>
+    <text x="1080" y="66" text-anchor="end" class="tiny">2ᵉ clic → « Confirmer la suppression » rouge + lien « Annuler ».</text>
+    <text x="1080" y="84" text-anchor="end" class="tiny">Refus serveur → « "Histoires du Bénin" contient encore 4 vidéos. »</text>
+    <text x="1080" y="102" text-anchor="end" class="tiny">Membre → « Seul un propriétaire ou un administrateur peut supprimer un projet. »</text>
+  </g>
+</svg>

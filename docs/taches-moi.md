@@ -18,10 +18,9 @@ Une ligne chacune. Tant qu'elles ne sont pas tranchées, quelqu'un attend.
       clips vidéo uniquement.
 - [x] **Studio embarqué** — tranché. Les deux vérifications deviennent
       bloquantes.
-- [ ] **Qui relit Yannick — Mourchid ou moi ?** (≈25 % du temps du relecteur)
-- [ ] **Landing publique maintenant ou plus tard ?**
-      → bloque Prince
-- [ ] **Un seul propriétaire du schéma** (a priori Mourchid)
+- [x] **Qui relit Yannick — moi ?** (≈25 % du temps du relecteur)
+- [ ] **Landing publique maintenant **
+- [ ] **Un seul propriétaire du schéma** (Mourchid)
 
 ---
 

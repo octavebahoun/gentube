@@ -134,11 +134,17 @@ transaction avec une clé d'idempotence.
 Décision actée : **les crédits de plan expirent à la fin du cycle**, ils ne
 s'accumulent pas.
 
-Conséquence directe sur le schéma : les crédits **achetés en recharge** ne
-doivent pas expirer, eux. Or `credit_ledger` ne connaît qu'un seul solde.
+Et la contrepartie, non négociable : **les crédits achetés en recharge
+n'expirent jamais.** Faire expirer ce qu'un client a payé, c'est du vol.
 
-Il faut donc séparer les deux poches, et décider laquelle est débitée en
-premier — logiquement celle qui expire.
+Or `credit_ledger` ne connaît qu'un seul solde.
+
+Il faut donc séparer les deux poches. **Ordre de débit acté : celle qui
+expire d'abord** (les crédits du plan), sinon le client perd de la valeur
+qu'il aurait pu utiliser.
+
+Exemple : 500 crédits de plan qui meurent le 31, 300 achetés. Il consomme
+200 → on prend sur les 500.
 
 Le grand livre est sur le chemin monétaire : écritures en transaction, clé
 d'idempotence, et un test par cas de bord.
