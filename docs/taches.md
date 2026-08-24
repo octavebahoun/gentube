@@ -76,9 +76,9 @@ Ces tâches bloquent les autres ou coûtent une migration si on les reporte.
 
 Ce ne sont pas des tâches à déléguer.
 
-- [x] **720p : 4 crédits/s** — tranché. Le 720p ne peut pas coûter le même
-      prix que le 480p (2 crédits/s). Le code était déjà à 4 : rien à changer,
-      les specs sont périmées sur ce point.
+- [x] **720p : 3 crédits/s** — tranché. Le 480p est à 1 crédit/s, et le 720p
+      coûte réellement 2,1× plus cher. Facturé 3×, la marge y reste à 58 %
+      sans donner de prise à un concurrent. **Le code est encore à 4.**
 - [ ] **Recharge 5 000 FCFA : 3 000 crédits → ~450** — à 40 % de marge.
       Aujourd'hui elle vend 50 min (20 000 FCFA de coût) pour 5 000.
 - [x] **Marge cible 40 %**, 5 mois à perte assumés, tarif gelé 1 an pour

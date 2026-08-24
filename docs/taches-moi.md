@@ -170,9 +170,9 @@ corriger les minutes incluses :
 Identique partout : clips `wan-video/wan-2.2-i2v-fast` (480p ou 720p), images
 Flux sur Cloudflare Workers AI, script DeepSeek `deepseek-v4-flash`.
 
-**Note sur le 720p :** il coûte 850 FCFA/min contre 400, soit **2,1×** le
-480p — mais il est facturé **4×**. La marge y monte à 69 %. Confortable, mais
-c'est le poste où un concurrent pourra t'attaquer sur le prix.
+**Le 720p est à 3 crédits/seconde.** Il coûte 2,1× le 480p ; facturé 3×, la
+marge y est de 58 % au lieu de 41 %. On garde l'écart sans se rendre
+attaquable sur le prix.
 
 ---
 
