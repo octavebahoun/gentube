@@ -7,7 +7,7 @@ import {
   testDatabaseUrl,
 } from './database';
 
-/** Creates the test database if needed, then brings it up to date. */
+/** Crée la base de données de test si besoin, puis la met à jour. */
 export async function setup() {
   const name = testDatabaseName();
 
@@ -16,7 +16,7 @@ export async function setup() {
     await admin.unsafe(`create database "${name}"`);
     console.log(`[test] created database ${name}`);
   } catch (error) {
-    // 42P01 duplicate_database — already there, nothing to do.
+    // 42P01 duplicate_database — déjà là, rien à faire.
     if ((error as { code?: string }).code !== '42P04') throw error;
   } finally {
     await admin.end();

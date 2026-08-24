@@ -36,7 +36,7 @@ function answering(scenes: { narration: string; type?: string }[]): JsonComplete
   };
 }
 
-/** A voice that always reports the same measured length. */
+/** Une voix qui rapporte toujours la même longueur mesurée. */
 function voice(durationS = 5.28) {
   const calls: { text: string; voice?: string | null }[] = [];
   const synthesizer: VoiceSynthesizer = {
@@ -112,11 +112,12 @@ describe('recording the voice-over', () => {
       'measured',
       'measured',
     ]);
-    // Each scene rounds up on its own: 6 + 6, not ceil(10.56).
+    // Chaque scène est arrondie au-dessus individuellement : 6 + 6, pas
+    // ceil(10,56).
     expect(result.creditsEstimated).toBe(12);
     expect(result.shots.every((shot) => Array.isArray(shot.words))).toBe(true);
 
-    // Audio lands under the tenant prefix, one object per scene.
+    // L'audio atterrit sous le préfixe du tenant, un objet par scène.
     expect(written).toHaveLength(2);
     expect(written.every((key) => key.startsWith(`${tdb.tenantId}/videos/${video.id}/`))).toBe(true);
     expect(result.shots.map((shot) => shot.audioUrl)).toEqual(written);
@@ -177,8 +178,8 @@ describe('recording the voice-over', () => {
       generateVoiceover(tdb, video.id, { client: flaky, store: assets })
     ).rejects.toThrow(VoiceError);
 
-    // The first scene is measured and stays so: a retry resumes rather than
-    // paying for the whole storyboard again.
+    // La première scène est mesurée et le reste : une reprise reprend au lieu
+    // de payer à nouveau tout le storyboard.
     const rows = await tdb.findMany(shots, eq(shots.videoId, video.id));
     const sources = rows.map((shot) => shot.durationSource).sort();
     expect(sources).toEqual(['estimated', 'measured']);
@@ -207,7 +208,7 @@ describe('recording the voice-over', () => {
     await generateVoiceover(tdb, video.id, { client: synthesizer, store: assets });
     const { charged, balance } = await validateStoryboard(tdb, video.id);
 
-    expect(charged).toBe(5); // ceil(4.5) at 480p
+    expect(charged).toBe(5); // ceil(4,5) en 480p
     expect(balance).toBe(95);
   });
 

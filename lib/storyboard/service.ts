@@ -24,34 +24,35 @@ import {
 import { sceneEffectsSchema, sceneSoundSchema } from './render';
 
 /**
- * Storyboard — the editable plan of a video.
+ * Storyboard — le plan éditable d'une vidéo.
  *
- * The order of the pipeline is what makes this file make sense:
+ * L'ordre du pipeline est ce qui donne son sens à ce fichier :
  *
- *   1. the model writes the NARRATION of each scene, plus a visual prompt
- *   2. the voice-over is generated, and its real length becomes the duration
- *   3. that duration is what the video is priced on, exactly
- *   4. only then are the expensive visuals generated
+ *   1. le modèle écrit la NARRATION de chaque scène, plus un prompt visuel
+ *   2. la voix off est générée, et sa longueur réelle devient la durée
+ *   3. cette durée est ce sur quoi la vidéo est facturée, au prix exact
+ *   4. seulement ensuite les visuels coûteux sont générés
  *
- * A duration is therefore never authored. Before the voice-over exists it is
- * *estimated* from the text so the user sees an order of magnitude; after, it
- * is *measured*. Validation refuses to charge anything that is still an
- * estimate — see `validateStoryboard`.
+ * Une durée n'est donc jamais rédigée à la main. Avant l'existence de la voix
+ * off elle est *estimée* à partir du texte pour que l'utilisateur voie un ordre
+ * de grandeur ; après, elle est *mesurée*. La validation refuse de facturer
+ * tout ce qui reste une estimation — voir `validateStoryboard`.
  */
 
-/** A guard against a model that decides a video needs eighty scenes. */
+/** Un garde-fou contre un modèle qui déciderait qu'une vidéo demande quatre-vingts scènes. */
 export const MAX_SHOTS = 30;
 export const DEFAULT_TARGET_SECONDS = 60;
 export const MIN_SCENE_SECONDS = 1;
 export const MAX_SCENE_SECONDS = 30;
 
 /**
- * Speaking rate used to estimate a duration before the audio exists.
+ * Débit de parole utilisé pour estimer une durée avant l'existence de l'audio.
  *
- * Calibrated on measured voice-overs from the existing pipeline: 69 characters
- * for 5.28s, 64 for 4.82s, 104 for 6.79s — 13.1, 13.3 and 15.3 characters per
- * second. The estimate is deliberately a little fast, so the price shown before
- * the voice-over sits slightly under the measured one rather than over it.
+ * Calibré sur des voix off mesurées du pipeline existant : 69 caractères pour
+ * 5,28 s, 64 pour 4,82 s, 104 pour 6,79 s — soit 13,1, 13,3 et 15,3
+ * caractères par seconde. L'estimation est volontairement un peu rapide, pour
+ * que le prix affiché avant la voix off se place légèrement sous le prix
+ * mesuré plutôt qu'au-dessus.
  */
 export const NARRATION_CHARS_PER_SECOND = 14;
 
@@ -71,7 +72,7 @@ export type StoryboardView = {
   creditsEstimated: number;
   balance: number;
   canAfford: boolean;
-  /** True once every scene is priced on real audio rather than on text. */
+  /** Vrai une fois que chaque scène est facturée sur de l'audio réel plutôt que sur du texte. */
   durationsMeasured: boolean;
 };
 
@@ -148,8 +149,8 @@ export function buildStoryboardMessages({
     .filter(Boolean)
     .join('\n');
 
-  // The system message is first and never varies, so the provider's prompt
-  // cache can hit on it across generations.
+  // Le message système est en premier et ne varie jamais, pour que le cache
+  // de prompt du fournisseur puisse le toucher d'une génération à l'autre.
   return [
     { role: 'system', content: SYSTEM_PROMPT },
     { role: 'user', content: user },
@@ -184,12 +185,12 @@ export type NormalisedScene = {
 };
 
 /**
- * Turns what the model said into rows we are willing to store.
+ * Transforme ce que le modèle a dit en lignes que nous acceptons de stocker.
  *
- * Three things are taken out of the model's hands: the scene type (a video shot
- * in an image-only project would quadruple what the customer is charged), the
- * duration (measured, never authored), and the sound paths (a sound that does
- * not exist fails minutes later inside the renderer).
+ * Trois choses sont retirées des mains du modèle : le type de scène (un plan
+ * vidéo dans un projet image-only quadruplerait ce que le client se voit
+ * facturer), la durée (mesurée, jamais rédigée), et les chemins de sons (un
+ * son inexistant échoue quelques minutes plus tard dans le renderer).
  */
 export function normalizeStoryboard(
   data: unknown,
@@ -223,7 +224,7 @@ export function normalizeStoryboard(
 }
 
 // ---------------------------------------------------------------------------
-// Reading
+// Lecture
 // ---------------------------------------------------------------------------
 
 export async function listShots(
@@ -259,8 +260,8 @@ export async function getStoryboard(
 }
 
 /**
- * Runs `mutate`, then re-prices the video in the same transaction: a storyboard
- * and the price shown next to it must never disagree.
+ * Exécute `mutate`, puis re-facture la vidéo dans la même transaction : un
+ * storyboard et le prix affiché à côté ne doivent jamais être en désaccord.
  */
 async function editStoryboard(
   tdb: TenantDb,
@@ -279,7 +280,7 @@ async function editStoryboard(
   return await view(tdb, updated);
 }
 
-/** Renumbers 1..n so a deletion never leaves a gap in the order. */
+/** Renumérote 1..n pour qu'une suppression ne laisse jamais de trou dans l'ordre. */
 async function compactOrder(tx: TenantDb, videoId: number): Promise<void> {
   const remaining = await listShots(tx, videoId);
 
@@ -297,7 +298,7 @@ async function compactOrder(tx: TenantDb, videoId: number): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Generation
+// Génération
 // ---------------------------------------------------------------------------
 
 export async function generateStoryboard(
@@ -334,8 +335,9 @@ export async function generateStoryboard(
   const generated = normalizeStoryboard(completion.data, pipeline, sounds);
 
   return await editStoryboard(tdb, videoId, async (tx) => {
-    // A regeneration replaces the draft wholesale — that is what the button
-    // says it does, and half-merged storyboards would be worse than either.
+    // Une régénération remplace le brouillon en bloc — c'est ce que le bouton
+    // annonce faire, et des storyboards à moitié fusionnés seraient pire que
+    // l'un ou l'autre.
     await tx.delete(shots, eq(shots.videoId, videoId));
     await tx.insert(
       shots,
@@ -354,13 +356,14 @@ export async function generateStoryboard(
 }
 
 // ---------------------------------------------------------------------------
-// Editing
+// Édition
 // ---------------------------------------------------------------------------
 
 /**
- * What a human may set on a scene. Notably absent: the duration. The user
- * rewrites the narration, and the duration follows — from the text while it is
- * an estimate, from the audio once the voice-over exists.
+ * Ce qu'un humain peut définir sur une scène. Notablement absent : la durée.
+ * L'utilisateur réécrit la narration, et la durée suit — à partir du texte
+ * tant que c'est une estimation, à partir de l'audio dès que la voix off
+ * existe.
  */
 export const shotInputSchema = z.object({
   type: z.enum(['image', 'video']),
@@ -379,7 +382,7 @@ export const shotUpdateSchema = shotInputSchema.partial();
 export type ShotInput = z.input<typeof shotInputSchema>;
 export type ShotUpdate = z.input<typeof shotUpdateSchema>;
 
-/** The shot must belong to *this* video, not merely to the same tenant. */
+/** Le plan doit appartenir à *cette* vidéo, pas seulement au même tenant. */
 async function getShotOfVideo(
   tdb: TenantDb,
   videoId: number,
@@ -425,10 +428,10 @@ export async function addShot(
 }
 
 /**
- * Rewriting the narration invalidates the voice-over: the audio no longer says
- * what the scene says, so the duration goes back to being an estimate and the
- * recorded track is dropped. Anything else would price the video on audio that
- * does not match its own script.
+ * Réécrire la narration invalide la voix off : l'audio ne dit plus ce que dit
+ * la scène, donc la durée redevient une estimation et la piste enregistrée
+ * est supprimée. Tout autre comportement facturerait la vidéo sur un audio
+ * qui ne matche pas son propre script.
  */
 export async function updateShot(
   tdb: TenantDb,
@@ -475,10 +478,11 @@ export async function deleteShot(
 }
 
 /**
- * Applies a new order.
+ * Applique un nouvel ordre.
  *
- * The submitted list must be exactly the video's scenes — no missing id, no
- * extra one, no duplicate. A partial list would silently renumber the rest.
+ * La liste soumise doit être exactement les scènes de la vidéo — pas d'id
+ * manquant, pas d'id en plus, pas de doublon. Une liste partielle renuméroterait
+ * silencieusement le reste.
  */
 export async function reorderShots(
   tdb: TenantDb,
@@ -516,7 +520,7 @@ export async function reorderShots(
   });
 }
 
-/** Moves one scene by one position. What the arrows in the kanban call. */
+/** Déplace une scène d'une position. Ce que les flèches du kanban appellent. */
 export async function moveShot(
   tdb: TenantDb,
   videoId: number,
@@ -529,7 +533,7 @@ export async function moveShot(
   const index = current.findIndex((shot) => shot.id === shotId);
   const target = direction === 'up' ? index - 1 : index + 1;
   if (target < 0 || target >= current.length) {
-    // Already at the end of the list: nothing to do, and not an error.
+    // Déjà en bout de liste : rien à faire, et pas une erreur.
     return await getStoryboard(tdb, videoId);
   }
 
@@ -544,12 +548,13 @@ export async function moveShot(
 // ---------------------------------------------------------------------------
 
 /**
- * Validates a storyboard and charges it.
+ * Valide un storyboard et le facture.
  *
- * Refuses while any scene is still priced on an estimate: the voice-over is
- * cheap and runs first precisely so the amount on the button is the amount
- * debited. Charging an estimate and reconciling afterwards would put correction
- * entries in a customer's ledger for no good reason.
+ * Refuse tant qu'une scène est encore facturée sur une estimation : la voix
+ * off est bon marché et tourne en premier précisément pour que le montant sur
+ * le bouton soit le montant débité. Facturer une estimation et réconcilier
+ * ensuite mettrait des écritures de correction dans le grand livre d'un client
+ * sans aucune bonne raison.
  */
 export async function validateStoryboard(
   tdb: TenantDb,

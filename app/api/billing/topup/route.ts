@@ -7,7 +7,7 @@ import {
 } from '@/lib/billing/checkout';
 import { billingErrorResponse } from '@/lib/billing/errors';
 
-/** Starts a checkout for a one-off credit pack. */
+/** Ouvre un checkout pour un pack de crédits ponctuel. */
 export async function POST(request: NextRequest) {
   const user = await getUser();
   if (!user) {

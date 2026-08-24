@@ -49,7 +49,7 @@ const theme = z.preprocess(
   z.string().max(VIDEO_THEME_MAX).nullable().optional()
 );
 
-/** An empty override means "inherit the project's default", i.e. null. */
+/** Un override vide signifie « hériter du défaut du projet », c.-à-d. null. */
 const pipelineOverride = z.preprocess(
   (value) => (value === '' || value === 'inherit' ? null : value),
   z.enum(PIPELINES).nullable().optional()
@@ -70,7 +70,7 @@ export const videoUpdateSchema = videoInputSchema
 export type VideoInput = z.input<typeof videoInputSchema>;
 export type VideoUpdate = z.input<typeof videoUpdateSchema>;
 
-/** Only a draft can be reshaped; everything else has been paid for. */
+/** Seul un brouillon peut être remodelé ; tout le reste a été payé. */
 export function assertDraft(video: Video): void {
   if (video.status !== 'draft') {
     throw new VideoError(
@@ -105,8 +105,9 @@ export async function createVideo(
 ): Promise<Video> {
   const data = videoInputSchema.parse(input);
 
-  // Throws 404 if the project belongs to someone else, so a forged projectId
-  // cannot hang a video off another tenant's project.
+  // Lève 404 si le projet appartient à quelqu'un d'autre, pour qu'un
+  // projectId forgé ne puisse pas accrocher une vidéo au projet d'un autre
+  // tenant.
   await getProject(tdb, data.projectId);
 
   const [video] = await tdb.insert(videos, {
@@ -146,10 +147,11 @@ export async function updateVideo(
 }
 
 /**
- * Deletes a draft and its storyboard.
+ * Supprime un brouillon et son storyboard.
  *
- * Refused once anything was charged: a ledger row pointing at a deleted video
- * would leave money moved for a reason nobody can look up.
+ * Refusé dès que quelque chose a été facturé : une ligne de grand livre
+ * pointant vers une vidéo supprimée laisserait de l'argent bougé pour une
+ * raison que personne ne peut retrouver.
  */
 export async function deleteVideo(tdb: TenantDb, id: number): Promise<Video> {
   const video = await getVideo(tdb, id);

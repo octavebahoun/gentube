@@ -34,8 +34,8 @@ describe('video creation', () => {
     expect(video).toMatchObject({
       status: 'draft',
       resolution: '480p',
-      // null means "inherit"; the project's default is not copied in, so
-      // changing the project changes the videos that never overrode it.
+      // null signifie « hériter » ; le défaut du projet n'est pas copié,
+      // donc changer le projet change les vidéos qui ne l'ont jamais surchargé.
       pipelineOverride: null,
       theme: null,
       creditsEstimated: 0,
@@ -173,7 +173,8 @@ describe('video edits', () => {
     const { tdb, video } = await draft();
     await tdb.update(videos, { status: 'generating' }, eq(videos.id, video.id));
 
-    // Credits have been charged by then: the storyboard is history, not a form.
+    // Les crédits ont alors été facturés : le storyboard est un historique,
+    // plus un formulaire.
     await expect(
       updateVideo(tdb, video.id, { title: 'Too late' })
     ).rejects.toMatchObject({ statusCode: 409 });
@@ -212,8 +213,8 @@ describe('video deletion', () => {
     const video = await createVideo(tdb, { projectId: project.id, title: 'A' });
     await tdb.update(videos, { creditsConsumed: 25 }, eq(videos.id, video.id));
 
-    // A ledger row pointing at a deleted video would be money moved for a
-    // reason nobody can look up.
+    // Une ligne de grand livre pointant vers une vidéo supprimée serait de
+    // l'argent bougé pour une raison que personne ne peut retrouver.
     await expect(deleteVideo(tdb, video.id)).rejects.toMatchObject({
       statusCode: 409,
     });

@@ -35,7 +35,7 @@ export type CreditReason = (typeof creditReasonEnum.enumValues)[number];
 export type LedgerResult = {
   entry: CreditLedgerEntry;
   balance: number;
-  /** True when an idempotency key matched an existing entry and nothing moved. */
+  /** Vrai quand une clé d'idempotence a matché une écriture existante et que rien n'a bougé. */
   replayed: boolean;
 };
 
@@ -43,7 +43,7 @@ type MovementInput = {
   amount: number;
   reason: CreditReason;
   videoId?: number;
-  /** Set this on webhook-driven writes so a replay is a no-op. */
+  /** À poser sur les écritures pilotées par webhook pour qu'un replay soit un no-op. */
   idempotencyKey?: string;
 };
 
@@ -64,7 +64,7 @@ async function findReplay(
   );
 }
 
-/** Current credit balance of the tenant. */
+/** Solde de crédits actuel du tenant. */
 export async function getBalance(tdb: TenantDb): Promise<number> {
   const tenant = await tdb.getTenant();
   if (!tenant) throw new Error(`Tenant ${tdb.tenantId} not found.`);
@@ -79,8 +79,8 @@ export async function canAfford(
 }
 
 /**
- * Adds credits (plan grant, top-up, refund). The tenant row and the ledger
- * entry move together in one transaction.
+ * Ajoute des crédits (dotation de plan, recharge, remboursement). La ligne du
+ * tenant et l'écriture du grand livre bougent ensemble dans une transaction.
  */
 export async function grantCredits(
   tdb: TenantDb,
@@ -113,10 +113,11 @@ export async function grantCredits(
 }
 
 /**
- * Removes credits. Blocks at zero: the balance is decremented by a conditional
- * `UPDATE ... WHERE credits_balance >= amount`, so concurrent debits serialise
- * on the tenant row and the balance can never go negative. When the guard
- * fails, nothing is written and `InsufficientCreditsError` is thrown.
+ * Retire des crédits. Bloque à zéro : le solde est décrémenté par un
+ * `UPDATE ... WHERE credits_balance >= amount` conditionnel, donc des débits
+ * concurrents se sérialisent sur la ligne du tenant et le solde ne peut jamais
+ * devenir négatif. Quand la garde échoue, rien n'est écrit et une
+ * `InsufficientCreditsError` est levée.
  */
 export async function debitCredits(
   tdb: TenantDb,
@@ -155,9 +156,9 @@ export async function debitCredits(
 }
 
 /**
- * Estimates a video from its storyboard and stores the estimate. Read-only on
- * the balance — nothing is charged here (specs §4: debit happens at
- * validation, never before).
+ * Estime une vidéo à partir de son storyboard et stocke l'estimation. En
+ * lecture seule sur le solde — rien n'est facturé ici (cahier des charges §4 :
+ * le débit a lieu à la validation, jamais avant).
  */
 export async function estimateVideo(
   tdb: TenantDb,
@@ -179,11 +180,11 @@ export async function estimateVideo(
 }
 
 /**
- * Validates a storyboard and charges it. This is the single point where a
- * video leaves `draft`, and the only place video credits are debited.
+ * Valide un storyboard et le facture. C'est l'unique point où une vidéo quitte
+ * `draft`, et le seul endroit où des crédits vidéo sont débités.
  *
- * Charge and status change share one transaction, so a failed debit leaves the
- * video in `draft` and no ledger row behind.
+ * La facturation et le changement de statut partagent une transaction, donc
+ * un débit échoué laisse la vidéo en `draft` sans aucune ligne de grand livre.
  */
 export async function validateAndChargeVideo(
   tdb: TenantDb,
@@ -228,8 +229,8 @@ export async function validateAndChargeVideo(
 }
 
 /**
- * Gives back what a failed video consumed. Refunds at most what was actually
- * charged, and marks the video `failed`.
+ * Rend ce qu'une vidéo échouée a consommé. Rembourse au plus ce qui a été
+ * réellement facturé, et marque la vidéo `failed`.
  */
 export async function refundVideo(
   tdb: TenantDb,
@@ -261,7 +262,7 @@ export async function refundVideo(
   });
 }
 
-/** Ledger history, most recent first. */
+/** Historique du grand livre, du plus récent au plus ancien. */
 export async function listLedger(
   tdb: TenantDb,
   limit = 50
@@ -272,7 +273,7 @@ export async function listLedger(
   });
 }
 
-/** Sum of every ledger delta — must always equal `tenants.credits_balance`. */
+/** Somme de tous les deltas du grand livre — doit toujours égaler `tenants.credits_balance`. */
 export async function ledgerSum(tdb: TenantDb): Promise<number> {
   const rows = await tdb.findMany(creditLedger);
   return rows.reduce((total, row) => total + row.delta, 0);

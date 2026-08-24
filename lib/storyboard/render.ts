@@ -2,38 +2,38 @@ import { z } from 'zod';
 import type { Ratio, Shot, Video } from '@/lib/db/schema';
 
 /**
- * The render contract — shared truth between the database and the Remotion
- * composition.
+ * Le contrat de rendu — vérité partagée entre la base de données et la
+ * composition Remotion.
  *
- * This is a port of the storyboard schema already in production in the
- * pipevideo pipeline, kept field-for-field so the composition can be reused
- * without translation. Two consequences worth stating out loud:
+ * C'est un port du schéma storyboard déjà en production dans le pipeline
+ * pipevideo, conservé champ pour champ pour que la composition puisse être
+ * réutilisée sans traduction. Deux conséquences à énoncer clairement :
  *
- *  - `durationInSeconds` and `words` are NEVER authored. They are the measured
- *    length of the voice-over and its word-by-word alignment, written by the
- *    voice-over step. A hand-written duration is a bug.
- *  - Everything in `sceneRenderSchema` is presentation. It lives in the `render`
- *    jsonb column precisely so that adding a transition or a title variant is a
- *    deploy, not a migration.
+ *  - `durationInSeconds` et `words` ne sont JAMAIS rédigés à la main. Ce sont
+ *    la longueur mesurée de la voix off et son alignement mot à mot, écrits
+ *    par l'étape voix off. Une durée écrite à la main est un bug.
+ *  - Tout ce qui est dans `sceneRenderSchema` est de la présentation. Cela vit
+ *    dans la colonne jsonb `render` précisément pour qu'ajouter une transition
+ *    ou une variante de titre soit un déploiement, pas une migration.
  */
 
 export const wordTimingSchema = z.object({
   text: z.string(),
-  /** Seconds from the start of the scene. */
+  /** Secondes depuis le début de la scène. */
   start: z.number(),
   duration: z.number(),
 });
 
-/** A sound played during a scene, on top of the voice: SFX, ambience, music. */
+/** Un son joué pendant une scène, par-dessus la voix : SFX, ambiance, musique. */
 export const sceneSoundSchema = z.object({
-  /** Key of a row in `sound_assets`, e.g. "sounds/sfx/pop.mp3". */
+  /** Clé d'une ligne de `sound_assets`, ex. "sounds/sfx/pop.mp3". */
   src: z.string(),
   volume: z.number().min(0).max(1).optional(),
   startInSeconds: z.number().min(0).optional(),
   loop: z.boolean().optional(),
   fadeInSeconds: z.number().min(0).optional(),
   fadeOutSeconds: z.number().min(0).optional(),
-  /** Trims the source file, to isolate one impact out of a longer take. */
+  /** Rognage du fichier source, pour isoler un impact d'une prise plus longue. */
   trimStart: z.number().min(0).optional(),
   trimEnd: z.number().min(0).optional(),
 });
@@ -50,14 +50,14 @@ export const TRANSITIONS = [
   'particleDissolve',
 ] as const;
 
-/** Camera moves are directives for the *prompt*, not for the renderer. */
+/** Les mouvements caméra sont des directives pour le *prompt*, pas pour le renderer. */
 export const CAMERA_MOTIONS = ['orbit', 'dolly', 'pan', 'static'] as const;
 
 export const sceneEffectsSchema = z.object({
   zoom: z.enum(['in', 'out', 'none']).optional(),
   transition: z.enum(TRANSITIONS).optional(),
   shake: z.boolean().optional(),
-  /** Directive: this shot must cut cleanly from the previous composition. */
+  /** Directive : ce plan doit couper nettement avec la composition précédente. */
   matchCut: z.boolean().optional(),
   cameraMotion: z.enum(CAMERA_MOTIONS).optional(),
   flash: z
@@ -92,16 +92,16 @@ export const sceneRenderSchema = z.object({
       glowColor: z.string().optional(),
     })
     .optional(),
-  /** Black screen with centred text: no voice, no media, no sound. */
+  /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
   card: z
     .object({
       text: z.string(),
       subtext: z.string().optional(),
     })
     .optional(),
-  /** Volume of the clip's own audio. 0 mutes it. */
+  /** Volume de l'audio propre au clip. 0 le rend muet. */
   mediaVolume: z.number().min(0).max(1).optional(),
-  /** Slows a short clip to fill the scene without a visible loop. */
+  /** Ralentit un clip court pour remplir la scène sans boucle visible. */
   playbackRate: z.number().positive().optional(),
   showSubtitles: z.boolean().optional(),
   sounds: z.array(sceneSoundSchema).optional(),
@@ -112,23 +112,24 @@ export type SceneSound = z.infer<typeof sceneSoundSchema>;
 export type SceneRender = z.infer<typeof sceneRenderSchema>;
 
 // ---------------------------------------------------------------------------
-// Timing — one source of truth, or scenes get truncated
+// Timing — une seule source de vérité, sinon les scènes sont tronquées
 // ---------------------------------------------------------------------------
 
 export const FPS = 30;
 
-/** Floor for a scene, in case an audio track comes back very short. */
+/** Plancher pour une scène, au cas où une piste audio revient très courte. */
 export const MIN_SCENE_FRAMES = 30;
 
 export const TRANSITION_FRAMES = 15;
 
 /**
- * Silence held after the narration ends, media still on screen, so the viewer
- * can digest before the next line.
+ * Silence maintenu après la fin de la narration, média toujours à l'écran,
+ * pour que le spectateur digère avant la réplique suivante.
  *
- * It must outlast the longest transition (26 frames for `black`): the overlap
- * with the next scene then falls entirely inside this silence, and one scene's
- * voice never plays over the next one's.
+ * Il doit durer plus longtemps que la transition la plus longue (26 frames
+ * pour `black`) : le chevauchement avec la scène suivante tombe alors
+ * entièrement dans ce silence, et la voix d'une scène ne joue jamais par-
+ * dessus celle de la suivante.
  */
 export const POST_NARRATION_PAUSE_FRAMES = 30;
 
@@ -158,14 +159,14 @@ export function sceneDurationInFrames(
   fps: number = FPS
 ): number {
   const narrationFrames = Math.ceil((scene.durationInSeconds ?? 2) * fps);
-  // A closing card has neither voice nor sound: nothing to digest.
+  // Une carte de fin n'a ni voix ni son : rien à digérer.
   const pauseFrames = scene.card ? 0 : POST_NARRATION_PAUSE_FRAMES;
   return Math.max(MIN_SCENE_FRAMES, narrationFrames + pauseFrames);
 }
 
 /**
- * Total length of the composition. Transitions overlap their neighbours, so
- * their duration is subtracted — otherwise the render runs past its content.
+ * Durée totale de la composition. Les transitions chevauchent leurs voisines,
+ * donc leur durée est soustraite — sinon le rendu dépasse son contenu.
  */
 export function totalDurationInFrames(
   scenes: { durationInSeconds?: number; card?: unknown; effects?: { transition?: string } }[],
@@ -186,7 +187,7 @@ export function dimensionsFor(ratio: Ratio): { width: number; height: number } {
 }
 
 // ---------------------------------------------------------------------------
-// Serialisation
+// Sérialisation
 // ---------------------------------------------------------------------------
 
 export type RemotionScene = {
@@ -212,12 +213,13 @@ export type RemotionStoryboard = {
 };
 
 /**
- * Turns the rows into exactly the JSON the composition consumes.
+ * Transforme les lignes en exactement le JSON que consomme la composition.
  *
- * Paths: pipevideo resolves `mediaPath` and `audioPath` against `public/`.
- * Here they are whatever the storage layer hands over — signed R2 URLs in
- * production, which Remotion accepts as absolute sources. The composition's
- * asset resolver is the single place that has to know the difference.
+ * Chemins : pipevideo résout `mediaPath` et `audioPath` contre `public/`.
+ * Ici ce sont ce que la couche de stockage remet — URLs R2 signées en
+ * production, que Remotion accepte comme sources absolues. Le résolveur
+ * d'assets de la composition est le seul endroit qui doit connaître la
+ * différence.
  */
 export function toRemotionStoryboard(
   video: Pick<
@@ -248,8 +250,8 @@ export function toRemotionStoryboard(
       const words = z.array(wordTimingSchema).safeParse(shot.words ?? []);
 
       return {
-        // Scene ids are positional: the composition orders on them, and the
-        // stored `order` is what the user rearranged.
+        // Les ids de scène sont positionnels : la composition ordonne dessus,
+        // et le `order` stocké est ce que l'utilisateur a réarrangé.
         id: index + 1,
         narration: shot.narration ?? '',
         subtitle: shot.subtitle ?? undefined,

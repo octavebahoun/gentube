@@ -44,7 +44,7 @@ function client() {
   });
 }
 
-/** Character-level alignment, as the API returns it. */
+/** Alignement au niveau caractère, tel que l'API le renvoie. */
 function alignmentOf(text: string, secondsPerChar = 0.1) {
   return {
     characters: [...text],
@@ -156,7 +156,8 @@ describe('synthesising a scene', () => {
   });
 
   it('treats audio without an alignment as unusable', async () => {
-    // No alignment means no measurable duration, so nothing can be priced.
+    // Pas d'alignement signifie pas de durée mesurable, donc rien ne peut
+    // être facturé.
     stubFetch({ audio_base64: Buffer.from('x').toString('base64'), alignment: null });
     await expect(client().synthesize('Salut')).rejects.toThrow(/no measurable duration|cannot read/);
   });

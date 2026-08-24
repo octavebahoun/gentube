@@ -16,25 +16,27 @@ import {
 import { getStoryboard, listShots, type StoryboardView } from './service';
 
 /**
- * The voice-over step — where a storyboard stops being an estimate.
+ * L'étape voix off — là où un storyboard cesse d'être une estimation.
  *
- * It runs BEFORE the expensive visuals and before any payment, on purpose:
- * speech is cheap (cents per thousand characters, against a per-clip price for
- * video), and it is the only way to know how long a scene actually lasts. The
- * amount on the validation button is then the amount debited, exactly.
+ * Elle tourne AVANT les visuels coûteux et avant tout paiement, volontairement
+ * : la parole est bon marché (des centimes pour mille caractères, contre un
+ * prix par clip pour la vidéo), et c'est le seul moyen de savoir combien de
+ * temps une scène dure réellement. Le montant sur le bouton de validation est
+ * alors le montant débité, exactement.
  *
- * Two properties matter more than speed here:
+ * Deux propriétés comptent plus que la vitesse ici :
  *
- *  - **Resumable.** Each scene is written the moment it succeeds. A failure
- *    halfway through leaves the finished scenes measured, and a second run
- *    skips them instead of paying ElevenLabs twice for the same line.
- *  - **Sequential.** Scenes are synthesised one at a time. A dozen parallel
- *    requests would be faster and would also be the fastest way to a 429 on a
- *    provider we do not control.
+ *  - **Reprise possible.** Chaque scène est écrite dès qu'elle réussit. Un
+ *    échec à mi-chemin laisse les scènes finies mesurées, et un second
+ *    passage les saute au lieu de payer deux fois ElevenLabs pour la même
+ *    ligne.
+ *  - **Séquentiel.** Les scènes sont synthétisées une par une. Une douzaine de
+ *    requêtes parallèles irait plus vite et serait aussi le moyen le plus
+ *    rapide de prendre un 429 sur un fournisseur que nous ne contrôlons pas.
  */
 
 export type VoiceoverResult = StoryboardView & {
-  /** Scenes voiced by this run. Already-measured scenes are not counted. */
+  /** Scènes doublées par ce passage. Les scènes déjà mesurées ne comptent pas. */
   voiced: number;
   skipped: number;
 };
@@ -58,8 +60,9 @@ export async function generateVoiceover(
     throw new Error('No scene has a line to read yet.');
   }
 
-  // Resolved lazily: a video whose scenes are all already measured must not
-  // fail just because the provider keys are missing.
+  // Résolus paresseusement : une vidéo dont toutes les scènes sont déjà
+  // mesurées ne doit pas échouer juste parce que les clés fournisseur
+  // manquent.
   let synthesizer = client;
   let assets = store;
 
@@ -101,8 +104,8 @@ export async function generateVoiceover(
     voiced += 1;
   }
 
-  // The price follows the audio: re-estimating here is what turns the measured
-  // durations into the exact number shown on the validation button.
+  // Le prix suit l'audio : ré-estimer ici est ce qui transforme les durées
+  // mesurées en nombre exact affiché sur le bouton de validation.
   await estimateVideo(tdb, videoId);
 
   return { ...(await getStoryboard(tdb, videoId)), voiced, skipped };

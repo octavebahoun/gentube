@@ -2,17 +2,17 @@ import { z } from 'zod';
 import type { WordTiming } from '@/lib/storyboard/render';
 
 /**
- * ElevenLabs voice-over with word-level timings.
+ * Voix off ElevenLabs avec timings au niveau du mot.
  *
- * The endpoint used is `/with-timestamps`, which returns the audio *and* a
- * character-by-character alignment. Those characters are folded into words
- * here: that alignment is what makes karaoke subtitles possible, and it is
- * also how a scene learns its real duration.
+ * L'endpoint utilisé est `/with-timestamps`, qui renvoie l'audio *et* un
+ * alignement caractère par caractère. Ces caractères sont regroupés en mots
+ * ici : cet alignement est ce qui rend possible les sous-titres karaoké, et
+ * c'est aussi ainsi qu'une scène apprend sa durée réelle.
  *
- * The duration is read off the alignment rather than by decoding the mp3, so
- * this module needs no audio dependency. It is the length of speech, excluding
- * trailing silence — which is the right number here, because the renderer adds
- * its own pause after each narration.
+ * La durée est lue sur l'alignement plutôt qu'en décodant le mp3, donc ce
+ * module n'a besoin d'aucune dépendance audio. C'est la longueur de la parole,
+ * hors silence final — le bon nombre ici, car le renderer ajoute sa propre
+ * pause après chaque narration.
  */
 
 export const VOICE_IDS: Record<string, string> = {
@@ -79,7 +79,7 @@ export function isVoiceConfigured(): boolean {
   }
 }
 
-/** Accepts a short name from the map, or a raw ElevenLabs voice id. */
+/** Accepte un nom court de la map, ou un id de voix ElevenLabs brut. */
 export function resolveVoiceId(voice?: string | null): string {
   const wanted = voice?.trim().toLowerCase();
   if (wanted && VOICE_IDS[wanted]) return VOICE_IDS[wanted];
@@ -102,8 +102,8 @@ const withTimestampsSchema = z.object({
 const round = (value: number) => Number(value.toFixed(3));
 
 /**
- * Folds a character alignment into word timings. Whitespace closes a word;
- * punctuation stays attached to it, the way it is pronounced.
+ * Regroupe un alignement de caractères en timings de mots. Un espace ferme un
+ * mot ; la ponctuation y reste attachée, comme elle est prononcée.
  */
 export function wordsFromAlignment(
   alignment: z.infer<typeof alignmentSchema> | null | undefined
@@ -149,7 +149,7 @@ export type Voiceover = {
   audio: Buffer;
   contentType: string;
   words: WordTiming[];
-  /** Length of speech in seconds, from the alignment. */
+  /** Longueur de la parole en secondes, d'après l'alignement. */
   durationS: number;
 };
 
@@ -186,7 +186,7 @@ export class ElevenLabsClient implements VoiceSynthesizer {
         const parsed = JSON.parse(body);
         detail = parsed?.detail?.message ?? parsed?.detail ?? detail;
       } catch {
-        // Keep the excerpt — never echo the request, which carries the key.
+        // Conserver l'extrait — ne jamais renvoyer la requête, qui porte la clé.
       }
       throw new VoiceError(
         `ElevenLabs returned HTTP ${response.status}: ${
@@ -203,8 +203,9 @@ export class ElevenLabsClient implements VoiceSynthesizer {
       throw new VoiceError('ElevenLabs returned an answer we cannot read.');
     }
 
-    // `normalized_alignment` follows the text as pronounced; the raw one
-    // follows the characters we sent. Either yields the same timing spine.
+    // `normalized_alignment` suit le texte tel que prononcé ; l'alignement
+    // brut suit les caractères que nous avons envoyés. L'un ou l'autre donne
+    // la même colonne vertébrale de timings.
     const words = wordsFromAlignment(payload.alignment ?? payload.normalized_alignment);
     if (words.length === 0) {
       throw new VoiceError(

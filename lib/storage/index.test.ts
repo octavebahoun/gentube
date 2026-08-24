@@ -15,7 +15,8 @@ describe('asset keys', () => {
   });
 
   it('refuses anything that could climb out of the prefix', () => {
-    // Path traversal in an object key is how one tenant reads another's assets.
+    // Un path traversal dans une clé d'objet est la façon pour un tenant de
+    // lire les assets d'un autre.
     for (const parts of [
       ['..', 'other'],
       ['videos/../..'],

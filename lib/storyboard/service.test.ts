@@ -49,7 +49,7 @@ const LIBRARY: SoundChoice[] = [
   },
 ];
 
-/** A narration whose estimated duration is exactly `seconds`. */
+/** Une narration dont la durée estimée est exactement `seconds`. */
 function line(seconds: number, label = 'a'): string {
   return label.repeat(seconds * NARRATION_CHARS_PER_SECOND);
 }
@@ -109,7 +109,7 @@ async function draftVideo(
   return { project, video };
 }
 
-/** Marks every scene as voiced, the way the voice-over step would. */
+/** Marque chaque scène comme doublée, comme le ferait l'étape voix off. */
 async function measure(tdb: TenantDb, videoId: number) {
   const rows = await tdb.findMany(shots, eq(shots.videoId, videoId));
   for (const shot of rows) {
@@ -123,7 +123,7 @@ async function measure(tdb: TenantDb, videoId: number) {
 
 describe('estimating a duration from the text', () => {
   it('reads the duration off the narration, not off the model', () => {
-    // Calibrated on measured voice-overs: ~14 characters per second.
+    // Calibré sur des voix off mesurées : ~14 caractères par seconde.
     expect(estimateNarrationSeconds(line(5))).toBe(5);
     expect(estimateNarrationSeconds(line(2))).toBe(2);
   });
@@ -146,16 +146,16 @@ describe('storyboard prompting', () => {
 
     expect(messages[0].role).toBe('system');
     expect(messages[0].content).toContain('narration');
-    // The duration is measured on the audio; the model must not invent one.
+    // La durée est mesurée sur l'audio ; le modèle ne doit pas en inventer une.
     expect(messages[0].content).toContain('Do NOT write any duration');
-    // Narration in the theme's language, visuals in English.
+    // Narration dans la langue du thème, visuels en anglais.
     expect(messages[0].content).toContain('SAME');
     expect(messages[0].content).toContain('ENGLISH');
 
     expect(messages[1].content).toContain('Amazones du Dahomey');
     expect(messages[1].content).toContain('Cinematic documentary');
     expect(messages[1].content).toContain('90 seconds');
-    // The catalogue travels with the request, or the model invents paths.
+    // Le catalogue voyage avec la requête, sinon le modèle invente des chemins.
     expect(messages[1].content).toContain('sounds/sfx/pop.mp3');
   });
 
@@ -190,7 +190,7 @@ describe('normalising what the model returns', () => {
       ],
     };
 
-    // A video scene in an image-only project would quadruple the bill.
+    // Une scène vidéo dans un projet image-only quadruplerait la facture.
     expect(normalizeStoryboard(answer, 'image').map((s) => s.type)).toEqual([
       'image',
       'image',
@@ -212,7 +212,7 @@ describe('normalising what the model returns', () => {
             effects: { zoom: 'in', transition: 'whipPan', cameraMotion: 'dolly' },
             sounds: [
               { src: 'sounds/sfx/pop.mp3', startInSeconds: 0.5 },
-              // Invented by the model: would fail minutes later inside Lambda.
+              // Inventé par le modèle : échouerait quelques minutes plus tard dans Lambda.
               { src: 'sounds/sfx/imaginary-boom.mp3' },
             ],
           },
@@ -238,7 +238,7 @@ describe('normalising what the model returns', () => {
     for (const answer of [
       {},
       { scenes: [] },
-      // No narration: nothing to read, so nothing to measure.
+      // Pas de narration : rien à lire, donc rien à mesurer.
       { scenes: [{ type: 'video', prompt: 'A long enough visual prompt' }] },
       { scenes: [{ narration: line(3), type: 'audio', prompt: 'A long enough prompt' }] },
       { scenes: [{ narration: line(3), type: 'video', prompt: 'short' }] },
@@ -426,7 +426,7 @@ describe('storyboard editing', () => {
       narration: line(8),
     });
 
-    // The audio no longer says what the scene says: back to an estimate.
+    // L'audio ne dit plus ce que dit la scène : retour à une estimation.
     expect(updated.shots[0]).toMatchObject({
       durationS: 8,
       durationSource: 'estimated',
@@ -514,8 +514,8 @@ describe('validation', () => {
     const { video } = await draftVideo(tdb);
     await generateStoryboard(tdb, video.id, { client: answering(scenesOf(3)), library: [] });
 
-    // The exact price is measured on the audio; charging before that would put
-    // correction entries in a customer's ledger.
+    // Le prix exact est mesuré sur l'audio ; facturer avant mettrait des
+    // écritures de correction dans le grand livre d'un client.
     await expect(validateStoryboard(tdb, video.id)).rejects.toThrow(
       /voice-over first/
     );

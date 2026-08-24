@@ -22,8 +22,8 @@ import {
   validateAndChargeVideo,
 } from './ledger';
 
-// One shared postgres client per worker: close it once, after every suite in
-// this file has run.
+// Un client postgres partagé par worker : fermé une fois, après l'exécution
+// de toutes les suites de ce fichier.
 afterAll(async () => {
   await closeDb();
 });

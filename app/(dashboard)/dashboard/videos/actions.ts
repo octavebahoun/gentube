@@ -28,9 +28,10 @@ import {
 } from '@/lib/storyboard';
 
 /**
- * Video and storyboard mutations. The rules live in lib/videos and
- * lib/storyboard; these actions validate a form, pick the tenant from the
- * session, and turn a thrown error into a sentence the page can show.
+ * Mutations des vidéos et des storyboards. Les règles vivent dans lib/videos
+ * et lib/storyboard ; ces actions valident un formulaire, récupèrent le
+ * tenant depuis la session, et transforment une erreur levée en phrase que la
+ * page peut afficher.
  */
 
 const videoIdentity = z.object({
@@ -112,12 +113,14 @@ export const addShotAction = validatedActionWithUser(
 );
 
 /**
- * Every button on a shot card posts the same form, distinguished by `intent`.
+ * Chaque bouton d'une carte de plan poste le même formulaire, distingué par
+ * `intent`.
  *
- * One form per shot instead of four means one submit path, one error slot, and
- * no nested forms — which HTML does not allow anyway. The shot fields are
- * validated only for `save`: a user who cleared the prompt must still be able
- * to delete the shot.
+ * Un formulaire par plan au lieu de quatre signifie un chemin de soumission,
+ * un emplacement d'erreur, et pas de formulaires imbriqués — ce que HTML
+ * n'autorise de toute façon pas. Les champs du plan ne sont validés que pour
+ * `save` : un utilisateur qui a effacé le prompt doit toujours pouvoir
+ * supprimer le plan.
  */
 const shotFormSchema = shotIdentity.extend({
   intent: z.enum(['save', 'delete', 'up', 'down']),
@@ -157,8 +160,8 @@ export const shotFormAction = validatedActionWithUser(
 );
 
 /**
- * Records the voice-over. This is what turns an estimated price into an exact
- * one: the duration of every scene becomes the real length of its audio.
+ * Enregistre la voix off. C'est ce qui transforme un prix estimé en prix
+ * exact : la durée de chaque scène devient la longueur réelle de son audio.
  */
 export const generateVoiceoverAction = validatedActionWithUser(
   videoIdentity,
@@ -181,9 +184,9 @@ export const generateVoiceoverAction = validatedActionWithUser(
 );
 
 /**
- * Validation is the only step that spends money. It refuses while any scene is
- * still priced on an estimate, so the amount on the button is the amount
- * debited — see lib/storyboard/service.ts.
+ * La validation est la seule étape qui dépense de l'argent. Elle refuse tant
+ * qu'une scène est encore facturée sur une estimation, pour que le montant
+ * sur le bouton soit le montant débité — voir lib/storyboard/service.ts.
  */
 export const validateVideoAction = validatedActionWithUser(
   videoIdentity,

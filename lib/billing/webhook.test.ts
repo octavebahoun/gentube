@@ -36,7 +36,7 @@ afterAll(async () => {
 
 const BASE_URL = 'https://app.test';
 
-/** A gateway that reports the payment as settled when re-read. */
+/** Une passerelle qui rapporte le paiement comme réglé lors de la re-lecture. */
 function paidGateway(overrides: Partial<GeniusPayPayment> = {}): GeniusPayClient {
   return fakeGeniusPay({
     onFetch: async (reference) => gatewayPayment({ reference, ...overrides }),
@@ -90,7 +90,7 @@ describe('confirmed payments', () => {
     expect(entry).toMatchObject({
       reason: 'subscription_grant',
       delta: PLAN_OFFERS.pro.monthlyCredits,
-      // Keyed on the payment, not the event.
+      // Clé sur le paiement, pas l'événement.
       idempotencyKey: 'geniuspay:payment:GP-SUB-1',
     });
 
@@ -143,7 +143,8 @@ describe('confirmed payments', () => {
     expect(await getBalance(tdb)).toBe(pack.credits);
     expect((await tdb.findMany(creditLedger))[0].reason).toBe('topup');
     expect(await getSubscription(tdb)).toBeNull();
-    // The tenant keeps the plan it had: a top-up buys credits, not a tier.
+    // Le tenant garde le plan qu'il avait : un top-up achète des crédits, pas
+    // un palier.
     expect((await tdb.getTenant())!.plan).toBe('starter');
   });
 });
@@ -166,7 +167,8 @@ describe('forged and replayed callbacks', () => {
     );
 
     expect(forged).toMatchObject({ status: 401, outcome: 'invalid_signature' });
-    // The specs are explicit: an invalid signature leaves no row behind.
+    // Le cahier des charges est explicite : une signature invalide ne laisse
+    // aucune ligne derrière elle.
     expect(await webhookRows()).toEqual([]);
     expect(await getBalance(tdb)).toBe(0);
     expect((await tdb.findById(paymentIntents, checkout.intentId))!.status).toBe(
@@ -245,7 +247,8 @@ describe('forged and replayed callbacks', () => {
       webhookPayload({ eventId: 'evt_2', reference: 'GP-SUB-1' })
     );
 
-    // Both events are legitimate; the ledger key is what stops the double credit.
+    // Les deux événements sont légitimes ; c'est la clé du grand livre qui
+    // empêche le double crédit.
     expect(first.outcome).toBe('credited');
     expect(again.outcome).toBe('credited');
     expect(await getBalance(tdb)).toBe(PLAN_OFFERS.starter.monthlyCredits);
@@ -290,7 +293,7 @@ describe('the gateway has the last word', () => {
       const result = await deliver(
         webhookPayload({
           reference: 'GP-SUB-1',
-          // The callback claims the right amount; the gateway says otherwise.
+          // Le callback prétend le bon montant ; la passerelle dit le contraire.
           amount: PLAN_OFFERS.starter.priceXof,
         }),
         { client: paidGateway({ amount: 500 }) }
@@ -335,7 +338,7 @@ describe('the gateway has the last word', () => {
     expect(event.processedAt).toBeNull();
     expect(event.processingError).toContain('refetch_failed');
 
-    // An unprocessed event may run again — that is what the 502 asked for.
+    // Un événement non traité peut repartir — c'est ce que le 502 a demandé.
     const retry = await deliver(payload, { client: paidGateway() });
     expect(retry.outcome).toBe('credited');
     expect(await getBalance(tdb)).toBe(PLAN_OFFERS.starter.monthlyCredits);
@@ -361,7 +364,8 @@ describe('the gateway has the last word', () => {
     const beta = await createTenant('Beta');
     await startSubscription(alpha, 'starter', 'GP-SUB-ALPHA');
 
-    // A caller who knows Beta's id cannot move Alpha's payment onto it.
+    // Un appelant connaissant l'id de Beta ne peut pas y faire passer le
+    // paiement d'Alpha.
     const result = await deliver(
       webhookPayload({
         reference: 'GP-SUB-ALPHA',
@@ -404,7 +408,7 @@ describe('failed payments', () => {
       (await tdb.findById(paymentAttempts, checkout.attemptId!))!.status
     ).toBe('failed');
     expect((await getSubscription(tdb))!.status).toBe('past_due');
-    // The period is still open for a retry.
+    // La période reste ouverte pour une nouvelle tentative.
     expect((await tdb.findById(billingCycles, checkout.cycleId!))!.status).toBe(
       'pending'
     );
@@ -431,7 +435,8 @@ describe('failed payments', () => {
     expect((await getSubscription(tdb))!.status).toBe('suspended');
     const [cycle] = await tdb.findMany(billingCycles);
     expect(cycle.status).toBe('failed');
-    // Suspension stops the renewal; it never confiscates what was bought.
+    // La suspension stoppe le renouvellement ; elle ne confisque jamais ce
+    // qui a été acheté.
     expect(await getBalance(tdb)).toBe(500);
   });
 
@@ -475,7 +480,7 @@ describe('failed payments', () => {
     );
 
     expect(result.outcome).toBe('gateway_contradicts_webhook');
-    // Marking it failed here would strand a tenant that actually paid.
+    // Le marquer échoué ici bloquerait un tenant qui a réellement payé.
     expect((await tdb.findById(paymentIntents, checkout.intentId))!.status).toBe(
       'pending'
     );

@@ -3,22 +3,22 @@ import { db } from '@/lib/db/drizzle';
 import { soundAssets, type SoundAsset, type SoundKind } from '@/lib/db/schema';
 
 /**
- * The shared sound library.
+ * La bibliothèque de sons partagée.
  *
- * Read through `db` rather than `tenantDb()`: the table holds no tenant_id
- * because it belongs to no tenant. It is a catalogue of platform assets —
- * closer to a font list than to customer data — and the isolation test lists
- * it as such.
+ * Lue via `db` plutôt que `tenantDb()` : la table ne porte pas de tenant_id
+ * car elle n'appartient à aucun tenant. C'est un catalogue d'actifs
+ * plateforme — plus proche d'une liste de polices que de données clients — et
+ * le test d'isolation la liste comme telle.
  */
 
 export type SoundChoice = {
-  /** What a storyboard writes into `sounds[].src`. */
+  /** Ce qu'un storyboard écrit dans `sounds[].src`. */
   src: string;
   kind: SoundKind;
   mood: string | null;
   loopable: boolean;
   durationS: number | null;
-  /** Seconds where the sound actually hits. */
+  /** Secondes où le son frappe réellement. */
   impacts: number[];
   usage: string | null;
 };
@@ -43,9 +43,10 @@ export async function listSounds(kind?: SoundKind): Promise<SoundChoice[]> {
 }
 
 /**
- * The catalogue as the model sees it: one line per sound, keyed by the exact
- * string it must copy. Bounded on purpose — a prompt carrying two hundred
- * sounds costs more than it helps, and the model only needs enough to choose.
+ * Le catalogue tel que le modèle le voit : une ligne par son, clé par la
+ * chaîne exacte qu'il doit copier. Borné volontairement — un prompt portant
+ * deux cents sons coûte plus qu'il n'aide, et le modèle n'a besoin que de
+ * quoi choisir.
  */
 export function renderSoundCatalogue(
   sounds: SoundChoice[],
@@ -70,9 +71,10 @@ export function renderSoundCatalogue(
 }
 
 /**
- * Keeps only the sounds that exist. A model that invents `sounds/sfx/boom.mp3`
- * would produce a storyboard the renderer cannot resolve, and the failure would
- * surface minutes later inside Lambda rather than here.
+ * Ne garde que les sons qui existent. Un modèle qui invente
+ * `sounds/sfx/boom.mp3` produirait un storyboard que le renderer ne peut pas
+ * résoudre, et l'échec surgirait quelques minutes plus tard dans Lambda
+ * plutôt qu'ici.
  */
 export function keepKnownSounds<T extends { src?: unknown }>(
   candidates: T[] | undefined,

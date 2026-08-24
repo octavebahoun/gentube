@@ -382,9 +382,9 @@ async function creditConfirmedPayment(
 }
 
 /**
- * Records a payment that did not go through. No credit moves, and the balance
- * already bought is untouched — a suspended subscription stops renewing, it
- * does not confiscate.
+ * Enregistre un paiement qui n'est pas passé. Aucun crédit ne bouge, et le
+ * solde déjà acheté reste intact — un abonnement suspendu cesse de se
+ * renouveler, il ne confisque pas.
  */
 async function recordFailedPayment(
   tdb: ReturnType<typeof tenantDb>,
@@ -435,7 +435,8 @@ async function recordFailedPayment(
     const cycle = await tx.findById(billingCycles, intent.billingCycleId);
     if (!cycle) return;
 
-    // Retries exhausted (specs §3.A): close the cycle and stop the renewal.
+    // Réessais épuisés (cahier des charges §3.A) : clore le cycle et stopper
+    // le renouvellement.
     if (failedAttempts >= MAX_PAYMENT_ATTEMPTS) {
       await tx.update(
         billingCycles,

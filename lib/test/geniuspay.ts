@@ -7,16 +7,16 @@ import type {
 } from '@/lib/payments/geniuspay';
 
 /**
- * Test doubles for the GeniusPay gateway.
+ * Doublures de test pour la passerelle GeniusPay.
  *
- * Both the checkout service and the webhook pipeline take an injectable
- * client, so no test ever touches the network — and no test needs the real
- * keys in the environment.
+ * Le service de checkout comme le pipeline webhook acceptent un client
+ * injectable, donc aucun test ne touche le réseau — et aucun test n'a besoin
+ * des vraies clés dans l'environnement.
  */
 
 export const TEST_WEBHOOK_SECRET = 'whsec_test_0123456789';
 
-/** A payment as the gateway would report it on `GET /payments/{ref}`. */
+/** Un paiement tel que la passerelle le rapporterait sur `GET /payments/{ref}`. */
 export function gatewayPayment(
   overrides: Partial<GeniusPayPayment> = {}
 ): GeniusPayPayment {
@@ -42,8 +42,9 @@ export type FakeGeniusPay = {
 };
 
 /**
- * A stub client. `onCreate` / `onFetch` let a test make either call fail or
- * answer something the webhook body disagrees with.
+ * Un client factice. `onCreate` / `onFetch` permettent à un test de faire
+ * échouer l'un ou l'autre appel, ou de répondre quelque chose en désaccord
+ * avec le corps du webhook.
  */
 export function fakeGeniusPay({
   reference = 'GP-REF-1',
@@ -87,7 +88,7 @@ export function fakeGeniusPay({
   return { client, created, fetched };
 }
 
-/** Builds the webhook body the gateway posts for a payment event. */
+/** Construit le corps webhook que la passerelle poste pour un événement de paiement. */
 export function webhookPayload({
   eventId = 'evt_1',
   event = 'payment.success',
@@ -116,7 +117,7 @@ export function webhookPayload({
   };
 }
 
-/** Signs a body the way the gateway does: HMAC-SHA256 over `<ts>.<body>`. */
+/** Signe un corps comme le fait la passerelle : HMAC-SHA256 sur `<ts>.<body>`. */
 export function signedWebhook(
   payload: unknown,
   {

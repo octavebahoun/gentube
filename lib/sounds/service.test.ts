@@ -9,7 +9,7 @@ afterAll(async () => {
   await closeDb();
 });
 
-/** Two rows in the exact format the pipeline's `npm run sounds` emits. */
+/** Deux lignes dans le format exact que le `npm run sounds` du pipeline émet. */
 const CATALOGUE = `# 🎧 Catalogue des sons — GÉNÉRÉ AUTOMATIQUEMENT
 
 | Nom | Type | Ambiance | Bouclable | Durée | Tonalité | BPM | Pics d'impact (s) | Usage | \`src\` |
@@ -103,7 +103,8 @@ describe('filtering what the model picked', () => {
   ];
 
   it('keeps the known sounds and drops the invented ones', () => {
-    // An invented path fails minutes later inside the renderer, not here.
+    // Un chemin inventé échoue quelques minutes plus tard dans le renderer,
+    // pas ici.
     expect(
       keepKnownSounds(
         [
@@ -129,8 +130,8 @@ describe('the shared library', () => {
   });
 
   it('is readable by everyone, because it belongs to no one', async () => {
-    // No tenant_id on this table: it is a platform catalogue, and the isolation
-    // test lists it as a deliberate exception.
+    // Pas de tenant_id sur cette table : c'est un catalogue plateforme, et le
+    // test d'isolation la liste comme exception délibérée.
     await db.insert(soundAssets).values(
       parseCatalogue(CATALOGUE).map((row) => ({ ...row }))
     );

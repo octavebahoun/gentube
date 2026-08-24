@@ -30,7 +30,7 @@ describe('project configuration', () => {
   });
 
   it('keeps its pipeline list in step with the schema enum', () => {
-    // The form offers these three; the column accepts exactly these three.
+    // Le formulaire propose ces trois-là ; la colonne accepte exactement ceux-ci.
     expect([...PIPELINES]).toEqual([...pipelineEnum.enumValues]);
   });
 
@@ -56,7 +56,8 @@ describe('project configuration', () => {
       name: '  Shorts  ',
       defaultPipeline: 'video',
       voiceId: '  elevenlabs:rachel  ',
-      // A form always posts every field; empty must mean null, not ''.
+      // Un formulaire poste toujours tous les champs ; vide doit signifier
+      // null, pas ''.
       stylePrompt: '   ',
       youtubeChannelId: '',
     });
@@ -97,7 +98,7 @@ describe('project configuration', () => {
       { projectId: second.id, title: 'One' },
       { projectId: second.id, title: 'Two' },
     ]);
-    // Touching `first` moves it back to the top of the list.
+    // Toucher `first` le fait remonter en tête de liste.
     await updateProject(alpha, first.id, { name: 'First, renamed' });
 
     const listed = await listProjects(alpha);
@@ -119,7 +120,7 @@ describe('project isolation', () => {
     const beta = await createTenant('Beta');
     const project = await createProject(alpha, { name: 'Alpha project' });
 
-    // Not "forbidden": Beta has no business learning the id exists.
+    // Pas « interdit » : Beta n'a pas à apprendre que l'id existe.
     for (const call of [
       () => getProject(beta, project.id),
       () => updateProject(beta, project.id, { name: 'Stolen' }),
@@ -209,7 +210,7 @@ describe('project deletion', () => {
     const tdb = await createTenant('Alpha');
     const { project } = await createProjectWithVideo(tdb, { title: 'Amazones' });
 
-    // Those videos carry consumed credits and published YouTube ids.
+    // Ces vidéos portent des crédits consommés et des ids YouTube publiés.
     await expect(deleteProject(tdb, project.id)).rejects.toMatchObject({
       statusCode: 409,
     });

@@ -33,7 +33,7 @@ afterAll(async () => {
 
 const BASE_URL = 'https://app.test';
 
-/** A checkout whose gateway call always fails. */
+/** Un checkout dont l'appel passerelle échoue toujours. */
 function refusingGateway() {
   return fakeGeniusPay({
     onCreate: async () => {
@@ -98,7 +98,7 @@ describe('subscription checkout', () => {
       paymentIntentId: checkout.intentId,
     });
 
-    // Nothing is bought until the gateway confirms it.
+    // Rien n'est acheté tant que la passerelle ne l'a pas confirmé.
     expect(await getBalance(tdb)).toBe(0);
     expect(await tdb.count(creditLedger)).toBe(0);
   });
@@ -174,7 +174,8 @@ describe('subscription checkout', () => {
     const [attempt] = await tdb.findMany(paymentAttempts);
     expect(attempt).toMatchObject({ status: 'failed' });
 
-    // The period is still unpaid, so its cycle stays open for a retry.
+    // La période est toujours impayée, donc son cycle reste ouvert pour une
+    // nouvelle tentative.
     const [cycle] = await tdb.findMany(billingCycles);
     expect(cycle.status).toBe('pending');
   });
@@ -207,7 +208,7 @@ describe('subscription checkout', () => {
       baseUrl: BASE_URL,
     });
 
-    // A tenant that ran out of retries can always pay its way back in.
+    // Un tenant à court de réessais peut toujours payer pour revenir.
     expect(fresh.cycleId).not.toBe(firstCycle.id);
     expect(await tdb.count(billingCycles)).toBe(2);
   });

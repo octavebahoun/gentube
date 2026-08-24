@@ -4,13 +4,13 @@ import type { TenantDb } from '@/lib/db/tenant-db';
 import { projects, videos, type Pipeline, type Project } from '@/lib/db/schema';
 
 /**
- * Projects — the unit that carries a style, a voice, a YouTube channel and a
- * default pipeline. Every video is created inside one and inherits its
- * configuration, so this is where a creator's editorial choices live.
+ * Projets — l'unité qui porte un style, une voix, une chaîne YouTube et un
+ * pipeline par défaut. Chaque vidéo est créée dans l'un et hérite de sa
+ * configuration, donc c'est ici que vivent les choix éditoriaux d'un créateur.
  *
- * Everything here goes through `tenantDb()`: a project id from another tenant
- * reads as "not found", never as "forbidden", because the caller has no
- * business learning that it exists.
+ * Tout ici passe par `tenantDb()` : un id de projet venant d'un autre tenant
+ * se lit « introuvable », jamais « interdit », car l'appelant n'a pas à
+ * apprendre qu'il existe.
  */
 
 export class ProjectError extends Error {
@@ -26,13 +26,13 @@ export class ProjectError extends Error {
 export const PROJECT_NAME_MAX = 120;
 export const VOICE_ID_MAX = 100;
 export const YOUTUBE_CHANNEL_ID_MAX = 100;
-/** The style prompt is prepended to every shot prompt, so it stays short. */
+/** Le prompt de style est préfixé au prompt de chaque plan, donc il reste court. */
 export const STYLE_PROMPT_MAX = 2_000;
 
-/** Must stay in step with `pipelineEnum`; a test asserts it does. */
+/** Doit rester en phase avec `pipelineEnum` ; un test le vérifie. */
 export const PIPELINES = ['image', 'video', 'mixed'] as const;
 
-/** Trims, and reads an empty field as "cleared" rather than as an empty string. */
+/** Trim, et lit un champ vide comme « effacé » plutôt que comme chaîne vide. */
 function nullableText(max: number) {
   return z.preprocess(
     (value) => {
@@ -60,7 +60,7 @@ export const projectInputSchema = z.object({
   stylePrompt: nullableText(STYLE_PROMPT_MAX),
 });
 
-/** Absent field means "leave it alone"; an empty one means "clear it". */
+/** Champ absent signifie « ne pas y toucher » ; champ vide signifie « effacer ». */
 export const projectUpdateSchema = projectInputSchema.partial();
 
 export type ProjectInput = z.input<typeof projectInputSchema>;
@@ -76,7 +76,7 @@ const EDITABLE_FIELDS = [
   'stylePrompt',
 ] as const;
 
-/** Deleting a project is the one project action reserved to owners and admins. */
+/** Supprimer un projet est la seule action projet réservée aux owners et admins. */
 export function assertCanDeleteProject(user: { role: string }): void {
   if (user.role !== 'owner' && user.role !== 'admin') {
     throw new ProjectError(
@@ -87,14 +87,14 @@ export function assertCanDeleteProject(user: { role: string }): void {
 }
 
 /**
- * Projects of the tenant, most recently touched first, each with the number of
- * videos it holds.
+ * Projets du tenant, touchés le plus récemment d'abord, chacun avec le nombre
+ * de vidéos qu'il contient.
  *
- * The counts are one indexed `COUNT` per project rather than a single grouped
- * query: `tenantDb()` has no `GROUP BY`, and adding one to the isolation
- * wrapper to save a few round trips on a list that holds a handful of rows
- * would be a poor trade. Loading every video row to tally them in memory would
- * be a worse one.
+ * Les comptages sont un `COUNT` indexé par projet plutôt qu'une requête
+ * groupée unique : `tenantDb()` n'a pas de `GROUP BY`, et en ajouter un au
+ * wrapper d'isolation pour économiser quelques allers-retours sur une liste
+ * de quelques lignes serait un mauvais marché. Charger chaque ligne vidéo
+ * pour les compter en mémoire le serait davantage.
  */
 export async function listProjects(
   tdb: TenantDb
@@ -114,7 +114,7 @@ export async function listProjects(
 export async function getProject(tdb: TenantDb, id: number): Promise<Project> {
   const project = Number.isInteger(id) ? await tdb.findById(projects, id) : null;
   if (!project) {
-    // Same answer whether the id is unknown or owned by someone else.
+    // Même réponse que l'id soit inconnu ou détenu par quelqu'un d'autre.
     throw new ProjectError(`Project ${id} not found.`, 404);
   }
   return project;
@@ -161,11 +161,12 @@ export async function updateProject(
 }
 
 /**
- * Deletes an empty project.
+ * Supprime un projet vide.
  *
- * A project holding videos is refused rather than cascaded: those videos carry
- * consumed credits, rendered assets and published YouTube ids. Deleting them
- * behind a single click would destroy paid work and the record of what it cost.
+ * Un projet contenant des vidéos est refusé plutôt que supprimé en cascade :
+ * ces vidéos portent des crédits consommés, des assets rendus et des ids
+ * YouTube publiés. Les détruire derrière un simple clic anéantirait du travail
+ * payé et la trace de ce qu'il a coûté.
  */
 export async function deleteProject(
   tdb: TenantDb,

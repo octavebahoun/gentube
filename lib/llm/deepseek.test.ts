@@ -32,7 +32,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** One canned HTTP answer for the next fetch. */
+/** Une réponse HTTP préenregistrée pour le prochain fetch. */
 function stubFetch(
   payload: unknown,
   { status = 200, raw }: { status?: number; raw?: string } = {}
@@ -48,7 +48,7 @@ function stubFetch(
   return fetchMock;
 }
 
-/** The shape the live API returns: content, plus reasoning billed separately. */
+/** La forme que renvoie l'API réelle : content, plus le raisonnement facturé à part. */
 function completion(
   content: string,
   { finishReason = 'stop', reasoningTokens = 275 } = {}
@@ -83,7 +83,7 @@ describe('deepSeekConfig', () => {
     expect(deepSeekConfig()).toEqual({
       apiKey: 'sk-abc',
       baseUrl: 'https://api.deepseek.com',
-      // Confirmed against the account: there is no `deepseek-chat` here.
+      // Confirmé auprès du compte : il n'y a pas de `deepseek-chat` ici.
       model: 'deepseek-v4-flash',
       maxTokens: 8_000,
     });
@@ -153,8 +153,9 @@ describe('DeepSeekClient.completeJson', () => {
   });
 
   it('explains an answer eaten entirely by reasoning', async () => {
-    // The real failure mode of a reasoning model on a tight budget: 200 OK,
-    // finish_reason "length", empty content, and the tokens all spent thinking.
+    // Le vrai mode d'échec d'un modèle à raisonnement sur un budget serré :
+    // 200 OK, finish_reason « length », contenu vide, et tous les tokens
+    // dépensés à réfléchir.
     stubFetch(completion('', { finishReason: 'length', reasoningTokens: 400 }));
 
     await expect(client().completeJson([])).rejects.toThrow(

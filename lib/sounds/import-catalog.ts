@@ -3,17 +3,18 @@ import { client, db } from '@/lib/db/drizzle';
 import { soundAssets, type NewSoundAsset, type SoundKind } from '@/lib/db/schema';
 
 /**
- * Imports a generated sound catalogue into `sound_assets`.
+ * Importe un catalogue de sons généré dans `sound_assets`.
  *
  *   pnpm tsx lib/sounds/import-catalog.ts ../pipevideo/public/sounds/CATALOG.md
  *
- * The source is the markdown table produced by the pipevideo pipeline
- * (`npm run sounds`), whose columns are:
+ * La source est la table markdown produite par le pipeline pipevideo
+ * (`npm run sounds`), dont les colonnes sont :
  *   name | kind | mood | loopable | duration | key | bpm | impacts | usage | src
  *
- * Only the metadata is imported. The audio files themselves have to reach R2
- * under the same keys before a render can resolve them — importing the rows
- * does not make the sounds available, it makes them *choosable* by the model.
+ * Seules les métadonnées sont importées. Les fichiers audio eux-mêmes doivent
+ * atteindre R2 sous les mêmes clés avant qu'un rendu puisse les résoudre —
+ * importer les lignes ne rend pas les sons disponibles, il les rend
+ * *choisisables* par le modèle.
  */
 
 const KINDS = new Set<SoundKind>(['sfx', 'ambient', 'music']);
@@ -50,7 +51,7 @@ export function parseCatalogue(markdown: string): NewSoundAsset[] {
     const kind = cell(columns[1]);
     const src = cell(columns[9]);
 
-    // Skips the header row and the separator without special-casing them.
+    // Saute la ligne d'en-tête et le séparateur sans cas particulier.
     if (!name || !src || !kind || !KINDS.has(kind as SoundKind)) continue;
 
     rows.push({

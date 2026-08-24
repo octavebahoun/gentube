@@ -3,11 +3,11 @@ import { InvalidAmountError, UnknownOfferError } from './plans';
 import { BillingError } from './checkout';
 
 /**
- * Maps a billing failure onto an HTTP answer.
+ * Traduit un échec de facturation en réponse HTTP.
  *
- * Everything unrecognised becomes a flat 500 with no detail: an unexpected
- * error message can carry a gateway response or a query fragment, and this text
- * is returned to the browser.
+ * Tout ce qui n'est pas reconnu devient un 500 plat sans détail : un message
+ * d'erreur inattendu peut porter une réponse de la passerelle ou un fragment
+ * de requête, et ce texte est renvoyé au navigateur.
  */
 export function billingErrorResponse(error: unknown): {
   status: number;

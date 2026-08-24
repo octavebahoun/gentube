@@ -8,9 +8,10 @@ import {
 } from './config';
 
 /**
- * `dotenv` has already loaded the developer's real .env by the time tests run,
- * so every variable this module reads is cleared and restored around each test.
- * Otherwise a machine with live keys would silently pass what a CI runner fails.
+ * `dotenv` a déjà chargé le vrai .env du développeur quand les tests tournent,
+ * donc chaque variable lue par ce module est effacée puis restaurée autour de
+ * chaque test. Sinon une machine avec des clés live passerait silencieusement
+ * ce qu'un runner CI échoue.
  */
 const MANAGED = [
   'GENIUS_ENV',
@@ -83,13 +84,13 @@ describe('geniusPayConfig', () => {
     setSandbox();
     for (const value of ['sandbox', 'LIVE', 'production', 'prod', '']) {
       process.env.GENIUS_ENV = value;
-      // Going live is an explicit act; a typo must never do it.
+      // Passer en live est un acte explicite ; une coquille ne doit jamais le faire.
       expect(geniusPayConfig().environment).toBe('sandbox');
     }
   });
 
   it('does not let one key set satisfy the other', () => {
-    // Live keys on disk, sandbox active: the sandbox keys are still required.
+    // Clés live sur disque, sandbox active : les clés sandbox restent requises.
     setLive();
 
     expect(isBillingConfigured()).toBe(false);
@@ -115,7 +116,7 @@ describe('geniusPayConfig', () => {
   });
 
   it('requires the webhook secret together with the keys', () => {
-    // A checkout would work without it; the confirmation never would.
+    // Un checkout marcherait sans lui ; la confirmation jamais.
     process.env.GENIUS_SANDBOX_API_KEY = 'sk_sandbox_key';
     process.env.GENIUS_SANDBOX_SECRET_KEY = 'sandbox_secret';
 
@@ -150,7 +151,7 @@ describe('appBaseUrl', () => {
   });
 
   it('refuses to guess when BASE_URL is unset', () => {
-    // A wrong origin strands the payer on a dead page after paying.
+    // Une mauvaise origine laisse le payeur sur une page morte après avoir payé.
     expect(() => appBaseUrl()).toThrow(BillingNotConfiguredError);
   });
 });

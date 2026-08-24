@@ -7,7 +7,7 @@ import {
 } from '@/lib/billing/checkout';
 import { billingErrorResponse } from '@/lib/billing/errors';
 
-/** Starts a checkout for a monthly plan. Returns the URL to redirect to. */
+/** Ouvre un checkout pour un plan mensuel. Renvoie l'URL vers laquelle rediriger. */
 export async function POST(request: NextRequest) {
   const user = await getUser();
   if (!user) {

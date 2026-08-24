@@ -22,7 +22,7 @@ describe('credit pricing', () => {
   });
 
   it('rounds each shot up, not the total', () => {
-    // 2.4s + 2.4s bills as 3 + 3, not 5.
+    // 2,4 s + 2,4 s facturés comme 3 + 3, pas 5.
     expect(estimateVideoCredits([{ durationS: 2.4 }, { durationS: 2.4 }], '480p')).toBe(6);
   });
 
@@ -54,23 +54,24 @@ describe('credit pricing', () => {
   });
 
   it('keeps plan allowances aligned with the minutes advertised in the specs', () => {
-    // Starter ≈ 22 min at 480p, Pro ≈ 50 min — see the note in pricing.ts.
+    // Starter ≈ 22 min en 480p, Pro ≈ 50 min — voir la note dans pricing.ts.
     expect(Math.round(secondsAffordable(PLAN_MONTHLY_CREDITS.starter, '480p') / 60)).toBe(22);
     expect(Math.round(secondsAffordable(PLAN_MONTHLY_CREDITS.pro, '480p') / 60)).toBe(50);
   });
 
   it('keeps the 480p and 720p credit rates in line with provider cost', () => {
-    // Same credits must map to roughly the same USD cost at either resolution,
-    // otherwise one resolution silently subsidises the other.
+    // Les mêmes crédits doivent correspondre à peu près au même coût USD aux
+    // deux résolutions, sinon une résolution subventionne silencieusement
+    // l'autre.
     const at480 = providerCostUsd(100, '480p');
     const at720 = providerCostUsd(100, '720p');
     expect(Math.abs(at480 - at720) / at480).toBeLessThan(0.05);
   });
 
   it('flags the top-up pack as loss-making at the specified rate', () => {
-    // Documents a known problem in the specs rather than asserting it is fine:
-    // if this ever turns positive, the pricing was fixed and the note in
-    // pricing.ts can go.
+    // Documente un problème connu du cahier des charges au lieu de le
+    // déclarer normal : si jamais ce chiffre devient positif, la tarification
+    // a été corrigée et la note dans pricing.ts peut disparaître.
     expect(topUpMarginFcfa(TOPUP_PACKS[0])).toBeLessThan(0);
   });
 });

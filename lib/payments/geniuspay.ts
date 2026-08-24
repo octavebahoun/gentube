@@ -8,18 +8,19 @@ import {
 import { CURRENCY, assertXofAmount } from '@/lib/billing/plans';
 
 /**
- * GeniusPay merchant API client (Mobile Money + card, XOF).
+ * Client de l'API marchande GeniusPay (Mobile Money + carte, XOF).
  *
- * Endpoints, headers and the signature format below are the ones the gateway
- * actually serves in production for Contravo — not guesses. Base URL:
- * `https://geniuspay.ci/api/v1/merchant`, keys in `X-API-Key` / `X-API-Secret`.
+ * Les endpoints, en-têtes et le format de signature ci-dessous sont ceux que
+ * la passerelle sert réellement en production pour Contravo — pas des
+ * conjectures. URL de base : `https://geniuspay.ci/api/v1/merchant`, clés dans
+ * `X-API-Key` / `X-API-Secret`.
  */
 
-/** Payment object as the gateway returns it, in `data`. */
+/** Objet paiement tel que la passerelle le renvoie, dans `data`. */
 export type GeniusPayPayment = {
   id?: number | string;
   reference: string;
-  /** Whole XOF: the gateway reports amounts in the currency's normal unit. */
+  /** XOF entier : la passerelle rapporte les montants dans l'unité normale de la devise. */
   amount: number;
   currency: string;
   status: string;
@@ -70,13 +71,14 @@ export class GeniusPayError extends Error {
 }
 
 /**
- * Statuses that mean the money actually arrived.
+ * Statuts qui signifient que l'argent est réellement arrivé.
  *
- * Everything not in this set — `pending`, `processing`, an unknown word, an
- * absent status — is treated as *not paid*. That is the safe direction: the
- * worst case is a confirmation that arrives late, never a balance credited for
- * a payment that never settled. Confirm the exact vocabulary on the first
- * sandbox payment and extend this set if the gateway uses another word.
+ * Tout ce qui n'est pas dans cet ensemble — `pending`, `processing`, un mot
+ * inconnu, un statut absent — est traité comme *non payé*. C'est le sens sûr :
+ * le pire cas est une confirmation qui arrive en retard, jamais un solde
+ * crédité pour un paiement qui ne s'est jamais réglé. Confirmer le vocabulaire
+ * exact au premier paiement sandbox et étendre cet ensemble si la passerelle
+ * utilise un autre mot.
  */
 const PAID_STATUSES = new Set([
   'success',
@@ -91,7 +93,7 @@ export function isPaidStatus(status: string | null | undefined): boolean {
   return typeof status === 'string' && PAID_STATUSES.has(status.toLowerCase());
 }
 
-/** Webhook event names emitted by the gateway. */
+/** Noms d'événements webhook émis par la passerelle. */
 export const PAYMENT_SUCCESS_EVENT = 'payment.success';
 export const PAYMENT_FAILURE_EVENTS = [
   'payment.failed',
@@ -105,17 +107,18 @@ export function isFailureEvent(event: string): event is PaymentFailureEvent {
   return (PAYMENT_FAILURE_EVENTS as readonly string[]).includes(event);
 }
 
-/** Webhook timestamps older than this are refused as replays. */
+/** Les horodatages webhook plus vieux que ceci sont refusés comme replays. */
 export const SIGNATURE_TOLERANCE_S = 300;
 
 export class GeniusPayClient {
   private readonly config: GeniusPayConfig;
 
   constructor(config: GeniusPayConfig = geniusPayConfig()) {
-    // The gateway decides sandbox vs live from the *key*, never from a flag we
-    // send. A disagreement between the two is therefore a startup error, not a
-    // warning: the alternative is real checkouts running in what everything
-    // else calls simulation, with nothing on screen to show it.
+    // La passerelle décide sandbox vs live à partir de la *clé*, jamais d'un
+    // flag que nous envoyons. Un désaccord entre les deux est donc une erreur
+    // de démarrage, pas un avertissement : l'alternative serait de vrais
+    // checkouts tournant dans ce que tout le reste appelle une simulation,
+    // sans rien à l'écran pour le montrer.
     const keyEnvironment: GeniusPayEnvironment | null = config.apiKey.includes(
       'sandbox'
     )
@@ -150,9 +153,10 @@ export class GeniusPayClient {
         'X-API-Key': this.config.apiKey,
         'X-API-Secret': this.config.apiSecret,
         'Content-Type': 'application/json',
-        // Without this the gateway answers a validation error with an HTML page
-        // and HTTP 200, and the real reason disappears behind a JSON parse
-        // error. Ask for JSON explicitly and a 422 comes back as a 422.
+        // Sans ceci la passerelle répond à une erreur de validation par une
+        // page HTML et un HTTP 200, et la vraie raison disparaît derrière une
+        // erreur de parse JSON. Demander JSON explicitement et un 422 revient
+        // comme un 422.
         Accept: 'application/json',
         ...init.headers,
       },
@@ -194,7 +198,7 @@ export class GeniusPayClient {
     return envelope.data;
   }
 
-  /** Opens a checkout. Returns the URL to send the payer to. */
+  /** Ouvre un checkout. Renvoie l'URL vers laquelle envoyer le payeur. */
   async createPayment(params: CreatePaymentParams): Promise<CreatedPayment> {
     const amount = assertXofAmount(params.amountXof);
 
@@ -214,9 +218,9 @@ export class GeniusPayClient {
     const payment = this.unwrap(envelope, 'POST /payments');
     const checkoutUrl = payment.checkout_url || payment.payment_url;
 
-    // A response with no URL is a failure whatever `success` claims: there is
-    // nowhere to send the payer. Treating it as success left dead "pending"
-    // cycles behind in Contravo.
+    // Une réponse sans URL est un échec quoi que prétende `success` : il n'y a
+    // nulle part où envoyer le payeur. La traiter comme un succès laissait des
+    // cycles « pending » morts derrière elle dans Contravo.
     if (!payment.reference || !checkoutUrl) {
       throw new GeniusPayError(
         'GeniusPay accepted the payment but returned no reference or checkout URL.'
@@ -227,8 +231,8 @@ export class GeniusPayClient {
   }
 
   /**
-   * Re-reads a payment from the gateway. This is the authority on whether money
-   * moved — a webhook body never is.
+   * Re-lit un paiement auprès de la passerelle. C'est elle qui fait autorité
+   * sur le fait que de l'argent a bougé — jamais un corps de webhook.
    */
   async fetchPayment(reference: string): Promise<GeniusPayPayment> {
     const envelope = await this.request<GeniusPayPayment>(
@@ -238,9 +242,9 @@ export class GeniusPayClient {
   }
 
   /**
-   * Reads the merchant account behind the keys. Charges nothing, so it is the
-   * harmless call that proves a key pair works — and the gateway's own word on
-   * which environment those keys belong to.
+   * Lit le compte marchand derrière les clés. Ne facture rien, donc c'est
+   * l'appel inoffensif qui prouve qu'une paire de clés fonctionne — et le mot
+   * propre de la passerelle sur l'environnement auquel ces clés appartiennent.
    */
   async getAccount(): Promise<Record<string, unknown>> {
     const envelope = await this.request<Record<string, unknown>>('/account');
@@ -248,20 +252,21 @@ export class GeniusPayClient {
   }
 }
 
-/** Client built from the environment. Throws if billing is not configured. */
+/** Client construit depuis l'environnement. Lève si la facturation n'est pas configurée. */
 export function createGeniusPayClient(): GeniusPayClient {
   return new GeniusPayClient(geniusPayConfig());
 }
 
 /**
- * Verifies an inbound webhook signature: HMAC-SHA256 over
- * `<timestamp>.<raw body>`, hex, compared in constant time.
+ * Vérifie la signature d'un webhook entrant : HMAC-SHA256 sur
+ * `<timestamp>.<corps brut>`, hexadécimal, comparé en temps constant.
  *
- * The raw body is the one the gateway signed, so it is the one hashed here.
- * The compact-JSON fallback covers a gateway that signs a re-serialised body —
- * a compatibility path Contravo needed in production. It cannot weaken the
- * result: both forms are HMACs under the same secret, and nothing is credited
- * on a signature alone anyway (the re-fetch decides).
+ * Le corps brut est celui que la passerelle a signé, donc c'est celui haché
+ * ici. Le repli JSON compact couvre une passerelle qui signe un corps
+ * re-sérialisé — un chemin de compatibilité dont Contravo a eu besoin en
+ * production. Il ne peut pas affaiblir le résultat : les deux formes sont des
+ * HMAC sous le même secret, et de toute façon rien n'est crédité sur une
+ * seule signature (la re-lecture décide).
  */
 export function verifyWebhookSignature({
   signature,
@@ -292,11 +297,11 @@ export function verifyWebhookSignature({
 }
 
 /**
- * Rejects a stale or future-dated webhook — the cheap half of replay
- * protection, the other half being the unique event id.
+ * Rejette un webhook périmé ou daté du futur — la moitié bon marché de la
+ * protection anti-replay, l'autre moitié étant l'id d'événement unique.
  *
- * Seconds since epoch is what the gateway sends; a millisecond value is
- * accepted too rather than being read as the year 48000.
+ * Des secondes depuis l'époque est ce que la passerelle envoie ; une valeur
+ * en millisecondes est acceptée aussi plutôt que d'être lue comme l'an 48000.
  */
 export function isFreshTimestamp(
   timestamp: string | number | null | undefined,

@@ -12,9 +12,9 @@ if (!process.env.DATABASE_URL) {
 export const client = postgres(process.env.DATABASE_URL);
 
 /**
- * Raw, unscoped handle. Application code must NOT import this — use
- * `tenantDb(tenantId)` from ./tenant-db so every query carries a tenant
- * filter. Direct use is limited to migrations, the seed script and the
- * tenant-resolution query in ./queries.ts.
+ * Handle brut, sans scope. Le code applicatif ne doit PAS l'importer —
+ * utilisez `tenantDb(tenantId)` de ./tenant-db pour que chaque requête porte
+ * un filtre tenant. L'usage direct est limité aux migrations, au script de
+ * seed et à la requête de résolution du tenant dans ./queries.ts.
  */
 export const db = drizzle(client, { schema });

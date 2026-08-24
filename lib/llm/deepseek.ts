@@ -1,26 +1,27 @@
 /**
- * DeepSeek client — the LLM behind script and storyboard generation (P1).
+ * Client DeepSeek — le LLM derrière la génération de script et de storyboard (P1).
  *
- * The API is OpenAI-compatible: `POST /chat/completions`, bearer auth,
- * `response_format: { type: 'json_object' }`. Two things about it are NOT the
- * OpenAI defaults, and both were confirmed against the live account rather
- * than assumed:
+ * L'API est compatible OpenAI : `POST /chat/completions`, auth bearer,
+ * `response_format: { type: 'json_object' }`. Deux choses ne sont PAS les
+ * défauts OpenAI, et les deux ont été confirmées auprès du compte réel plutôt
+ * que supposées :
  *
- *   - The model ids are `deepseek-v4-flash` / `deepseek-v4-pro` (+ a vision
- *     variant). There is no `deepseek-chat`.
- *   - These are *reasoning* models. The answer is preceded by internal
- *     reasoning that is billed as completion tokens and returned separately in
- *     `reasoning_content`. A tight `max_tokens` is spent entirely on reasoning
- *     and comes back with `finish_reason: "length"` and an EMPTY content — a
- *     failure that looks like a model refusing to answer. Hence the wide
- *     default budget and the explicit error below.
+ *   - Les ids de modèles sont `deepseek-v4-flash` / `deepseek-v4-pro` (+ une
+ *     variante vision). Il n'y a pas de `deepseek-chat`.
+ *   - Ce sont des modèles à *raisonnement*. La réponse est précédée d'un
+ *     raisonnement interne facturé comme tokens de complétion et renvoyé à
+ *     part dans `reasoning_content`. Un `max_tokens` serré est dépensé
+ *     entièrement en raisonnement et revient avec `finish_reason: "length"`
+ *     et un contenu VIDE — un échec qui ressemble à un modèle refusant de
+ *     répondre. D'où le budget par défaut large et l'erreur explicite
+ *     ci-dessous.
  */
 
 export type DeepSeekConfig = {
   apiKey: string;
   baseUrl: string;
   model: string;
-  /** Covers reasoning *and* the answer — reasoning eats this budget first. */
+  /** Couvre le raisonnement *et* la réponse — le raisonnement mange ce budget en premier. */
   maxTokens: number;
 };
 
@@ -86,7 +87,7 @@ export type ChatMessage = {
 };
 
 export type JsonCompletion = {
-  /** Parsed `content`. Callers validate the shape themselves. */
+  /** `content` parsé. Les appelants valident la forme eux-mêmes. */
   data: unknown;
   usage: {
     promptTokens: number;
@@ -106,7 +107,7 @@ export class DeepSeekClient implements JsonCompleter {
     return this.config.model;
   }
 
-  /** One JSON answer. Anything that is not usable JSON throws. */
+  /** Une réponse JSON. Tout ce qui n'est pas du JSON utilisable lève. */
   async completeJson(messages: ChatMessage[]): Promise<JsonCompletion> {
     const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
       method: 'POST',
@@ -130,7 +131,7 @@ export class DeepSeekClient implements JsonCompleter {
       try {
         detail = JSON.parse(text)?.error?.message ?? detail;
       } catch {
-        // Keep the raw excerpt — never the request, which carries the key.
+        // Conserver l'extrait brut — jamais la requête, qui porte la clé.
       }
       throw new LlmError(
         `DeepSeek returned HTTP ${response.status}: ${detail}`,
@@ -156,8 +157,9 @@ export class DeepSeekClient implements JsonCompleter {
     };
 
     if (choice?.finish_reason === 'length' && !content.trim()) {
-      // The whole budget went into reasoning. Says so, instead of reporting an
-      // empty answer and leaving the next reader to guess why.
+      // Tout le budget est parti en raisonnement. On le dit, au lieu de
+      // rapporter une réponse vide et laisser le prochain lecteur deviner
+      // pourquoi.
       throw new LlmError(
         `DeepSeek spent its whole ${this.config.maxTokens}-token budget on ` +
           `reasoning (${usage.reasoningTokens} tokens) and returned nothing. ` +

@@ -6,14 +6,17 @@ import {
 } from 'node:crypto';
 
 /**
- * AES-256-GCM helper for secrets stored at rest (specs §5): YouTube OAuth
- * access/refresh tokens today, any other provider credential later.
+ * Aide AES-256-GCM pour les secrets stockés au repos (cahier des charges §5) :
+ * tokens OAuth YouTube access/refresh aujourd'hui, toute autre credential de
+ * fournisseur plus tard.
  *
- * Payload format: `v1:<base64(iv | authTag | ciphertext)>`
- * — 12-byte IV, 16-byte auth tag, both random/derived per call, so encrypting
- * the same token twice never yields the same string.
+ * Format du payload : `v1:<base64(iv | authTag | ciphertext)>`
+ * — IV de 12 octets, tag d'authentification de 16 octets, tous deux
+ * aléatoires/dérivés par appel, donc chiffrer deux fois le même token ne donne
+ * jamais la même chaîne.
  *
- * ENCRYPTION_KEY must be 32 bytes, given as 64 hex chars or 44 base64 chars:
+ * ENCRYPTION_KEY doit faire 32 octets, donnée en 64 caractères hex ou 44
+ * caractères base64 :
  *   openssl rand -hex 32
  */
 
@@ -53,7 +56,7 @@ function parseKey(raw: string): Buffer {
   return key;
 }
 
-/** Resolved lazily so importing this module never crashes a build. */
+/** Résolue paresseusement pour qu'importer ce module ne fasse jamais planter un build. */
 export function getEncryptionKey(): Buffer {
   if (cachedKey) return cachedKey;
 
@@ -65,7 +68,7 @@ export function getEncryptionKey(): Buffer {
   return cachedKey;
 }
 
-/** Test hook: forget the memoised key after changing process.env. */
+/** Crochet de test : oublie la clé mémoïsée après modification de process.env. */
 export function resetEncryptionKeyCache(): void {
   cachedKey = null;
 }
@@ -105,7 +108,7 @@ export function decrypt(payload: string, key: Buffer = getEncryptionKey()): stri
       decipher.final(),
     ]).toString('utf8');
   } catch {
-    // Wrong key or tampered payload — never echo the ciphertext in the error.
+    // Mauvaise clé ou payload altéré — ne jamais renvoyer le ciphertext dans l'erreur.
     throw new DecryptionError('Failed to decrypt: bad key or tampered payload.');
   }
 }
@@ -114,7 +117,7 @@ export function isEncrypted(value: string): boolean {
   return value.startsWith(`${VERSION}:`);
 }
 
-/** Constant-time comparison for webhook signatures (Replicate, GeniusPay). */
+/** Comparaison en temps constant pour les signatures webhook (Replicate, GeniusPay). */
 export function safeEqual(a: string, b: string): boolean {
   const left = Buffer.from(a);
   const right = Buffer.from(b);

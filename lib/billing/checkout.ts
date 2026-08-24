@@ -30,12 +30,12 @@ import {
 } from './plans';
 
 /**
- * Checkout — the paying half of billing.
+ * Checkout — la moitié payante de la facturation.
  *
- * Nothing here grants a single credit. A checkout only creates the local rows
- * the gateway's confirmation will later be matched against, and hands back a
- * URL. Credits move in lib/billing/webhook.ts, after the payment has been
- * re-read from the gateway.
+ * Rien ici n'accorde un seul crédit. Un checkout ne fait que créer les lignes
+ * locales auxquelles la confirmation de la passerelle sera ensuite comparée,
+ * et renvoie une URL. Les crédits bougent dans lib/billing/webhook.ts, après
+ * que le paiement a été re-lu depuis la passerelle.
  */
 
 export class BillingError extends Error {
@@ -58,12 +58,12 @@ export type CheckoutResult = {
 };
 
 type CheckoutOptions = {
-  /** Injectable for tests; production builds one from the environment. */
+  /** Injectable pour les tests ; la production en construit un depuis l'environnement. */
   client?: GeniusPayClient;
   baseUrl?: string;
 };
 
-/** Only an owner or an admin may change what the workspace is billed. */
+/** Seul un owner ou un admin peut changer la facturation du workspace. */
 export function assertCanManageBilling(user: { role: string }): void {
   if (user.role !== 'owner' && user.role !== 'admin') {
     throw new BillingError(
@@ -84,7 +84,7 @@ function returnUrls(baseUrl: string, intentId: number) {
   };
 }
 
-/** The tenant's subscription row, created on first checkout. */
+/** La ligne d'abonnement du tenant, créée au premier checkout. */
 export async function getSubscription(
   tdb: TenantDb
 ): Promise<Subscription | null> {
@@ -98,8 +98,8 @@ async function getOrCreateSubscription(
   const existing = await getSubscription(tdb);
   if (existing) return existing;
 
-  // Created `pending`: the plan on the row is what is being bought, and only
-  // the confirmed payment turns it into the tenant's actual plan.
+  // Créé `pending` : le plan de la ligne est ce qui est en cours d'achat, et
+  // seul le paiement confirmé en fait le plan réel du tenant.
   const [created] = await tdb.insert(subscriptions, {
     plan: plan.plan,
     status: 'pending',
@@ -108,13 +108,14 @@ async function getOrCreateSubscription(
 }
 
 /**
- * The cycle a new attempt belongs to.
+ * Le cycle auquel appartient une nouvelle tentative.
  *
- * An unpaid cycle for the same plan is reused, so three tries at the same
- * month's bill are three `payment_attempts` on one cycle rather than three
- * cycles — which is what makes "retry, then suspend" (specs §3.A) countable.
- * Once a cycle has burned its retries, the next checkout opens a fresh one, so
- * a suspended tenant can always pay its way back.
+ * Un cycle non payé du même plan est réutilisé, donc trois essais pour la
+ * même facture mensuelle sont trois `payment_attempts` sur un seul cycle
+ * plutôt que trois cycles — ce qui rend « réessayer, puis suspendre » (cahier
+ * des charges §3.A) comptable. Une fois qu'un cycle a brûlé ses réessais, le
+ * checkout suivant en ouvre un neuf, pour qu'un tenant suspendu puisse
+ * toujours payer pour revenir.
  */
 async function resolveCycle(
   tdb: TenantDb,
@@ -156,11 +157,13 @@ async function resolveCycle(
 }
 
 /**
- * Records what the gateway answered, or closes the rows it never accepted.
+ * Enregistre ce que la passerelle a répondu, ou ferme les lignes qu'elle n'a
+ * jamais acceptées.
  *
- * The local rows are written *before* the call because their ids travel in the
- * gateway metadata; a failed call must therefore mark them failed rather than
- * leave a "pending" payment that nothing is waiting for.
+ * Les lignes locales sont écrites *avant* l'appel car leurs ids voyagent dans
+ * les métadonnées de la passerelle ; un appel échoué doit donc les marquer
+ * comme échouées plutôt que de laisser un paiement « pending » que rien
+ * n'attend.
  */
 async function attachGatewayResult(
   tdb: TenantDb,
@@ -213,13 +216,13 @@ async function markCheckoutFailed(
       eq(paymentAttempts.id, attemptId)
     );
   }
-  // The cycle stays `pending`: the period is still unpaid and reusable. Only
-  // exhausted retries close it (see lib/billing/webhook.ts).
+  // Le cycle reste `pending` : la période est toujours impayée et réutilisable.
+  // Seuls les réessais épuisés le ferment (voir lib/billing/webhook.ts).
 }
 
 /**
- * Opens a checkout for a monthly plan. The tenant's plan does not change here —
- * it changes when the payment is confirmed.
+ * Ouvre un checkout pour un plan mensuel. Le plan du tenant ne change pas ici —
+ * il change quand le paiement est confirmé.
  */
 export async function createSubscriptionCheckout(
   tdb: TenantDb,
@@ -227,8 +230,9 @@ export async function createSubscriptionCheckout(
   options: CheckoutOptions = {}
 ): Promise<CheckoutResult> {
   const offer = getPlanOffer(plan);
-  // Configuration is checked before the first write, so a misconfigured
-  // instance answers "not configured" instead of leaving orphan rows behind.
+  // La configuration est vérifiée avant la première écriture, pour qu'une
+  // instance mal configurée réponde « non configuré » au lieu de laisser des
+  // lignes orphelines derrière elle.
   const client = resolveClient(options);
   const baseUrl = options.baseUrl ?? appBaseUrl();
 
@@ -267,9 +271,10 @@ export async function createSubscriptionCheckout(
       description: `GenTube — abonnement ${offer.name} (30 jours)`,
       successUrl,
       errorUrl,
-      // Informational only. The webhook resolves the tenant from the gateway
-      // reference it finds in our own payment_intents row, never from this —
-      // metadata is attacker-supplied on the way back in.
+      // Informatives seulement. Le webhook résout le tenant depuis la
+      // référence passerelle qu'il trouve dans notre propre ligne
+      // payment_intents, jamais depuis ceci — les métadonnées sont fournies
+      // par un attaquant au retour.
       metadata: {
         kind: 'subscription',
         tenant_id: tdb.tenantId,
@@ -298,8 +303,9 @@ export async function createSubscriptionCheckout(
 }
 
 /**
- * Opens a checkout for a one-off credit pack. No cycle, no subscription: bought
- * credits are not tied to a period and never expire (specs §1).
+ * Ouvre un checkout pour un pack de crédits ponctuel. Pas de cycle, pas
+ * d'abonnement : les crédits achetés ne sont liés à aucune période et
+ * n'expirent jamais (cahier des charges §1).
  */
 export async function createTopupCheckout(
   tdb: TenantDb,
@@ -369,7 +375,7 @@ async function recentLedger(tdb: TenantDb) {
   });
 }
 
-/** Everything the billing page shows, in one tenant-scoped read. */
+/** Tout ce que la page de facturation affiche, en une seule lecture scopée au tenant. */
 export async function getBillingOverview(
   tdb: TenantDb
 ): Promise<BillingOverview> {

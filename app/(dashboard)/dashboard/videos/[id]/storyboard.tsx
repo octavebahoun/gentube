@@ -277,7 +277,7 @@ function GenerateButton({
   );
 }
 
-/** Step two: record the voice, and with it the real duration of every scene. */
+/** Étape deux : enregistrer la voix, et avec elle la durée réelle de chaque scène. */
 function VoiceoverForm({ videoId }: { videoId: number }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     generateVoiceoverAction,
@@ -513,7 +513,7 @@ export function StoryboardEditor({
   );
 }
 
-/** Deleting a draft. Refused by the server once anything was charged. */
+/** Suppression d'un brouillon. Refusée par le serveur dès que quelque chose a été facturé. */
 export function DeleteVideoButton({
   videoId,
   projectId,

@@ -74,8 +74,9 @@ export default async function BillingPage({
     <section className="flex-1 p-4 lg:p-8">
       <h1 className="text-lg lg:text-2xl font-medium mb-6">Billing</h1>
 
-      {/* The gateway sends the payer back here; the balance itself only moves
-          when the webhook confirms the payment, which can land a beat later. */}
+      {/* La passerelle renvoie le payeur ici ; le solde lui-même ne bouge
+          que lorsque le webhook confirme le paiement, ce qui peut arriver un
+          peu plus tard. */}
       {payment === 'success' && (
         <p className="mb-6 rounded-md bg-green-50 p-4 text-sm text-green-800">
           Payment received. Credits appear as soon as GeniusPay confirms it —

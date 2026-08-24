@@ -6,10 +6,10 @@ import { activityLogs, users, type TenantDataWithMembers } from './schema';
 import { verifyToken } from '@/lib/auth/session';
 
 /**
- * Session -> user. This is the one place that reads a table without a tenant
- * filter: it is the query that *resolves* which tenant the caller belongs to,
- * and it is keyed on the user id carried by a signed session cookie.
- * Everything downstream goes through `tenantDb()`.
+ * Session -> utilisateur. C'est le seul endroit qui lit une table sans filtre
+ * tenant : c'est la requête qui *résout* à quel tenant l'appelant appartient,
+ * et elle est clé sur l'id d'utilisateur porté par un cookie de session signé.
+ * Tout ce qui suit passe par `tenantDb()`.
  */
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session');
@@ -40,15 +40,15 @@ export async function getUser() {
 }
 
 /**
- * Tenant-scoped database handle for the signed-in user. Every server action,
- * route handler and page should start here.
+ * Handle de base de données scopé au tenant pour l'utilisateur connecté.
+ * Chaque server action, route handler et page devrait commencer ici.
  */
 export async function getTenantDb(): Promise<TenantDb | null> {
   const user = await getUser();
   return user ? tenantDb(user.tenantId) : null;
 }
 
-/** Same, but throws instead of returning null — for authenticated-only paths. */
+/** Pareil, mais lève au lieu de renvoyer null — pour les chemins authentifiés uniquement. */
 export async function requireTenantDb(): Promise<TenantDb> {
   const tdb = await getTenantDb();
   if (!tdb) throw new Error('Not authenticated');

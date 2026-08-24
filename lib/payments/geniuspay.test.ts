@@ -28,7 +28,7 @@ function sign(body: string, timestamp: number | string, secret = SECRET) {
   return createHmac('sha256', secret).update(`${timestamp}.${body}`).digest('hex');
 }
 
-/** Queues one JSON response for the next fetch call. */
+/** Met en file une réponse JSON pour le prochain appel fetch. */
 function stubFetch(
   body: unknown,
   { status = 200, raw }: { status?: number; raw?: string } = {}
@@ -124,8 +124,8 @@ describe('webhook signature', () => {
   });
 
   it('accepts a digest computed over the compact form of the same body', () => {
-    // Compatibility path: a gateway that signs a re-serialised body. The bytes
-    // differ, the JSON does not.
+    // Chemin de compatibilité : une passerelle qui signe un corps re-sérialisé.
+    // Les octets diffèrent, pas le JSON.
     const spaced = `{\n  "id": "evt_1",\n  "event": "payment.success"\n}`;
     const compact = JSON.stringify(JSON.parse(spaced));
     expect(spaced).not.toBe(compact);
@@ -164,7 +164,7 @@ describe('gateway vocabulary', () => {
     for (const status of ['success', 'SUCCEEDED', 'completed', 'paid']) {
       expect(isPaidStatus(status)).toBe(true);
     }
-    // Anything else is "not paid yet" — the direction that never credits.
+    // Tout le reste est « pas encore payé » — la direction qui ne crédite jamais.
     for (const status of ['pending', 'processing', 'failed', '', null, undefined]) {
       expect(isPaidStatus(status)).toBe(false);
     }
@@ -180,8 +180,8 @@ describe('gateway vocabulary', () => {
 
 describe('GeniusPayClient', () => {
   it('refuses keys that disagree with the declared environment', () => {
-    // Only the key decides which is real; a mismatch would run live payments
-    // while the dashboard claims sandbox.
+    // Seule la clé décide laquelle est réelle ; un désaccord ferait tourner
+    // des paiements live pendant que le dashboard prétend être en sandbox.
     expect(() => new GeniusPayClient(config({ apiKey: 'pk_live_abc' }))).toThrow(
       GeniusPayError
     );
@@ -251,8 +251,8 @@ describe('GeniusPayClient', () => {
   });
 
   it('treats a response with no checkout URL as a failure', async () => {
-    // `success: true` with nowhere to send the payer stranded Contravo users on
-    // a page that reloaded itself.
+    // `success: true` sans nulle part où envoyer le payeur a laissé des
+    // utilisateurs de Contravo sur une page qui se rechargeait en boucle.
     stubFetch({
       success: true,
       data: { reference: 'GP-2', amount: 15_000, currency: 'XOF', status: 'pending' },
@@ -295,7 +295,7 @@ describe('GeniusPayClient', () => {
 
     const payment = await new GeniusPayClient(config()).fetchPayment('GP 5/6');
     expect(payment.status).toBe('success');
-    // The reference is path-encoded, not interpolated raw.
+    // La référence est encodée dans le chemin, pas interpolée brute.
     expect(fetchMock.mock.calls[0][0]).toBe(
       'https://geniuspay.test/api/v1/merchant/payments/GP%205%2F6'
     );

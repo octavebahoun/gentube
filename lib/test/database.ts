@@ -3,9 +3,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 /**
- * Tests never run against the development database. The URL below points at a
- * sibling database (`<db>_test`) that the vitest global setup creates and
- * migrates, and that each test truncates.
+ * Les tests ne tournent jamais sur la base de développement. L'URL ci-dessous
+ * pointe vers une base sœur (`<db>_test`) que le setup global de vitest crée
+ * et migre, et que chaque test tronque.
  */
 export function testDatabaseUrl(): string {
   const base = process.env.DATABASE_URL;

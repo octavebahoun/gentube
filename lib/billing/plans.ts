@@ -5,29 +5,30 @@ import {
 } from '@/lib/credits/pricing';
 
 /**
- * The billing catalogue — written by hand, on purpose.
+ * Le catalogue de facturation — écrit à la main, volontairement.
  *
- * There is no plans table and no admin screen to edit prices: an offer is a
- * constant in this file, reviewed and deployed like any other code change.
- * What a tenant is charged and how many credits it gets are the two numbers
- * that decide whether the product makes or loses money, so they belong in the
- * diff, not in a row someone can change at 2am.
+ * Il n'y a ni table de plans ni écran d'administration pour éditer les prix :
+ * une offre est une constante dans ce fichier, relue et déployée comme
+ * n'importe quel autre changement de code. Ce qu'un tenant paie et combien de
+ * crédits il reçoit sont les deux nombres qui décident si le produit gagne ou
+ * perd de l'argent, donc ils appartiennent à un diff, pas à une ligne que
+ * quelqu'un peut modifier à 2h du matin.
  *
- * Prices and allowances themselves come from lib/credits/pricing.ts, which is
- * the single source of truth for the credit unit. This module only turns them
- * into things that can be bought.
+ * Les prix et dotations eux-mêmes viennent de lib/credits/pricing.ts, qui est
+ * la source unique de vérité pour l'unité de crédit. Ce module ne fait que les
+ * transformer en choses achetables.
  */
 
-/** Plans a tenant can buy self-service. `business` is on quote (specs §1). */
+/** Plans qu'un tenant peut acheter en libre-service. `business` est sur devis (cahier des charges §1). */
 export const PURCHASABLE_PLANS = ['starter', 'pro'] as const;
 export type PurchasablePlan = (typeof PURCHASABLE_PLANS)[number];
 
 export type PlanOffer = {
   plan: PurchasablePlan;
   name: string;
-  /** Monthly price in whole XOF — the currency has no minor unit. */
+  /** Prix mensuel en XOF entier — la devise n'a pas de sous-unité. */
   priceXof: number;
-  /** Credits granted when a cycle is paid. */
+  /** Crédits accordés quand un cycle est payé. */
   monthlyCredits: number;
 };
 
@@ -53,13 +54,15 @@ export type TopupPack = {
 };
 
 /**
- * One-off credit packs (specs §1). Bought credits never expire — unlike the
- * plan allowance, which belongs to its cycle.
+ * Packs de crédits ponctuels (cahier des charges §1). Les crédits achetés
+ * n'expirent jamais — contrairement à la dotation du plan, qui appartient à
+ * son cycle.
  *
- * ⚠️ At the specified rate this pack is sold below provider cost; the margin is
- * asserted negative by lib/credits/pricing.test.ts so the problem cannot be
- * forgotten. Selling it is a pricing decision, not an implementation one — the
- * number lives in pricing.ts and nowhere else.
+ * ⚠️ Au tarif spécifié ce pack est vendu en dessous du coût fournisseur ; la
+ * marge est vérifiée négative par lib/credits/pricing.test.ts pour que le
+ * problème ne puisse pas être oublié. Le vendre est une décision de
+ * tarification, pas d'implémentation — le nombre vit dans pricing.ts et
+ * nulle part ailleurs.
  */
 export const TOPUP_PACKS_FOR_SALE: TopupPack[] = TOPUP_PACKS.map((pack) => ({
   id: `topup-${pack.priceFcfa}`,
@@ -67,15 +70,15 @@ export const TOPUP_PACKS_FOR_SALE: TopupPack[] = TOPUP_PACKS.map((pack) => ({
   credits: pack.credits,
 }));
 
-/** ISO code sent to the gateway. Mobile money in the zone is XOF only. */
+/** Code ISO envoyé à la passerelle. Le mobile money de la zone est uniquement XOF. */
 export const CURRENCY = 'XOF';
 
-/** A billing cycle is a flat 30 days: no proration, no mid-cycle maths. */
+/** Un cycle de facturation fait 30 jours plats : pas de prorata, pas de calcul en cours de cycle. */
 export const BILLING_CYCLE_DAYS = 30;
 
 /**
- * Failed payments tolerated on one cycle before the subscription is suspended
- * (specs §3.A: "retry, puis passage du tenant en suspended").
+ * Paiements échoués tolérés sur un cycle avant que l'abonnement soit suspendu
+ * (cahier des charges §3.A : « retry, puis passage du tenant en suspended »).
  */
 export const MAX_PAYMENT_ATTEMPTS = 3;
 
@@ -105,7 +108,7 @@ export function isPurchasablePlan(value: unknown): value is PurchasablePlan {
   );
 }
 
-/** Resolves a plan offer, refusing anything not sold self-service. */
+/** Résout une offre de plan, en refusant tout ce qui n'est pas vendu en libre-service. */
 export function getPlanOffer(plan: unknown): PlanOffer {
   if (!isPurchasablePlan(plan)) {
     throw new UnknownOfferError(
@@ -128,9 +131,9 @@ export function getTopupPack(id: unknown): TopupPack {
 }
 
 /**
- * Guards every amount on its way to or from the gateway. XOF has no decimals,
- * so a float here is always a bug — and a rounded one would be a silent
- * mispayment.
+ * Vérifie chaque montant allant vers ou venant de la passerelle. Le XOF n'a
+ * pas de décimales, donc un float ici est toujours un bug — et un float
+ * arrondi serait un paiement erroné silencieux.
  */
 export function assertXofAmount(amount: unknown): number {
   if (!Number.isInteger(amount) || (amount as number) <= 0) {
@@ -139,7 +142,7 @@ export function assertXofAmount(amount: unknown): number {
   return amount as number;
 }
 
-/** End of the cycle that starts at `from`. */
+/** Fin du cycle qui commence à `from`. */
 export function cyclePeriodEnd(from: Date): Date {
   return new Date(from.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
 }

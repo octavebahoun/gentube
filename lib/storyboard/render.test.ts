@@ -13,8 +13,8 @@ import {
 
 describe('timing', () => {
   it('holds the media past the narration, longer than any transition', () => {
-    // The pause must outlast the longest transition, or one scene's voice plays
-    // over the next one's.
+    // La pause doit durer plus longtemps que la transition la plus longue,
+    // sinon la voix d'une scène joue par-dessus celle de la suivante.
     const longest = Math.max(
       ...['fade', 'slide', 'black', 'wipe', 'zoomPunch', 'whipPan', 'glitchCut', 'particleDissolve']
         .filter((transition) => transition !== 'particleDissolve')
@@ -49,7 +49,8 @@ describe('timing', () => {
     ];
 
     const perScene = 5 * FPS + POST_NARRATION_PAUSE_FRAMES;
-    // The first scene overlaps nothing; the others eat into their predecessor.
+    // La première scène ne chevauche rien ; les autres empiètent sur leur
+    // prédécesseure.
     expect(totalDurationInFrames(scenes)).toBe(perScene * 3 - 26 - 8);
   });
 
@@ -139,7 +140,8 @@ describe('serialising for Remotion', () => {
   });
 
   it('drops a render blob that does not match the contract', () => {
-    // Garbage in the jsonb column must not reach the renderer as-is.
+    // Des données corrompues dans la colonne jsonb ne doivent pas atteindre
+    // le renderer telles quelles.
     const storyboard = toRemotionStoryboard(video, [
       shot({ render: { effects: { zoom: 'sideways' } } as unknown as Shot['render'] }),
     ]);

@@ -25,8 +25,8 @@ describe('billing catalogue', () => {
   });
 
   it('charges the price and grants the allowance defined in pricing.ts', () => {
-    // The catalogue must never restate a number: a drift here would mean two
-    // sources of truth for what a plan costs.
+    // Le catalogue ne doit jamais répéter un nombre : une dérive ici
+    // signifierait deux sources de vérité pour le prix d'un plan.
     expect(PLAN_OFFERS.starter.priceXof).toBe(PLAN_PRICE_FCFA.starter);
     expect(PLAN_OFFERS.pro.priceXof).toBe(PLAN_PRICE_FCFA.pro);
     expect(PLAN_OFFERS.starter.monthlyCredits).toBe(
@@ -47,7 +47,8 @@ describe('billing catalogue', () => {
   });
 
   it('refuses a plan that is not sold self-service', () => {
-    // Business is on quote (specs §1): no checkout may open for it.
+    // Business est sur devis (cahier des charges §1) : aucun checkout ne peut
+    // s'ouvrir pour lui.
     expect(() => getPlanOffer('business')).toThrow(UnknownOfferError);
     expect(() => getPlanOffer('enterprise')).toThrow(UnknownOfferError);
     expect(() => getPlanOffer(undefined)).toThrow(UnknownOfferError);
@@ -64,7 +65,8 @@ describe('billing catalogue', () => {
   });
 
   it('rejects any amount that is not a positive integer', () => {
-    // XOF has no minor unit: a decimal amount is a bug, never a rounding.
+    // Le XOF n'a pas de sous-unité : un montant décimal est un bug, jamais
+    // un arrondi.
     expect(() => assertXofAmount(15_000.5)).toThrow(InvalidAmountError);
     expect(() => assertXofAmount(0)).toThrow(InvalidAmountError);
     expect(() => assertXofAmount(-15_000)).toThrow(InvalidAmountError);

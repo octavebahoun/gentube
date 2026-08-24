@@ -17,7 +17,7 @@ export async function closeDb() {
   await client.end();
 }
 
-/** Creates a tenant and hands back a scoped handle for it. */
+/** Crée un tenant et rend un handle scopé pour lui. */
 export async function createTenant(
   name: string,
   { plan = 'starter', credits = 0 }: { plan?: Plan; credits?: number } = {}
@@ -29,7 +29,7 @@ export async function createTenant(
   return tenantDb(tenant.id);
 }
 
-/** A project plus a draft video, for tests that need something to scope. */
+/** Un projet plus une vidéo en brouillon, pour les tests qui ont besoin de quelque chose à scoper. */
 export async function createProjectWithVideo(
   tdb: TenantDb,
   {
