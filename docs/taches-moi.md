@@ -150,9 +150,29 @@ corriger les minutes incluses :
 | Starter | 15 000 FCFA | 22 min | 8 800 | 41 % |
 | Pro | 30 000 FCFA | 45 min | 18 000 | 40 % |
 
-- [ ] **Recharge 5 000 FCFA : reste à corriger.** À 3 000 crédits elle vend
-      50 min (20 000 FCFA de coût) pour 5 000. À 40 % de marge, le pack devrait
-      faire **~450 crédits**, pas 3 000.
+- [x] **Recharge : 360 crédits pour 5 000 FCFA** (6 minutes pile).
+      Volontairement un peu plus chère que l'abonnement — 833 FCFA/min contre
+      682 — sinon personne ne s'abonne. Marge 52 %.
+      (Elle vendait 3 000 crédits = 50 min, soit 20 000 FCFA de coût pour
+      5 000 encaissés.)
+- [x] **Le 720p est disponible sur tous les plans**, à 4 crédits/seconde.
+      C'est l'argent du client, il choisit.
+
+### Offre finale
+
+| Plan | Prix | Minutes 480p | Voix |
+|---|---|---|---|
+| Starter | 15 000 FCFA/mois | 22 min | Amazon Polly Neural |
+| Pro | 30 000 FCFA/mois | 45 min | ElevenLabs |
+| Business | sur devis | négocié | ElevenLabs |
+| Recharge | 5 000 FCFA | 6 min | selon le plan |
+
+Identique partout : clips `wan-video/wan-2.2-i2v-fast` (480p ou 720p), images
+Flux sur Cloudflare Workers AI, script DeepSeek `deepseek-v4-flash`.
+
+**Note sur le 720p :** il coûte 850 FCFA/min contre 400, soit **2,1×** le
+480p — mais il est facturé **4×**. La marge y monte à 69 %. Confortable, mais
+c'est le poste où un concurrent pourra t'attaquer sur le prix.
 
 ---
 
