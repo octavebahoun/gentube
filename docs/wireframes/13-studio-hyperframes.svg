@@ -1,0 +1,251 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1120" viewBox="0 0 1440 1120" font-family="Plus Jakarta Sans, Inter, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#CC0000"/>
+    </linearGradient>
+    <linearGradient id="thumb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a0508"/><stop offset=".55" stop-color="#450a0f"/><stop offset="1" stop-color="#12060a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#FF0000" stop-opacity=".25"/><stop offset="1" stop-color="#FF0000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".8"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h1{font-size:21px;font-weight:800;fill:#fff}
+    .h2{font-size:14px;font-weight:700;fill:#fff}
+    .body{font-size:13px;fill:#E8E8ED}
+    .sub{font-size:12px;fill:#A5A5AA}
+    .mut{font-size:11px;fill:#8A8A92}
+    .tiny{font-size:10px;fill:#4A4A4A}
+    .lbl{font-size:11px;font-weight:600;fill:#8A8A92;letter-spacing:.08em}
+    .nav{font-size:13px;font-weight:600;fill:#A5A5AA}
+    .navOn{font-size:13px;font-weight:700;fill:#fff}
+    .card{fill:#1C1C1E;stroke:#2A2A2D}
+    .field{fill:#0A0A0B;stroke:#2E2E32}
+    .ghost{fill:none;stroke:#3A3A3E}
+    .link{font-size:12px;font-weight:700;fill:#FF453A}
+    .tick{font-size:9px;fill:#6E6E73}
+    .blk{font-size:10px;font-weight:700;fill:#fff}
+  </style>
+  <rect width="1440" height="1120" fill="#000000"/>
+
+  <rect width="1440" height="64" fill="#000"/>
+  <line x1="0" y1="64" x2="1440" y2="64" stroke="#1F1F22"/>
+  <g transform="translate(40,16)">
+    <rect width="32" height="32" rx="9" fill="url(#red)"/>
+    <path d="M13 9 L23 16 L13 23 Z" fill="#fff"/>
+    <text x="42" y="23" font-size="17" font-weight="800" fill="#fff">Gen<tspan fill="#FF453A">Tube</tspan></text>
+  </g>
+  <g transform="translate(1120,17)">
+    <rect width="150" height="30" rx="15" fill="#1C1C1E" stroke="#2E2E32"/>
+    <path d="M14 7 l4 3 -1.5 5 -5 0 -1.5 -5 z" fill="#FF453A"/>
+    <text x="34" y="20" font-size="12" font-weight="800" fill="#fff">2 500</text>
+    <text x="86" y="20" font-size="9" font-weight="700" fill="#FF453A">GET MORE</text>
+  </g>
+  <circle cx="1388" cy="32" r="17" fill="#2E2E30"/>
+  <text x="1388" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">AM</text>
+
+  <rect x="0" y="64" width="256" height="1056" fill="#0B0B0C"/>
+  <line x1="256" y1="64" x2="256" y2="1120" stroke="#1F1F22"/>
+  <g stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(30,98)" stroke="#6E6E73"><circle cx="9" cy="7" r="3.2"/><path d="M3 18c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="8" r="2.5"/><path d="M16 12.4c2.8.4 4.6 2.5 4.6 5.6"/></g>
+    <text x="62" y="113" class="nav">Équipe</text>
+    <rect x="14" y="134" width="228" height="40" rx="10" fill="#1C1C1E"/>
+    <g transform="translate(30,144)" stroke="#FF453A"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
+    <text x="62" y="159" class="navOn">Projets</text>
+    <g transform="translate(30,190)" stroke="#6E6E73"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>
+    <text x="62" y="205" class="nav">Général</text>
+    <g transform="translate(30,236)" stroke="#6E6E73"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></g>
+    <text x="62" y="251" class="nav">Facturation</text>
+    <g transform="translate(30,282)" stroke="#6E6E73"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5"/></g>
+    <text x="62" y="297" class="nav">Activité</text>
+    <g transform="translate(30,328)" stroke="#6E6E73"><path d="M12 3l8 3v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/></g>
+    <text x="62" y="343" class="nav">Sécurité</text>
+  </g>
+
+  <text x="296" y="106" class="link">←  Histoires du Bénin</text>
+  <text x="296" y="140" class="h1">Les Amazones du Dahomey</text>
+  <rect x="530" y="122" width="96" height="24" rx="12" fill="#8E8E93" fill-opacity=".15"/>
+  <circle cx="544" cy="134" r="3" fill="#8E8E93"/>
+  <text x="552" y="138" font-size="11" font-weight="600" fill="#C9C9CE">brouillon</text>
+  <text x="1400" y="138" text-anchor="end" class="mut">480p · 16:9</text>
+
+  <!-- onglets -->
+  <g transform="translate(296,158)">
+    <text x="0" y="20" class="nav">Storyboard</text>
+    <text x="110" y="20" class="navOn">Studio</text>
+    <rect x="104" y="28" width="44" height="3" rx="1.5" fill="#FF453A"/>
+    <line x1="0" y1="34" x2="1104" y2="34" stroke="#26262A"/>
+  </g>
+
+  <!-- ===== APERÇU ===== -->
+  <rect x="288" y="216" width="816" height="470" fill="url(#glow)"/>
+  <g transform="translate(296,224)">
+    <rect width="800" height="450" rx="14" fill="url(#thumb)" stroke="#FF453A" stroke-opacity=".5"/>
+    <rect x="120" y="120" width="180" height="330" fill="#2b0b10"/>
+    <rect x="330" y="180" width="150" height="270" fill="#38101a"/>
+    <rect x="510" y="140" width="170" height="310" fill="#2b0b10"/>
+    <rect x="0" y="330" width="800" height="120" fill="url(#fade)"/>
+    <!-- sous-titre karaoké : mot courant en rouge -->
+    <text x="400" y="392" text-anchor="middle" font-size="20" font-weight="800" fill="#fff">On les appelle <tspan fill="#FF453A">les Amazones</tspan>.</text>
+    <!-- contrôles -->
+    <circle cx="400" cy="200" r="40" fill="#000" fill-opacity=".45" stroke="#fff" stroke-opacity=".35"/>
+    <path d="M386 180 L426 200 L386 220 Z" fill="#fff"/>
+    <rect x="24" y="24" width="66" height="24" rx="6" fill="#000" fill-opacity=".55"/>
+    <text x="57" y="40" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">0:07,2</text>
+    <rect x="710" y="24" width="66" height="24" rx="6" fill="#000" fill-opacity=".55"/>
+    <text x="743" y="40" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">0:30</text>
+    <rect x="24" y="402" width="120" height="24" rx="6" fill="#000" fill-opacity=".55"/>
+    <text x="36" y="418" font-size="10" fill="#C9C9CE">Scène #2 · vidéo</text>
+  </g>
+
+  <!-- transport -->
+  <g transform="translate(296,690)">
+    <rect width="800" height="52" rx="12" class="card"/>
+    <g transform="translate(24,12)" stroke="#C9C9CE" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 6v16M12 14l10-8v16zM12 14l10 8"/>
+    </g>
+    <circle cx="400" cy="26" r="20" fill="url(#red)"/>
+    <path d="M394 17 L412 26 L394 35 Z" fill="#fff"/>
+    <g transform="translate(752,12)" stroke="#C9C9CE" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 6v16M22 14L12 6v16zM22 14L12 22"/>
+    </g>
+    <text x="470" y="31" class="sub" font-weight="700">0:07,2 / 0:30</text>
+    <rect x="560" y="16" width="120" height="6" rx="3" fill="#2A2A2D"/>
+    <rect x="560" y="16" width="29" height="6" rx="3" fill="#FF453A"/>
+    <circle cx="589" cy="19" r="5" fill="#fff"/>
+  </g>
+
+  <!-- ===== INSPECTEUR ===== -->
+  <g transform="translate(1112,224)">
+    <rect width="288" height="518" rx="14" class="card"/>
+    <text x="20" y="34" class="h2">Scène #2</text>
+    <rect x="220" y="18" width="48" height="22" rx="11" fill="#32D74B" fill-opacity=".13"/>
+    <text x="244" y="33" text-anchor="middle" font-size="10" font-weight="700" fill="#32D74B">mesurée</text>
+    <text x="20" y="58" class="mut">Vidéo · 5,1 s · 6,3 s → 11,4 s</text>
+
+    <text x="20" y="94" class="lbl">TRANSITION ENTRANTE</text>
+    <rect x="20" y="104" width="248" height="38" rx="9" class="field"/>
+    <text x="36" y="128" class="body">Fondu</text>
+    <path d="M248 118 l6 7 6-7" stroke="#8A8A92" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+    <text x="20" y="172" class="lbl">ZOOM</text>
+    <rect x="20" y="182" width="248" height="38" rx="9" class="field"/>
+    <text x="36" y="206" class="body">Entrée lent</text>
+    <path d="M248 196 l6 7 6-7" stroke="#8A8A92" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+    <text x="20" y="250" class="lbl">SOUS-TITRES</text>
+    <rect x="20" y="260" width="248" height="38" rx="9" class="field"/>
+    <text x="36" y="284" class="body">Karaoké</text>
+    <path d="M248 274 l6 7 6-7" stroke="#8A8A92" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+    <text x="20" y="328" class="lbl">SONS DE LA SCÈNE</text>
+    <g transform="translate(20,340)">
+      <rect width="248" height="34" rx="9" fill="#141416" stroke="#2A2A2D"/>
+      <text x="12" y="22" class="sub" font-weight="600">▶ pop · sfx</text>
+      <text x="236" y="22" text-anchor="end" font-size="11" fill="#8A8A92">✕</text>
+    </g>
+    <g transform="translate(20,382)">
+      <rect width="248" height="34" rx="9" fill="#141416" stroke="#2A2A2D"/>
+      <text x="12" y="22" class="sub" font-weight="600">▶ ambiance marché · 33 s</text>
+      <text x="236" y="22" text-anchor="end" font-size="11" fill="#8A8A92">✕</text>
+    </g>
+    <text x="20" y="444" class="link" font-size="11">+ Ajouter un son</text>
+
+    <rect x="20" y="462" width="248" height="38" rx="9" class="ghost"/>
+    <text x="144" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">⟳  Régénérer cette scène</text>
+  </g>
+
+  <!-- ===== TIMELINE ===== -->
+  <g transform="translate(296,766)">
+    <rect width="1104" height="290" rx="14" class="card"/>
+    <text x="24" y="32" class="h2">Timeline</text>
+    <text x="24" y="50" class="tiny">Glisser un bloc pour le déplacer · cliquer pour sélectionner · la durée des plans est verrouillée à l'audio.</text>
+    <g transform="translate(880,18)">
+      <rect width="28" height="26" rx="7" class="ghost"/><text x="14" y="18" text-anchor="middle" font-size="13" fill="#C9C9CE">−</text>
+      <rect x="36" width="52" height="26" rx="7" class="ghost"/><text x="62" y="18" text-anchor="middle" font-size="10" font-weight="700" fill="#C9C9CE">100 %</text>
+      <rect x="96" width="28" height="26" rx="7" class="ghost"/><text x="110" y="18" text-anchor="middle" font-size="13" fill="#C9C9CE">+</text>
+      <rect x="136" width="68" height="26" rx="7" class="ghost"/><text x="170" y="18" text-anchor="middle" font-size="10" font-weight="700" fill="#C9C9CE">Ajuster</text>
+    </g>
+
+    <!-- règle -->
+    <g transform="translate(130,66)">
+      <line x1="0" y1="10" x2="950" y2="10" stroke="#26262A"/>
+      <g class="tick">
+        <text x="0" y="24">0 s</text><text x="150" y="24">5 s</text><text x="310" y="24">10 s</text><text x="470" y="24">15 s</text>
+        <text x="630" y="24">20 s</text><text x="790" y="24">25 s</text><text x="935" y="24">30 s</text>
+      </g>
+      <g stroke="#26262A">
+        <line x1="0" y1="6" x2="0" y2="14"/><line x1="158" y1="6" x2="158" y2="14"/><line x1="316" y1="6" x2="316" y2="14"/>
+        <line x1="474" y1="6" x2="474" y2="14"/><line x1="632" y1="6" x2="632" y2="14"/><line x1="790" y1="6" x2="790" y2="14"/><line x1="948" y1="6" x2="948" y2="14"/>
+      </g>
+    </g>
+
+    <!-- piste visuels -->
+    <text x="24" y="118" class="sub" font-weight="700">Visuels</text>
+    <g transform="translate(130,100)">
+      <rect x="0" width="198" height="40" rx="7" fill="url(#thumb)" stroke="#FF453A" stroke-opacity=".55"/>
+      <text x="10" y="25" class="blk">#1</text>
+      <rect x="206" width="176" height="40" rx="7" fill="url(#thumb)" stroke="#fff" stroke-opacity=".8"/>
+      <text x="216" y="25" class="blk">#2</text>
+      <rect x="390" width="178" height="40" rx="7" fill="url(#thumb)" stroke="#FF453A" stroke-opacity=".55"/>
+      <text x="400" y="25" class="blk">#3</text>
+      <rect x="576" width="163" height="40" rx="7" fill="url(#thumb)" stroke="#FF453A" stroke-opacity=".55"/>
+      <text x="586" y="25" class="blk">#4</text>
+      <rect x="747" width="201" height="40" rx="7" fill="url(#thumb)" stroke="#FF453A" stroke-opacity=".55"/>
+      <text x="757" y="25" class="blk">#5</text>
+      <!-- transitions -->
+      <g font-size="11" font-weight="800" fill="#FF453A">
+        <text x="197" y="25">⇄</text><text x="381" y="25">⇄</text><text x="567" y="25">⇄</text><text x="738" y="25">⇄</text>
+      </g>
+    </g>
+
+    <!-- piste voix -->
+    <text x="24" y="172" class="sub" font-weight="700">Voix off</text>
+    <g transform="translate(130,154)">
+      <g fill="#FF453A" fill-opacity=".45">
+        <rect x="0" width="167" height="34" rx="6" fill="#141416" stroke="#2A2A2D"/>
+        <rect x="206" width="154" height="34" rx="6" fill="#141416" stroke="#FF453A" stroke-opacity=".6"/>
+        <rect x="390" width="156" height="34" rx="6" fill="#141416" stroke="#2A2A2D"/>
+        <rect x="576" width="141" height="34" rx="6" fill="#141416" stroke="#2A2A2D"/>
+        <rect x="747" width="174" height="34" rx="6" fill="#141416" stroke="#2A2A2D"/>
+      </g>
+      <g stroke="#FF453A" stroke-opacity=".7">
+        <line x1="216" y1="160" x2="216" y2="182"/><line x1="222" y1="164" x2="222" y2="178"/><line x1="228" y1="160" x2="228" y2="182"/><line x1="234" y1="165" x2="234" y2="177"/><line x1="240" y1="161" x2="240" y2="181"/><line x1="246" y1="166" x2="246" y2="176"/><line x1="252" y1="160" x2="252" y2="182"/><line x1="258" y1="164" x2="258" y2="178"/><line x1="264" y1="162" x2="264" y2="180"/><line x1="270" y1="166" x2="270" y2="176"/><line x1="276" y1="160" x2="276" y2="182"/><line x1="282" y1="165" x2="282" y2="177"/><line x1="288" y1="161" x2="288" y2="181"/><line x1="294" y1="166" x2="294" y2="176"/><line x1="300" y1="160" x2="300" y2="182"/><line x1="306" y1="164" x2="306" y2="178"/><line x1="312" y1="162" x2="312" y2="180"/><line x1="318" y1="166" x2="318" y2="176"/><line x1="324" y1="160" x2="324" y2="182"/><line x1="330" y1="164" x2="330" y2="178"/><line x1="336" y1="162" x2="336" y2="180"/><line x1="342" y1="166" x2="342" y2="176"/><line x1="348" y1="160" x2="348" y2="182"/>
+      </g>
+      <text x="10" y="21" class="blk" opacity=".85">#2 · narration</text>
+    </g>
+
+    <!-- piste musique -->
+    <text x="24" y="226" class="sub" font-weight="700">Musique</text>
+    <g transform="translate(130,208)">
+      <rect width="948" height="34" rx="6" fill="#141416" stroke="#2A2A2D"/>
+      <rect x="0" y="12" width="948" height="10" fill="url(#red)" opacity=".35"/>
+      <text x="12" y="21" class="blk" opacity=".85">ambiance marché · volume 0,09 · le mix creuse la voix automatiquement</text>
+    </g>
+
+    <!-- piste sfx -->
+    <text x="24" y="280" class="sub" font-weight="700">SFX</text>
+    <g transform="translate(130,262)">
+      <line x1="0" y1="12" x2="948" y2="12" stroke="#26262A"/>
+      <g fill="#FF453A">
+        <rect x="94" y="2" width="14" height="20" rx="4"/><rect x="199" y="2" width="14" height="20" rx="4"/>
+        <rect x="425" y="2" width="14" height="20" rx="4"/><rect x="569" y="2" width="14" height="20" rx="4"/>
+        <rect x="754" y="2" width="14" height="20" rx="4"/>
+      </g>
+      <text x="180" y="16" class="tick">pop</text>
+    </g>
+
+    <!-- tête de lecture à 7,2 s -->
+    <g transform="translate(358,60)">
+      <line x1="0" y1="0" x2="0" y2="216" stroke="#FF453A" stroke-width="2"/>
+      <path d="M-7 0 L7 0 L0 10 Z" fill="#FF453A"/>
+    </g>
+  </g>
+
+  <text x="848" y="1086" text-anchor="middle" class="tiny">Panneau de code masqué : timeline et aperçu seuls — jamais d'éditeur HTML/CSS/JS côté client. · Chargé en lazy, version épinglée.</text>
+  <text x="848" y="1104" text-anchor="middle" class="tiny">Scrub : toute position du curseur rend une image exacte (temps déclaré, jamais accumulé). · Mobile : aperçu au-dessus, timeline défilable horizontalement au doigt.</text>
+</svg>

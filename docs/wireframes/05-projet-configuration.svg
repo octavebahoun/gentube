@@ -112,7 +112,7 @@
     <text x="1012" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">+ Nouvelle vidéo</text>
     <g transform="translate(24,64)">
       <text x="0" y="20" class="body" font-weight="700">Les Amazones du Dahomey</text>
-      <text x="640" y="20" class="mut">25 crédits débités · 2:04</text>
+      <text x="640" y="20" class="mut">25 crédits débités · 0:30</text>
       <rect x="900" y="2" width="82" height="24" rx="12" fill="#FFD60A" fill-opacity=".13"/>
       <circle cx="914" cy="14" r="3" fill="#FFD60A"/>
       <text x="922" y="18" font-size="11" font-weight="600" fill="#FFD60A">validée</text>
@@ -128,7 +128,7 @@
     <line x1="24" y1="170" x2="1080" y2="170" stroke="#26262A"/>
     <g transform="translate(24,184)">
       <text x="0" y="20" class="body" font-weight="700">Les marchés de Cotonou</text>
-      <text x="640" y="20" class="mut">60 crédits débités · 1:12</text>
+      <text x="640" y="20" class="mut">60 crédits débités · 1:05</text>
       <rect x="900" y="2" width="86" height="24" rx="12" fill="#32D74B" fill-opacity=".13"/>
       <circle cx="914" cy="14" r="3" fill="#32D74B"/>
       <text x="922" y="18" font-size="11" font-weight="600" fill="#32D74B">publiée</text>

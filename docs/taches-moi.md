@@ -110,7 +110,53 @@ C'est une question d'argent autant que de technique — donc c'est la mienne.
 
 ---
 
-## 7. Coût par vidéo
+## 7. Coût par vidéo — chiffré le 25 août 2026
+
+**Une minute de vidéo en 480p coûte environ 400 FCFA :**
+
+| Poste | Coût |
+|---|---|
+| Replicate — 12 clips de 5 s à 0,05 $ | 375 FCFA |
+| Amazon Polly Neural + speech marks | 10 FCFA |
+| Rendu Lambda | ~12 FCFA |
+| DeepSeek, R2 | négligeable |
+
+En 720p, les clips passent à 0,11 $ → la minute coûte **~850 FCFA**.
+
+Base : 1 $ = 625 FCFA. Replicate facture **par vidéo générée**, pas par
+seconde : 81 images à 16 fps = 5,06 s de clip.
+
+### Décisions actées
+
+- [x] **Marge cible : 40 %**, avec 5 mois d'investissement à perte assumés.
+- [x] **Les 15 premiers clients gardent leur tarif pendant 1 an**, même après
+      la hausse. C'est aussi l'argument de lancement.
+- [x] **Amazon Polly Neural remplace ElevenLabs** en voix par défaut.
+      5× moins cher, et 1 M de caractères gratuits par mois pendant 12 mois —
+      donc la voix est quasi gratuite sur toute la période d'investissement.
+      **Les speech marks sont obligatoires** : c'est ce qui fournit les timings
+      mot à mot dont dépendent les sous-titres et les durées mesurées.
+- [x] **ElevenLabs devient un argument de montée en gamme** — réservé aux
+      plans Pro et Business. Le français de Polly est plus robotique, donc la
+      qualité de voix devient une raison d'acheter le plan supérieur.
+
+### Conséquence sur les plans
+
+À 40 % de marge, **aucune hausse de prix n'est nécessaire** — il suffit de
+corriger les minutes incluses :
+
+| Plan | Prix | Minutes 480p | Coût | Marge |
+|---|---|---|---|---|
+| Starter | 15 000 FCFA | 22 min | 8 800 | 41 % |
+| Pro | 30 000 FCFA | 45 min | 18 000 | 40 % |
+
+- [ ] **Recharge 5 000 FCFA : reste à corriger.** À 3 000 crédits elle vend
+      50 min (20 000 FCFA de coût) pour 5 000. À 40 % de marge, le pack devrait
+      faire **~450 crédits**, pas 3 000.
+
+---
+
+## 7 bis. Suivi du coût réel
 
 Le prix en crédits doit rester tenable. Aujourd'hui personne ne mesure le coût
 réel d'une vidéo en FCFA : voix off + images + clips + rendu.

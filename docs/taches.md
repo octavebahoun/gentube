@@ -79,7 +79,14 @@ Ce ne sont pas des tâches à déléguer.
 - [x] **720p : 4 crédits/s** — tranché. Le 720p ne peut pas coûter le même
       prix que le 480p (2 crédits/s). Le code était déjà à 4 : rien à changer,
       les specs sont périmées sur ce point.
-- [ ] **Recharge 5 000 FCFA / 3 000 crédits** — elle perd de l'argent.
+- [ ] **Recharge 5 000 FCFA : 3 000 crédits → ~450** — à 40 % de marge.
+      Aujourd'hui elle vend 50 min (20 000 FCFA de coût) pour 5 000.
+- [x] **Marge cible 40 %**, 5 mois à perte assumés, tarif gelé 1 an pour
+      les 15 premiers clients.
+- [x] **Amazon Polly remplace ElevenLabs** par défaut (5× moins cher) ;
+      ElevenLabs réservé aux plans Pro et Business.
+- [x] **Minutes incluses corrigées** : Starter 22 min, Pro 45 min, prix
+      inchangés. Une minute de 480p coûte 400 FCFA, 850 en 720p.
 - [x] **Crédits de plan : ils expirent** — tranché. Ils disparaissent à la fin
       du cycle, ils ne s'accumulent pas.
 - [x] **Les crédits achetés en recharge n'expirent jamais** — tranché, et non

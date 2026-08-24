@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenTube — Wireframes finaux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#FF453A;--card:#1C1C1E;--border:#2A2A2D}
+  *{box-sizing:border-box}
+  body{margin:0;padding:48px 32px 96px;background:#000;color:#fff;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  header{max-width:1200px;margin:0 auto 40px}
+  header h1{font-size:28px;font-weight:800;margin:0 0 8px}
+  header h1 em{font-style:normal;color:var(--red)}
+  header p{color:#A5A5AA;font-size:14px;margin:0;max-width:760px;line-height:1.6}
+  .palette{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+  .sw{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:11px;color:#A5A5AA}
+  .sw b{width:18px;height:18px;border-radius:50%;display:inline-block;border:1px solid #3A3A3E}
+  .grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:56px}
+  .shot figure{margin:0}
+  .shot .meta{display:flex;align-items:baseline;gap:14px;margin-bottom:12px}
+  .shot .num{color:var(--red);font-weight:800;font-size:13px;letter-spacing:.12em}
+  .shot h2{font-size:18px;font-weight:800;margin:0}
+  .shot .route{color:#6E6E73;font-size:12px;font-family:ui-monospace,monospace}
+  .shot .note{color:#8A8A92;font-size:12px;margin-top:10px;line-height:1.6;max-width:900px}
+  .frame{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:#000}
+  .frame img,.frame object{display:block;width:100%;height:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>GenTube — <em>wireframes finaux</em></h1>
+  <p>Thème sombre cinématique, accent rouge YouTube. Ces écrans sont la référence d'implémentation du frontend : routes, libellés, états vides / chargement / erreur inclus. Le détail des états et variantes reste documenté dans <code>docs/produit-et-wireframes.md</code>.</p>
+  <div class="palette">
+    <span class="sw"><b style="background:#000"></b>Primary #000000</span>
+    <span class="sw"><b style="background:#1C1C1E"></b>Secondary #1C1C1E</span>
+    <span class="sw"><b style="background:#FF0000"></b>Accent #FF0000</span>
+    <span class="sw"><b style="background:#FFFFFF"></b>Highlight #FFFFFF</span>
+    <span class="sw"><b style="background:#4A4A4A"></b>Subtle #4A4A4A</span>
+    <span class="sw"><b style="background:linear-gradient(180deg,#FF5A4E,#CC0000)"></b>Boutons : dégradé + halo</span>
+  </div>
+</header>
+
+<div class="grid">
+
+  <section class="shot">
+    <div class="meta"><span class="num">01</span><h2>Accueil publique</h2><span class="route">/</span></div>
+    <div class="frame"><img src="01-accueil.svg" alt="Accueil publique"></div>
+    <p class="note">Hero avec halo rouge, parcours en 3 étapes, 6 fonctionnalités, tarifs FCFA (Starter 15 000 / Pro 30 000 / Business sur devis), FAQ, CTA final. Mention mobile money + « sans carte bancaire » dès le hero.</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">02</span><h2>Connexion & inscription</h2><span class="route">/sign-in · /sign-up</span></div>
+    <div class="frame"><img src="02-connexion-inscription.svg" alt="Connexion et inscription"></div>
+    <p class="note">Carte connexion en état erreur (le message ne dit jamais lequel des deux champs est faux), carte inscription, et les 3 états du formulaire (vide / soumission / erreur).</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">03</span><h2>Workspace</h2><span class="route">/dashboard</span></div>
+    <div class="frame"><img src="03-dashboard-workspace.svg" alt="Tableau de bord du workspace"></div>
+    <p class="note">Plan + solde traduit en minutes, barre d'utilisation du cycle, membres avec rôles et « Retirer », invitation avec rôles. Widget crédits en haut à droite (style carte « CREDITS 2,500 » de la référence).</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">04</span><h2>Projets</h2><span class="route">/dashboard/projects</span></div>
+    <div class="frame"><img src="04-liste-projets.svg" alt="Liste des projets"></div>
+    <p class="note">Cartes projets avec vignettes des vidéos, pipeline / nombre de vidéos / dernière modification, état vide complet.</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">05</span><h2>Configuration d'un projet</h2><span class="route">/dashboard/projects/[id]</span></div>
+    <div class="frame"><img src="05-projet-configuration.svg" alt="Configuration d'un projet"></div>
+    <p class="note">Formulaire (nom, pipeline avec conséquences prix, prompt de style), sélecteur de voix, chip de chaîne connectée, liste des vidéos avec statuts, zone dangereuse avec ses 3 variantes.</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">06</span><h2>Nouvelle vidéo</h2><span class="route">/dashboard/projects/[id]/videos/new</span></div>
+    <div class="frame"><img src="06-nouvelle-video.svg" alt="Nouvelle vidéo"></div>
+    <p class="note">Thème en une phrase (base du storyboard), résolution avec traduction crédits/seconde, pipeline hérité ou forcé, rappel « aucun crédit débité à cette étape ».</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">07</span><h2>Éditeur de storyboard — écran central</h2><span class="route">/dashboard/videos/[id]</span></div>
+    <div class="frame"><img src="07-storyboard.svg" alt="Éditeur de storyboard"></div>
+    <p class="note">Coût estimé + CTA contextuel (« Enregistrer la voix off » puis « Valider et débiter 25 crédits »), scènes avec durée pastillée (mesurée/estimée), narration FR + prompt visuel EN, sound design par scène (chips + mini-volumes), réordonnancement, ajout de scène. Aucun champ de durée : la durée se lit puis se mesure.</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">08</span><h2>Storyboard — les 6 états</h2><span class="route">variantes de /dashboard/videos/[id]</span></div>
+    <div class="frame"><img src="08-storyboard-etats.svg" alt="États du storyboard"></div>
+    <p class="note">Vide · écriture en cours (squelettes) · voix off en cours · voix partielle (reprise sans re-paiement) · solde insuffisant expliqué · validée en lecture seule (historique, pas formulaire grisé).</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">09</span><h2>Studio Hyperframes — aperçu + timeline</h2><span class="route">/dashboard/videos/[id]/studio (onglet « Studio »)</span></div>
+    <div class="frame"><img src="13-studio-hyperframes.svg" alt="Studio Hyperframes"></div>
+    <p class="note">`@hyperframes/studio` embarqué : aperçu 16:9 avec scrub, transport, inspecteur de scène (transition, zoom, sous-titres, sons), timeline multi-pistes (Visuels / Voix off / Musique / SFX) avec tête de lecture et transitions ⇄. Panneau de code masqué — timeline et aperçu seuls. Chargé en lazy, version épinglée.</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">10</span><h2>Progression du pipeline</h2><span class="route">/dashboard/videos/[id] (après validation)</span></div>
+    <div class="frame"><img src="09-progression-pipeline.svg" alt="Progression du pipeline"></div>
+    <p class="note">Barre globale « 8/15 prêts » + estimation floue, étapes avec horodatage, liste des plans avec relance unitaire et erreur tronquée, variante échec global (remboursement annoncé + retour en brouillon).</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">11</span><h2>Facturation</h2><span class="route">/dashboard/billing</span></div>
+    <div class="frame"><img src="10-facturation.svg" alt="Facturation"></div>
+    <p class="note">Bandeau retour de paiement (« les crédits apparaissent dès que GeniusPay confirme »), plan courant, offres (bouton rouge sauf plan actuel), recharge ponctuelle, historique avec statuts, variante abonnement suspendu.</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">12</span><h2>Chaînes YouTube</h2><span class="route">/dashboard/channels</span></div>
+    <div class="frame"><img src="11-chaînes-youtube.svg" alt="Chaînes YouTube"></div>
+    <p class="note">État vide avec permissions listées, multi-chaînes (cas normal), règle du quota 6/jour présentée comme règle du jeu, connexion expirée, confirmation de déconnexion en deux temps.</p>
+  </section>
+
+  <section class="shot">
+    <div class="meta"><span class="num">13</span><h2>Publication & statistiques</h2><span class="route">/dashboard/videos/[id]/publish · /dashboard/stats</span></div>
+    <div class="frame"><img src="12-publication-statistiques.svg" alt="Publication et statistiques"></div>
+    <p class="note">Publication : aperçu MP4, titre/description/mots-clés, visibilité, maintenant ou programmer, destination explicite. Stats : 4 KPI avec variation 24 h, courbe 30 jours (l'historique daté compte plus que le chiffre du jour), tableau des vidéos publiées.</p>
+  </section>
+
+</div>
+</body>
+</html>

@@ -579,6 +579,44 @@ Montre l'état vide ("Aucun son sur cette scène") et le cas d'un son plus long
 que la scène, avec la mention que seul le début sera joué.
 ```
 
+## 2.9 ter — Le Studio Hyperframes (aperçu + timeline)
+
+```
+Wireframe du Studio embarqué de GenTube, onglet « Studio » de
+/dashboard/videos/[id]. C'est @hyperframes/studio (React 19 + Tailwind)
+embarqué : aperçu, scrub et timeline visuelle. Deux règles absolues : le
+panneau de code (CodeMirror) est masqué — timeline et aperçu seuls, jamais un
+éditeur HTML/JS pour les clients — et le paquet est chargé en lazy, version
+épinglée à l'exact.
+
+Disposition :
+- À gauche, l'aperçu 16:9 avec halo rouge : l'image courante à la position du
+  curseur, le sous-titre karaoké incrusté (mot courant en rouge), badge de
+  position « 0:07,2 » et durée totale « 0:30 », badge de scène en bas à gauche.
+- Sous l'aperçu, le transport : retour, lecture/pause rouge, avance, position
+  « 0:07,2 / 0:30 », mini-barre de progression.
+- À droite, l'inspecteur de la scène sélectionnée : titre « Scène #2 », pastille
+  « mesurée », position exacte dans le temps (lecture seule), transition
+  entrante (sélecteur aligné sur shader-transitions), zoom, style de
+  sous-titres, les sons de la scène (chips avec ✕), « + Ajouter un son »,
+  « Régénérer cette scène » en contour.
+- En bas, la timeline pleine largeur : règle en secondes (0 s → 30 s), puis
+  quatre pistes étiquetées —
+  · Visuels : un bloc par scène (vignette + #n), séparés par le marqueur de
+    transition ⇄ ; le bloc sélectionné a un bord blanc ;
+  · Voix off : un bloc de forme d'onde par narration, aligné sur sa scène ;
+  · Musique : un bloc pleine durée « ambiance marché · volume 0,09 · le mix
+    creuse la voix automatiquement » (voiceover carve d'Hyperframes) ;
+  · SFX : petits marqueurs rouges posés sur les impacts (pop, whoosh…).
+- Tête de lecture rouge verticale traversant les quatre pistes, poignée sur la
+  règle. Contrôles de zoom (− / 100 % / + / Ajuster) en haut à droite.
+- Interactions : glisser un bloc pour le déplacer dans sa piste, cliquer pour
+  sélectionner (l'inspecteur suit), scruber n'importe où — toute position rend
+  une image exacte (temps déclaré, jamais accumulé).
+- Mobile : aperçu au-dessus, timeline défilable horizontalement au doigt,
+  inspecteur en feuille glissante sous la timeline.
+```
+
 ## 2.10 Écran 8 — Progression du pipeline (à concevoir)
 
 ```
