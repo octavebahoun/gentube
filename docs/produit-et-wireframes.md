@@ -1,5 +1,16 @@
 # GenTube — description du produit et prompts de wireframes
 
+> **⚠️ À réviser — 25 août 2026.** Ce document a été écrit quand le rendu
+> passait par Remotion. Deux changements le périment partiellement :
+>
+> 1. **Le rendu passe par Hyperframes** (HeyGen, Apache 2.0, HTML → MP4).
+>    Toutes les mentions de Remotion sont à remplacer.
+> 2. **Hyperframes Studio est embarqué** dans l'application. Les prompts de
+>    wireframes qui décrivent un éditeur de storyboard maison sont donc à
+>    revoir : §2.9 (storyboard) et §2.9 bis (sound design) en particulier.
+>
+> Les tarifs de ce document sont périmés : voir `docs/tarifs.md`.
+
 Document de travail pour concevoir les interfaces. La partie 1 décrit le produit
 tel qu'il est **réellement implémenté** (le code fait autorité, pas les specs
 d'origine, et les divergences sont signalées). La partie 2 donne des prompts
