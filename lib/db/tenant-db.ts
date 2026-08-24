@@ -7,11 +7,16 @@ import type {
 import { db } from './drizzle';
 import {
   activityLogs,
+  billingCycles,
   creditLedger,
   invitations,
   jobs,
+  paymentAttempts,
+  paymentIntents,
+  paymentWebhookEvents,
   projects,
   shots,
+  subscriptions,
   tenants,
   users,
   videos,
@@ -52,6 +57,14 @@ export const TENANT_SCOPED_TABLES = [
   jobs,
   creditLedger,
   youtubeTokens,
+  subscriptions,
+  billingCycles,
+  paymentIntents,
+  paymentAttempts,
+  // Readable through the wrapper like any other table; the webhook intake path
+  // is the one writer that runs unscoped, because it is what resolves the
+  // tenant. See the table's comment in schema.ts.
+  paymentWebhookEvents,
 ] as const;
 
 export type TenantScopedTable = PgTable & { tenantId: AnyPgColumn };

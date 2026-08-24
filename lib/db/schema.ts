@@ -7,6 +7,7 @@ import {
   timestamp,
   integer,
   jsonb,
+  boolean,
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
@@ -275,6 +276,212 @@ export const youtubeTokens = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// Billing (GeniusPay — mobile money + card, XOF)
+//
+// The platform holds ONE merchant account: its keys live in the environment,
+// not in the database. There is deliberately no per-tenant credentials table —
+// tenants pay the platform, they do not collect payments themselves.
+//
+// Money is stored as `amount_xof` integers. XOF has no minor unit, so there is
+// no cents column anywhere and no float ever touches an amount.
+// ---------------------------------------------------------------------------
+
+export const paymentKindEnum = pgEnum('payment_kind', [
+  'subscription',
+  'topup',
+]);
+
+export const paymentStatusEnum = pgEnum('payment_status', [
+  // Local row created, gateway not called yet.
+  'created',
+  // Checkout URL handed to the user, waiting for the gateway's word.
+  'pending',
+  'succeeded',
+  'failed',
+  'cancelled',
+  'expired',
+]);
+
+export const subscriptionStatusEnum = pgEnum('subscription_status', [
+  // Created at checkout, before the first payment confirms.
+  'pending',
+  'active',
+  'past_due',
+  // Retries exhausted (specs §3.A): the tenant keeps its balance but the
+  // subscription no longer renews.
+  'suspended',
+  'canceled',
+]);
+
+export const billingCycleStatusEnum = pgEnum('billing_cycle_status', [
+  'pending',
+  'paid',
+  'failed',
+]);
+
+export const paymentAttemptStatusEnum = pgEnum('payment_attempt_status', [
+  'pending',
+  'succeeded',
+  'failed',
+]);
+
+export const subscriptions = pgTable(
+  'subscriptions',
+  {
+    id: serial('id').primaryKey(),
+    // One subscription per tenant: a plan change reuses this row rather than
+    // stacking a second one.
+    tenantId: integer('tenant_id')
+      .notNull()
+      .references(() => tenants.id),
+    plan: planEnum('plan').notNull(),
+    status: subscriptionStatusEnum('status').notNull().default('pending'),
+    currentPeriodStart: timestamp('current_period_start'),
+    currentPeriodEnd: timestamp('current_period_end'),
+    // Set when a downgrade is scheduled; the paid period still runs out.
+    cancelAt: timestamp('cancel_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('subscriptions_tenant_id_uq').on(t.tenantId)]
+);
+
+export const billingCycles = pgTable(
+  'billing_cycles',
+  {
+    id: serial('id').primaryKey(),
+    tenantId: integer('tenant_id')
+      .notNull()
+      .references(() => tenants.id),
+    subscriptionId: integer('subscription_id')
+      .notNull()
+      .references(() => subscriptions.id),
+    plan: planEnum('plan').notNull(),
+    periodStart: timestamp('period_start').notNull(),
+    periodEnd: timestamp('period_end').notNull(),
+    amountXof: integer('amount_xof').notNull(),
+    // The plan allowance this cycle buys, recorded so the grant is auditable
+    // against the price that was actually charged.
+    creditsGranted: integer('credits_granted').notNull(),
+    status: billingCycleStatusEnum('status').notNull().default('pending'),
+    paidAt: timestamp('paid_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('billing_cycles_tenant_id_idx').on(t.tenantId),
+    index('billing_cycles_subscription_id_idx').on(t.subscriptionId),
+  ]
+);
+
+export const paymentIntents = pgTable(
+  'payment_intents',
+  {
+    id: serial('id').primaryKey(),
+    tenantId: integer('tenant_id')
+      .notNull()
+      .references(() => tenants.id),
+    kind: paymentKindEnum('kind').notNull(),
+    // Subscription payments only.
+    plan: planEnum('plan'),
+    billingCycleId: integer('billing_cycle_id').references(
+      () => billingCycles.id
+    ),
+    amountXof: integer('amount_xof').notNull(),
+    creditsGranted: integer('credits_granted').notNull(),
+    // GeniusPay's own id for the transaction. Unique because it is what the
+    // webhook resolves a tenant from — one reference, one intent, one tenant.
+    gatewayReference: varchar('gateway_reference', { length: 120 }),
+    checkoutUrl: text('checkout_url'),
+    status: paymentStatusEnum('status').notNull().default('created'),
+    // The gateway's own words, kept verbatim for support and reconciliation.
+    gatewayStatus: varchar('gateway_status', { length: 40 }),
+    paymentMethod: varchar('payment_method', { length: 60 }),
+    feesXof: integer('fees_xof'),
+    netXof: integer('net_xof'),
+    metadata: jsonb('metadata'),
+    failureReason: text('failure_reason'),
+    succeededAt: timestamp('succeeded_at'),
+    failedAt: timestamp('failed_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('payment_intents_tenant_id_created_at_idx').on(
+      t.tenantId,
+      t.createdAt
+    ),
+    uniqueIndex('payment_intents_gateway_reference_uq').on(t.gatewayReference),
+  ]
+);
+
+export const paymentAttempts = pgTable(
+  'payment_attempts',
+  {
+    id: serial('id').primaryKey(),
+    tenantId: integer('tenant_id')
+      .notNull()
+      .references(() => tenants.id),
+    billingCycleId: integer('billing_cycle_id')
+      .notNull()
+      .references(() => billingCycles.id),
+    paymentIntentId: integer('payment_intent_id').references(
+      () => paymentIntents.id
+    ),
+    attemptNumber: integer('attempt_number').notNull().default(1),
+    status: paymentAttemptStatusEnum('status').notNull().default('pending'),
+    gatewayReference: varchar('gateway_reference', { length: 120 }),
+    error: text('error'),
+    attemptedAt: timestamp('attempted_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('payment_attempts_tenant_id_idx').on(t.tenantId),
+    index('payment_attempts_billing_cycle_id_idx').on(t.billingCycleId),
+  ]
+);
+
+/**
+ * Audit log of every webhook that got past signature verification, and the
+ * idempotency guard for the money path.
+ *
+ * `tenant_id` is nullable here and only here: an event is written before it is
+ * known which tenant it belongs to — the tenant is *resolved* from the intent
+ * behind `gateway_reference`, and an event matching no intent belongs to no
+ * tenant. It is the same exception as `getUser()` in lib/db/queries.ts, and it
+ * is why the webhook path is the one place allowed to touch this table
+ * unscoped (see lib/billing/webhook.ts).
+ */
+export const paymentWebhookEvents = pgTable(
+  'payment_webhook_events',
+  {
+    id: serial('id').primaryKey(),
+    tenantId: integer('tenant_id').references(() => tenants.id),
+    provider: varchar('provider', { length: 40 }).notNull().default('geniuspay'),
+    eventId: varchar('event_id', { length: 120 }).notNull(),
+    eventType: varchar('event_type', { length: 60 }).notNull(),
+    environment: varchar('environment', { length: 20 }),
+    gatewayReference: varchar('gateway_reference', { length: 120 }),
+    payload: jsonb('payload').notNull(),
+    signatureValid: boolean('signature_valid').notNull().default(false),
+    // Null while the event has not been acted upon. A replay of an unprocessed
+    // event is allowed to run again; a replay of a processed one is a no-op.
+    processedAt: timestamp('processed_at'),
+    processingError: text('processing_error'),
+    receivedAt: timestamp('received_at').notNull().defaultNow(),
+    receivedFromIp: varchar('received_from_ip', { length: 45 }),
+  },
+  (t) => [
+    // The idempotency guarantee: one gateway event credits at most once.
+    uniqueIndex('payment_webhook_events_provider_event_id_uq').on(
+      t.provider,
+      t.eventId
+    ),
+    index('payment_webhook_events_tenant_id_idx').on(t.tenantId),
+  ]
+);
+
+// ---------------------------------------------------------------------------
 // Relations
 // ---------------------------------------------------------------------------
 
@@ -370,6 +577,71 @@ export const youtubeTokensRelations = relations(youtubeTokens, ({ one }) => ({
   }),
 }));
 
+export const subscriptionsRelations = relations(
+  subscriptions,
+  ({ one, many }) => ({
+    tenant: one(tenants, {
+      fields: [subscriptions.tenantId],
+      references: [tenants.id],
+    }),
+    cycles: many(billingCycles),
+  })
+);
+
+export const billingCyclesRelations = relations(
+  billingCycles,
+  ({ one, many }) => ({
+    tenant: one(tenants, {
+      fields: [billingCycles.tenantId],
+      references: [tenants.id],
+    }),
+    subscription: one(subscriptions, {
+      fields: [billingCycles.subscriptionId],
+      references: [subscriptions.id],
+    }),
+    attempts: many(paymentAttempts),
+  })
+);
+
+export const paymentIntentsRelations = relations(paymentIntents, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [paymentIntents.tenantId],
+    references: [tenants.id],
+  }),
+  billingCycle: one(billingCycles, {
+    fields: [paymentIntents.billingCycleId],
+    references: [billingCycles.id],
+  }),
+}));
+
+export const paymentAttemptsRelations = relations(
+  paymentAttempts,
+  ({ one }) => ({
+    tenant: one(tenants, {
+      fields: [paymentAttempts.tenantId],
+      references: [tenants.id],
+    }),
+    billingCycle: one(billingCycles, {
+      fields: [paymentAttempts.billingCycleId],
+      references: [billingCycles.id],
+    }),
+    paymentIntent: one(paymentIntents, {
+      fields: [paymentAttempts.paymentIntentId],
+      references: [paymentIntents.id],
+    }),
+  })
+);
+
+export const paymentWebhookEventsRelations = relations(
+  paymentWebhookEvents,
+  ({ one }) => ({
+    tenant: one(tenants, {
+      fields: [paymentWebhookEvents.tenantId],
+      references: [tenants.id],
+    }),
+  })
+);
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -395,10 +667,29 @@ export type NewCreditLedgerEntry = typeof creditLedger.$inferInsert;
 export type YoutubeToken = typeof youtubeTokens.$inferSelect;
 export type NewYoutubeToken = typeof youtubeTokens.$inferInsert;
 
+export type Subscription = typeof subscriptions.$inferSelect;
+export type NewSubscription = typeof subscriptions.$inferInsert;
+export type BillingCycle = typeof billingCycles.$inferSelect;
+export type NewBillingCycle = typeof billingCycles.$inferInsert;
+export type PaymentIntent = typeof paymentIntents.$inferSelect;
+export type NewPaymentIntent = typeof paymentIntents.$inferInsert;
+export type PaymentAttempt = typeof paymentAttempts.$inferSelect;
+export type NewPaymentAttempt = typeof paymentAttempts.$inferInsert;
+export type PaymentWebhookEvent = typeof paymentWebhookEvents.$inferSelect;
+export type NewPaymentWebhookEvent = typeof paymentWebhookEvents.$inferInsert;
+
 export type Plan = (typeof planEnum.enumValues)[number];
 export type Resolution = (typeof resolutionEnum.enumValues)[number];
 export type Pipeline = (typeof pipelineEnum.enumValues)[number];
 export type VideoStatus = (typeof videoStatusEnum.enumValues)[number];
+export type PaymentKind = (typeof paymentKindEnum.enumValues)[number];
+export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];
+export type SubscriptionStatus =
+  (typeof subscriptionStatusEnum.enumValues)[number];
+export type BillingCycleStatus =
+  (typeof billingCycleStatusEnum.enumValues)[number];
+export type PaymentAttemptStatus =
+  (typeof paymentAttemptStatusEnum.enumValues)[number];
 
 export type TenantDataWithMembers = Tenant & {
   users: Pick<User, 'id' | 'name' | 'email' | 'role'>[];

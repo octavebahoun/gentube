@@ -58,7 +58,11 @@ function PlanAndCredits() {
               Plan: {tenant?.plan ?? '—'}
             </p>
             <p className="text-sm text-muted-foreground">
-              Billing runs on GeniusPay (mobile money) — not wired up yet.
+              Billed in XOF through GeniusPay —{' '}
+              <a href="/dashboard/billing" className="underline">
+                manage your plan and credits
+              </a>
+              .
             </p>
           </div>
           <div className="text-right">

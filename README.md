@@ -6,7 +6,8 @@ kanban, validé par l'utilisateur, puis produit par un pipeline asynchrone.
 
 Base : template officiel [Next.js SaaS Starter](https://github.com/nextjs/saas-starter)
 de Vercel — auth, sessions, middleware et structure d'équipe conservés, **toute
-la partie Stripe supprimée** (le paiement passera par GeniusPay / mobile money).
+la partie Stripe supprimée** — la facturation passe par GeniusPay (mobile money
+et carte, en XOF).
 
 **Stack** : Next.js 15 (App Router, TypeScript) · Drizzle ORM + PostgreSQL ·
 Tailwind + shadcn/ui · déploiement Vercel.
@@ -146,14 +147,92 @@ vérifie que ces allocations correspondent bien aux minutes annoncées.
 Le pack de recharge est laissé tel que spécifié (5 000 FCFA = 3 000 crédits)
 mais il est **vendu à perte** : 3 000 s en 480p ≈ $36 de coût pour ~$8 encaissés.
 L'équilibre serait autour de 450 crédits. `topUpMarginFcfa()` calcule la marge,
-et un test la signale tant qu'elle est négative. **À trancher avant de brancher
-GeniusPay.**
+et un test la signale tant qu'elle est négative. Le pack est désormais
+**achetable en ligne** : à trancher avant d'ouvrir les inscriptions, le prix se
+change dans `pricing.ts` et nulle part ailleurs.
+
+---
+
+## Facturation — GeniusPay
+
+Abonnements mensuels (Starter 15 000 / Pro 30 000 FCFA) et recharges ponctuelles,
+en XOF, par mobile money ou carte. Tout est dans `lib/billing/` et
+`lib/payments/geniuspay.ts`.
+
+### La configuration est écrite à la main
+
+Il n'y a **ni table de credentials, ni écran d'administration des prix** :
+
+- les clés de la passerelle sont des variables d'environnement (`lib/billing/config.ts`) ;
+- le catalogue — plans, prix, crédits accordés, packs — est un fichier de
+  constantes (`lib/billing/plans.ts`) qui ne fait que réexposer `lib/credits/pricing.ts`.
+
+La plateforme n'a qu'**un seul compte marchand** : les tenants la paient, ils
+n'encaissent rien. Le pattern chiffré par organisation de Contravo n'a donc pas
+lieu d'être ici. Ce qu'un client paie et ce qu'il reçoit se relisent dans un
+diff, pas dans une ligne de base modifiable à chaud.
+
+### Aucun crédit accordé au checkout
+
+`lib/billing/checkout.ts` crée les lignes locales (`payment_intents`,
+`billing_cycles`, `payment_attempts`) et renvoie l'URL de paiement. Le plan du
+tenant ne change pas, le solde ne bouge pas. La configuration est vérifiée
+**avant** la première écriture : une instance mal configurée répond « non
+configuré » au lieu de laisser des lignes orphelines derrière elle.
+
+### Le webhook, dans cet ordre
+
+`lib/billing/webhook.ts`, appelé par `POST /api/webhooks/geniuspay` :
+
+| Étape | Effet d'un échec |
+|---|---|
+| 1. corps JSON valide | `400`, rien écrit |
+| 2. horodatage dans ±300 s | `400`, rien écrit |
+| 3. **signature HMAC** | `401`, **rien écrit** |
+| 4. journalisation, unique sur `event_id` | rejeu déjà traité → `200` sans effet |
+| 5. tenant résolu depuis **notre** `payment_intents` | référence inconnue → `200` |
+| 6. **re-fetch** du paiement chez GeniusPay | `502`, la passerelle rejouera |
+| 7. statut, montant et devise comparés à l'intent | `200`, aucun crédit |
+| 8. crédit + cycle + plan, en une transaction | — |
+
+Deux écarts assumés par rapport au pipeline Contravo :
+
+- **Signature avant journalisation.** Contravo journalise d'abord, pour l'audit.
+  Écrire avant de vérifier offre une table à remplir à n'importe quel appelant
+  non authentifié — et les specs demandent explicitement « 401 sans rien
+  écrire ». Un callback forgé ne laisse donc aucune trace.
+- **Rejeu autorisé tant que `processed_at` est nul.** Un événement vérifié qui
+  échoue en aval (passerelle injoignable) doit pouvoir être rejoué. La clé
+  d'idempotence du ledger est dérivée de la **référence de paiement**, pas de
+  l'id d'événement : deux événements distincts pour le même paiement ne
+  créditent qu'une fois.
+
+Le tenant est toujours résolu depuis la référence de paiement stockée par nous,
+**jamais depuis `metadata`** — un webhook qui prétend appartenir à un autre
+tenant crédite quand même le bon (test dédié).
+
+### Échecs et suspension
+
+Un paiement échoué marque la tentative, passe l'abonnement en `past_due` et
+laisse le cycle ouvert pour un nouvel essai. Au bout de
+`MAX_PAYMENT_ATTEMPTS` (3) tentatives échouées sur le même cycle, le cycle passe
+`failed` et l'abonnement `suspended`. La suspension **arrête le renouvellement,
+elle ne confisque rien** : le solde acheté reste acquis, et un nouveau paiement
+ouvre un cycle neuf — un tenant suspendu peut toujours revenir seul.
+
+### Le seul accès non scopé du code
+
+Le webhook arrive sans session : le tenant est ce qu'il *résout*. Les deux
+lectures/écritures non scopées de `lib/billing/webhook.ts` (journal d'événements
+et résolution de l'intent par sa référence) sont la même exception que
+`getUser()`, et elles s'arrêtent là — tout ce qui touche à l'argent passe par
+`tenantDb()`.
 
 ---
 
 ## Schéma
 
-10 tables (`lib/db/schema.ts`), migrations dans `lib/db/migrations/`.
+15 tables (`lib/db/schema.ts`), migrations dans `lib/db/migrations/`.
 
 | Table | Rôle |
 |---|---|
@@ -166,6 +245,11 @@ GeniusPay.**
 | `jobs` | étape de pipeline, id externe, statut, payload, erreur |
 | `credit_ledger` | tous les mouvements de crédits |
 | `youtube_tokens` | tokens OAuth chiffrés AES-256-GCM |
+| `subscriptions` | un abonnement par tenant : plan, statut, période courante |
+| `billing_cycles` | une période facturée : montant XOF, crédits du cycle, statut |
+| `payment_attempts` | tentatives de paiement d'un cycle (c'est ce qui rend « retry puis suspend » comptable) |
+| `payment_intents` | paiement vu de la passerelle : référence unique, montant, crédits promis |
+| `payment_webhook_events` | journal des webhooks vérifiés, unique sur `event_id` — la garantie d'idempotence |
 
 États d'une vidéo : `draft → validated → generating → rendering → rendered →
 published`, plus `failed` (ajouté : sans lui, un crash de pipeline laisse une
@@ -205,7 +289,36 @@ restent vides, aucune n'est nécessaire à cette étape.
 `DATABASE_URL`, `BASE_URL`, `AUTH_SECRET`, `ENCRYPTION_KEY`, `R2_*`,
 `REPLICATE_API_TOKEN`, `REPLICATE_WEBHOOK_SECRET`, `ELEVENLABS_API_KEY`,
 `CLOUDFLARE_AI_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `YOUTUBE_CLIENT_ID`,
-`YOUTUBE_CLIENT_SECRET`, `N8N_WEBHOOK_SECRET`, `N8N_BASE_URL`, `GENIUSPAY_*`.
+`YOUTUBE_CLIENT_SECRET`, `N8N_WEBHOOK_SECRET`, `N8N_BASE_URL`.
+
+### Facturation
+
+Les clés sandbox et live cohabitent sous leurs propres noms, et `GENIUS_ENV`
+(`sandbox` par défaut) désigne le jeu actif :
+
+```
+GENIUS_ENV=sandbox|live
+GENIUS_URL_ENDPOINT=https://geniuspay.ci/api/v1/merchant
+GENIUS_SANDBOX_API_KEY / _SECRET_KEY / _WEBHOOK_SECRET
+GENIUS_LIVE_API_KEY    / _SECRET_KEY / _WEBHOOK_SECRET
+```
+
+Passer en production, c'est **ajouter** trois variables et basculer `GENIUS_ENV`
+— aucun renommage, les clés sandbox restent en place. Un jeu ne peut pas
+satisfaire l'autre : en `live`, les clés sandbox ne sont même pas lues, et
+l'erreur nomme les variables de l'environnement actif.
+
+Les trois secrets d'un jeu sont exigés **ensemble**. Sans le secret de webhook,
+un checkout aboutirait, le client paierait, et rien ne créditerait jamais son
+solde faute de pouvoir vérifier la confirmation.
+
+Toute valeur de `GENIUS_ENV` autre que très exactement `live` vaut `sandbox` :
+passer en réel est un acte explicite, jamais une faute de frappe. Et c'est la
+**clé** qui décide du bac à sable, pas la variable — une clé `live` rangée sous
+un nom `GENIUS_SANDBOX_*` lève une erreur à la construction du client plutôt que
+d'encaisser pour de vrai dans ce que tout le reste appelle une simulation.
+
+Webhook à déclarer côté GeniusPay : `${BASE_URL}/api/webhooks/geniuspay`.
 
 ---
 
@@ -224,9 +337,19 @@ restent vides, aucune n'est nécessaire à cette étape.
 
 ## Pas encore implémenté
 
-Volontairement hors de cette étape : Replicate, Remotion, YouTube, ElevenLabs,
-GeniusPay, le CRUD projets/vidéos et le kanban de storyboard. Le schéma, les
-crédits et l'isolation sont en place pour les recevoir.
+Volontairement hors périmètre pour l'instant : Replicate, Remotion, YouTube,
+ElevenLabs, le CRUD projets/vidéos et le kanban de storyboard. Le schéma, les
+crédits, l'isolation et la facturation sont en place pour les recevoir.
+
+**Expiration du quota de plan.** Les specs §1 disent que les crédits achetés
+n'expirent pas mais que le quota du plan expire en fin de cycle. Le crédit du
+cycle est bien accordé et tracé (`billing_cycles.credits_granted`), mais rien ne
+l'expire : il faudrait distinguer crédits de plan et crédits achetés dans le
+ledger, et une tâche planifiée pour les périmer. À arbitrer — en l'état, un
+crédit non consommé reste acquis.
+
+**Résiliation / rétrogradation self-service.** `subscriptions.cancel_at` existe
+dans le schéma, aucune route ne l'écrit encore.
 
 Un point à traiter tôt : le quota YouTube Data API est de 10 000 unités/jour
 **par projet Google Cloud**, et un upload en coûte 1 600 — soit ~6 publications
