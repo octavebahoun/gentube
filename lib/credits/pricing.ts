@@ -26,16 +26,24 @@ export const CREDITS_PER_SECOND: Record<ShotType, Record<Resolution, number>> = 
  * 16 fps font 5,06 s de clip, à 0,05 $ en 480p et 0,11 $ en 720p. D'où les
  * valeurs par seconde ci-dessous.
  *
- * Les images fixes passent par Flux sur Cloudflare Workers AI, dont le coût
- * est d'un autre ordre de grandeur. La valeur ci-dessous est une borne haute
- * prudente tant que rien n'est mesuré en production — à corriger dès que le
- * pipeline image tourne pour de vrai.
+ * Les images fixes passent par `flux-2-klein-4b` sur Cloudflare Workers AI,
+ * facturé **par tuile de 512×512 générée** : 0,00045 $ pour une trame 848×480,
+ * 0,00101 $ pour une 1280×720 (`imageCostUsd()` dans lib/images/flux.ts).
+ *
+ * Une image ne se paie qu'une fois, quelle que soit sa durée à l'écran. Les
+ * valeurs par seconde ci-dessous supposent une fixe tenant 5 s — la moyenne
+ * des voix off mesurées. Un diaporama aux plans plus longs nous coûte donc
+ * moins que ce tableau ne dit, jamais plus.
+ *
+ * L'ordre de grandeur est ce qui compte ici : une seconde de clip coûte plus
+ * de cent fois une seconde de fixe. C'est ce qui justifie que le plan image
+ * soit facturé moitié prix.
  */
 export const PROVIDER_COST_USD_PER_SECOND: Record<
   ShotType,
   Record<Resolution, number>
 > = {
-  image: { '480p': 0.0008, '720p': 0.0012 },
+  image: { '480p': 0.00009, '720p': 0.0002 },
   video: { '480p': 0.00988, '720p': 0.02174 },
 };
 

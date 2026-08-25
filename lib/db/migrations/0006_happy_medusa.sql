@@ -1,0 +1,1 @@
+ALTER TABLE "shots" ADD COLUMN "source_image_url" text;

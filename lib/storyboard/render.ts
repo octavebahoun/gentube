@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Ratio, Shot, Video } from '@/lib/db/schema';
+import type { Ratio, Resolution, Shot, Video } from '@/lib/db/schema';
 
 /**
  * Le contrat de rendu — vérité partagée entre la base de données et la
@@ -258,10 +258,37 @@ export function totalDurationSeconds(scenes: TimedScene[]): number {
   );
 }
 
-export function dimensionsFor(ratio: Ratio): { width: number; height: number } {
+/**
+ * Hauteur de la trame, en pixels, pour chaque résolution vendue.
+ *
+ * Multiples de 16 des deux côtés, et ce n'est pas de la coquetterie : les
+ * modèles image de Workers AI ramènent toute dimension au multiple de 16
+ * inférieur. Demander le 854 du 480p canonique renvoie une image de 848 de
+ * large, donc 6 px de décalage avec la trame — soit un léger étirement sur
+ * chaque plan. On aligne la trame sur ce que le modèle sait produire.
+ */
+const FRAME_SIZES: Record<Resolution, { long: number; short: number }> = {
+  '480p': { long: 848, short: 480 },
+  '720p': { long: 1280, short: 720 },
+};
+
+/**
+ * Taille de la trame de sortie.
+ *
+ * Dépend de la résolution **et** du ratio. Elle ne dépendait que du ratio,
+ * et rendait donc tout en 1920×1080 : un client qui payait le 480p — un
+ * crédit la seconde — recevait un fichier 1080p, et le palier 720p facturé
+ * trois fois plus n'existait qu'à l'affichage. L'essai gratuit bridé en 480p
+ * livrait lui aussi du 1080p.
+ */
+export function dimensionsFor(
+  ratio: Ratio,
+  resolution: Resolution
+): { width: number; height: number } {
+  const { long, short } = FRAME_SIZES[resolution];
   return ratio === '9:16'
-    ? { width: 1080, height: 1920 }
-    : { width: 1920, height: 1080 };
+    ? { width: short, height: long }
+    : { width: long, height: short };
 }
 
 // ---------------------------------------------------------------------------
@@ -318,6 +345,7 @@ export function toHyperframesStoryboard(
     Video,
     | 'title'
     | 'ratio'
+    | 'resolution'
     | 'voice'
     | 'subtitles'
     | 'subtitleStyle'
@@ -340,7 +368,7 @@ export function toHyperframesStoryboard(
   });
 
   const starts = sceneStartTimes(parsed);
-  const { width, height } = dimensionsFor(video.ratio);
+  const { width, height } = dimensionsFor(video.ratio, video.resolution);
 
   return {
     title: video.title,

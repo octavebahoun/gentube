@@ -304,6 +304,17 @@ export const shots = pgTable(
      * consomme la composition Hyperframes — donc extensible sans migration.
      */
     render: jsonb('render'),
+    /**
+     * Clé R2 de l'image fixe de la scène.
+     *
+     * Séparée de `assetUrl` parce qu'un plan animé a **deux** assets : Wan
+     * fait de l'image-to-video, donc la fixe est la matière première du clip,
+     * pas un brouillon. Les confondre dans une colonne fait qu'une reprise du
+     * clip repaie l'image — et l'image d'un plan animé est ce qui décide de son
+     * cadrage, donc on veut pouvoir régénérer le clip sans rejouer le dé.
+     */
+    sourceImageUrl: text('source_image_url'),
+    /** Ce que le rendu consomme : l'image fixe, ou le clip pour un plan animé. */
     assetUrl: text('asset_url'),
     status: shotStatusEnum('status').notNull().default('pending'),
     createdAt: timestamp('created_at').notNull().defaultNow(),

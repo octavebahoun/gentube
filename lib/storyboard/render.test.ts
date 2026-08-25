@@ -97,8 +97,29 @@ describe('timing', () => {
   });
 
   it('sizes the canvas from the ratio', () => {
-    expect(dimensionsFor('16:9')).toEqual({ width: 1920, height: 1080 });
-    expect(dimensionsFor('9:16')).toEqual({ width: 1080, height: 1920 });
+    expect(dimensionsFor('16:9', '720p')).toEqual({ width: 1280, height: 720 });
+    expect(dimensionsFor('9:16', '720p')).toEqual({ width: 720, height: 1280 });
+  });
+
+  it('gives 480p a smaller frame than 720p, since that is what is billed', () => {
+    // La trame ne dépendait que du ratio : tout sortait en 1920×1080, donc le
+    // palier 720p facturé 3× et l'essai bridé en 480p ne changeaient rien au
+    // fichier livré.
+    expect(dimensionsFor('16:9', '480p')).toEqual({ width: 848, height: 480 });
+    expect(dimensionsFor('9:16', '480p')).toEqual({ width: 480, height: 848 });
+  });
+
+  it('keeps every frame dimension a multiple of 16', () => {
+    // Les modèles image de Workers AI rabotent au multiple de 16 inférieur.
+    // Une trame qui n'en est pas un reçoit une image plus petite qu'elle, donc
+    // étirée sur chaque plan.
+    for (const ratio of ['16:9', '9:16'] as const) {
+      for (const resolution of ['480p', '720p'] as const) {
+        const { width, height } = dimensionsFor(ratio, resolution);
+        expect(width % 16, `${ratio} ${resolution} largeur`).toBe(0);
+        expect(height % 16, `${ratio} ${resolution} hauteur`).toBe(0);
+      }
+    }
   });
 });
 
@@ -106,6 +127,7 @@ describe('serialising for Hyperframes', () => {
   const video = {
     title: 'Les Amazones',
     ratio: '16:9',
+    resolution: '480p',
     voice: null,
     subtitles: true,
     subtitleStyle: 'karaoke',
@@ -151,8 +173,8 @@ describe('serialising for Hyperframes', () => {
     // La composition n'a plus rien à calculer : dimensions, fps et durée
     // totale sont posés une fois ici.
     expect(storyboard).toMatchObject({
-      width: 1920,
-      height: 1080,
+      width: 848,
+      height: 480,
       fps: 30,
       durationInSeconds: 5.28 + POST_NARRATION_PAUSE_SECONDS,
     });
