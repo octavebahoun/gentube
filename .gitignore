@@ -39,3 +39,7 @@ next-env.d.ts
 # Docker
 postgres_data/
 .env*.local
+
+# Bibliotheque de sons copiee depuis pipevideo — 131 Mo d audio.
+# Sa place est R2, pas git. Le catalogue lisible est docs/ ou la base.
+assets/sounds/
