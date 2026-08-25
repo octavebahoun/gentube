@@ -6,12 +6,10 @@
  * stockage de l'isolation tenant : une URL signée fuit un objet, jamais le
  * dossier d'un voisin.
  *
- * L'implémentation R2 n'est pas encore écrite. Ce fichier existe pour que le
- * code ayant besoin du stockage (la voix off aujourd'hui, la génération
- * d'image et vidéo ensuite) soit écrit contre une interface gelée au lieu
- * d'attendre — et pour que la seule règle qui ne doit jamais plier, le
- * préfixe tenant, soit imposée dans une fonction unique plutôt qu'à chaque
- * site d'appel.
+ * Ce fichier porte l'interface et les clés ; l'implémentation R2 vit dans
+ * `./r2`. Le découpage tient à ceci : la règle qui ne doit jamais plier — le
+ * préfixe tenant — est imposée dans une fonction unique plutôt qu'à chaque
+ * site d'appel, et elle reste vraie quel que soit le fournisseur derrière.
  */
 
 export interface AssetStore {
@@ -24,10 +22,13 @@ export interface AssetStore {
 export class StorageNotConfiguredError extends Error {
   readonly statusCode = 503;
 
-  constructor() {
+  constructor(missing: string[] = []) {
     super(
-      'Asset storage is not wired up yet: R2 credentials and lib/storage/r2.ts ' +
-        'are missing. Voice-over, image and video generation all depend on it.'
+      missing.length > 0
+        ? `Asset storage is not configured on this instance: ${missing.join(', ')} ` +
+            'are missing. Voice-over, image and video generation all depend on it.'
+        : 'Asset storage is not configured on this instance. Voice-over, image ' +
+            'and video generation all depend on it.'
     );
     this.name = 'StorageNotConfiguredError';
   }
@@ -73,6 +74,11 @@ export function keyBelongsToTenant(key: string, tenantId: number): boolean {
   return key.startsWith(`${tenantId}/`) && !key.includes('..');
 }
 
-export function createAssetStore(): AssetStore {
-  throw new StorageNotConfiguredError();
-}
+/**
+ * Construit le store à partir de l'environnement.
+ *
+ * Lève `StorageNotConfiguredError` en nommant les variables manquantes, plutôt
+ * que d'échouer plus tard sur un appel réseau opaque. Réexporté depuis `./r2`
+ * pour que les appelants ne dépendent que de `@/lib/storage`.
+ */
+export { createAssetStore } from './r2';

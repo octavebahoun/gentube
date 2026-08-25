@@ -42,7 +42,15 @@ describe('asset keys', () => {
     expect(keyBelongsToTenant('7/../8/videos/1.mp3', 7)).toBe(false);
   });
 
-  it('says plainly that R2 is not wired up yet', () => {
-    expect(() => createAssetStore()).toThrow(StorageNotConfiguredError);
+  it('names the missing variables instead of failing later on the network', () => {
+    const saved = { ...process.env };
+    for (const name of ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET']) {
+      delete process.env[name];
+    }
+    try {
+      expect(() => createAssetStore()).toThrow(StorageNotConfiguredError);
+    } finally {
+      process.env = saved;
+    }
   });
 });
