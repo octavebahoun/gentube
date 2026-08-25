@@ -10,6 +10,8 @@ import {
   validateAndChargeVideo,
 } from '@/lib/credits';
 import {
+  MAX_SCENE_SECONDS,
+  MIN_SCENE_SECONDS,
   estimateNarrationSeconds,
   type WordTiming,
 } from '@/lib/storyboard';
@@ -149,15 +151,45 @@ function draftShot(videoId: number, order: number, spec: SceneSpec) {
 }
 
 /**
+ * Écart entre la durée estimée depuis le texte et la durée réellement mesurée
+ * sur l'audio.
+ *
+ * L'estimation suppose un débit constant ; une vraie voix accélère sur une
+ * énumération et ralentit sur un nom propre. Sans cet écart, les plans mesurés
+ * tomberaient pile sur leur estimation et l'interface n'aurait jamais à
+ * afficher la différence — alors que c'est exactement ce que la pastille
+ * « estimée / mesurée » sert à montrer, et ce qui décide du prix débité.
+ *
+ * Dérivé du texte plutôt que tiré au hasard : deux `pnpm db:seed` produisent
+ * la même base, sinon une capture d'écran ne correspond plus au lendemain.
+ */
+function measuredDrift(narration: string): number {
+  let hash = 0;
+  for (const char of narration) {
+    hash = (hash * 31 + char.codePointAt(0)!) % 100_000;
+  }
+  // ±12 % autour de l'estimation.
+  return 0.88 + (hash % 25) / 100;
+}
+
+/**
  * Un plan tel que la voix off puis les visuels l'ont écrit : durée mesurée,
  * alignement mot à mot, clé audio et clé visuelle au format `assetKey()`.
  * Les clés sont bidon mais respectent le préfixe tenant et la convention
  * `<tenant>/videos/<vidéo>/scene-<plan>.*` du pipeline.
  */
 function measuredShot(tenantId: number, videoId: number, order: number, spec: SceneSpec) {
-  const durationS = estimateNarrationSeconds(spec.narration);
+  const estimated = estimateNarrationSeconds(spec.narration);
+  const durationS =
+    Math.round(
+      Math.min(
+        MAX_SCENE_SECONDS,
+        Math.max(MIN_SCENE_SECONDS, estimated * measuredDrift(spec.narration))
+      ) * 100
+    ) / 100;
   return {
     ...baseShot(videoId, order, spec),
+    durationS,
     durationSource: 'measured' as const,
     words: wordTimings(spec.narration, durationS),
     audioUrl: `${tenantId}/videos/${videoId}/scene-${order}.mp3`,
@@ -335,7 +367,7 @@ async function seed() {
   console.log(`    editor@studio.test / admin123  (member)`);
   console.log(`    project "${project.name}" ->`);
   console.log(
-    `      "${draft.title}" (draft, estimated, ${draft.creditsEstimated} credits)`
+    `      "${draft.title}" (draft, estimated, ${creditsEstimated} credits)`
   );
   console.log(
     `      "${generating.video.title}" (generating, ${generating.charged} credits charged)`
