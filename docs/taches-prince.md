@@ -125,10 +125,27 @@ jamais en tapant un nombre.
 
       Décision actée à l'origine. C'est une vraie
       bibliothèque React 19 + Tailwind, avec timeline visuelle et scrub.
-      Deux prérequis avant de commencer, on les vérifie :
-      son serveur (`@hyperframes/studio-server`) doit pouvoir lire par tenant,
-      et son panneau de code CodeMirror doit pouvoir être masqué — on ne donne
-      pas un éditeur HTML/JS aux clients.
+      **Vérifié le 25 août — voici ce que le paquet permet vraiment.**
+
+      Le paquet n'exporte pas qu'une application monolithique. Il expose des
+      composants séparés : `Timeline`, `NLEPreview`, `Player`,
+      `PlayerControls`, `PropertyPanel`, `FileTree`, `CompositionBreadcrumb`,
+      `SourceEditor`, `EditorShell`, et `StudioApp`.
+
+      Donc **on ne monte pas `StudioApp`.** On assemble `Timeline` +
+      `NLEPreview` + `Player`, et le panneau de code disparaît parce qu'on ne
+      monte jamais `SourceEditor` — pas besoin d'un drapeau pour le cacher.
+      (Il accepte aussi `readOnly` si un jour on veut le montrer sans le
+      rendre éditable.)
+
+      **La règle « on déplace, on ne redimensionne jamais » est applicable
+      telle quelle.** `TimelineProps` accepte `onMoveElement`,
+      `onResizeElement`, `onSplitElement` et surtout `onBlockedEditAttempt` :
+      on accepte les déplacements, on refuse les redimensionnements, et on
+      explique pourquoi à l'utilisateur au lieu de le laisser deviner.
+      `onSeek`, `onSelectElement`, `renderClipContent` et `theme` permettent
+      d'habiller les blocs à nos couleurs.
+
       24 Mo décompressés : à charger en lazy, et version épinglée à l'exact.
 
 ---

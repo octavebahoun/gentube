@@ -87,10 +87,23 @@ Un jeu de données insérable en une commande :
 
 > Débloque : Prince.
 
-- [ ] **Lire le code de `@hyperframes/studio-server`** — peut-il lire par
-      tenant, ou suppose-t-il un dossier de travail unique ?
-- [ ] **Le panneau de code CodeMirror est-il masquable ?** On ne donne pas un
-      éditeur HTML/JS aux clients.
+- [x] **Lire le code de `@hyperframes/studio-server`** — fait.
+      `createStudioApi(adapter)` renvoie une sous-application Hono, et
+      l'adaptateur est un vrai point d'extension : `resolveProject(id)`,
+      `bundle(projectDir)`, `startRender(...)`. Il existe même un mode
+      multi-projets explicite (`resolveSession`).
+      **L'isolation par tenant se pose dans `resolveProject()`** — c'est notre
+      code, donc `tenantDb()` s'applique comme partout ailleurs.
+- [x] **Le panneau de code est masquable** — fait, et mieux que prévu : le
+      paquet expose des composants séparés. On monte `Timeline` + `NLEPreview`
+      + `Player` et on ne monte jamais `SourceEditor`.
+- [ ] **Conséquence à trancher : Studio veut un disque.** `ResolvedProject`
+      est `{ id, dir }`, et tout le serveur travaille sur des dossiers —
+      `bundle(projectDir)`, `rendersDir()`, `walkDir()`, un watcher de fichiers.
+      Une session d'édition a donc besoin d'un **répertoire de travail réel**,
+      pas seulement d'objets R2. Ça exclut l'édition sur du serverless : il
+      faut un hôte avec un disque, plus une étape « matérialiser depuis R2 »
+      à l'ouverture et « repousser vers R2 » à la fermeture.
 
 Maquette de référence : `docs/wireframes/13-studio-hyperframes.svg`.
 
