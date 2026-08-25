@@ -1,148 +1,163 @@
-# GenTube face à la concurrence
+# GenTube face à ses vrais concurrents
 
-Recherche du 25 août 2026. Ce document n'est pas un argumentaire : c'est ce
-qu'un jury ou un investisseur va nous opposer, et ce qu'on peut répondre.
+Recherche du 25 août 2026, sur les deux acteurs qui visent le même client que
+nous : francophones, prix en FCFA, paiement sans carte bancaire.
 
----
-
-## 1. La trouvaille la plus gênante : notre prix a déjà un point d'ancrage
-
-Des revendeurs comme **iziPremium** et **TakePro** vendent déjà **CapCut Pro,
-Canva Pro, Gemini** en FCFA via **Wave, Orange Money et MTN MoMo**, livrés en
-moins de 60 secondes, **au Bénin** comme au Sénégal, en Côte d'Ivoire, au Mali,
-au Burkina et au Togo. À partir de **1 999 FCFA**.
-
-Deux conséquences directes :
-
-**a) « Le mobile money est une barrière » est faux.** Ça l'était ; le marché
-gris l'a résolu. Un créateur béninois accède déjà aux outils mondiaux sans
-carte bancaire. Ce n'est plus notre argument.
-
-**b) Notre Starter est à 15 000 FCFA, soit 7,5× le prix d'un CapCut Pro.**
-C'est le chiffre qui va nous être jeté à la figure.
-
-**La réponse honnête :** CapCut est un **éditeur**, GenTube est un
-**producteur**. Avec CapCut, l'utilisateur écrit son texte, trouve ses images,
-enregistre sa voix, monte, publie — l'outil ne fait que le montage, le travail
-reste entier. Chez nous il tape un thème. Ce n'est pas 7,5× plus cher qu'un
-outil comparable : c'est un autre métier.
-
-Mais il faut le dire ainsi, et surtout **ne jamais se comparer à CapCut sur le
-prix**.
+Ce document n'est pas un argumentaire. C'est ce qu'on va nous opposer.
 
 ---
 
-## 2. Le concurrent structurel : Dala Studio (Éthiopie)
+## 1. ViralClip AI Studio — `viraclip.me`
 
-**Gebeya + M-PESA Ethiopia**, lancé en **février 2026**. C'est *la première
-fois qu'un opérateur de mobile money africain intègre des outils de création IA
-comme produit grand public* : on ouvre la mini-app depuis M-PESA, on choisit un
-forfait, on paie avec son portefeuille, on reçoit un code par SMS — et 1 Go de
-data Safaricom offert.
+### Ses tarifs, relevés dans son propre code
 
-Contenu : applications, sites, jeux, bandes dessinées, **vidéos**, musique — en
-**amharique, oromo** et autres langues locales.
+| Plan | Prix | Crédits | Minutes | Formats | Ce qu'il inclut |
+|---|---|---|---|---|---|
+| **Base** | 3 €/mois ≈ **1 970 FCFA** | 335 | 10 min | 9:16 seul | Sans filigrane, **pas d'édition**, clips gardés 3 jours |
+| **Créateur** | 9 €/mois ≈ **5 900 FCFA** | 990 | 30 min | 9:16 + 1:1 | Édition complète, **publication directe sur les réseaux**, clips gardés 30 jours |
+| **Pro** | 25 €/mois ≈ **16 400 FCFA** | 2 970 | 90 min | 9:16, 1:1, 16:9 | Publication + **planification** + **analytiques** |
 
-**Ce que ça nous dit :**
+Partout : sans filigrane, **traduction et doublage IA**. Sélecteur de devise
+FCFA / EUR / USD, conversion à 655,957. Paiement **Mobile Money** (MTN).
+Programme d'**affiliation**.
 
-- Le modèle « IA payée au mobile money » est **validé**, pas spéculatif. C'est
-  bon pour nous.
-- Mais il est validé **par un opérateur télécom**. Le jour où MTN ou Orange
-  fait pareil en Afrique de l'Ouest, ils arrivent avec 20 millions de clients
-  déjà facturés. C'est notre vrai risque, pas une startup.
-- Dala est **large et peu profond** : apps, jeux, BD, vidéo, musique. Nous
-  faisons une seule chose de bout en bout. C'est notre angle.
-- Et c'est en **Éthiopie**. L'Afrique de l'Ouest francophone est libre —
-  aujourd'hui.
+### Mais ce n'est pas le même métier
 
----
+ViralClip est un **découpeur**, pas un générateur. Son interface dit
+« Importer une vidéo depuis votre appareil », et son produit ce sont des
+« clips viraux prêts pour TikTok/Reels/Shorts », « découpés en 30 à 60
+secondes ».
 
-## 3. Les acteurs mondiaux
+**Il faut déjà avoir une vidéo.** Il la coupe, la sous-titre, la traduit, la
+double, la publie. Il ne crée rien à partir de rien.
 
-Sur la génération vidéo pure, les parts d'usage : **Veo (Google) 10,5 %**,
-**Adobe Firefly 5,3 %**, **Kling AI 4,8 %**, **Runway 4,7 %**.
+C'est notre différence la plus nette et la plus facile à démontrer : chez lui,
+un utilisateur qui n'a pas tourné de vidéo n'a rien à faire. Chez nous, il tape
+un thème.
 
-**Ne jamais prétendre les battre sur la qualité de l'image.** Ils ont des
-budgets de recherche que nous n'aurons jamais, et nous *utilisons* des modèles
-du même marché.
+### Ce qu'il fait mieux que nous, aujourd'hui
 
-**Clideo** est plus proche de nous : script-to-video, sous-titres automatiques,
-traduction de vidéo avec voix off multilingue. Mais c'est une boîte à outils
-en anglais, payable par carte, sans publication ni facturation locale.
-
-**Ce qu'aucun d'eux ne fait :** la chaîne complète, du thème à la vidéo
-publiée sur la chaîne YouTube du client, avec un prix exact annoncé avant
-débit, en français, payé en FCFA. Ils vendent des outils ; nous vendons un
-résultat.
+- **La publication est multi-réseaux** : TikTok, Instagram, YouTube. Nous
+  n'avons que YouTube.
+- **La planification et les analytiques existent.** Chez nous, c'est écrit dans
+  les tâches.
+- **La traduction et le doublage** sont dans tous ses plans. Nous ne faisons
+  que le français.
+- **Un plan à 1 970 FCFA** ouvre la porte. Notre entrée est à 15 000.
 
 ---
 
-## 4. Les acteurs africains à surveiller
+## 2. Deepnia — `deepnia.com`
 
-| Acteur | Ce qu'ils font | Pourquoi ça compte |
-|---|---|---|
-| **PlotWeaver** | Écriture de scénarios, doublage, production de contenu **en langues africaines** | Le plus proche de notre métier sur le versant texte et voix |
-| **Vambo AI** (Afrique du Sud) | Infrastructure IA multilingue — traduction, parole, génératif en langues africaines | Fournisseur potentiel autant que concurrent |
-| **Opérateurs télécoms** | GSMA rapporte que les grands opérateurs africains construisent leurs propres modèles de langue africains | Le risque le plus sérieux, et le moins visible |
+*« Créez images, vidéos, voix et musique avec l'IA. »*
 
----
+Une suite d'outils IA réunis sur un seul site : images, vidéos, voix, musique.
+Clips musicaux, mini-séries. Sans filigrane.
 
-## 5. Notre angle mort, et il est réel
+- **Paiement à l'usage** : on paie ce qu'on génère.
+- **Crédits payables en FCFA**, aucune carte bancaire nécessaire pour créer un
+  compte.
+- **−70 % sur la première recharge** — acquisition agressive.
 
-**GenTube ne génère qu'en français.**
+### Le point qui doit nous alerter
 
-Or la demande de contenu **en langues africaines** est décrite comme « quasi
-inexploitée ». C'est exactement le terrain de PlotWeaver, de Vambo, et des
-opérateurs télécoms.
+> Deepnia affiche **le coût exact avant chaque création**.
 
-Un jury peut légitimement demander : *pourquoi une plateforme conçue pour
-l'Afrique de l'Ouest ne parle-t-elle pas fon, yoruba ou wolof ?*
+C'est mot pour mot l'argument que j'avais mis en tête de notre résumé de
+soumission. **Il est déjà pris.** Le revendiquer comme une nouveauté nous fera
+passer pour des gens qui n'ont pas regardé le marché.
 
-**La réponse à préparer :** le français est le marché le plus large et le
-premier à monétiser — les écoles, les radios, les entreprises communiquent en
-français. Les langues locales sont l'étape suivante, et notre architecture y
-est prête : la voix est un fournisseur remplaçable (Polly aujourd'hui,
-ElevenLabs sur les plans supérieurs), et rien dans le pipeline ne suppose le
-français.
+Ce qui reste vrai et défendable : chez Deepnia, le prix exact porte sur **une
+génération isolée** — une image, une voix, un plan. Chez nous il porte sur **la
+vidéo entière, montée et publiée**, et il est connu *avant* que la production
+commence. Ce n'est pas le même engagement. Mais c'est une nuance, pas un
+territoire vierge.
 
-Ne pas prétendre que c'est déjà fait. Dire que c'est la suite, et pourquoi
-dans cet ordre.
+### Ce qu'il fait mieux que nous
 
----
-
-## 6. Le contexte qui joue pour nous
-
-- **207 startups IA en Afrique**, concentrées au **Nigeria (50)**, en **Afrique
-  du Sud (49)** et au **Kenya (31)**. L'Afrique de l'Ouest francophone est
-  sous-servie — c'est un argument de marché, pas une excuse.
-- **70 % des adultes d'Afrique subsaharienne** n'ont pas de compte bancaire,
-  mais presque tous ont un compte mobile money actif.
-- Chaque opérateur est un **silo** : brancher Wave, MTN, Orange et Moov
-  séparément, c'est quatre intégrations, quatre contrats, quatre
-  réconciliations. Nous passons par une passerelle unique — c'est un vrai
-  avantage d'exécution, rarement mentionné parce que peu spectaculaire.
+- **Le paiement à l'usage.** Pas d'abonnement à 15 000 FCFA à sortir avant
+  d'avoir essayé. C'est la barrière d'entrée la plus basse du marché.
+- **Plus de types de contenu** : musique, voix seule, image seule.
+- **Il est déjà lancé, avec des témoignages d'utilisateurs qui en tirent des
+  revenus.** Nous n'avons pas encore produit une vidéo de bout en bout.
 
 ---
 
-## 7. Notre position en une phrase
+## 3. Ce qui nous reste vraiment
 
-> Les outils mondiaux vendent des fonctionnalités à des créateurs qui savent
-> déjà monter. GenTube vend une vidéo finie à quelqu'un qui a juste une idée,
-> en français, au prix exact annoncé avant paiement, réglable au mobile money.
+Quatre choses, et il faut les défendre sur celles-là seulement.
 
-## Ce qu'il ne faut pas dire
+### a) La chaîne complète, d'une phrase à une vidéo publiée
 
-- « Il n'y a pas de concurrent. » Il y en a, dont un lancé en février.
-- « Le mobile money est notre avantage. » Il ne l'est plus seul.
-- « Nous générons de meilleures vidéos que Veo. » Non.
-- « Nous couvrons les langues africaines. » Pas encore.
+Deepnia est une **boîte à outils** : l'utilisateur assemble. ViralClip a besoin
+d'une **vidéo existante**. Aucun des deux ne prend un thème écrit et rend une
+vidéo narrée, sous-titrée, bruitée et mise en ligne.
+
+C'est le seul endroit où nous sommes seuls. Toute la démonstration doit tenir
+là.
+
+### b) La durée dictée par le texte, pas l'inverse
+
+Notre modèle écrit la narration, mesure la durée **sur l'audio réel**, puis
+commande les visuels à cette durée. Une suite d'outils ne peut pas garantir ça :
+chaque outil ignore ce que fait le suivant.
+
+Conséquence visible pour l'utilisateur : la vidéo ne coupe jamais une phrase au
+milieu, et sa longueur est celle du propos.
+
+### c) Le multi-locataire
+
+Une agence pilote les chaînes de plusieurs clients depuis un seul compte,
+chacun cloisonné, avec un grand livre de crédits auditable par client.
+
+Ni Deepnia ni ViralClip ne le proposent. C'est un marché différent — les
+agences de communication, pas les créateurs isolés — et c'est le plus solvable.
+
+### d) Le sound design synchronisé
+
+Bruitages calés sur les coupes à la seconde près, sous-titres qui s'allument
+mot par mot sur l'alignement réel de la voix. ViralClip sous-titre ; il ne cale
+pas un impact sonore sur une transition.
+
+---
+
+## 4. Ce qu'il faut changer dans notre discours
+
+| À arrêter de dire | Parce que |
+|---|---|
+| « Le prix exact avant paiement, c'est notre originalité » | Deepnia le dit déjà |
+| « Payer en FCFA sans carte, c'est notre avantage » | Les deux le font |
+| « Il n'y a pas de concurrent sur ce marché » | Il y en a deux, opérationnels |
+| « Nous publions sur les réseaux » | Nous n'avons que YouTube, ViralClip en a trois |
+
+| À dire à la place |
+|---|
+| « D'une phrase à une vidéo publiée. Nos concurrents découpent une vidéo que vous avez déjà, ou vous vendent des outils à assembler. » |
+| « La durée de la vidéo est celle de votre texte, mesurée sur la voix réelle. » |
+| « Une agence gère plusieurs clients depuis un compte, cloisonnés et facturés séparément. » |
+
+---
+
+## 5. Deux décisions que cette recherche impose
+
+**a) Notre entrée à 15 000 FCFA est un mur.** ViralClip ouvre à 1 970, Deepnia
+à l'usage. Il faut soit un palier d'essai, soit un plan à l'usage — sinon
+personne n'entre, quelle que soit la qualité.
+
+Attention : à 400 FCFA la minute de coût réel, un plan d'essai gratuit se
+chiffre. Deux minutes offertes coûtent 800 FCFA par inscription.
+
+**b) La publication multi-réseaux passe devant les statistiques.** Un créateur
+béninois publie sur TikTok et WhatsApp avant YouTube. Notre quota YouTube de
+six publications par jour, plateforme entière, devient d'ailleurs beaucoup
+moins gênant si TikTok existe à côté.
+
+---
 
 ## Sources
 
+- [ViralClip AI Studio](https://viraclip.me/) — tarifs et fonctionnalités relevés dans le bundle applicatif du site
+- [Deepnia](https://deepnia.com/) — le site bloque les robots ; informations issues de la recherche et de son référencement
+- [Outils IA dominants en génération vidéo, 2026](https://www.digitalbusiness.africa/enquete-les-outils-ia-qui-dominent-la-generation-de-texte-dimage-de-video-en-2026/)
 - [État des startups IA africaines 2026](https://digitalmag.ci/etat-des-lieux-des-startups-ia-africaines-en-2026-rapport/)
-- [Outils IA dominants en génération vidéo](https://www.digitalbusiness.africa/enquete-les-outils-ia-qui-dominent-la-generation-de-texte-dimage-de-video-en-2026/)
-- [Dala AI Bundle — M-PESA Ethiopia et Gebeya](https://techafricanews.com/2026/02/25/gebeya-and-m-pesa-ethiopia-partner-to-bring-ai-powered-creation-tools-to-mobile-users/)
-- [iziPremium — abonnements en FCFA par Wave et mobile money](https://izipremium.com/)
-- [Paiement en ligne et mobile money en Afrique de l'Ouest](https://www.pirabellabs.com/blog/paiement-en-ligne-mobile-money-afrique-ouest-2026)
-- [Startups africaines à suivre en 2026](https://www.trembi.com/post/top-19-african-startups-to-watch-in-2026)
-- [Les télécoms africains et les modèles de langue locaux (GSMA)](https://techpoint.africa/news/africa-ai-language-models/)
+- [Dala AI Bundle — M-PESA Éthiopie et Gebeya](https://techafricanews.com/2026/02/25/gebeya-and-m-pesa-ethiopia-partner-to-bring-ai-powered-creation-tools-to-mobile-users/)
