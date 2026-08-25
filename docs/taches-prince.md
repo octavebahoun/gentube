@@ -7,6 +7,11 @@ voit**. C'est le couloir à plus forte valeur produit : l'éditeur de storyboard
 Stack : Next.js 15 (App Router), React 19, Tailwind, shadcn/ui, accent
 `orange-500`. Server actions avec `validatedActionWithUser` + `useActionState`.
 
+Tout ce dont tu dépends — fixtures, contrat de rendu en secondes, enum de
+transitions aligné, versions épinglées, vérifications Studio, constantes de
+tarifs — est pris en charge par le lead avant que tu commences. Si l'un de ces
+points te bloque, c'est chez lui qu'il faut aller, pas ailleurs.
+
 **Tu possèdes seul la coquille partagée** : `app/(dashboard)/dashboard/layout.tsx`,
 `components/ui/`, la navigation. Personne d'autre n'y touche — ça supprime
 la classe de conflits la plus pénible à quatre.
@@ -173,6 +178,6 @@ obtiennent une vidéo. Chaque écran qui demande un réglage technique est un
 
 ## Fini quand
 
-`pnpm test`, `pnpm typecheck` et `pnpm build` passent. Yannick te fournit un
+`pnpm test`, `pnpm typecheck` et `pnpm build` passent. Le lead te fournit un
 **corpus de fixtures** (une vidéo entièrement voicée, durées mesurées, URLs
 d'assets bidon) pour que tu ne dépendes pas du back.

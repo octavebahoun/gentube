@@ -1,196 +1,219 @@
-# Moi — chaîne IA, orchestration n8n, arbitrages
+# Moi — débloquer l'équipe, puis la chaîne IA
 
-Je possède **ce que la vidéo raconte** : les prompts, les providers, la
-séquence. Et les décisions que personne d'autre ne peut prendre.
+Je prends **toutes les tâches qui bloquent quelqu'un d'autre**. Les trois
+autres ne doivent jamais attendre après moi.
 
----
-
-## D'abord : les décisions qui bloquent les autres
-
-Une ligne chacune. Tant qu'elles ne sont pas tranchées, quelqu'un attend.
-
-- [x] **720p : 4 crédits/s** — tranché. Le double du 480p, c'est voulu.
-- [ ] **Recharge 5 000 FCFA / 3 000 crédits** — elle perd de l'argent.
-      → bloque la page tarifs de Prince
-- [x] **Les crédits de plan expirent** — tranché. Reste à distinguer les
-      crédits de recharge, qui n'expirent pas.
-- [x] **Images : Cloudflare Workers AI** — tranché. Replicate reste pour les
-      clips vidéo uniquement.
-- [x] **Studio embarqué** — tranché. Les deux vérifications deviennent
-      bloquantes.
-- [x] **Qui relit Yannick — moi ?** (≈25 % du temps du relecteur)
-- [ ] **Landing publique maintenant **
-- [ ] **Un seul propriétaire du schéma** (Mourchid)
+> ⚠️ **Conséquence assumée :** je deviens le chemin critique de toute
+> l'équipe. Si je prends du retard, Prince, Mourchid et Yannick s'arrêtent —
+> pas seulement moi. Tant que la partie A n'est pas finie, elle passe avant
+> mon propre couloir.
 
 ---
 
-## 1. Images — Flux
+# Partie A — Ce qui débloque les autres
+
+Dans l'ordre. Chaque tâche indique qui elle libère.
+
+## A1. Sécuriser R2 avant la première écriture
+
+> Débloque : tout. Et devient une migration de fichiers si on le fait après.
+
+- [ ] **Fermer l'accès public du bucket.** `R2_PUBLIC_URL` est une URL
+      `pub-….r2.dev` : n'importe qui devinant un chemin lit la vidéo d'un
+      client. Tout doit passer par `signedUrl()`.
+- [ ] **Bucket dédié, ou préfixe racine `gentube/`.** Le bucket actuel
+      (`renderx-videos`) vient d'un autre projet, et `assetKey()` préfixe par
+      tenant à la racine : les deux produits partageraient l'espace de noms.
+- [ ] **`R2_ENDPOINT` est vide.** Déduit de l'account id
+      (`https://<id>.r2.cloudflarestorage.com`) ou exigé ? Documenter dans
+      `.env.example`.
+
+## A2. Implémenter `createAssetStore()`
+
+> Débloque : la voix off, les images, les clips, le rendu, et l'upload des
+> sons par Yannick. C'est **le** blocage du projet.
+
+Le contrat est déjà écrit et figé dans `lib/storage/index.ts` :
+
+```ts
+export interface AssetStore {
+  put(key: string, body: Uint8Array, contentType: string): Promise<string>;
+  signedUrl(key: string, expiresInSeconds?: number): Promise<string>;
+}
+```
+
+R2 est compatible S3 : `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner`.
+~100 lignes avec les tests.
+
+**Ne pas toucher** à `assetKey()` ni `keyBelongsToTenant()` : ils sont testés,
+et `assetKey()` refuse déjà les segments de traversée (`..`).
+
+**Fini quand :** `generateVoiceover()` écrit un vrai MP3 sur R2.
+
+## A3. Le corpus de fixtures
+
+> Débloque : **Prince, entièrement.** Sans lui il attend deux semaines.
+
+Un jeu de données insérable en une commande :
+
+- un tenant, un projet, une vidéo
+- 5 à 6 plans avec `narration` + `prompt`, `duration_s` cohérente
+  (~14 caractères/seconde), `duration_source: 'measured'`
+- `words` : les timings **mot à mot** — Prince en a besoin pour le karaoké
+- `audio_url` et `asset_url` : des URLs bidon mais bien formées
+- des variantes : brouillon, en production, échouée, publiée
+
+`lib/db/seed.ts` existe déjà, il suffit de l'étendre.
+
+## A4. Migrer le contrat de rendu vers Hyperframes
+
+> Débloque : Prince (les templates), Mourchid (le rendu Lambda).
+
+- [ ] **`lib/storyboard/render.ts` : frames → secondes.** Hyperframes déclare
+      `data-start` / `data-duration` en secondes. Ça supprime la conversion
+      `Math.ceil` qui dérive contre l'audio réel.
+      `MIN_SCENE_FRAMES` / `TRANSITION_FRAMES` / `POST_NARRATION_PAUSE_FRAMES`
+      → 1 s / 0,5 s / 1 s.
+- [ ] **`toRemotionStoryboard()` → `toHyperframesHtml()`.**
+- [ ] **Aligner l'enum des 9 transitions sur `shader-transitions`.** La
+      colonne `render` (jsonb) est vide en base : gratuit aujourd'hui,
+      migration de données demain.
+- [ ] **Épingler `@hyperframes/*` à la version exacte.** 0.8.x, 371 versions,
+      plusieurs publications par jour.
+- [ ] Nettoyer les mentions Remotion : `lib/db/schema.ts` (2 commentaires),
+      `README.md`.
+
+## A5. Vérifier Studio avant que Prince l'intègre
+
+> Débloque : Prince.
+
+- [ ] **Lire le code de `@hyperframes/studio-server`** — peut-il lire par
+      tenant, ou suppose-t-il un dossier de travail unique ?
+- [ ] **Le panneau de code CodeMirror est-il masquable ?** On ne donne pas un
+      éditeur HTML/JS aux clients.
+
+Maquette de référence : `docs/wireframes/13-studio-hyperframes.svg`.
+
+## A6. Appliquer les tarifs dans le code
+
+> Débloque : Prince (affichage des prix) et Yannick (stats).
+
+Dans `lib/credits/pricing.ts` :
+
+- [ ] `CREDITS_PER_SECOND['720p']` : 4 → **3**
+- [ ] `PLAN_MONTHLY_CREDITS` : starter 1 333 → **1 320**, pro 3 000 → **2 700**
+- [ ] Pack de recharge : 3 000 → **360 crédits**
+- [ ] Mettre à jour les assertions de `lib/credits/pricing.test.ts`
+
+## A7. Les deux poches de crédits
+
+> Débloque : Mourchid (schéma) et Prince (écran de facturation).
+
+Les crédits de plan **expirent** en fin de cycle, les crédits **achetés
+n'expirent jamais**. Or `credit_ledger` ne connaît qu'un solde.
+
+- [ ] Séparer les deux poches
+- [ ] Débiter **en premier celle qui expire**
+
+C'est le chemin monétaire : transaction, clé d'idempotence, un test par cas
+de bord.
+
+## A8. Écrire les quatre contrats
+
+> Débloque : tout le monde. Sans eux, quatre devs improvisent la même chose
+> différemment.
+
+- [ ] **Jobs** — vocabulaire exact de `step`, politique de reprise, et
+      **où vit la vérité** : `videos.status` ou les lignes `jobs` ? Si les
+      deux, elles divergeront.
+- [ ] **n8n ↔ Next.js** — sens des appels, authentification, et qui détient
+      les clés providers.
+- [ ] **Plan de nommage R2** — un tableau : voix, image, clip, rendu, musique.
+      Le catalogue de sons est hors tenant, il lui faut son propre préfixe.
+- [ ] **Publication** — aucune table n'existe. Il manque le compteur de quota
+      YouTube (10 000 unités/jour pour toute la plateforme, ~6 publications)
+      et la programmation.
+
+## A9. Une migration de schéma consolidée
+
+> Débloque : tout le monde. Quatre devs qui lancent `drizzle-kit` = conflit
+> sur `_journal.json` à chaque fois.
+
+- [ ] Regrouper ce qu'on sait déjà (deux poches de crédits, publications,
+      quota YouTube) en **une seule** migration, puis ne plus y toucher cette
+      semaine.
+- [ ] Ensuite, passer la main : **Mourchid devient propriétaire du schéma.**
+
+---
+
+# Partie B — Décisions qui restent
+
+- [ ] **Qui relit Yannick** — Mourchid ou moi ? (≈25 % du temps du relecteur)
+- [ ] **Landing publique** maintenant ou plus tard ? → bloque Prince
+- [ ] Corriger les 7 wireframes périmés (`docs/wireframes-a-corriger.md`)
+- [ ] Régénérer `CATALOG.md` : 51 → 60 sons (`npm run sounds` dans pipevideo)
+
+Déjà tranché : tarifs, marge 40 %, Polly par défaut, ElevenLabs en premium,
+720p à 3 crédits/s partout, Hyperframes, Studio embarqué, Lambda,
+templates chez Prince. Voir `docs/tarifs.md`.
+
+---
+
+# Partie C — Mon couloir, une fois la partie A finie
+
+Je possède **ce que la vidéo raconte**.
+
+## Images — Flux sur Cloudflare Workers AI
 
 `CLOUDFLARE_AI_TOKEN` et `CLOUDFLARE_ACCOUNT_ID` sont déjà dans `.env`.
-Workers AI sert Flux à un coût sans commune mesure avec Replicate.
+Écriture dans `shots.asset_url`, via `AssetStore.put()`. Jamais de client S3
+en direct.
 
-**Décidé : les images passent par Workers AI.** Replicate ne sert plus qu'aux
-clips vidéo.
+## Clips — `wan-video/wan-2.2-i2v-fast`
 
-À valider en cours de route : la qualité en ratio 9:16, la latence, et le coût
-réel par image.
+Image-to-video : on anime l'image déjà générée au lieu de repartir de zéro.
+Moins cher, et cohérent avec le storyboard.
 
-Écriture attendue : `shots.asset_url`, via `AssetStore.put()` de Mourchid.
-Jamais de client S3 en direct.
+Facturation **par vidéo générée**, pas par seconde : 81 images à 16 fps font
+5,06 s de clip, à 0,05 $ en 480p et 0,11 $ en 720p. L'option
+`interpolate_output` (30 fps) fait monter à 0,065 $ et 0,145 $.
 
----
+Asynchrone : `jobs.external_id` est déjà **unique** pour qu'un webhook rejoué
+résolve exactement un job. Le motif à suivre existe et est testé :
+`lib/billing/webhook.ts`.
 
-## 2. Clips vidéo — Replicate
+## Qualité du storyboard — `lib/llm/`
 
-Pour les plans `type: 'video'`. Asynchrone : Replicate rappelle par webhook,
-et `jobs.external_id` est déjà **unique** pour qu'un webhook rejoué résolve
-exactement un job.
+DeepSeek `deepseek-v4-flash`. **Piège déjà rencontré :** ce sont des modèles
+de raisonnement — avec un budget de tokens trop serré, ils dépensent tout en
+raisonnement et renvoient un contenu vide. Le client lève une erreur explicite.
 
-Le motif de webhook à suivre existe, écrit et testé : `lib/billing/webhook.ts`.
+Le prompt interdit au modèle d'écrire une durée, le serveur force le type de
+scène et supprime les sons inventés. **Ne relâcher aucune des trois.**
 
----
+Calibrage : ~14 caractères de narration par seconde d'audio. Si les voix
+changent, ce nombre change.
 
-## 3. Qualité du storyboard — `lib/llm/`
+## Orchestration n8n
 
-DeepSeek en P1, Anthropic en P2. Modèle : `deepseek-v4-flash`.
+Séquence : voix off → images → clips → rendu → publication.
 
-**Le piège, déjà rencontré :** ce sont des modèles de raisonnement. Avec un
-budget de tokens trop serré, ils dépensent tout en raisonnement et renvoient un
-contenu **vide**. Le client lève une erreur explicite dans ce cas — si tu la
-vois, augmente `DEEPSEEK_MAX_TOKENS` ou demande moins de scènes.
+## Notifications — via n8n, hors application
 
-Le prompt interdit explicitement au modèle d'écrire une durée, et le serveur
-force le type de scène et supprime les sons inventés. **Ne relâche aucune des
-trois** : c'est ce qui empêche le modèle de casser le rendu.
+- [ ] Vidéo prête · vidéo échouée · paiement échoué (3 tentatives max) ·
+      solde bas
+- [ ] Canal : email ou WhatsApp, vu le marché
 
-À travailler : la qualité des narrations et des prompts visuels. C'est moi qui
-sais à quoi ressemble une bonne sortie — personne d'autre ne peut juger ça.
+## Reprise sur échec
 
-Calibrage actuel : ~14 caractères de narration par seconde d'audio.
-Si les voix changent, ce nombre change.
+Les providers échouent régulièrement. Combien de tentatives, quel délai, et
+**qui paie** quand un plan est régénéré ? C'est une question d'argent autant
+que de technique.
 
----
+## Coût réel
 
-## 4. Orchestration n8n
+Une minute de 480p coûte ~400 FCFA, une minute de 720p ~850 FCFA.
+Détail dans `docs/tarifs.md`.
 
-La séquence : voix off → images → clips → rendu → publication.
-
-**Le contrat à figer avec Mourchid, avant d'écrire un workflow :**
-
-- Dans quel sens ça appelle — n8n interroge notre API, ou l'app déclenche des
-  webhooks n8n ?
-- Quelle authentification ?
-- **Qui détient les clés providers** — n8n ou l'app ? C'est ça qui décide si
-  n8n est l'orchestrateur ou un simple exécutant.
-
-Et la question qui traîne : **où vit la vérité** de « où en est cette vidéo » ?
-Dans `videos.status` ou dans les lignes `jobs` ? Si les deux, elles divergeront.
-
----
-
-## 5. Notifications — récupérées de Yannick
-
-Géré par n8n, hors de l'application.
-
-- [ ] Vidéo prête
-- [ ] Vidéo échouée
-- [ ] Paiement échoué (les réessais s'arrêtent à 3 tentatives)
-- [ ] Solde de crédits bas
-
-Canal à décider : email, ou WhatsApp vu le marché.
-
----
-
-## 6. Reprise sur échec
-
-Les providers d'IA échouent régulièrement. À définir : combien de tentatives,
-quel délai, et **qui paie** quand un plan est régénéré après un échec.
-
-C'est une question d'argent autant que de technique — donc c'est la mienne.
-
----
-
-## 7. Coût par vidéo — chiffré le 25 août 2026
-
-**Une minute de vidéo en 480p coûte environ 400 FCFA :**
-
-| Poste | Coût |
-|---|---|
-| Replicate — 12 clips de 5 s à 0,05 $ | 375 FCFA |
-| Amazon Polly Neural + speech marks | 10 FCFA |
-| Rendu Lambda | ~12 FCFA |
-| DeepSeek, R2 | négligeable |
-
-En 720p, les clips passent à 0,11 $ → la minute coûte **~850 FCFA**.
-
-Base : 1 $ = 625 FCFA. Replicate facture **par vidéo générée**, pas par
-seconde : 81 images à 16 fps = 5,06 s de clip.
-
-### Décisions actées
-
-- [x] **Marge cible : 40 %**, avec 5 mois d'investissement à perte assumés.
-- [x] **Les 15 premiers clients gardent leur tarif pendant 1 an**, même après
-      la hausse. C'est aussi l'argument de lancement.
-- [x] **Amazon Polly Neural remplace ElevenLabs** en voix par défaut.
-      5× moins cher, et 1 M de caractères gratuits par mois pendant 12 mois —
-      donc la voix est quasi gratuite sur toute la période d'investissement.
-      **Les speech marks sont obligatoires** : c'est ce qui fournit les timings
-      mot à mot dont dépendent les sous-titres et les durées mesurées.
-- [x] **ElevenLabs devient un argument de montée en gamme** — réservé aux
-      plans Pro et Business. Le français de Polly est plus robotique, donc la
-      qualité de voix devient une raison d'acheter le plan supérieur.
-
-### Conséquence sur les plans
-
-À 40 % de marge, **aucune hausse de prix n'est nécessaire** — il suffit de
-corriger les minutes incluses :
-
-| Plan | Prix | Minutes 480p | Coût | Marge |
-|---|---|---|---|---|
-| Starter | 15 000 FCFA | 22 min | 8 800 | 41 % |
-| Pro | 30 000 FCFA | 45 min | 18 000 | 40 % |
-
-- [x] **Recharge : 360 crédits pour 5 000 FCFA** (6 minutes pile).
-      Volontairement un peu plus chère que l'abonnement — 833 FCFA/min contre
-      682 — sinon personne ne s'abonne. Marge 52 %.
-      (Elle vendait 3 000 crédits = 50 min, soit 20 000 FCFA de coût pour
-      5 000 encaissés.)
-- [x] **Le 720p est disponible sur tous les plans**, à 4 crédits/seconde.
-      C'est l'argent du client, il choisit.
-
-### Offre finale
-
-| Plan | Prix | Minutes 480p | Voix |
-|---|---|---|---|
-| Starter | 15 000 FCFA/mois | 22 min | Amazon Polly Neural |
-| Pro | 30 000 FCFA/mois | 45 min | ElevenLabs |
-| Business | sur devis | négocié | ElevenLabs |
-| Recharge | 5 000 FCFA | 6 min | selon le plan |
-
-Identique partout : clips `wan-video/wan-2.2-i2v-fast` (480p ou 720p), images
-Flux sur Cloudflare Workers AI, script DeepSeek `deepseek-v4-flash`.
-
-**Le 720p est à 3 crédits/seconde.** Il coûte 2,1× le 480p ; facturé 3×, la
-marge y est de 58 % au lieu de 41 %. On garde l'écart sans se rendre
-attaquable sur le prix.
-
----
-
-## 7 bis. Suivi du coût réel
-
-Le prix en crédits doit rester tenable. Aujourd'hui personne ne mesure le coût
-réel d'une vidéo en FCFA : voix off + images + clips + rendu.
-
-Contrainte externe à ne pas oublier : GeniusPay plafonne à **500 000 FCFA par
-mois** pour toute la plateforme, commission **1,5 %**. Et YouTube limite à
-~6 uploads par jour, tous tenants confondus.
-
----
-
-## À vérifier avant de figer l'UI
-
-- [ ] Lire le code de `@hyperframes/studio-server` — isolation par tenant
-      possible, ou dossier de travail unique ?
-- [ ] Le panneau de code CodeMirror de Studio est-il désactivable ?
-- [ ] Ouvrir une issue licence chez HeyGen — aucun des 11 paquets
-      `@hyperframes/*` ne déclare de champ `license`
+Plafonds externes : GeniusPay 500 000 FCFA/mois (commission 1,5 %),
+YouTube ~6 publications/jour pour toute la plateforme.

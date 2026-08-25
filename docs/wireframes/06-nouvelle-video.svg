@@ -80,7 +80,7 @@
       <text x="80" y="8" class="mut">1 crédit par seconde</text>
       <circle cx="248" cy="10" r="8" class="ghost" stroke-width="1.6"/>
       <text x="268" y="8" class="body" font-weight="700">720p</text>
-      <text x="320" y="8" class="mut">4 crédits par seconde</text>
+      <text x="320" y="8" class="mut">3 crédits par seconde</text>
     </g>
 
     <text x="24" y="414" class="lbl">PIPELINE</text>

@@ -1,22 +1,22 @@
 # GenTube — description du produit et prompts de wireframes
 
-> **⚠️ À réviser — 25 août 2026.** Ce document a été écrit quand le rendu
-> passait par Remotion. Deux changements le périment partiellement :
+> **Révisé le 25 août 2026.** Trois changements sont désormais intégrés :
 >
-> 1. **Le rendu passe par Hyperframes** (HeyGen, Apache 2.0, HTML → MP4).
->    Toutes les mentions de Remotion sont à remplacer.
-> 2. **Hyperframes Studio est embarqué** dans l'application. Les prompts de
->    wireframes qui décrivent un éditeur de storyboard maison sont donc à
->    revoir : §2.9 (storyboard) et §2.9 bis (sound design) en particulier.
->
-> Les tarifs de ce document sont périmés : voir `docs/tarifs.md`.
+> 1. **Le rendu passe par Hyperframes** (HeyGen, Apache 2.0, HTML → MP4) —
+>    les mentions Remotion ont été remplacées.
+> 2. **Hyperframes Studio est embarqué** — voir §2.9 ter ; les écrans de
+>    storyboard portent l'onglet « Studio ».
+> 3. **Les tarifs sont alignés sur `docs/tarifs.md`** : 720p à 3 crédits/s,
+>    recharge 5 000 FCFA = 360 crédits, voix Amazon Polly par défaut
+>    (ElevenLabs réservé Pro/Business), offre fondateurs — les 15 premiers
+>    clients gardent leur tarif pendant 1 an.
 
 Document de travail pour concevoir les interfaces. La partie 1 décrit le produit
 tel qu'il est **réellement implémenté** (le code fait autorité, pas les specs
 d'origine, et les divergences sont signalées). La partie 2 donne des prompts
 prêts à coller dans un générateur d'interface.
 
-Dernière mise à jour : 24 août 2026 — état du dépôt : J1–J5 + J12 livrés,
+Dernière mise à jour : 25 août 2026 — état du dépôt : J1–J5 + J12 livrés,
 plus la voix off et le contrat de rendu. 236 tests verts.
 
 **Wireframes finaux** (thème sombre, accent rouge YouTube) :
@@ -62,28 +62,28 @@ facturation et l'écran de validation doivent être utilisables sur mobile.
 ## 1.3 Modèle économique
 
 **Unité de crédit** : 1 crédit = 1 seconde de vidéo générée en 480p.
-En 720p, **4 crédits par seconde**.
+En 720p, **3 crédits par seconde** (révision du 25 août 2026, calée sur le
+coût réel : 2,1× le 480p).
 
-> ⚠️ Les specs d'origine annonçaient 2 crédits/s en 720p. Le code retient 4,
-> parce qu'à 2 la résolution 720p serait vendue à perte par rapport au coût
-> provider — un test verrouille l'alignement des deux barèmes sur le coût réel.
+> ⚠️ Les specs d'origine annonçaient 2 crédits/s en 720p ; le code est resté
+> longtemps à 4. Révisé au 25 août 2026 : **3 crédits/s** — voir `docs/tarifs.md`.
 
 | Plan | Prix / mois | Crédits | ≈ en 480p |
 |---|---|---|---|
-| Starter | 15 000 FCFA | 1 333 | ~22 min |
-| Pro | 30 000 FCFA | 3 000 | ~50 min |
+| Starter | 15 000 FCFA | 1 320 | ~22 min |
+| Pro | 30 000 FCFA | 2 700 | ~45 min |
 | Business | sur devis | négocié | — |
 
-**Recharge ponctuelle** : 5 000 FCFA = 3 000 crédits. Les crédits achetés
-n'expirent pas.
+**Recharge ponctuelle** : 5 000 FCFA = 360 crédits (≈ 6 min). Les crédits
+achetés n'expirent pas.
 
 > ⚠️ Deux points de tarification non tranchés, à afficher clairement à l'équipe
 > plutôt qu'à cacher dans l'interface :
 > - La colonne « Crédits » des specs (10 000 / 22 000) est incohérente avec
->   l'unité définie dans la même section. Les valeurs retenues (1 333 / 3 000)
+>   l'unité définie dans la même section. Les valeurs retenues (1 320 / 2 700)
 >   sont celles qui correspondent aux minutes annoncées.
-> - Le pack de recharge est **vendu à perte** : 3 000 s en 480p coûtent ~36 $ de
->   provider pour ~8 $ encaissés. Un test signale la marge négative.
+> - Le pack de recharge à 3 000 crédits était **vendu à perte** ; révisé le
+>   25 août à 360 crédits (≈ 6 min, marge ~52 %).
 
 **Ce que le client paie et ce qu'il consomme sont deux choses distinctes.** Il
 achète des FCFA de crédits ; il consomme des secondes de vidéo. L'interface doit
@@ -123,11 +123,11 @@ inconnu et un id appartenant à quelqu'un d'autre donnent la même page 404.
 5.  Storyboard généré     → le LLM écrit la NARRATION de chaque scène,
                              son prompt visuel, ses effets, ses bruitages
 6.  Édition               → réécrire la narration et le visuel, réordonner
-7.  VOIX OFF              → ElevenLabs lit chaque scène. Sa longueur RÉELLE
+7.  VOIX OFF              → la voix lit chaque scène. Sa longueur RÉELLE
                              devient la durée de la scène, donc le prix exact
 8.  VALIDATION            → les crédits sont débités ici, et nulle part ailleurs
 9.  Génération            → clips (Replicate) et images (Flux), en parallèle
-10. Assemblage            → Remotion sur Lambda, MP4 final sur R2
+10. Assemblage            → Hyperframes sur Lambda, MP4 final sur R2
 11. Publication           → YouTube, immédiate ou programmée
 12. Statistiques          → vues, likes, watch time, historique daté
 ```
@@ -165,7 +165,7 @@ pas des champs désactivés, on montre un état de fait.
 ## 1.7 Architecture
 
 ```
-Next.js 15 (App Router) — dashboard, auth, API, code Remotion
+Next.js 15 (App Router) — dashboard, auth, API, code Hyperframes
    │
    ├── PostgreSQL + Drizzle — 16 tables, isolation par tenantDb()
    ├── DeepSeek — script et storyboard (modèle à raisonnement)
@@ -174,8 +174,8 @@ Next.js 15 (App Router) — dashboard, auth, API, code Remotion
    └── n8n (VPS) — orchestrateur asynchrone
           ├── Replicate wan-2.2-*-fast — clips vidéo
           ├── Cloudflare Workers AI (Flux) — images
-          ├── ElevenLabs — voix off
-          ├── AWS Lambda + Remotion — assemblage
+          ├── Amazon Polly — voix off (ElevenLabs en Pro)
+          ├── AWS Lambda + Hyperframes — assemblage
           └── YouTube Data API — publication + statistiques
                     │
               Cloudflare R2 — tous les assets, préfixe tenant_id/
@@ -226,13 +226,13 @@ n'appartient à aucun client.
 | Livré et testé | Reste à faire |
 |---|---|
 | Auth, workspace, membres, rôles | Génération des plans (Replicate, Flux) |
-| Isolation multi-tenant | Assemblage final (Remotion + Lambda) |
+| Isolation multi-tenant | Assemblage final (Hyperframes + Lambda) |
 | Crédits : ledger, débit, blocage à zéro | Publication YouTube + OAuth |
 | Projets : CRUD + configuration | Statistiques YouTube |
 | Vidéos + storyboard IA + édition | Statistiques |
-| Voix off ElevenLabs, durées mesurées | Orchestration n8n |
-| Bibliothèque de sons partagée | Composition Remotion à recopier |
-| Contrat de rendu Remotion porté | **Stockage R2 — bloque tout le reste** |
+| Voix off Polly/ElevenLabs, durées mesurées | Orchestration n8n |
+| Bibliothèque de sons partagée | Composition Hyperframes à recopier |
+| Contrat de rendu Hyperframes porté | **Stockage R2 — bloque tout le reste** |
 | Validation refusée sur une estimation | Glisser-déposer du kanban |
 | Facturation GeniusPay complète | |
 
@@ -340,9 +340,11 @@ Sections, de haut en bas :
    schéma simplifié.
 5. Tarifs : deux cartes côte à côte, Starter 15 000 FCFA et Pro 30 000 FCFA,
    avec pour chacune le nombre de crédits et l'équivalent en minutes de vidéo
-   ("1 333 crédits ≈ 22 min en 480p"). Une troisième carte Business sur devis.
+   ("1 320 crédits ≈ 22 min en 480p"). Une troisième carte Business sur devis.
    Sous les cartes, une ligne explicative : "1 crédit = 1 seconde de vidéo en
-   480p. Les crédits achetés n'expirent pas."
+   480p (3 crédits en 720p). Les crédits achetés n'expirent pas." Puis une
+   ligne ambre : "Offre fondateurs — les 15 premiers comptes gardent leur
+   tarif pendant 1 an."
 6. Pied de page sobre.
 
 Montre aussi la variante mobile de la section accroche et de la section tarifs.
@@ -378,10 +380,10 @@ Trois cartes empilées :
 
 1. "Plan et crédits" — à gauche le plan courant ("Plan : Pro") avec une
    pastille verte "actif" et la date de renouvellement ; à droite, en gros
-   chiffre tabulaire, le solde de crédits (3 000) et en dessous sa traduction
-   en minutes : "crédits ≈ 50 min en 480p · 12 min en 720p". Un lien discret
+   chiffre tabulaire, le solde de crédits (2 700) et en dessous sa traduction
+   en minutes : "crédits ≈ 45 min en 480p · 15 min en 720p". Un lien discret
    "gérer mon plan et mes crédits". Tout en bas de la carte, en petit :
-   "1 crédit = 1 s en 480p · 4 crédits = 1 s en 720p".
+   "1 crédit = 1 s en 480p · 3 crédits = 1 s en 720p".
    Montre aussi la variante solde à zéro : le chiffre est là, et une ligne
    rouge indique que la génération est bloquée jusqu'à la recharge.
 
@@ -439,8 +441,9 @@ Carte 1 — "Configuration", formulaire de 672 px maximum :
   redéfinir."
 - "Prompt de style" : zone de texte multiligne, avec l'explication "ajouté
   devant chaque prompt de plan — le rendu que tout le projet partage".
-- "Voix" : sélecteur déroulant des voix disponibles (George, Liam, Antoni,
-  Anaïs, Rachel — ou un identifiant ElevenLabs personnalisé).
+- "Voix" : sélecteur déroulant — voix Amazon Polly par défaut (Léa, Rémi…) ;
+  les voix ElevenLabs et les identifiants personnalisés restent visibles mais
+  verrouillés hors plans Pro et Business.
 - "Chaîne YouTube" : chip de chaîne connectée (« ✓ Histoires du Bénin ») avec
   un lien « gérer les chaînes » vers l'écran 10 ; si aucune chaîne n'est
   connectée, un bouton « Connecter ma chaîne ».
@@ -477,7 +480,7 @@ Champs :
   Explication en dessous : "C'est à partir de ça que le storyboard est écrit.
   Laissé vide, le titre est utilisé."
 - Résolution : deux boutons radio, 480p ("1 crédit par seconde") et 720p
-  ("4 crédits par seconde").
+  ("3 crédits par seconde").
 - Pipeline : quatre boutons radio — "Hériter du projet (mixte)", "Images
   seulement", "Vidéo seulement", "Mixte".
 - Bouton orange "Créer la vidéo".
@@ -501,6 +504,7 @@ l'enregistrement de la voix, et la validation n'est possible qu'à ce moment-là
 En-tête : retour "← Histoires du Bénin", puis sur une ligne le titre de la
 vidéo "Les Amazones du Dahomey", une pastille grise "brouillon", et en gris
 "480p · 16:9 · pipeline mixte".
+Sous le titre, deux onglets : "Storyboard" (actif) et "Studio" — voir §2.9 ter.
 
 Carte "Thème" : le texte du thème, en lecture seule.
 
@@ -671,12 +675,12 @@ arrêté, que les crédits déjà achetés sont intacts, et qu'un nouveau paieme
 relance tout.
 
 Carte 2 — "Plans" : une ligne par offre. À gauche "Starter — 15 000 FCFA"
-avec "/mois" en gris, et en dessous "1 333 crédits ≈ 22 min en 480p". À droite
+avec "/mois" en gris, et en dessous "1 320 crédits ≈ 22 min en 480p". À droite
 un bouton orange "Payer 15 000 FCFA", remplacé par la mention grise "Plan
 actuel" pour le plan en cours. Sous la liste, une ligne : "Mobile money ou
 carte, en XOF, via GeniusPay. Les plans Business sont sur devis."
 
-Carte 3 — "Recharger des crédits" : "3 000 crédits — 5 000 FCFA", avec en
+Carte 3 — "Recharger des crédits" : "360 crédits — 5 000 FCFA", avec en
 dessous "Les crédits achetés n'expirent pas, contrairement au quota mensuel",
 et un bouton contour "Payer 5 000 FCFA".
 
@@ -696,6 +700,8 @@ Variantes à montrer impérativement :
    un propriétaire ou un administrateur peut payer pour ce workspace."
 5. Version mobile complète de l'écran : c'est là que le paiement se fera le
    plus souvent.
+6. Badge ambre "★ Tarif fondateur — figé 1 an" à côté du plan actif : les
+   15 premiers clients gardent leur tarif pendant un an.
 ```
 
 ## 2.12 Écran 10 — Connexion de chaîne YouTube (à concevoir)

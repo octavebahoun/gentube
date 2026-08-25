@@ -172,7 +172,7 @@
     <text x="28" y="44" font-size="16" font-weight="700" fill="#fff">Starter</text>
     <text x="28" y="84" class="price">15 000 FCFA <tspan font-size="12" fill="#8A8A92" font-weight="600">/mois</tspan></text>
     <g font-size="12" fill="#C9C9CE">
-      <text x="28" y="126" fill="#FF453A" font-weight="800">✓</text><text x="46" y="126">1 333 crédits ≈ 22 min en 480p</text>
+      <text x="28" y="126" fill="#FF453A" font-weight="800">✓</text><text x="46" y="126">1 320 crédits ≈ 22 min en 480p</text>
       <text x="28" y="154" fill="#FF453A" font-weight="800">✓</text><text x="46" y="154">Voix off et sous-titres inclus</text>
       <text x="28" y="182" fill="#FF453A" font-weight="800">✓</text><text x="46" y="182">Publication sur ta chaîne YouTube</text>
     </g>
@@ -186,7 +186,7 @@
     <text x="28" y="60" font-size="16" font-weight="700" fill="#fff">Pro</text>
     <text x="28" y="100" class="price">30 000 FCFA <tspan font-size="12" fill="#8A8A92" font-weight="600">/mois</tspan></text>
     <g font-size="12" fill="#C9C9CE">
-      <text x="28" y="142" fill="#FF453A" font-weight="800">✓</text><text x="46" y="142">3 000 crédits ≈ 50 min en 480p</text>
+      <text x="28" y="142" fill="#FF453A" font-weight="800">✓</text><text x="46" y="142">2 700 crédits ≈ 45 min en 480p</text>
       <text x="28" y="170" fill="#FF453A" font-weight="800">✓</text><text x="46" y="170">Voix premium et styles multiples</text>
       <text x="28" y="198" fill="#FF453A" font-weight="800">✓</text><text x="46" y="198">Publication et statistiques</text>
     </g>
@@ -205,7 +205,8 @@
     <rect x="28" y="216" width="370" height="44" rx="10" class="ghost"/>
     <text x="213" y="243" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Nous contacter</text>
   </g>
-  <text x="720" y="1710" text-anchor="middle" class="sub">1 crédit = 1 seconde de vidéo en 480p (4 crédits en 720p) · Mobile money ou carte, en XOF · Les crédits achetés n'expirent pas.</text>
+  <text x="720" y="1710" text-anchor="middle" class="sub">1 crédit = 1 seconde de vidéo en 480p (3 crédits en 720p) · Mobile money ou carte, en XOF · Les crédits achetés n'expirent pas.</text>
+  <text x="720" y="1738" text-anchor="middle" font-size="12" font-weight="700" fill="#FFD60A">★  Offre fondateurs — les 15 premiers comptes gardent leur tarif pendant 1 an.</text>
 
   <!-- ===== FAQ ===== -->
   <text x="720" y="1770" text-anchor="middle" class="h2" font-size="24">Questions fréquentes</text>

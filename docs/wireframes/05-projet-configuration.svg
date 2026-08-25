@@ -75,7 +75,7 @@
       <text x="90" y="8" class="mut">Plans fixes sur une voix off — le moins cher par minute.</text>
       <circle cx="8" cy="52" r="8" class="ghost" stroke-width="1.6"/>
       <text x="28" y="50" class="body" font-weight="700">Vidéo</text>
-      <text x="82" y="50" class="mut">Clips animés — 1 crédit/s en 480p, 4 crédits/s en 720p.</text>
+      <text x="82" y="50" class="mut">Clips animés — 1 crédit/s en 480p, 3 crédits/s en 720p.</text>
       <circle cx="8" cy="94" r="8" stroke="#FF453A" fill="none" stroke-width="1.6"/><circle cx="8" cy="94" r="3.5" fill="#FF453A"/>
       <text x="28" y="92" class="body" font-weight="700">Mixte</text>
       <text x="80" y="92" class="mut">Décidé plan par plan dans le storyboard.</text>
@@ -89,8 +89,12 @@
 
     <text x="24" y="482" class="lbl">VOIX</text>
     <rect x="24" y="492" width="360" height="42" rx="10" class="field"/>
-    <text x="40" y="518" class="body">Rachel — chaleureuse, française</text>
+    <text x="40" y="518" class="body">Léa — Polly, française</text>
     <path d="M364 508 l6 7 6-7" stroke="#8A8A92" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <rect x="24" y="542" width="360" height="34" rx="9" fill="#141416" stroke="#2A2A2D"/>
+    <g transform="translate(36,551)" stroke="#FFD60A" fill="none" stroke-width="1.4" stroke-linecap="round"><rect x="0" y="6" width="10" height="8" rx="2"/><path d="M2 6V4a3 3 0 0 1 6 0v2"/></g>
+    <text x="56" y="564" class="mut">Rachel, George, Antoni — ElevenLabs</text>
+    <text x="372" y="564" text-anchor="end" font-size="10" font-weight="800" fill="#FFD60A">PRO</text>
     <text x="404" y="502" class="lbl">CHAÎNE YOUTUBE</text>
     <g transform="translate(404,492)">
       <rect width="300" height="42" rx="10" fill="#32D74B" fill-opacity=".1" stroke="#32D74B" stroke-opacity=".4"/>
@@ -100,8 +104,8 @@
     <text x="724" y="518" class="link" font-size="11">Connecter une autre chaîne</text>
     <rect x="920" y="496" width="160" height="42" rx="10" fill="url(#red)"/>
     <text x="1000" y="522" text-anchor="middle" class="btnT">Enregistrer</text>
-    <text x="24" y="576" class="tiny">Voix : liste = George, Liam, Antoni, Anaïs, Rachel, ou un identifiant ElevenLabs personnalisé.</text>
-    <text x="24" y="594" class="tiny">Chaîne : si aucune n'est connectée → bouton « Connecter ma chaîne » (écran 10).</text>
+    <text x="24" y="596" class="tiny">Voix par défaut : Amazon Polly (Léa, Rémi…). ElevenLabs et les identifiants personnalisés sont réservés aux plans Pro et Business.</text>
+    <text x="24" y="614" class="tiny">Chaîne : si aucune n'est connectée → bouton « Connecter ma chaîne » (écran 12).</text>
   </g>
 
   <!-- vidéos -->

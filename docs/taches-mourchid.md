@@ -1,8 +1,8 @@
 # Mourchid — infra et publication
 
 Tu possèdes le **socle technique** : le stockage, la file de jobs, le rendu et
-la publication YouTube. Tu es aussi **propriétaire du schéma** et **relecteur
-du code de Yannick**.
+la publication YouTube. Tu deviens **propriétaire du schéma** après la migration consolidée, et tu es
+**relecteur du code de Yannick**.
 
 Stack : Next.js 15 (App Router), Drizzle ORM, PostgreSQL, Vitest.
 Base de dev : Docker local. Tests : base `postgres_test` séparée,
@@ -10,61 +10,17 @@ Base de dev : Docker local. Tests : base `postgres_test` séparée,
 
 ---
 
-## 1. Adaptateur R2 — jour 1, priorité absolue
-
-**C'est le seul vrai blocage du projet.** Sans lui : pas de voix off, pas
-d'images, pas de clips, pas de rendu. Trois personnes attendent.
-
-Le contrat est déjà écrit et figé dans `lib/storage/index.ts` :
-
-```ts
-export interface AssetStore {
-  put(key: string, body: Uint8Array, contentType: string): Promise<string>;
-  signedUrl(key: string, expiresInSeconds?: number): Promise<string>;
-}
-```
-
-Il ne te reste qu'à faire renvoyer un vrai client S3 par `createAssetStore()`.
-R2 est compatible S3 : `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner`.
-
-**Ne touche pas** à `assetKey()` ni à `keyBelongsToTenant()` : ils sont testés,
-et `assetKey()` refuse déjà les segments de traversée (`..`) — un test le
-vérifie explicitement.
-
-Variables déjà présentes dans `.env` : `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
-`R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL`, `R2_ENDPOINT` (vide).
-
-**Trois problèmes à régler dans la même passe :**
-
-1. **Le bucket est en accès public.** `R2_PUBLIC_URL` est une URL
-   `pub-….r2.dev` : tout fichier est lisible sans authentification. Désactive
-   l'accès public, sers tout via `signedUrl()`. Sans ça, l'isolation
-   multi-tenant qu'on a construite en base ne protège rien.
-2. **Le bucket `renderx-videos` vient d'un autre projet.** `assetKey()`
-   préfixe par tenant à la racine (`7/voice/…`), donc les deux produits
-   partageraient l'espace de noms. Bucket dédié, ou préfixe racine `gentube/`.
-   Gratuit maintenant, migration de fichiers plus tard.
-3. **`R2_ENDPOINT` est vide.** Décide : déduit de l'account id
-   (`https://<id>.r2.cloudflarestorage.com`) ou exigé en variable, et
-   documente-le dans `.env.example`.
-
-**Fini quand :** `generateVoiceover()` écrit un vrai MP3 sur R2 et
-`lib/storyboard/voiceover.test.ts` passe contre le vrai store.
+> **Ce qui t'est retiré :** l'adaptateur R2 et le plan de nommage R2 sont
+> repris par le lead, parce qu'ils bloquent trois personnes. Tu récupères un
+> `AssetStore` fonctionnel — utilise `put()` et `signedUrl()`, n'écris jamais
+> de client S3 toi-même.
+>
+> Tu récupères aussi **la propriété du schéma** une fois la migration
+> consolidée passée.
 
 ---
 
-## 2. Plan de nommage R2
-
-Un seul tableau, que les quatre devs lisent. À écrire avant que quiconque
-écrive un fichier.
-
-Couvre : voix (`{tenant}/voice/{videoId}/{shotId}.mp3`), images, clips, rendu
-final, musique. Le catalogue de sons est **hors tenant** (table `sound_assets`,
-partagée par tous) — il lui faut son propre préfixe.
-
----
-
-## 3. File de jobs — `lib/jobs/`
+## 1. File de jobs — `lib/jobs/`
 
 La table `jobs` existe déjà : `step`, `external_id` (**unique**, pour qu'un
 webhook rejoué résolve exactement un job), `status`, `payload`, `attempts`.
@@ -80,7 +36,7 @@ webhook rejoué résolve exactement un job), `status`, `payload`, `attempts`.
 
 ---
 
-## 4. Rendu Hyperframes sur Lambda
+## 2. Rendu Hyperframes sur Lambda
 
 On a quitté Remotion (licence payante au-delà de 3 personnes) pour
 **Hyperframes** de HeyGen (Apache 2.0, HTML → MP4).
@@ -100,7 +56,7 @@ publiées, plusieurs par jour. Un `^` sur du 0.x = des ruptures en silence.
 
 ---
 
-## 5. Webhooks providers
+## 3. Webhooks providers
 
 Replicate et Lambda rappellent quand un job finit. Le motif à suivre existe
 déjà, écrit et testé : `lib/billing/webhook.ts`.
@@ -113,7 +69,7 @@ transaction avec une clé d'idempotence.
 
 ---
 
-## 6. YouTube
+## 4. YouTube
 
 - OAuth : flux d'autorisation, stockage des tokens.
   `lib/crypto/encryption.ts` (AES-256-GCM) existe déjà, la table
@@ -129,7 +85,10 @@ transaction avec une clé d'idempotence.
 
 ---
 
-## 7. Deux poches de crédits
+## 5. Deux poches de crédits
+
+> Posé par le lead dans la migration consolidée. Tu en hérites : c'est du
+> chemin monétaire, donc c'est toi qui le maintiens ensuite.
 
 Décision actée : **les crédits de plan expirent à la fin du cycle**, ils ne
 s'accumulent pas.
@@ -151,7 +110,7 @@ d'idempotence, et un test par cas de bord.
 
 ---
 
-## 8. Propriétaire du schéma
+## 6. Propriétaire du schéma
 
 Quatre devs qui lancent `drizzle-kit` = conflit sur `_journal.json` à chaque
 fois. Les autres te **demandent** leurs colonnes, tu produis la migration.
@@ -161,7 +120,7 @@ Idéalement : une migration consolidée maintenant pour ce qu'on sait déjà
 
 ---
 
-## 9. CI
+## 7. CI
 
 Le projet a 236 tests et personne ne les fait tourner automatiquement.
 `pnpm test`, `pnpm typecheck`, `pnpm build` sur chaque PR.
@@ -171,7 +130,7 @@ régressions, tu relis la logique.
 
 ---
 
-## 10. Relecture du code de Yannick
+## 8. Relecture du code de Yannick
 
 Budgète **20 à 30 % de ton temps**. Si ce n'est pas budgété explicitement, ça
 mange le planning en silence.

@@ -23,6 +23,11 @@
   <text x="20" y="28" class="cap">1 · STORYBOARD VIDE</text>
   <g transform="translate(20,44)">
     <rect width="540" height="330" rx="16" class="card"/>
+    <g transform="translate(388,16)">
+      <text x="0" y="9" font-size="10" font-weight="700" fill="#fff">Storyboard</text>
+      <rect x="0" y="13" width="57" height="2" rx="1" fill="#FF453A"/>
+      <text x="67" y="9" font-size="10" fill="#6E6E73">Studio</text>
+    </g>
     <g transform="translate(270,110)">
       <circle r="40" fill="#1a0508" stroke="#FF453A" stroke-opacity=".55"/>
       <g transform="translate(-13,-13)" stroke="#FF453A" stroke-width="1.8" fill="none"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l6 3.5-6 3.5z"/></g>
@@ -37,6 +42,11 @@
   <text x="620" y="28" class="cap">2 · ÉCRITURE DU STORYBOARD (PLUSIEURS SECONDES)</text>
   <g transform="translate(620,44)">
     <rect width="540" height="330" rx="16" class="card"/>
+    <g transform="translate(388,16)">
+      <text x="0" y="9" font-size="10" font-weight="700" fill="#fff">Storyboard</text>
+      <rect x="0" y="13" width="57" height="2" rx="1" fill="#FF453A"/>
+      <text x="67" y="9" font-size="10" fill="#6E6E73">Studio</text>
+    </g>
     <circle cx="40" cy="44" r="11" fill="none" stroke="#FF453A" stroke-width="2.4" stroke-dasharray="42 28"/>
     <text x="64" y="49" class="h2">Écriture du storyboard…</text>
     <text x="64" y="68" class="tiny">Le modèle raisonne avant de répondre. L'ancien storyboard reste intact en cas d'échec.</text>
@@ -55,6 +65,11 @@
   <text x="20" y="424" class="cap">3 · ENREGISTREMENT DE LA VOIX (PLUSIEURS SECONDES PAR SCÈNE)</text>
   <g transform="translate(20,440)">
     <rect width="540" height="330" rx="16" class="card"/>
+    <g transform="translate(388,16)">
+      <text x="0" y="9" font-size="10" font-weight="700" fill="#fff">Storyboard</text>
+      <rect x="0" y="13" width="57" height="2" rx="1" fill="#FF453A"/>
+      <text x="67" y="9" font-size="10" fill="#6E6E73">Studio</text>
+    </g>
     <circle cx="40" cy="44" r="11" fill="none" stroke="#FF453A" stroke-width="2.4" stroke-dasharray="42 28"/>
     <text x="64" y="49" class="h2">Enregistrement de la voix…</text>
     <g transform="translate(24,76)">
@@ -82,6 +97,11 @@
   <text x="620" y="424" class="cap">4 · VOIX PARTIELLE (REPRISE)</text>
   <g transform="translate(620,440)">
     <rect width="540" height="330" rx="16" class="card"/>
+    <g transform="translate(388,16)">
+      <text x="0" y="9" font-size="10" font-weight="700" fill="#fff">Storyboard</text>
+      <rect x="0" y="13" width="57" height="2" rx="1" fill="#FF453A"/>
+      <text x="67" y="9" font-size="10" fill="#6E6E73">Studio</text>
+    </g>
     <text x="24" y="40" class="h2">Coût : <tspan fill="#FF453A">18</tspan> crédits estimés</text>
     <text x="24" y="62" class="tiny">2 scènes mesurées · 3 estimées — le total descend quand la voix avance.</text>
     <g transform="translate(24,84)">
@@ -105,6 +125,11 @@
   <text x="20" y="820" class="cap">5 · SOLDE INSUFFISANT APRÈS MESURE</text>
   <g transform="translate(20,836)">
     <rect width="540" height="330" rx="16" class="card"/>
+    <g transform="translate(388,16)">
+      <text x="0" y="9" font-size="10" font-weight="700" fill="#fff">Storyboard</text>
+      <rect x="0" y="13" width="57" height="2" rx="1" fill="#FF453A"/>
+      <text x="67" y="9" font-size="10" fill="#6E6E73">Studio</text>
+    </g>
     <text x="24" y="44" class="h2">Coût exact : <tspan fill="#fff">25</tspan> crédits</text>
     <text x="24" y="66" class="tiny">5 scènes · toutes mesurées sur l'audio.</text>
     <rect x="24" y="90" width="492" height="44" rx="11" fill="#141416" stroke="#2A2A2D"/>
@@ -120,16 +145,21 @@
   <text x="620" y="820" class="cap">6 · VIDÉO VALIDÉE — HISTORIQUE, PAS FORMULAIRE GRISÉ</text>
   <g transform="translate(620,836)">
     <rect width="540" height="330" rx="16" class="card"/>
+    <g transform="translate(388,16)">
+      <text x="0" y="9" font-size="10" font-weight="700" fill="#fff">Storyboard</text>
+      <rect x="0" y="13" width="57" height="2" rx="1" fill="#FF453A"/>
+      <text x="67" y="9" font-size="10" fill="#6E6E73">Studio</text>
+    </g>
     <rect x="0" y="0" width="540" height="330" rx="16" fill="none" stroke="#2A2A2D"/>
-    <rect x="16" y="16" width="508" height="40" rx="10" fill="#32D74B" fill-opacity=".1" stroke="#32D74B" stroke-opacity=".4"/>
-    <text x="32" y="41" font-size="12" font-weight="700" fill="#32D74B">✓  Cette vidéo est validée — 25 crédits ont été débités.</text>
-    <g transform="translate(24,84)">
+    <rect x="16" y="36" width="508" height="40" rx="10" fill="#32D74B" fill-opacity=".1" stroke="#32D74B" stroke-opacity=".4"/>
+    <text x="32" y="61" font-size="12" font-weight="700" fill="#32D74B">✓  Cette vidéo est validée — 25 crédits ont été débités.</text>
+    <g transform="translate(24,102)">
       <text x="0" y="12" class="tiny">#1 · 5,28 s · mesurée</text>
       <text x="0" y="34" class="body">Au XVIIᵉ siècle, un royaume d'Afrique de l'Ouest confie sa garde à des femmes.</text>
       <text x="0" y="54" class="mut">Wide establishing shot of the royal palace of Abomey at dawn…</text>
     </g>
-    <line x1="24" y1="164" x2="516" y2="164" stroke="#26262A"/>
-    <g transform="translate(24,184)">
+    <line x1="24" y1="182" x2="516" y2="182" stroke="#26262A"/>
+    <g transform="translate(24,202)">
       <text x="0" y="12" class="tiny">#2 · 5,1 s · mesurée</text>
       <text x="0" y="34" class="body">On les appelle les Amazones. Elles s'entraînent chaque jour, pieds nus.</text>
       <text x="0" y="54" class="mut">Amazon warriors training in formation, dust rising, slow motion.</text>

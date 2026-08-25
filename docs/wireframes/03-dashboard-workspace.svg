@@ -75,11 +75,11 @@
     <text x="24" y="106" class="mut">Renouvellement le 12 septembre 2026.</text>
     <text x="24" y="140" class="link">Gérer mon plan et mes crédits  →</text>
     <text x="1080" y="76" text-anchor="end" class="big">3 000</text>
-    <text x="1080" y="100" text-anchor="end" class="sub">crédits ≈ 50 min en 480p · 12 min en 720p</text>
+    <text x="1080" y="100" text-anchor="end" class="sub">crédits ≈ 45 min en 480p · 15 min en 720p</text>
     <rect x="760" y="114" width="320" height="8" rx="4" fill="#2A2A2D"/>
-    <rect x="760" y="114" width="208" height="8" rx="4" fill="url(#bar)"/>
-    <text x="1080" y="140" text-anchor="end" class="tiny">1 950 / 3 000 crédits utilisés ce cycle</text>
-    <text x="24" y="166" class="tiny">1 crédit = 1 s en 480p · 4 crédits = 1 s en 720p</text>
+    <rect x="760" y="114" width="231" height="8" rx="4" fill="url(#bar)"/>
+    <text x="1080" y="140" text-anchor="end" class="tiny">1 950 / 2 700 crédits utilisés ce cycle</text>
+    <text x="24" y="166" class="tiny">1 crédit = 1 s en 480p · 3 crédits = 1 s en 720p</text>
   </g>
 
   <!-- membres -->

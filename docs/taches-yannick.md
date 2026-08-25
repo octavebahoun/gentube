@@ -47,40 +47,20 @@ les clients, il n'a pas de `tenant_id`. C'est volontaire et documenté.
 
 ---
 
-## 1. Corpus de fixtures — ta première tâche
-
-**Elle débloque Prince.** Sans elle, il attend le back pendant deux semaines.
-
-Il te faut un jeu de données réaliste, insérable en une commande :
-
-- un tenant, un projet, une vidéo
-- 5 à 6 plans (`shots`) avec, pour chacun :
-  - une `narration` (le texte parlé) et un `prompt` (la description visuelle)
-  - `duration_s` **cohérente avec la longueur du texte** (~14 caractères par
-    seconde : 69 caractères ≈ 5,28 s)
-  - `duration_source: 'measured'` — c'est ce qui débloque l'écran de validation
-  - `words` : les timings **mot à mot**, un objet par mot avec son début et sa
-    fin en secondes. Prince en a besoin pour les sous-titres karaoké.
-  - `audio_url` et `asset_url` : des URLs bidon mais bien formées
-- des variantes utiles : une vidéo en `draft`, une en cours de production, une
-  échouée, une publiée. Prince doit pouvoir afficher chaque état.
-
-Regarde `lib/db/seed.ts` : il existe déjà, tu l'étends.
-
-**Fini quand :** Prince lance une commande, ouvre l'éditeur de storyboard, et
-voit une vidéo complète avec ses timings.
+> **Ce qui t'est retiré :** le corpus de fixtures est repris par le lead,
+> parce qu'il bloque Prince. Tu commences directement par le catalogue.
 
 ---
 
-## 2. Catalogue de sons
+## 1. Catalogue de sons
 
-51 sons existent sous forme de tableau Markdown. Le parseur est déjà écrit :
+60 sons existent sous forme de tableau Markdown (51 + 9 ajoutés le 25 août). Le parseur est déjà écrit :
 `lib/sounds/import-catalog.ts` expose `parseCatalogue()`.
 
 - [ ] Écrire la commande d'import qui remplit la table `sound_assets`.
       La clé est **unique** — un import relancé doit mettre à jour, pas
       dupliquer.
-- [ ] **Monter les fichiers audio sur R2.** Attends l'adaptateur de Mourchid,
+- [ ] **Monter les fichiers audio sur R2.** Attends l'adaptateur du lead,
       puis utilise `AssetStore.put()` — n'écris jamais de client S3 toi-même.
 - [ ] CRUD d'administration du catalogue : lister, ajouter, corriger, retirer.
       Écran interne, réservé aux administrateurs de la plateforme.
@@ -91,7 +71,7 @@ s'il est renseigné dans le catalogue.
 
 ---
 
-## 3. Statistiques
+## 2. Statistiques
 
 **Que des `SELECT`.** Aucune écriture, aucune logique d'argent. C'est pour ça
 que c'est ta tâche : `tenantDb()` fait déjà l'isolation, et son test la
@@ -112,7 +92,7 @@ lente en production.
 
 ---
 
-## 4. Back-office en lecture seule
+## 3. Back-office en lecture seule
 
 Écrans internes, pour vous, pas pour les clients :
 
@@ -127,7 +107,7 @@ soit. Les actions viendront plus tard, une fois les écrans stabilisés.
 
 ---
 
-## 5. Journal d'activité
+## 4. Journal d'activité
 
 La table `activity_logs` et l'enum `ActivityType` existent, mais seuls les
 événements de compte sont journalisés (connexion, invitation, changement de

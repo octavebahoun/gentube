@@ -75,13 +75,15 @@
     <rect x="66" y="66" width="52" height="22" rx="11" fill="#32D74B" fill-opacity=".13"/>
     <circle cx="80" cy="77" r="3" fill="#32D74B"/>
     <text x="88" y="81" font-size="11" font-weight="600" fill="#32D74B">actif</text>
+    <rect x="132" y="66" width="196" height="22" rx="11" fill="#FFD60A" fill-opacity=".13"/>
+    <text x="146" y="81" font-size="11" font-weight="700" fill="#FFD60A">★  Tarif fondateur — figé 1 an</text>
     <text x="24" y="110" class="mut">Renouvellement le 12 septembre 2026 · 30 000 FCFA/mois</text>
     <text x="24" y="144" class="link">Voir les factures et les mouvements de crédits  →</text>
-    <text x="1080" y="78" text-anchor="end" class="big">3 000</text>
-    <text x="1080" y="102" text-anchor="end" class="sub">crédits ≈ 50 min en 480p · 12 min en 720p</text>
+    <text x="1080" y="78" text-anchor="end" class="big">2 700</text>
+    <text x="1080" y="102" text-anchor="end" class="sub">crédits ≈ 45 min en 480p · 15 min en 720p</text>
     <rect x="760" y="116" width="320" height="8" rx="4" fill="#2A2A2D"/>
-    <rect x="760" y="116" width="208" height="8" rx="4" fill="url(#bar)"/>
-    <text x="1080" y="142" text-anchor="end" class="tiny">1 950 / 3 000 crédits utilisés ce cycle</text>
+    <rect x="760" y="116" width="231" height="8" rx="4" fill="url(#bar)"/>
+    <text x="1080" y="142" text-anchor="end" class="tiny">1 950 / 2 700 crédits utilisés ce cycle</text>
   </g>
 
   <!-- plans -->
@@ -92,7 +94,7 @@
       <text x="0" y="22" class="body" font-weight="700">Starter</text>
       <text x="0" y="42" class="mut">Pour démarrer seul.</text>
       <text x="480" y="26" class="price">15 000 FCFA <tspan font-size="10" fill="#8A8A92" font-weight="600">/MOIS</tspan></text>
-      <text x="480" y="46" class="tiny">1 333 crédits ≈ 22 min en 480p</text>
+      <text x="480" y="46" class="tiny">1 320 crédits ≈ 22 min en 480p</text>
       <rect x="900" y="4" width="180" height="38" rx="10" fill="url(#red)"/>
       <text x="990" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Payer 15 000 FCFA</text>
     </g>
@@ -101,7 +103,7 @@
       <text x="0" y="22" class="body" font-weight="700">Pro <tspan fill="#FF453A" font-size="10" font-weight="800"> · PLAN ACTUEL</tspan></text>
       <text x="0" y="42" class="mut">Pour publier chaque semaine.</text>
       <text x="480" y="26" class="price">30 000 FCFA <tspan font-size="10" fill="#8A8A92" font-weight="600">/MOIS</tspan></text>
-      <text x="480" y="46" class="tiny">3 000 crédits ≈ 50 min en 480p</text>
+      <text x="480" y="46" class="tiny">2 700 crédits ≈ 45 min en 480p</text>
       <text x="1080" y="28" text-anchor="end" class="mut" font-weight="600">Plan actuel</text>
     </g>
     <line x1="24" y1="190" x2="1080" y2="190" stroke="#26262A"/>
@@ -120,7 +122,7 @@
   <g transform="translate(296,704)">
     <rect width="1104" height="120" rx="16" class="card"/>
     <text x="24" y="36" class="h2">Recharger des crédits</text>
-    <text x="24" y="72" class="body" font-weight="700">3 000 crédits — 5 000 FCFA</text>
+    <text x="24" y="72" class="body" font-weight="700">360 crédits — 5 000 FCFA</text>
     <text x="24" y="94" class="tiny">Les crédits achetés n'expirent pas, contrairement au quota mensuel du plan.</text>
     <rect x="900" y="38" width="180" height="44" rx="10" fill="none" stroke="#FF453A" stroke-opacity=".65"/>
     <text x="990" y="65" text-anchor="middle" font-size="13" font-weight="700" fill="#FF453A">Payer 5 000 FCFA</text>
