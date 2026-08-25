@@ -6,28 +6,29 @@
 
 On tape un thème et on récupère une vidéo prête à publier.
 
-GenTube écrit le texte parlé, l'enregistre avec une voix française, découpe le
+GenTube écrit le texte parlé, l'enregistre en voix française, découpe le
 récit en scènes, produit pour chacune une image ou un plan animé, pose des
 sous-titres qui s'allument mot par mot, ajoute une nappe musicale et des
 bruitages calés sur les coupes, assemble le tout et l'envoie sur la chaîne
-YouTube de l'utilisateur.
+YouTube du client.
 
-Rien n'est imposé. Avant de payer, on relit chaque phrase et on la réécrit, on
-réordonne les scènes, on change une voix, un bruitage ou une transition, et on
-prévisualise le résultat sur une timeline. Le format se choisit : 16:9 pour
-YouTube, 9:16 pour les formats courts.
+Avant de payer, on relit chaque phrase et on la réécrit, on réordonne les
+scènes, on change une voix, un bruitage ou une transition, et on prévisualise
+le résultat sur une timeline. Format 16:9, ou 9:16 pour les formats courts.
 
 Ce que ça remplace : un scénariste, un narrateur, un monteur et deux jours de
 travail. Une vidéo d'une minute sort en quelques minutes, pour quelques
 centaines de francs, payables par mobile money. Le prix affiché avant
 validation est le prix exact.
 
-Une agence pilote les chaînes de plusieurs clients depuis un seul compte,
-chacune cloisonnée.
+Un tableau de bord suit les vues, les vidéos en cours et les crédits
+consommés, et prévient quand une vidéo est prête, qu'une génération échoue ou
+qu'un paiement rate.
 
-Pour qui : créateurs, écoles, radios et petites entreprises d'Afrique de
-l'Ouest francophone, pour qui produire de la vidéo coûte aujourd'hui trop
-cher.
+Une agence pilote plusieurs clients depuis un seul compte, chacun cloisonné.
+
+Pour les créateurs, écoles, radios et petites entreprises d'Afrique de
+l'Ouest francophone.
 
 ---
 
@@ -47,7 +48,7 @@ J'en ajouterais un :
   (Flux, Wan) relève de la vision générative. Sans elle, un jury lit « un
   projet de texte », alors que la moitié du travail est visuelle.
 
-À ne pas cocher : *Langues africaines / NLP* tant que le produit ne génère
+À ne pas cocher : _Langues africaines / NLP_ tant que le produit ne génère
 qu'en français. Cocher un domaine qu'on ne démontre pas se retourne toujours
 contre le candidat en question.
 
