@@ -113,10 +113,10 @@ Maquette de référence : `docs/wireframes/13-studio-hyperframes.svg`.
 
 Dans `lib/credits/pricing.ts` :
 
-- [ ] `CREDITS_PER_SECOND['720p']` : 4 → **3**
-- [ ] `PLAN_MONTHLY_CREDITS` : starter 1 333 → **1 320**, pro 3 000 → **2 700**
-- [ ] Pack de recharge : 3 000 → **360 crédits**
-- [ ] Mettre à jour les assertions de `lib/credits/pricing.test.ts`
+- [x] `CREDITS_PER_SECOND['720p']` : 4 → **3**
+- [x] `PLAN_MONTHLY_CREDITS` : starter 1 333 → **1 320**, pro 3 000 → **2 700**
+- [x] Pack de recharge : 3 000 → **360 crédits**
+- [x] Mettre à jour les assertions de `lib/credits/pricing.test.ts`
 
 ## A7. Les deux poches de crédits
 

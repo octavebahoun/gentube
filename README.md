@@ -28,9 +28,9 @@ Comptes créés par le seed (mot de passe `admin123` pour tous) :
 
 | Email | Tenant | Rôle | Crédits |
 |---|---|---|---|
-| `owner@studio.test` | Studio Cotonou (pro) | owner | 3 000 |
+| `owner@studio.test` | Studio Cotonou (pro) | owner | 2 700 |
 | `editor@studio.test` | Studio Cotonou (pro) | member | — |
-| `owner@demo.test` | Kanal Demo (starter) | owner | 1 333 |
+| `owner@demo.test` | Kanal Demo (starter) | owner | 1 320 |
 
 ### Commandes
 
@@ -101,7 +101,8 @@ sont commentées dans le code.
 ## Crédits
 
 Unité (specs §1) : **1 crédit = 1 seconde de vidéo générée en 480p**, 720p à
-4 crédits/seconde. Tout est dans `lib/credits/`.
+3 crédits/seconde. Tout est dans `lib/credits/`, chiffrage complet dans
+`docs/tarifs.md`.
 
 - `pricing.ts` — barème, estimation, coût provider. Aucun nombre de tarification
   ailleurs dans le code.
@@ -127,29 +128,19 @@ Garanties :
   créditer deux fois.
 - **Invariant** : `somme(credit_ledger.delta) == tenants.credits_balance`.
 
-### ⚠️ Incohérence tarifaire dans les specs
+### Tarifs retenus
 
-La colonne « Crédits » du tableau §1 ne tient pas avec l'unité définie dans la
-même section :
+La colonne « Crédits » du tableau §1 des specs est inutilisable telle quelle
+(10 000 « crédits » y sont en réalité un budget compute en FCFA, pas un nombre
+de crédits). Les allocations ont été tranchées le 25 août 2026, chiffrées dans
+`docs/tarifs.md` :
 
-- Starter = 10 000 crédits = 10 000 s en 480p = **166 min**, alors que la même
-  ligne annonce ~23 min — et 10 000 s coûtent ~$120 de Replicate pour un
-  abonnement à 15 000 FCFA (~$24).
-- Les chiffres retombent juste si cette cellule est le **budget compute en
-  FCFA** (prix du plan moins la part plateforme), pas un nombre de crédits :
-  Starter 15 000 − 5 000 = 10 000 FCFA ≈ $16 → $16 / $0,012 = 1 333 s ≈ 22 min ✓
-  et Pro 22 000 FCFA ≈ $35 → 2 933 s ≈ 49 min ✓ — ce qui correspond exactement à
-  la colonne « ~480p ».
-
-`PLAN_MONTHLY_CREDITS` retient donc **1 333 (Starter) / 3 000 (Pro)**. Un test
-vérifie que ces allocations correspondent bien aux minutes annoncées.
-
-Le pack de recharge est laissé tel que spécifié (5 000 FCFA = 3 000 crédits)
-mais il est **vendu à perte** : 3 000 s en 480p ≈ $36 de coût pour ~$8 encaissés.
-L'équilibre serait autour de 450 crédits. `topUpMarginFcfa()` calcule la marge,
-et un test la signale tant qu'elle est négative. Le pack est désormais
-**achetable en ligne** : à trancher avant d'ouvrir les inscriptions, le prix se
-change dans `pricing.ts` et nulle part ailleurs.
+- **Starter** 15 000 FCFA/mois = **1 320 crédits ≈ 22 min** en 480p (marge 41 %)
+- **Pro** 30 000 FCFA/mois = **2 700 crédits ≈ 45 min** en 480p (marge 40 %)
+- **Recharge** 5 000 FCFA = **360 crédits ≈ 6 min**, plus chère à la minute que
+  l'abonnement volontairement — et désormais rentable (~52 % au coût réel).
+  Un test vérifie que les allocations correspondent aux minutes annoncées et
+  que le pack ne repasse jamais en perte.
 
 ---
 

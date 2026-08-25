@@ -270,13 +270,14 @@ describe('storyboard generation', () => {
       'estimated',
       'estimated',
     ]);
-    // 3 scenes x 5s at 480p = 15 credits, still an estimate.
-    expect(result.creditsEstimated).toBe(15);
+    // 3 scènes animées de 5 s à 2 crédits/s : l'unité est l'image fixe, un
+    // plan qui bouge coûte le double.
+    expect(result.creditsEstimated).toBe(30);
     expect(result.durationsMeasured).toBe(false);
     expect(result.video.creditsConsumed).toBe(0);
   });
 
-  it('prices 720p four times as much', async () => {
+  it('prices 720p three times the 480p rate', async () => {
     const tdb = await createTenant('Alpha', { credits: 1_000 });
     const { video } = await draftVideo(tdb, { resolution: '720p' });
 
@@ -285,7 +286,7 @@ describe('storyboard generation', () => {
       library: [],
     });
 
-    expect(result.creditsEstimated).toBe(40);
+    expect(result.creditsEstimated).toBe(60);
   });
 
   it('replaces the previous draft wholesale', async () => {
@@ -387,7 +388,9 @@ describe('storyboard editing', () => {
       durationS: 4,
       durationSource: 'estimated',
     });
-    expect(board.creditsEstimated).toBe(5 + 5 + 4);
+    // Deux plans animés de 5 s, puis une image fixe de 4 s : seule l'image
+    // est facturée à l'unité.
+    expect(board.creditsEstimated).toBe(5 * 2 + 5 * 2 + 4);
   });
 
   it('refuses a scene with nothing to read', async () => {
@@ -433,7 +436,7 @@ describe('storyboard editing', () => {
       audioUrl: null,
       words: null,
     });
-    expect(updated.creditsEstimated).toBe(8 + 5);
+    expect(updated.creditsEstimated).toBe((8 + 5) * 2);
     expect(updated.durationsMeasured).toBe(false);
   });
 
@@ -460,7 +463,7 @@ describe('storyboard editing', () => {
     const after = await deleteShot(tdb, video.id, board.shots[1].id);
 
     expect(after.shots.map((shot) => shot.order)).toEqual([1, 2]);
-    expect(after.creditsEstimated).toBe(10);
+    expect(after.creditsEstimated).toBe(20);
   });
 
   it('reorders on an exact list, and refuses anything else', async () => {
@@ -534,8 +537,8 @@ describe('validation', () => {
 
     const { charged, balance } = await validateStoryboard(tdb, video.id);
 
-    expect(charged).toBe(15);
-    expect(balance).toBe(985);
+    expect(charged).toBe(30);
+    expect(balance).toBe(970);
     expect((await getStoryboard(tdb, video.id)).video.status).toBe('validated');
   });
 

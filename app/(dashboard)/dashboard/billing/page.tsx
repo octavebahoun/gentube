@@ -121,8 +121,9 @@ export default async function BillingPage({
                 {credits(overview.creditsBalance)}
               </p>
               <p className="text-sm text-muted-foreground">
-                credits ≈ {minutes(secondsAffordable(overview.creditsBalance, '480p'))}{' '}
-                at 480p
+                credits ≈{' '}
+                {minutes(secondsAffordable(overview.creditsBalance, 'video', '480p'))}{' '}
+                animated at 480p
               </p>
             </div>
           </div>
@@ -155,8 +156,10 @@ export default async function BillingPage({
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {credits(offer.monthlyCredits)} credits ≈{' '}
-                      {minutes(secondsAffordable(offer.monthlyCredits, '480p'))} at
-                      480p
+                      {minutes(secondsAffordable(offer.monthlyCredits, 'video', '480p'))}{' '}
+                      animated, or{' '}
+                      {minutes(secondsAffordable(offer.monthlyCredits, 'image', '480p'))}{' '}
+                      as stills
                     </p>
                   </div>
                   {current ? (

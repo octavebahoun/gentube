@@ -193,7 +193,7 @@ export const videos = pgTable(
     status: videoStatusEnum('status').notNull().default('draft'),
     pipelineOverride: pipelineEnum('pipeline_override'),
     // Détermine la tarification en crédits : 1 crédit/s en 480p,
-    // 4 crédits/s en 720p.
+    // 3 crédits/s en 720p (docs/tarifs.md).
     resolution: resolutionEnum('resolution').notNull().default('480p'),
     // --- Réglages de rendu, sérialisés dans le storyboard Hyperframes -----
     ratio: ratioEnum('ratio').notNull().default('16:9'),
@@ -799,6 +799,7 @@ export type Plan = (typeof planEnum.enumValues)[number];
 export type Resolution = (typeof resolutionEnum.enumValues)[number];
 export type Pipeline = (typeof pipelineEnum.enumValues)[number];
 export type VideoStatus = (typeof videoStatusEnum.enumValues)[number];
+export type ShotType = (typeof shotTypeEnum.enumValues)[number];
 export type Ratio = (typeof ratioEnum.enumValues)[number];
 export type SubtitleStyle = (typeof subtitleStyleEnum.enumValues)[number];
 export type DurationSource = (typeof durationSourceEnum.enumValues)[number];

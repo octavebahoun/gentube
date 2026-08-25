@@ -70,8 +70,9 @@ function PlanAndCredits() {
               {balance.toLocaleString()}
             </p>
             <p className="text-sm text-muted-foreground">
-              credits ≈ {formatMinutes(secondsAffordable(balance, '480p'))} at
-              480p · {formatMinutes(secondsAffordable(balance, '720p'))} at 720p
+              credits ≈ {formatMinutes(secondsAffordable(balance, 'video', '480p'))}{' '}
+              animated · {formatMinutes(secondsAffordable(balance, 'image', '480p'))}{' '}
+              as stills, at 480p
             </p>
           </div>
         </div>
@@ -81,8 +82,9 @@ function PlanAndCredits() {
           </p>
         )}
         <p className="mt-4 text-xs text-muted-foreground">
-          1 credit = 1s at 480p · {CREDITS_PER_SECOND['720p']} credits = 1s at
-          720p
+          1 credit = 1s of a still at 480p · an animated shot costs{' '}
+          {CREDITS_PER_SECOND.video['480p']}× · 720p costs{' '}
+          {CREDITS_PER_SECOND.image['720p']}×
         </p>
       </CardContent>
     </Card>

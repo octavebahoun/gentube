@@ -120,7 +120,7 @@ const PIPELINE_INSTRUCTION: Record<Pipeline, string> = {
   video: 'Every scene must have type "video".',
   mixed:
     'Choose per scene: "video" when movement carries the meaning, "image" when ' +
-    'a still frame is enough — a still costs the customer four times less.',
+    'a still frame is enough — a still costs the customer half as much.',
 };
 
 export function buildStoryboardMessages({

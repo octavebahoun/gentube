@@ -7,13 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
+import { CREDITS_PER_SECOND } from '@/lib/credits/pricing';
 import { createVideoAction } from '../../../../videos/actions';
 
 type ActionState = { error?: string; success?: string };
 
 const RESOLUTIONS = [
-  { value: '480p', label: '480p', hint: '1 credit per second' },
-  { value: '720p', label: '720p', hint: '4 credits per second' },
+  { value: '480p', label: '480p' },
+  { value: '720p', label: '720p' },
 ] as const;
 
 const PIPELINES = [
@@ -80,7 +81,12 @@ export function NewVideoForm({
               />
               <div>
                 <Label htmlFor={`resolution-${option.value}`}>{option.label}</Label>
-                <p className="text-xs text-muted-foreground">{option.hint}</p>
+                <p className="text-xs text-muted-foreground">
+                  {CREDITS_PER_SECOND.image[option.value]} credit
+                  {CREDITS_PER_SECOND.image[option.value] > 1 ? 's' : ''}/s for a
+                  still · {CREDITS_PER_SECOND.video[option.value]} for an animated
+                  shot
+                </p>
               </div>
             </div>
           ))}

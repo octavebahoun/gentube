@@ -6,8 +6,19 @@ Chiffré le 25 août 2026. Base : 1 $ = 625 FCFA.
 
 ## L'unité
 
-**1 crédit = 1 seconde de vidéo en 480p.**
-Le 720p coûte **3 crédits/seconde** (il coûte réellement 2,1× le 480p).
+**1 crédit = 1 seconde d'image fixe en 480p.**
+
+| | 480p | 720p |
+|---|---|---|
+| Plan en image fixe | 1 crédit/s | 3 crédits/s |
+| Plan animé | 2 crédits/s | 6 crédits/s |
+
+Un plan animé coûte le double parce qu'il nous coûte réellement bien plus :
+~400 FCFA la minute contre ~30 pour des images fixes. Facturer les deux au
+même prix faisait payer aux clients « diaporama » — l'usage d'entrée de gamme,
+le plus sensible au prix — le tarif de la vidéo générée.
+
+Le 720p reste à 3× le 480p : il coûte réellement 2,1× plus cher.
 
 ---
 
@@ -33,11 +44,12 @@ Attention : l'option `interpolate_output` (30 fps) fait monter à 0,065 $ et
 
 | Plan | Prix/mois | Crédits | Minutes 480p | Voix | Marge |
 |---|---|---|---|---|---|
-| Starter | 15 000 FCFA | 1 320 | 22 min | Amazon Polly Neural | 41 % |
-| Pro | 30 000 FCFA | 2 700 | 45 min | ElevenLabs | 40 % |
+| Starter | 15 000 FCFA | 2 640 | 22 min animées, ou 44 min d'images | Amazon Polly Neural | 41 % |
+| Pro | 30 000 FCFA | 5 400 | 45 min animées, ou 90 min d'images | ElevenLabs | 40 % |
 | Business | sur devis | négocié | négocié | ElevenLabs | négocié |
 
-**Recharge : 5 000 FCFA = 360 crédits = 6 minutes.**
+**Recharge : 5 000 FCFA = 720 crédits**, soit 6 minutes animées ou 12 minutes
+d'images fixes.
 
 Volontairement un peu plus chère que l'abonnement — 833 FCFA/min contre 682 —
 sinon personne ne s'abonne. Marge 52 %.
@@ -88,8 +100,9 @@ toute la période d'investissement.
 
 Les constantes vivent dans `lib/credits/pricing.ts`.
 
-- [ ] `CREDITS_PER_SECOND['720p']` : 4 → **3**
-- [ ] `PLAN_MONTHLY_CREDITS` : starter 1 333 → **1 320**, pro 3 000 → **2 700**
-- [ ] Pack de recharge : 3 000 → **360 crédits**
-- [ ] Mettre à jour les assertions de `lib/credits/pricing.test.ts`
+- [x] `CREDITS_PER_SECOND['720p']` : 4 → **3**
+- [x] `PLAN_MONTHLY_CREDITS` : starter → **2 640**, pro → **5 400**
+- [x] Pack de recharge : → **720 crédits**
+- [x] `CREDITS_PER_SECOND` est indexé par type de plan **et** par résolution
+- [x] Mettre à jour les assertions de `lib/credits/pricing.test.ts`
 - [ ] Deux poches de crédits : plan (expire) et recharge (n'expire jamais)
