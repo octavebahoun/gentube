@@ -4,8 +4,7 @@
 
 > Version prête à coller.
 
-On tape un thème — « Les Amazones du Dahomey » — et on récupère une vidéo
-prête à publier.
+On tape un thème et on récupère une vidéo prête à publier.
 
 GenTube écrit le texte parlé, l'enregistre avec une voix française, découpe le
 récit en scènes, produit pour chacune une image ou un plan animé, pose des
