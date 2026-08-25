@@ -2,6 +2,7 @@ import { and, eq, gte, sql } from 'drizzle-orm';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import {
   creditLedger,
+  creditPocketEnum,
   creditReasonEnum,
   shots,
   tenants,
@@ -31,6 +32,25 @@ export class InvalidCreditAmountError extends Error {
 }
 
 export type CreditReason = (typeof creditReasonEnum.enumValues)[number];
+export type CreditPocket = (typeof creditPocketEnum.enumValues)[number];
+
+/**
+ * Quelle poche une écriture alimente, quand l'appelant ne le dit pas.
+ *
+ * Une dotation de plan va dans la poche périssable ; tout le reste — recharge,
+ * remboursement, geste commercial — va dans celle qui n'expire jamais.
+ * Rembourser vers `plan` rendrait le remboursement périmable, ce qui punirait
+ * un client pour une panne qui n'est pas la sienne.
+ */
+const DEFAULT_POCKET: Record<CreditReason, CreditPocket> = {
+  signup_grant: 'plan',
+  subscription_grant: 'plan',
+  plan_expiry: 'plan',
+  topup: 'topup',
+  video_debit: 'plan',
+  video_refund: 'topup',
+  manual_adjustment: 'topup',
+};
 
 export type LedgerResult = {
   entry: CreditLedgerEntry;
@@ -45,6 +65,10 @@ type MovementInput = {
   videoId?: number;
   /** À poser sur les écritures pilotées par webhook pour qu'un replay soit un no-op. */
   idempotencyKey?: string;
+  /** Poche alimentée. Déduite de `reason` si absente. */
+  pocket?: CreditPocket;
+  /** Fin de validité du quota de plan. Ignoré pour la poche `topup`. */
+  expiresAt?: Date;
 };
 
 function assertAmount(amount: number): void {
@@ -84,7 +108,7 @@ export async function canAfford(
  */
 export async function grantCredits(
   tdb: TenantDb,
-  { amount, reason, videoId, idempotencyKey }: MovementInput
+  { amount, reason, videoId, idempotencyKey, pocket, expiresAt }: MovementInput
 ): Promise<LedgerResult> {
   assertAmount(amount);
 
@@ -94,8 +118,13 @@ export async function grantCredits(
       return { entry: replay, balance: await getBalance(tx), replayed: true };
     }
 
+    const target = pocket ?? DEFAULT_POCKET[reason];
+    const column = target === 'plan' ? tenants.creditsPlan : tenants.creditsTopup;
+
     const [tenant] = await tx.updateTenant({
       creditsBalance: sql`${tenants.creditsBalance} + ${amount}`,
+      [target === 'plan' ? 'creditsPlan' : 'creditsTopup']: sql`${column} + ${amount}`,
+      ...(target === 'plan' && expiresAt ? { planCreditsExpireAt: expiresAt } : {}),
       updatedAt: new Date(),
     });
     if (!tenant) throw new Error(`Tenant ${tx.tenantId} not found.`);
@@ -103,6 +132,7 @@ export async function grantCredits(
     const [entry] = await tx.insert(creditLedger, {
       delta: amount,
       reason,
+      pocket: target,
       videoId: videoId ?? null,
       balanceAfter: tenant.creditsBalance,
       idempotencyKey: idempotencyKey ?? null,
@@ -131,27 +161,61 @@ export async function debitCredits(
       return { entry: replay, balance: await getBalance(tx), replayed: true };
     }
 
+    // On prend d'abord dans la poche qui expire, pour que personne ne perde
+    // de la valeur qu'il aurait pu consommer avant la fin du cycle.
+    const current = await tx.getTenant();
+    if (!current) throw new Error(`Tenant ${tx.tenantId} not found.`);
+
+    const fromPlan = Math.min(current.creditsPlan, amount);
+    const fromTopup = amount - fromPlan;
+
+    // Concurrence optimiste : la garde porte sur chaque poche, donc un débit
+    // parti d'une lecture périmée échoue au lieu de creuser un solde négatif.
     const [tenant] = await tx.updateTenant(
       {
         creditsBalance: sql`${tenants.creditsBalance} - ${amount}`,
+        creditsPlan: sql`${tenants.creditsPlan} - ${fromPlan}`,
+        creditsTopup: sql`${tenants.creditsTopup} - ${fromTopup}`,
         updatedAt: new Date(),
       },
-      gte(tenants.creditsBalance, amount)
+      and(
+        gte(tenants.creditsPlan, fromPlan),
+        gte(tenants.creditsTopup, fromTopup)
+      )
     );
 
     if (!tenant) {
       throw new InsufficientCreditsError(amount, await getBalance(tx));
     }
 
-    const [entry] = await tx.insert(creditLedger, {
-      delta: -amount,
-      reason,
-      videoId: videoId ?? null,
-      balanceAfter: tenant.creditsBalance,
-      idempotencyKey: idempotencyKey ?? null,
-    });
+    // Un débit qui traverse les deux poches écrit une ligne par poche : le
+    // grand livre reste lisible ligne à ligne, et la clé d'idempotence — qui
+    // est unique — est suffixée pour que les deux puissent coexister.
+    const movements = (
+      [
+        ['plan', fromPlan],
+        ['topup', fromTopup],
+      ] as const
+    ).filter(([, taken]) => taken > 0);
 
-    return { entry, balance: tenant.creditsBalance, replayed: false };
+    const entries: CreditLedgerEntry[] = [];
+    for (const [target, taken] of movements) {
+      const [written] = await tx.insert(creditLedger, {
+        delta: -taken,
+        reason,
+        pocket: target,
+        videoId: videoId ?? null,
+        balanceAfter: tenant.creditsBalance,
+        idempotencyKey: idempotencyKey
+          ? movements.length > 1
+            ? `${idempotencyKey}:${target}`
+            : idempotencyKey
+          : null,
+      });
+      entries.push(written);
+    }
+
+    return { entry: entries[0], balance: tenant.creditsBalance, replayed: false };
   });
 }
 
@@ -280,3 +344,60 @@ export async function ledgerSum(tdb: TenantDb): Promise<number> {
 }
 
 export { and, eq };
+
+/**
+ * Fait tomber le quota de plan arrivé à échéance.
+ *
+ * Les crédits **achetés** ne sont pas touchés : ils n'expirent jamais, faire
+ * expirer ce qu'un client a payé serait du vol. Seule la poche `plan` retombe
+ * à zéro, et l'opération est tracée dans le grand livre pour qu'un client
+ * puisse voir ce qui a disparu, quand, et pourquoi.
+ *
+ * Idempotent : appelée deux fois le même cycle, la seconde ne fait rien.
+ * Sûre à appeler avant n'importe quelle lecture de solde.
+ */
+export async function expirePlanCredits(
+  tdb: TenantDb,
+  now: Date = new Date()
+): Promise<{ expired: number; balance: number }> {
+  return await tdb.transaction(async (tx) => {
+    const tenant = await tx.getTenant();
+    if (!tenant) throw new Error(`Tenant ${tx.tenantId} not found.`);
+
+    const due =
+      tenant.planCreditsExpireAt !== null &&
+      tenant.planCreditsExpireAt <= now &&
+      tenant.creditsPlan > 0;
+
+    if (!due) {
+      return { expired: 0, balance: tenant.creditsBalance };
+    }
+
+    const expired = tenant.creditsPlan;
+    const [updated] = await tx.updateTenant(
+      {
+        creditsBalance: sql`${tenants.creditsBalance} - ${expired}`,
+        creditsPlan: 0,
+        planCreditsExpireAt: null,
+        updatedAt: new Date(),
+      },
+      gte(tenants.creditsPlan, expired)
+    );
+    if (!updated) {
+      // Un débit concurrent a entamé la poche : elle sera périmée au prochain
+      // passage, sur des valeurs fraîches.
+      return { expired: 0, balance: await getBalance(tx) };
+    }
+
+    await tx.insert(creditLedger, {
+      delta: -expired,
+      reason: 'plan_expiry',
+      pocket: 'plan',
+      videoId: null,
+      balanceAfter: updated.creditsBalance,
+      idempotencyKey: `plan_expiry:${tx.tenantId}:${tenant.planCreditsExpireAt!.toISOString()}`,
+    });
+
+    return { expired, balance: updated.creditsBalance };
+  });
+}

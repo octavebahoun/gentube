@@ -2,6 +2,7 @@ import { client, db } from '@/lib/db/drizzle';
 import { resetDatabase } from '@/lib/db/reset';
 import { tenantDb, type TenantDb } from '@/lib/db/tenant-db';
 import {
+  type CreditPocket,
   projects,
   tenants,
   videos,
@@ -20,11 +21,24 @@ export async function closeDb() {
 /** Crée un tenant et rend un handle scopé pour lui. */
 export async function createTenant(
   name: string,
-  { plan = 'starter', credits = 0 }: { plan?: Plan; credits?: number } = {}
+  {
+    plan = 'starter',
+    credits = 0,
+    pocket = 'plan',
+  }: { plan?: Plan; credits?: number; pocket?: CreditPocket } = {}
 ): Promise<TenantDb> {
+  // L'invariant du solde est `credits_balance = credits_plan + credits_topup`.
+  // Poser un solde sans remplir de poche donnait un tenant qui affiche des
+  // crédits et ne peut rien débiter.
   const [tenant] = await db
     .insert(tenants)
-    .values({ name, plan, creditsBalance: credits })
+    .values({
+      name,
+      plan,
+      creditsBalance: credits,
+      creditsPlan: pocket === 'plan' ? credits : 0,
+      creditsTopup: pocket === 'topup' ? credits : 0,
+    })
     .returning();
   return tenantDb(tenant.id);
 }

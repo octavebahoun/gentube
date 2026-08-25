@@ -20,6 +20,7 @@ import {
   tenants,
   users,
   videos,
+  publications,
   youtubeTokens,
   type Tenant,
 } from './schema';
@@ -60,6 +61,7 @@ export const TENANT_SCOPED_TABLES = [
   jobs,
   creditLedger,
   youtubeTokens,
+  publications,
   subscriptions,
   billingCycles,
   paymentIntents,

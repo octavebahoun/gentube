@@ -131,7 +131,9 @@ n'expirent jamais**. Or `credit_ledger` ne connaît qu'un solde.
 C'est le chemin monétaire : transaction, clé d'idempotence, un test par cas
 de bord.
 
-## A8. Écrire les quatre contrats
+## A8. Écrire les quatre contrats — fait
+
+> Écrits dans `docs/contrats.md`.
 
 > Débloque : tout le monde. Sans eux, quatre devs improvisent la même chose
 > différemment.
@@ -147,7 +149,9 @@ de bord.
       YouTube (10 000 unités/jour pour toute la plateforme, ~6 publications)
       et la programmation.
 
-## A9. Une migration de schéma consolidée
+## A9. Une migration de schéma consolidée — fait
+
+> Migration `0004`. Deux poches de crédits, `publications`, `youtube_quota_usage`.
 
 > Débloque : tout le monde. Quatre devs qui lancent `drizzle-kit` = conflit
 > sur `_journal.json` à chaque fois.

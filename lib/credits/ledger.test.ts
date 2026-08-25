@@ -20,6 +20,7 @@ import {
   listLedger,
   refundVideo,
   validateAndChargeVideo,
+  expirePlanCredits,
 } from './ledger';
 
 // Un client postgres partagé par worker : fermé une fois, après l'exécution
@@ -317,5 +318,144 @@ describe('video estimation and charging', () => {
       eq(creditLedger.reason, 'video_refund')
     );
     expect(refunds).toHaveLength(1);
+  });
+});
+
+describe('the two credit pockets', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it('spends the expiring pocket before the one that was paid for', async () => {
+    // Sinon le client perd de la valeur qu'il aurait pu consommer avant la
+    // fin du cycle.
+    const tdb = await createTenant('Alpha');
+    await grantCredits(tdb, { amount: 100, reason: 'subscription_grant' });
+    await grantCredits(tdb, { amount: 50, reason: 'topup' });
+
+    await debitCredits(tdb, { amount: 60, reason: 'video_debit' });
+
+    const tenant = await tdb.getTenant();
+    expect(tenant?.creditsPlan).toBe(40);
+    expect(tenant?.creditsTopup).toBe(50);
+    expect(tenant?.creditsBalance).toBe(90);
+  });
+
+  it('writes one ledger line per pocket when a debit spans both', async () => {
+    const tdb = await createTenant('Alpha');
+    await grantCredits(tdb, { amount: 30, reason: 'subscription_grant' });
+    await grantCredits(tdb, { amount: 100, reason: 'topup' });
+
+    await debitCredits(tdb, {
+      amount: 50,
+      reason: 'video_debit',
+      idempotencyKey: 'video:1:debit',
+    });
+
+    // L'ordre de listing n'est pas un contrat ; les deux lignes le sont.
+    const debits = (await listLedger(tdb))
+      .filter((row) => row.delta < 0)
+      .map((row) => [row.pocket, row.delta])
+      .sort();
+    expect(debits).toEqual([
+      ['plan', -30],
+      ['topup', -20],
+    ]);
+
+    const tenant = await tdb.getTenant();
+    expect(tenant?.creditsPlan).toBe(0);
+    expect(tenant?.creditsTopup).toBe(80);
+  });
+
+  it('keeps the balance equal to the sum of its pockets', async () => {
+    const tdb = await createTenant('Alpha');
+    await grantCredits(tdb, { amount: 100, reason: 'subscription_grant' });
+    await grantCredits(tdb, { amount: 40, reason: 'topup' });
+    await debitCredits(tdb, { amount: 130, reason: 'video_debit' });
+
+    const tenant = await tdb.getTenant();
+    expect(tenant?.creditsBalance).toBe(
+      tenant!.creditsPlan + tenant!.creditsTopup
+    );
+    expect(tenant?.creditsBalance).toBe(10);
+  });
+
+  it('expires the plan quota and never the credits that were bought', async () => {
+    // Faire expirer ce qu'un client a payé serait du vol.
+    const tdb = await createTenant('Alpha');
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    await grantCredits(tdb, {
+      amount: 100,
+      reason: 'subscription_grant',
+      expiresAt: yesterday,
+    });
+    await grantCredits(tdb, { amount: 40, reason: 'topup' });
+
+    const { expired, balance } = await expirePlanCredits(tdb);
+
+    expect(expired).toBe(100);
+    expect(balance).toBe(40);
+    const tenant = await tdb.getTenant();
+    expect(tenant?.creditsTopup).toBe(40);
+    expect(tenant?.planCreditsExpireAt).toBeNull();
+  });
+
+  it('leaves a quota that has not reached its date', async () => {
+    const tdb = await createTenant('Alpha');
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await grantCredits(tdb, {
+      amount: 100,
+      reason: 'subscription_grant',
+      expiresAt: tomorrow,
+    });
+
+    expect((await expirePlanCredits(tdb)).expired).toBe(0);
+    expect((await tdb.getTenant())?.creditsPlan).toBe(100);
+  });
+
+  it('does nothing the second time it runs on the same cycle', async () => {
+    const tdb = await createTenant('Alpha');
+    await grantCredits(tdb, {
+      amount: 100,
+      reason: 'subscription_grant',
+      expiresAt: new Date(Date.now() - 1000),
+    });
+
+    await expirePlanCredits(tdb);
+    const second = await expirePlanCredits(tdb);
+
+    expect(second.expired).toBe(0);
+    expect(second.balance).toBe(0);
+  });
+
+  it('records the expiry so a customer can see what vanished', async () => {
+    const tdb = await createTenant('Alpha');
+    await grantCredits(tdb, {
+      amount: 100,
+      reason: 'subscription_grant',
+      expiresAt: new Date(Date.now() - 1000),
+    });
+
+    await expirePlanCredits(tdb);
+
+    const [last] = (await listLedger(tdb)).filter(
+      (row) => row.reason === 'plan_expiry'
+    );
+    expect(last.delta).toBe(-100);
+    expect(last.pocket).toBe('plan');
+    expect(last.balanceAfter).toBe(0);
+  });
+
+  it('refunds into the pocket that does not expire', async () => {
+    // Un remboursement périmable punirait le client pour une panne qui n'est
+    // pas la sienne.
+    const tdb = await createTenant('Alpha');
+    await grantCredits(tdb, { amount: 100, reason: 'subscription_grant' });
+    await debitCredits(tdb, { amount: 40, reason: 'video_debit' });
+    await grantCredits(tdb, { amount: 40, reason: 'video_refund' });
+
+    const tenant = await tdb.getTenant();
+    expect(tenant?.creditsPlan).toBe(60);
+    expect(tenant?.creditsTopup).toBe(40);
   });
 });

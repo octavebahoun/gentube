@@ -27,7 +27,14 @@ afterAll(async () => {
  * et la bibliothèque de sons partagée — un catalogue d'actifs plateforme
  * n'appartenant à aucun client et lisible par tous.
  */
-const UNSCOPED_TABLES = new Set(['tenants', 'sound_assets']);
+// `youtube_quota_usage` rejoint la liste : le quota YouTube est une ressource
+// de plateforme (10 000 unités/jour pour tous les clients réunis), pas la
+// donnée d'un tenant. Même statut que `sound_assets`.
+const UNSCOPED_TABLES = new Set([
+  'tenants',
+  'sound_assets',
+  'youtube_quota_usage',
+]);
 
 describe('tenantDb — schema coverage', () => {
   it('registers every tenant-owned table', () => {

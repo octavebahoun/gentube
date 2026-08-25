@@ -80,6 +80,27 @@ export const creditReasonEnum = pgEnum('credit_reason', [
   'video_debit',
   'video_refund',
   'manual_adjustment',
+  // Fin de cycle : le quota du plan tombe, les crédits achetés ne bougent pas.
+  'plan_expiry',
+]);
+
+/**
+ * Les deux poches d'un solde.
+ *
+ * `plan` est le quota mensuel : il tombe en fin de cycle. `topup` est ce que
+ * le client a **payé en plus** : il n'expire jamais — faire expirer ce qu'un
+ * client a acheté, c'est du vol.
+ *
+ * Un débit prend d'abord dans `plan`, la poche périssable, pour que personne
+ * ne perde de la valeur qu'il aurait pu consommer.
+ */
+export const creditPocketEnum = pgEnum('credit_pocket', ['plan', 'topup']);
+
+export const publicationStatusEnum = pgEnum('publication_status', [
+  'scheduled',
+  'uploading',
+  'published',
+  'failed',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -92,7 +113,17 @@ export const tenants = pgTable('tenants', {
   plan: planEnum('plan').notNull().default('starter'),
   // Total courant dénormalisé de `credit_ledger`. Uniquement muté via
   // lib/credits — voir le test d'invariant dans lib/credits/credits.test.ts.
+  /**
+   * Total des deux poches, dénormalisé pour que le solde se lise sans agréger
+   * le grand livre. Toujours égal à `creditsPlan + creditsTopup`.
+   */
   creditsBalance: integer('credits_balance').notNull().default(0),
+  /** Quota du cycle en cours. Tombe à `planCreditsExpireAt`. */
+  creditsPlan: integer('credits_plan').notNull().default(0),
+  /** Crédits achetés. N'expirent jamais. */
+  creditsTopup: integer('credits_topup').notNull().default(0),
+  /** Fin du cycle courant. `null` tant qu'aucun quota n'a été accordé. */
+  planCreditsExpireAt: timestamp('plan_credits_expire_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
@@ -316,6 +347,11 @@ export const creditLedger = pgTable(
     // Négatif pour un débit, positif pour une dotation/recharge/remboursement.
     delta: integer('delta').notNull(),
     reason: creditReasonEnum('reason').notNull(),
+    /**
+     * Poche touchée. Un débit qui traverse les deux écrit deux lignes, une par
+     * poche, pour que le grand livre reste lisible ligne à ligne.
+     */
+    pocket: creditPocketEnum('pocket').notNull().default('plan'),
     videoId: integer('video_id').references(() => videos.id),
     balanceAfter: integer('balance_after').notNull(),
     // Posé par les écritures pilotées par webhook (GeniusPay, Replicate) pour
@@ -596,6 +632,70 @@ export const paymentWebhookEvents = pgTable(
   ]
 );
 
+/**
+ * Une tentative de publication, pas une par vidéo : republier après un échec
+ * doit rester lisible dans l'historique.
+ *
+ * `videos.youtube_video_id` reste en projection de la dernière publication
+ * réussie — même règle que `videos.status` face à `jobs`.
+ */
+export const publications = pgTable(
+  'publications',
+  {
+    id: serial('id').primaryKey(),
+    tenantId: integer('tenant_id')
+      .notNull()
+      .references(() => tenants.id),
+    videoId: integer('video_id')
+      .notNull()
+      .references(() => videos.id),
+    provider: varchar('provider', { length: 40 }).notNull().default('youtube'),
+    /** Id côté plateforme, une fois l'envoi accepté. */
+    externalId: varchar('external_id', { length: 64 }),
+    status: publicationStatusEnum('status').notNull().default('scheduled'),
+    /** Quand publier. `null` signifie dès que possible. */
+    scheduledFor: timestamp('scheduled_for'),
+    publishedAt: timestamp('published_at'),
+    error: text('error'),
+    /** Ce que l'appel a coûté en quota, pour réconcilier avec le compteur. */
+    quotaUnits: integer('quota_units'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('publications_tenant_id_idx').on(t.tenantId),
+    index('publications_video_id_idx').on(t.videoId),
+    index('publications_scheduled_for_idx').on(t.scheduledFor),
+  ]
+);
+
+/**
+ * Consommation quotidienne du quota YouTube, **pour toute la plateforme**.
+ *
+ * Ce n'est pas une limite par client : 10 000 unités par jour, un envoi en
+ * coûte 1 600, donc environ six publications quotidiennes tous clients
+ * confondus. Deux clients qui publient trois vidéos chacun l'épuisent.
+ *
+ * Pas de `tenant_id`, volontairement — même statut que `sound_assets` : c'est
+ * une ressource de plateforme, pas la donnée d'un client. Le compteur est
+ * incrémenté dans la transaction qui crée la publication, jamais après
+ * l'envoi, sinon deux envois simultanés passent tous les deux.
+ *
+ * Le quota se réinitialise à minuit **Pacifique**, l'heure de Google — 9 h du
+ * matin à Cotonou en heure d'hiver.
+ */
+export const youtubeQuotaUsage = pgTable(
+  'youtube_quota_usage',
+  {
+    id: serial('id').primaryKey(),
+    /** Jour Pacifique, au format `YYYY-MM-DD`. */
+    day: varchar('day', { length: 10 }).notNull(),
+    unitsUsed: integer('units_used').notNull().default(0),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('youtube_quota_usage_day_uq').on(t.day)]
+);
+
 // ---------------------------------------------------------------------------
 // Relations
 // ---------------------------------------------------------------------------
@@ -781,6 +881,12 @@ export type CreditLedgerEntry = typeof creditLedger.$inferSelect;
 export type NewCreditLedgerEntry = typeof creditLedger.$inferInsert;
 export type YoutubeToken = typeof youtubeTokens.$inferSelect;
 export type NewYoutubeToken = typeof youtubeTokens.$inferInsert;
+
+export type Publication = typeof publications.$inferSelect;
+export type NewPublication = typeof publications.$inferInsert;
+export type YoutubeQuotaUsage = typeof youtubeQuotaUsage.$inferSelect;
+export type CreditPocket = (typeof creditPocketEnum.enumValues)[number];
+export type PublicationStatus = (typeof publicationStatusEnum.enumValues)[number];
 
 export type SoundAsset = typeof soundAssets.$inferSelect;
 export type NewSoundAsset = typeof soundAssets.$inferInsert;
