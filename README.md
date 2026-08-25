@@ -265,8 +265,8 @@ encore atteindre R2 sous les mêmes clés pour être **jouables**.
 production dans le pipeline pipevideo : `effects` (9 transitions, zoom, shake,
 matchCut, cameraMotion, flash), `overlayText`, `kineticTitle`, `card`, `sounds`,
 volumes, et le modèle de temps (30 fps, 1 s de silence après chaque narration,
-transitions qui se chevauchent). `toRemotionStoryboard()` sérialise
-`videos` + `shots` vers exactement ce JSON, pour que la composition Remotion
+transitions qui se chevauchent). `toHyperframesStoryboard()` sérialise
+`videos` + `shots` vers exactement ce JSON, pour que la composition
 existante soit réutilisée sans traduction.
 
 L'habillage vit dans une colonne `render` en jsonb, validée par zod : ajouter
@@ -475,23 +475,32 @@ Webhook à déclarer côté GeniusPay : `${BASE_URL}/api/webhooks/geniuspay`.
 
 ## Pas encore implémenté
 
-Volontairement hors périmètre pour l'instant : Replicate, Remotion, YouTube,
+Volontairement hors périmètre pour l'instant : Replicate, Hyperframes, YouTube,
 ElevenLabs et l'orchestration n8n. Le schéma, les crédits, l'isolation, la
 facturation, les projets et le storyboard sont en place pour les recevoir.
 
-**Stockage R2 — le blocage numéro un.** `lib/storage/index.ts` fige le contrat
-(`AssetStore`, `assetKey` avec préfixe `tenant_id/` obligatoire) et lève
-`StorageNotConfiguredError` tant qu'aucune implémentation R2 n'existe. La voix
-off, les images, les clips et le rendu final en dépendent tous. C'est la
-première chose à écrire, et elle débloque quatre chantiers d'un coup.
+**Stockage R2 — fait.** `lib/storage/index.ts` porte le contrat (`AssetStore`,
+`assetKey` avec préfixe `tenant_id/` obligatoire) et `lib/storage/r2.ts`
+l'implémente sur Cloudflare R2. Rien n'est public : tout se lit par une URL
+signée de quinze minutes. `StorageNotConfiguredError` nomme les variables
+manquantes plutôt que d'échouer plus tard sur un appel réseau opaque.
+
+Les tests ne peuvent pas l'atteindre : `lib/test/setup.ts` vide les variables
+`R2_*`. Sans ce garde-fou, un test qui oublie d'injecter un store factice écrit
+dans le bucket de production — c'est arrivé dès la première exécution.
 
 **Glisser-déposer du kanban.** Le réordonnancement se fait aux flèches ; le
 drag-and-drop des specs reste à poser par-dessus le même appel serveur.
 
-**Composition Remotion.** Le contrat est porté (`lib/storyboard/render.ts`),
-la composition elle-même — `Main.tsx`, `Scene.tsx`, `Subtitles.tsx`,
-`transitions.tsx`, `KineticTitle.tsx` — reste à recopier depuis pipevideo, avec
-ses dépendances `remotion` et `@remotion/*`.
+**Templates Hyperframes.** Le contrat est porté et exprimé en secondes
+(`lib/storyboard/render.ts`) : `toHyperframesStoryboard()` produit les
+positions absolues, les dimensions et la durée totale. Les templates
+HTML/CSS/GSAP qui les consomment restent à écrire, avec
+`@hyperframes/shader-transitions` pour les transitions.
+
+Les paquets ne sont pas encore installés. **Quand ils le seront, ils doivent
+être épinglés à la version exacte** : `@hyperframes/*` est en 0.8.x, publié
+plusieurs fois par jour. Un `^` sur du 0.x accepte des ruptures en silence.
 
 **Expiration du quota de plan.** Les specs §1 disent que les crédits achetés
 n'expirent pas mais que le quota du plan expire en fin de cycle. Le crédit du

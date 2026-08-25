@@ -21,7 +21,7 @@ import {
   type ChatMessage,
   type JsonCompleter,
 } from '@/lib/llm/deepseek';
-import { sceneEffectsSchema, sceneSoundSchema } from './render';
+import { TRANSITIONS, sceneEffectsSchema, sceneSoundSchema } from './render';
 
 /**
  * Storyboard — le plan éditable d'une vidéo.
@@ -107,9 +107,9 @@ const SYSTEM_PROMPT = [
   '- Do NOT write any duration. The duration of a scene is the real length of',
   '  its voice-over, measured after the audio is generated.',
   '- Do not restate the project style in each prompt: it is applied separately.',
-  '- `effects` is optional: zoom in/out/none, transition fade/slide/none/black/',
-  '  wipe/zoomPunch/whipPan/glitchCut/particleDissolve, shake true/false,',
-  '  cameraMotion orbit/dolly/pan/static.',
+  '- `effects` is optional: zoom in/out/none, shake true/false,',
+  '  cameraMotion orbit/dolly/pan/static, and transition — one of:',
+  `  ${TRANSITIONS.join('/')}.`,
   '- `sounds` is optional and may ONLY contain `src` values copied verbatim',
   '  from the sound library given below. Never invent a path.',
   `- Never return more than ${MAX_SHOTS} scenes.`,

@@ -195,7 +195,7 @@ export const videos = pgTable(
     // Détermine la tarification en crédits : 1 crédit/s en 480p,
     // 4 crédits/s en 720p.
     resolution: resolutionEnum('resolution').notNull().default('480p'),
-    // --- Réglages de rendu, sérialisés dans le storyboard Remotion --------
+    // --- Réglages de rendu, sérialisés dans le storyboard Hyperframes -----
     ratio: ratioEnum('ratio').notNull().default('16:9'),
     /** Nom de la voix ou id du fournisseur. Null hérite de la voix du projet. */
     voice: varchar('voice', { length: 60 }),
@@ -264,7 +264,7 @@ export const shots = pgTable(
      * Mise en scène et sound design : zoom, transition, mouvement caméra,
      * overlays et titres animés, sons par scène, cartes, volumes. Validé par
      * le contrat zod de lib/storyboard/render.ts, qui est la même forme que
-     * consomme la composition Remotion — donc extensible sans migration.
+     * consomme la composition Hyperframes — donc extensible sans migration.
      */
     render: jsonb('render'),
     assetUrl: text('asset_url'),

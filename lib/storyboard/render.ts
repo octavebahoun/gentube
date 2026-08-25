@@ -3,7 +3,7 @@ import type { Ratio, Shot, Video } from '@/lib/db/schema';
 
 /**
  * Le contrat de rendu — vérité partagée entre la base de données et la
- * composition Remotion.
+ * composition Hyperframes.
  *
  * C'est un port du schéma storyboard déjà en production dans le pipeline
  * pipevideo, conservé champ pour champ pour que la composition puisse être
@@ -38,17 +38,45 @@ export const sceneSoundSchema = z.object({
   trimEnd: z.number().min(0).optional(),
 });
 
-export const TRANSITIONS = [
-  'fade',
-  'slide',
-  'none',
-  'black',
-  'wipe',
-  'zoomPunch',
-  'whipPan',
-  'glitchCut',
-  'particleDissolve',
+/**
+ * Transitions rendues en CSS : elles n'ont pas d'équivalent shader et n'en
+ * ont pas besoin. `none` ne dure rien, `black` passe par un noir franc.
+ */
+export const CSS_TRANSITIONS = ['none', 'fade', 'black'] as const;
+
+/**
+ * Transitions de `@hyperframes/shader-transitions`, reprises sous leurs noms
+ * exacts.
+ *
+ * On adopte leur vocabulaire tel quel plutôt que de traduire le nôtre : une
+ * table de correspondance entre deux jeux de noms ne peut que dériver, et
+ * c'est le renderer qui a le dernier mot sur ce qui existe vraiment.
+ */
+export const SHADER_TRANSITIONS = [
+  'domain-warp',
+  'ridged-burn',
+  'whip-pan',
+  'sdf-iris',
+  'ripple-waves',
+  'gravitational-lens',
+  'cinematic-zoom',
+  'chromatic-split',
+  'glitch',
+  'swirl-vortex',
+  'thermal-distortion',
+  'flash-through-white',
+  'cross-warp-morph',
+  'light-leak',
 ] as const;
+
+export const TRANSITIONS = [...CSS_TRANSITIONS, ...SHADER_TRANSITIONS] as const;
+
+export type Transition = (typeof TRANSITIONS)[number];
+
+/** Vrai quand la transition doit être rendue par un shader WebGL. */
+export function isShaderTransition(transition: string): boolean {
+  return (SHADER_TRANSITIONS as readonly string[]).includes(transition);
+}
 
 /** Les mouvements caméra sont des directives pour le *prompt*, pas pour le renderer. */
 export const CAMERA_MOTIONS = ['orbit', 'dolly', 'pan', 'static'] as const;
@@ -113,71 +141,121 @@ export type SceneRender = z.infer<typeof sceneRenderSchema>;
 
 // ---------------------------------------------------------------------------
 // Timing — une seule source de vérité, sinon les scènes sont tronquées
+//
+// Tout est en SECONDES, parce que Hyperframes déclare `data-start` et
+// `data-duration` en secondes et parce que notre source de vérité — la durée
+// mesurée sur l'audio — est déjà une durée en secondes. L'ancien modèle
+// convertissait en images à 30 fps avec un `Math.ceil` : chaque scène dérivait
+// jusqu'à 33 ms contre son propre audio, et ces millisecondes s'additionnaient.
 // ---------------------------------------------------------------------------
 
+/** Fréquence de sortie du rendu. N'intervient plus dans aucun calcul de durée. */
 export const FPS = 30;
 
-/** Plancher pour une scène, au cas où une piste audio revient très courte. */
-export const MIN_SCENE_FRAMES = 30;
+/**
+ * Plancher du temps passé à l'écran, au cas où une piste audio revient très
+ * courte. À ne pas confondre avec `MIN_SCENE_SECONDS` de `./service`, qui
+ * borne la durée *estimée* depuis le texte avant que l'audio existe.
+ */
+export const MIN_SCENE_ON_SCREEN_SECONDS = 1;
 
-export const TRANSITION_FRAMES = 15;
+/** Durée d'une transition qui n'en déclare pas d'autre. */
+export const DEFAULT_TRANSITION_SECONDS = 0.5;
 
 /**
  * Silence maintenu après la fin de la narration, média toujours à l'écran,
  * pour que le spectateur digère avant la réplique suivante.
  *
- * Il doit durer plus longtemps que la transition la plus longue (26 frames
- * pour `black`) : le chevauchement avec la scène suivante tombe alors
- * entièrement dans ce silence, et la voix d'une scène ne joue jamais par-
- * dessus celle de la suivante.
+ * Il doit durer plus longtemps que la transition la plus longue : le
+ * chevauchement avec la scène suivante tombe alors entièrement dans ce
+ * silence, et la voix d'une scène ne joue jamais par-dessus celle de la
+ * suivante. Un test le vérifie — l'ancien contrat l'affirmait en commentaire
+ * et le violait déjà, `particleDissolve` durant 40 images pour une pause de 30.
  */
-export const POST_NARRATION_PAUSE_FRAMES = 30;
-
-export function transitionDurationFrames(transition?: string): number {
-  switch (transition) {
-    case 'none':
-      return 0;
-    case 'black':
-      return 26;
-    case 'wipe':
-      return 20;
-    case 'zoomPunch':
-      return 18;
-    case 'whipPan':
-      return 20;
-    case 'glitchCut':
-      return 8;
-    case 'particleDissolve':
-      return 40;
-    default:
-      return TRANSITION_FRAMES; // fade, slide
-  }
-}
-
-export function sceneDurationInFrames(
-  scene: { durationInSeconds?: number; card?: unknown },
-  fps: number = FPS
-): number {
-  const narrationFrames = Math.ceil((scene.durationInSeconds ?? 2) * fps);
-  // Une carte de fin n'a ni voix ni son : rien à digérer.
-  const pauseFrames = scene.card ? 0 : POST_NARRATION_PAUSE_FRAMES;
-  return Math.max(MIN_SCENE_FRAMES, narrationFrames + pauseFrames);
-}
+export const POST_NARRATION_PAUSE_SECONDS = 1;
 
 /**
- * Durée totale de la composition. Les transitions chevauchent leurs voisines,
- * donc leur durée est soustraite — sinon le rendu dépasse son contenu.
+ * Durée de chaque transition, en secondes.
+ *
+ * Table plutôt que `switch` : elle se parcourt, donc l'invariant « plus courte
+ * que la pause » est vérifiable au lieu d'être promis.
  */
-export function totalDurationInFrames(
-  scenes: { durationInSeconds?: number; card?: unknown; effects?: { transition?: string } }[],
-  fps: number = FPS
-): number {
-  const total = scenes.reduce((accumulated, scene, index) => {
-    const overlap =
-      index === 0 ? 0 : transitionDurationFrames(scene.effects?.transition ?? 'fade');
-    return accumulated + sceneDurationInFrames(scene, fps) - overlap;
-  }, 0);
-  return Math.max(MIN_SCENE_FRAMES, total);
+export const TRANSITION_DURATIONS: Record<Transition, number> = {
+  none: 0,
+  fade: DEFAULT_TRANSITION_SECONDS,
+  black: 0.85,
+  'domain-warp': 0.9,
+  'ridged-burn': 0.9,
+  'whip-pan': 0.65,
+  'sdf-iris': 0.65,
+  'ripple-waves': 0.8,
+  'gravitational-lens': 0.8,
+  'cinematic-zoom': 0.6,
+  'chromatic-split': 0.4,
+  glitch: 0.3,
+  'swirl-vortex': 0.8,
+  'thermal-distortion': 0.7,
+  'flash-through-white': 0.35,
+  'cross-warp-morph': 0.9,
+  'light-leak': 0.6,
+};
+
+/** Arrondi à la milliseconde : au-delà, ce n'est que du bruit de flottant. */
+function ms(seconds: number): number {
+  return Math.round(seconds * 1000) / 1000;
+}
+
+export function transitionDurationSeconds(transition?: string): number {
+  if (transition && transition in TRANSITION_DURATIONS) {
+    return TRANSITION_DURATIONS[transition as Transition];
+  }
+  return DEFAULT_TRANSITION_SECONDS;
+}
+
+export function sceneDurationSeconds(scene: {
+  durationInSeconds?: number;
+  card?: unknown;
+}): number {
+  const narration = scene.durationInSeconds ?? 2;
+  // Une carte de fin n'a ni voix ni son : rien à digérer.
+  const pause = scene.card ? 0 : POST_NARRATION_PAUSE_SECONDS;
+  return ms(Math.max(MIN_SCENE_ON_SCREEN_SECONDS, narration + pause));
+}
+
+type TimedScene = {
+  durationInSeconds?: number;
+  card?: unknown;
+  effects?: { transition?: string };
+};
+
+/**
+ * Instant de départ de chaque scène sur la timeline.
+ *
+ * C'est ce que Hyperframes attend : des positions absolues, pas des durées
+ * enchaînées. Les transitions chevauchent leur voisine de gauche, donc chaque
+ * scène recule de la durée de sa propre transition entrante.
+ */
+export function sceneStartTimes(scenes: TimedScene[]): number[] {
+  const starts: number[] = [];
+  let cursor = 0;
+  scenes.forEach((scene, index) => {
+    if (index > 0) {
+      cursor -= transitionDurationSeconds(scene.effects?.transition ?? 'fade');
+    }
+    starts.push(ms(Math.max(0, cursor)));
+    cursor = Math.max(0, cursor) + sceneDurationSeconds(scene);
+  });
+  return starts;
+}
+
+/** Durée totale de la composition. */
+export function totalDurationSeconds(scenes: TimedScene[]): number {
+  if (scenes.length === 0) return MIN_SCENE_ON_SCREEN_SECONDS;
+  const starts = sceneStartTimes(scenes);
+  const last = scenes.length - 1;
+  return ms(
+    Math.max(MIN_SCENE_ON_SCREEN_SECONDS, starts[last] + sceneDurationSeconds(scenes[last]))
+  );
 }
 
 export function dimensionsFor(ratio: Ratio): { width: number; height: number } {
@@ -190,17 +268,25 @@ export function dimensionsFor(ratio: Ratio): { width: number; height: number } {
 // Sérialisation
 // ---------------------------------------------------------------------------
 
-export type RemotionScene = {
+export type HyperframesScene = {
   id: number;
   narration: string;
   subtitle?: string;
   mediaPath?: string;
   audioPath?: string;
-  durationInSeconds?: number;
+  /** Position absolue sur la timeline — c'est le `data-start` de Hyperframes. */
+  startInSeconds: number;
+  /** Temps total à l'écran, silence de fin compris : le `data-duration`. */
+  durationInSeconds: number;
+  /**
+   * Longueur de l'audio seul, sans le silence. La voix off s'arrête là, alors
+   * que l'image reste. Les deux étaient confondus dans l'ancien contrat.
+   */
+  narrationSeconds: number;
   words?: WordTiming[];
 } & SceneRender;
 
-export type RemotionStoryboard = {
+export type HyperframesStoryboard = {
   title: string;
   ratio: Ratio;
   voice?: string;
@@ -209,7 +295,12 @@ export type RemotionStoryboard = {
   music?: string;
   musicVolume: number;
   sfxVolume: number;
-  scenes: RemotionScene[];
+  /** Durée totale, calculée une fois ici pour que personne ne la recalcule. */
+  durationInSeconds: number;
+  fps: number;
+  width: number;
+  height: number;
+  scenes: HyperframesScene[];
 };
 
 /**
@@ -217,11 +308,12 @@ export type RemotionStoryboard = {
  *
  * Chemins : pipevideo résout `mediaPath` et `audioPath` contre `public/`.
  * Ici ce sont ce que la couche de stockage remet — URLs R2 signées en
- * production, que Remotion accepte comme sources absolues. Le résolveur
+ * production, que le navigateur de rendu accepte comme sources absolues. Le
+ * résolveur
  * d'assets de la composition est le seul endroit qui doit connaître la
  * différence.
  */
-export function toRemotionStoryboard(
+export function toHyperframesStoryboard(
   video: Pick<
     Video,
     | 'title'
@@ -235,7 +327,21 @@ export function toRemotionStoryboard(
   >,
   shots: Shot[],
   { fallbackVoice }: { fallbackVoice?: string | null } = {}
-): RemotionStoryboard {
+): HyperframesStoryboard {
+  const parsed = shots.map((shot) => {
+    const render = sceneRenderSchema.safeParse(shot.render ?? {});
+    return {
+      shot,
+      render: render.success ? render.data : {},
+      durationInSeconds: shot.durationS,
+      card: render.success ? render.data.card : undefined,
+      effects: render.success ? render.data.effects : undefined,
+    };
+  });
+
+  const starts = sceneStartTimes(parsed);
+  const { width, height } = dimensionsFor(video.ratio);
+
   return {
     title: video.title,
     ratio: video.ratio,
@@ -245,8 +351,12 @@ export function toRemotionStoryboard(
     music: video.musicUrl ?? undefined,
     musicVolume: video.musicVolume,
     sfxVolume: video.sfxVolume,
-    scenes: shots.map((shot, index) => {
-      const render = sceneRenderSchema.safeParse(shot.render ?? {});
+    durationInSeconds: totalDurationSeconds(parsed),
+    fps: FPS,
+    width,
+    height,
+    scenes: parsed.map((entry, index) => {
+      const { shot } = entry;
       const words = z.array(wordTimingSchema).safeParse(shot.words ?? []);
 
       return {
@@ -257,9 +367,11 @@ export function toRemotionStoryboard(
         subtitle: shot.subtitle ?? undefined,
         mediaPath: shot.assetUrl ?? undefined,
         audioPath: shot.audioUrl ?? undefined,
-        durationInSeconds: shot.durationS,
+        startInSeconds: starts[index],
+        durationInSeconds: sceneDurationSeconds(entry),
+        narrationSeconds: shot.durationS,
         words: words.success && words.data.length > 0 ? words.data : undefined,
-        ...(render.success ? render.data : {}),
+        ...entry.render,
       };
     }),
   };

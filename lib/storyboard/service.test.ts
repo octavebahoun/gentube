@@ -209,7 +209,7 @@ describe('normalising what the model returns', () => {
             narration: line(3),
             type: 'video',
             prompt: 'Warriors in formation at dawn',
-            effects: { zoom: 'in', transition: 'whipPan', cameraMotion: 'dolly' },
+            effects: { zoom: 'in', transition: 'whip-pan', cameraMotion: 'dolly' },
             sounds: [
               { src: 'sounds/sfx/pop.mp3', startInSeconds: 0.5 },
               // Inventé par le modèle : échouerait quelques minutes plus tard dans Lambda.
@@ -223,7 +223,7 @@ describe('normalising what the model returns', () => {
     );
 
     expect(normalised[0].render).toEqual({
-      effects: { zoom: 'in', transition: 'whipPan', cameraMotion: 'dolly' },
+      effects: { zoom: 'in', transition: 'whip-pan', cameraMotion: 'dolly' },
       sounds: [{ src: 'sounds/sfx/pop.mp3', startInSeconds: 0.5 }],
     });
   });
