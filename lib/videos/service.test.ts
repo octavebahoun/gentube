@@ -3,7 +3,13 @@ import { ZodError } from 'zod';
 import { eq } from 'drizzle-orm';
 import { shots, videos } from '@/lib/db/schema';
 import { createProject } from '@/lib/projects';
-import { closeDb, createTenant, resetDb } from '@/lib/test/fixtures';
+import { ResolutionNotAllowedError } from '@/lib/billing/entitlements';
+import {
+  closeDb,
+  createTenant,
+  resetDb,
+  subscribe,
+} from '@/lib/test/fixtures';
 import {
   VideoError,
   createVideo,
@@ -45,6 +51,7 @@ describe('video creation', () => {
 
   it('keeps the theme apart from the title', async () => {
     const tdb = await createTenant('Alpha');
+    await subscribe(tdb); // le 720p demande un abonnement actif
     const project = await createProject(tdb, { name: 'Docs' });
 
     const video = await createVideo(tdb, {
@@ -154,6 +161,7 @@ describe('video edits', () => {
 
   it('touches only what it was given', async () => {
     const { tdb, video } = await draft();
+    await subscribe(tdb);
 
     const updated = await updateVideo(tdb, video.id, { resolution: '720p' });
 
@@ -219,5 +227,65 @@ describe('video deletion', () => {
       statusCode: 409,
     });
     expect(await tdb.count(videos)).toBe(1);
+  });
+});
+
+describe('the trial', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it('refuses 720p without an active plan, even on a forged request', async () => {
+    // Le formulaire n'offre pas le choix ; une requête directe, si.
+    const tdb = await createTenant('Alpha');
+    const project = await createProject(tdb, { name: 'Docs' });
+
+    await expect(
+      createVideo(tdb, {
+        projectId: project.id,
+        title: 'Amazones',
+        resolution: '720p',
+      })
+    ).rejects.toThrow(ResolutionNotAllowedError);
+  });
+
+  it('refuses to upgrade an existing draft to 720p either', async () => {
+    const tdb = await createTenant('Alpha');
+    const project = await createProject(tdb, { name: 'Docs' });
+    const video = await createVideo(tdb, {
+      projectId: project.id,
+      title: 'Amazones',
+    });
+
+    await expect(
+      updateVideo(tdb, video.id, { resolution: '720p' })
+    ).rejects.toThrow(ResolutionNotAllowedError);
+  });
+
+  it('still allows 480p', async () => {
+    const tdb = await createTenant('Alpha');
+    const project = await createProject(tdb, { name: 'Docs' });
+
+    const video = await createVideo(tdb, {
+      projectId: project.id,
+      title: 'Amazones',
+      resolution: '480p',
+    });
+
+    expect(video.resolution).toBe('480p');
+  });
+
+  it('opens 720p as soon as a plan is active', async () => {
+    const tdb = await createTenant('Alpha');
+    await subscribe(tdb);
+    const project = await createProject(tdb, { name: 'Docs' });
+
+    const video = await createVideo(tdb, {
+      projectId: project.id,
+      title: 'Amazones',
+      resolution: '720p',
+    });
+
+    expect(video.resolution).toBe('720p');
   });
 });

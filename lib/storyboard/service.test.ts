@@ -6,7 +6,12 @@ import { createVideo } from '@/lib/videos';
 import { LlmError, type JsonCompleter } from '@/lib/llm/deepseek';
 import type { SoundChoice } from '@/lib/sounds';
 import type { TenantDb } from '@/lib/db/tenant-db';
-import { closeDb, createTenant, resetDb } from '@/lib/test/fixtures';
+import {
+  closeDb,
+  createTenant,
+  resetDb,
+  subscribe,
+} from '@/lib/test/fixtures';
 import {
   MAX_SHOTS,
   NARRATION_CHARS_PER_SECOND,
@@ -279,6 +284,7 @@ describe('storyboard generation', () => {
 
   it('prices 720p three times the 480p rate', async () => {
     const tdb = await createTenant('Alpha', { credits: 1_000 });
+    await subscribe(tdb); // le 720p demande un abonnement actif
     const { video } = await draftVideo(tdb, { resolution: '720p' });
 
     const result = await generateStoryboard(tdb, video.id, {
@@ -597,5 +603,55 @@ describe('storyboard isolation', () => {
     });
 
     expect(await beta.count(shots)).toBe(0);
+  });
+});
+
+describe('the watermark', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  async function voicedDraft(tdb: TenantDb) {
+    const { video } = await draftVideo(tdb);
+    await generateStoryboard(tdb, video.id, {
+      client: answering(scenesOf(2, { seconds: 5 })),
+      library: [],
+    });
+    await measure(tdb, video.id);
+    return video;
+  }
+
+  it('marks what a trial produced', async () => {
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await voicedDraft(tdb);
+
+    await validateStoryboard(tdb, video.id);
+
+    const row = await tdb.findById(videos, video.id);
+    expect(row?.watermarked).toBe(true);
+  });
+
+  it('leaves a paid video clean', async () => {
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    await subscribe(tdb);
+    const video = await voicedDraft(tdb);
+
+    await validateStoryboard(tdb, video.id);
+
+    const row = await tdb.findById(videos, video.id);
+    expect(row?.watermarked).toBe(false);
+  });
+
+  it('is decided at the charge, so subscribing later does not clean it', async () => {
+    // Une vidéo garde la marque avec laquelle elle a été payée. Sinon un
+    // client réclamerait le rendu propre de sa vidéo d'essai.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await voicedDraft(tdb);
+    await validateStoryboard(tdb, video.id);
+
+    await subscribe(tdb);
+
+    const row = await tdb.findById(videos, video.id);
+    expect(row?.watermarked).toBe(true);
   });
 });

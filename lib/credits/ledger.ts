@@ -1,4 +1,4 @@
-import { and, eq, gte, sql } from 'drizzle-orm';
+import { and, eq, gte, or, sql } from 'drizzle-orm';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import {
   creditLedger,
@@ -77,6 +77,14 @@ function assertAmount(amount: number): void {
   }
 }
 
+/**
+ * Retrouve l'écriture qu'une clé d'idempotence a déjà produite.
+ *
+ * Deux formes existent : la clé exacte pour une écriture simple, et
+ * `<clé>:plan` quand un débit a traversé les deux poches et écrit une ligne
+ * par poche (voir debitCredits). Sonder les deux est ce qui rend le replay un
+ * no-op dans les deux cas — sinon un débit fractionné serait rejouable.
+ */
 async function findReplay(
   tdb: TenantDb,
   idempotencyKey?: string
@@ -84,7 +92,10 @@ async function findReplay(
   if (!idempotencyKey) return null;
   return await tdb.findFirst(
     creditLedger,
-    eq(creditLedger.idempotencyKey, idempotencyKey)
+    or(
+      eq(creditLedger.idempotencyKey, idempotencyKey),
+      eq(creditLedger.idempotencyKey, `${idempotencyKey}:plan`)
+    )
   );
 }
 
@@ -252,7 +263,18 @@ export async function estimateVideo(
  */
 export async function validateAndChargeVideo(
   tdb: TenantDb,
-  videoId: number
+  videoId: number,
+  /**
+   * Le rendu portera-t-il un filigrane ? Décidé **ici**, au débit, et non au
+   * rendu : une vidéo garde la marque avec laquelle elle a été payée. Sans ça,
+   * un client qui s'abonne le lendemain réclamerait le rendu propre de sa
+   * vidéo d'essai, et il aurait raison de le demander.
+   *
+   * Sans valeur par défaut, volontairement : la question est trop chère pour
+   * qu'un appelant l'oublie en silence. C'est `lib/billing/entitlements.ts`
+   * qui la tranche.
+   */
+  { watermark }: { watermark: boolean }
 ): Promise<{ video: Video; charged: number; balance: number }> {
   return await tdb.transaction(async (tx) => {
     const video = await tx.findById(videos, videoId);
@@ -281,6 +303,7 @@ export async function validateAndChargeVideo(
       videos,
       {
         status: 'validated',
+        watermarked: watermark,
         creditsEstimated: charged,
         creditsConsumed: charged,
         updatedAt: new Date(),

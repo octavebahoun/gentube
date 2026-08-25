@@ -239,6 +239,12 @@ export const videos = pgTable(
     musicVolume: real('music_volume').notNull().default(0.09),
     /** Multiplicateur global sur tous les sons de scène. 0 coupe tous les SFX d'un coup. */
     sfxVolume: real('sfx_volume').notNull().default(1),
+    /**
+     * Décidé **au débit**, pas au rendu : une vidéo garde la marque avec
+     * laquelle elle a été payée. Sinon un client qui s'abonne après coup
+     * réclamerait le rendu propre de sa vidéo d'essai — et il aurait raison.
+     */
+    watermarked: boolean('watermarked').notNull().default(false),
     creditsEstimated: integer('credits_estimated').notNull().default(0),
     creditsConsumed: integer('credits_consumed').notNull().default(0),
     youtubeVideoId: varchar('youtube_video_id', { length: 32 }),

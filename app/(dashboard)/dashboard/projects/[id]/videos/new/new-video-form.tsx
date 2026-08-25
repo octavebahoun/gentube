@@ -27,10 +27,17 @@ const PIPELINES = [
 export function NewVideoForm({
   projectId,
   projectPipeline,
+  allowedResolutions,
+  watermark,
 }: {
   projectId: number;
   projectPipeline: string;
+  allowedResolutions: readonly string[];
+  watermark: boolean;
 }) {
+  const resolutions = RESOLUTIONS.filter((option) =>
+    allowedResolutions.includes(option.value)
+  );
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     createVideoAction,
     {}
@@ -72,7 +79,7 @@ export function NewVideoForm({
       <div>
         <Label>Resolution</Label>
         <RadioGroup name="resolution" defaultValue="480p" className="mt-2 space-y-2">
-          {RESOLUTIONS.map((option) => (
+          {resolutions.map((option) => (
             <div key={option.value} className="flex items-start gap-2">
               <RadioGroupItem
                 value={option.value}
@@ -122,6 +129,12 @@ export function NewVideoForm({
 
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
 
+      {watermark && (
+        <p className="rounded-md border border-orange-500/20 bg-orange-500/10 p-3 text-sm text-muted-foreground">
+          Essai gratuit : la vidéo sortira en 480p avec un filigrane. Un plan
+          actif débloque le 720p et retire la marque.
+        </p>
+      )}
       <Button
         type="submit"
         className="bg-orange-500 hover:bg-orange-600 text-white"

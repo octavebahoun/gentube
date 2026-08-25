@@ -175,8 +175,7 @@ function measuredDrift(narration: string): number {
 /**
  * Un plan tel que la voix off puis les visuels l'ont écrit : durée mesurée,
  * alignement mot à mot, clé audio et clé visuelle au format `assetKey()`.
- * Les clés sont bidon mais respectent le préfixe tenant et la convention
- * `<tenant>/videos/<vidéo>/scene-<plan>.*` du pipeline.
+ * Les clés sont bidon mais suivent le plan de nommage de docs/contrats.md §3.
  */
 function measuredShot(tenantId: number, videoId: number, order: number, spec: SceneSpec) {
   const estimated = estimateNarrationSeconds(spec.narration);
@@ -192,11 +191,11 @@ function measuredShot(tenantId: number, videoId: number, order: number, spec: Sc
     durationS,
     durationSource: 'measured' as const,
     words: wordTimings(spec.narration, durationS),
-    audioUrl: `${tenantId}/videos/${videoId}/scene-${order}.mp3`,
+    audioUrl: `${tenantId}/videos/${videoId}/voice/scene-${order}.mp3`,
     assetUrl:
       spec.type === 'image'
-        ? `${tenantId}/videos/${videoId}/scene-${order}.png`
-        : `${tenantId}/videos/${videoId}/scene-${order}.mp4`,
+        ? `${tenantId}/videos/${videoId}/images/scene-${order}.png`
+        : `${tenantId}/videos/${videoId}/clips/scene-${order}.mp4`,
     status: 'ready' as const,
   };
 }
@@ -296,7 +295,7 @@ async function seed() {
       shots,
       SCENES.map((spec, index) => measuredShot(studio.id, video.id, index + 1, spec))
     );
-    const { charged } = await validateAndChargeVideo(studioDb, video.id);
+    const { charged } = await validateAndChargeVideo(studioDb, video.id, { watermark: false });
     return { video, inserted, charged };
   }
 

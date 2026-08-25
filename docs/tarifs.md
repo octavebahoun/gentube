@@ -48,6 +48,16 @@ Attention : l'option `interpolate_output` (30 fps) fait monter à 0,065 $ et
 | Pro | 30 000 FCFA | 5 400 | 45 min animées, ou 90 min d'images | ElevenLabs | 40 % |
 | Business | sur devis | négocié | négocié | ElevenLabs | négocié |
 
+**Essai gratuit : 120 crédits à l'inscription**, soit une minute animée ou
+deux minutes d'images fixes. **480p uniquement, avec filigrane.**
+
+Coût réel : 400 FCFA au pire par inscription, 60 FCFA si l'essai part en
+images fixes. C'est un budget publicitaire.
+
+Le filigrane est posé **au débit**, pas au rendu : une vidéo garde la marque
+avec laquelle elle a été payée. Les deux concurrents directs vendent « sans
+filigrane » comme fonctionnalité payante, donc c'est attendu sur ce marché.
+
 **Recharge : 5 000 FCFA = 720 crédits**, soit 6 minutes animées ou 12 minutes
 d'images fixes.
 

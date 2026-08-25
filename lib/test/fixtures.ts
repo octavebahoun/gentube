@@ -4,6 +4,7 @@ import { tenantDb, type TenantDb } from '@/lib/db/tenant-db';
 import {
   type CreditPocket,
   projects,
+  subscriptions,
   tenants,
   videos,
   type Plan,
@@ -41,6 +42,21 @@ export async function createTenant(
     })
     .returning();
   return tenantDb(tenant.id);
+}
+
+/**
+ * Donne au tenant un abonnement actif, ce qui débloque le 720p et retire le
+ * filigrane. Sans lui, un tenant de test est en essai.
+ */
+export async function subscribe(
+  tdb: TenantDb,
+  plan: Plan = 'pro'
+): Promise<void> {
+  await db.insert(subscriptions).values({
+    tenantId: tdb.tenantId,
+    plan,
+    status: 'active',
+  });
 }
 
 /** Un projet plus une vidéo en brouillon, pour les tests qui ont besoin de quelque chose à scoper. */

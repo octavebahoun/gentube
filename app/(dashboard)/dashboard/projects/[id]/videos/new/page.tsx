@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getUser } from '@/lib/db/queries';
 import { tenantDb } from '@/lib/db/tenant-db';
 import { ProjectError, getProject } from '@/lib/projects';
+import { getEntitlements } from '@/lib/billing/entitlements';
 import { NewVideoForm } from './new-video-form';
 
 export default async function NewVideoPage({
@@ -25,6 +26,12 @@ export default async function NewVideoPage({
     throw error;
   }
 
+  // L'essai ne produit qu'en 480p. On n'affiche pas un choix que le serveur
+  // refusera : une option grisée sans explication se lit comme un bug.
+  const { resolutions, watermark } = await getEntitlements(
+    tenantDb(user.tenantId)
+  );
+
   return (
     <section className="flex-1 p-4 lg:p-8">
       <Link
@@ -42,6 +49,8 @@ export default async function NewVideoPage({
         </CardHeader>
         <CardContent>
           <NewVideoForm
+            allowedResolutions={resolutions}
+            watermark={watermark}
             projectId={project.id}
             projectPipeline={project.defaultPipeline}
           />

@@ -9,6 +9,7 @@ import {
   type Video,
 } from '@/lib/db/schema';
 import { PIPELINES, getProject } from '@/lib/projects';
+import { assertResolutionAllowed } from '@/lib/billing/entitlements';
 
 /**
  * Videos — a title, a theme, and the storyboard that will be generated from it.
@@ -110,6 +111,10 @@ export async function createVideo(
   // tenant.
   await getProject(tdb, data.projectId);
 
+  // Le 720p demande un abonnement actif. Vérifié ici et pas seulement dans le
+  // formulaire : une requête forgée passerait à côté du choix affiché.
+  await assertResolutionAllowed(tdb, data.resolution ?? '480p');
+
   const [video] = await tdb.insert(videos, {
     projectId: data.projectId,
     title: data.title,
@@ -130,6 +135,10 @@ export async function updateVideo(
   const data = videoUpdateSchema.parse(input);
   const video = await getVideo(tdb, id);
   assertDraft(video);
+
+  if (data.resolution !== undefined) {
+    await assertResolutionAllowed(tdb, data.resolution);
+  }
 
   const patch: Record<string, unknown> = {};
   for (const field of ['title', 'theme', 'resolution', 'pipelineOverride'] as const) {

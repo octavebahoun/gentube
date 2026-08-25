@@ -1,0 +1,1 @@
+ALTER TABLE "videos" ADD COLUMN "watermarked" boolean DEFAULT false NOT NULL;

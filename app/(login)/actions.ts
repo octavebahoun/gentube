@@ -16,7 +16,7 @@ import {
 } from '@/lib/db/schema';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { getUser } from '@/lib/db/queries';
-import { grantCredits, PLAN_MONTHLY_CREDITS } from '@/lib/credits';
+import { grantCredits, TRIAL_CREDITS } from '@/lib/credits';
 import {
   validatedAction,
   validatedActionWithUser,
@@ -184,8 +184,10 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
 
     // Dotation de démarrage, passée par le grand livre comme tout autre
     // mouvement.
+    // Essai, pas un mois offert : 120 crédits valent une minute animée ou
+    // deux minutes d'images fixes, en 480p et filigrané.
     await grantCredits(tenantDb(tenantId), {
-      amount: PLAN_MONTHLY_CREDITS.starter,
+      amount: TRIAL_CREDITS,
       reason: 'signup_grant',
       idempotencyKey: `tenant:${tenantId}:signup_grant`,
     });

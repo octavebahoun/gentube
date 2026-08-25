@@ -83,8 +83,17 @@ export async function generateVoiceover(
       video.voice ?? project.voiceId
     );
 
+    // Plan de nommage : docs/contrats.md §3 —
+    // `<tenant>/videos/<video>/voice/scene-<ordre>.mp3`. L'ordre, pas l'id :
+    // une scène déplacée garde son fichier, le storyboard dit quel fichier va où.
     const key = await assets.put(
-      assetKey(tdb.tenantId, 'videos', String(videoId), `scene-${shot.id}.mp3`),
+      assetKey(
+        tdb.tenantId,
+        'videos',
+        String(videoId),
+        'voice',
+        `scene-${shot.order}.mp3`
+      ),
       voiceover.audio,
       voiceover.contentType
     );

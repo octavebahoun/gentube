@@ -66,6 +66,30 @@ export const PLAN_PRICE_FCFA: Record<Plan, number | null> = {
 };
 
 /**
+ * Dotation offerte à l'inscription, sans paiement.
+ *
+ * 120 crédits = **une minute animée ou deux minutes d'images fixes** en 480p.
+ * Assez pour produire une vidéo complète et juger le résultat, pas assez pour
+ * s'en servir comme d'un abonnement gratuit.
+ *
+ * Le coût réel est de 400 FCFA au pire (tout en plans animés), 60 FCFA si
+ * l'essai part en images fixes. C'est un budget publicitaire, pas une fuite.
+ *
+ * L'inscription offrait auparavant `PLAN_MONTHLY_CREDITS.starter`, soit un
+ * mois complet de Starter — 22 minutes animées, environ 8 800 FCFA de coût
+ * fournisseur par compte créé, y compris pour dix comptes ouverts par la même
+ * personne.
+ *
+ * L'essai est bridé en 480p et filigrané : les deux concurrents directs
+ * vendent « sans filigrane » comme fonctionnalité payante, donc c'est attendu
+ * sur ce marché.
+ */
+export const TRIAL_CREDITS = 120;
+
+/** Résolution imposée tant qu'aucun abonnement n'est actif. */
+export const TRIAL_RESOLUTION = '480p' as const;
+
+/**
  * Packs de recharge (docs/tarifs.md) : 5 000 FCFA = 720 crédits, soit 6 min
  * animées ou 12 min d'images.
  *

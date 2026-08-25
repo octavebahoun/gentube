@@ -227,7 +227,7 @@ describe('video estimation and charging', () => {
     const { video } = await createProjectWithVideo(tdb);
     await addShots(tdb, video.id, [6, 8, 5, 6]);
 
-    const result = await validateAndChargeVideo(tdb, video.id);
+    const result = await validateAndChargeVideo(tdb, video.id, { watermark: false });
 
     expect(result.charged).toBe(50);
     expect(result.balance).toBe(450);
@@ -245,7 +245,7 @@ describe('video estimation and charging', () => {
     const { video } = await createProjectWithVideo(tdb);
     await addShots(tdb, video.id, [6, 8, 5, 6]);
 
-    await expect(validateAndChargeVideo(tdb, video.id)).rejects.toThrow(
+    await expect(validateAndChargeVideo(tdb, video.id, { watermark: false })).rejects.toThrow(
       InsufficientCreditsError
     );
 
@@ -259,9 +259,9 @@ describe('video estimation and charging', () => {
     const { video } = await createProjectWithVideo(tdb);
     await addShots(tdb, video.id, [6, 8, 5, 6]);
 
-    await validateAndChargeVideo(tdb, video.id);
+    await validateAndChargeVideo(tdb, video.id, { watermark: false });
 
-    await expect(validateAndChargeVideo(tdb, video.id)).rejects.toThrow(
+    await expect(validateAndChargeVideo(tdb, video.id, { watermark: false })).rejects.toThrow(
       /only a draft can be validated/
     );
     expect(await getBalance(tdb)).toBe(450);
@@ -271,7 +271,7 @@ describe('video estimation and charging', () => {
     const tdb = await createTenant('Alpha', { credits: 500 });
     const { video } = await createProjectWithVideo(tdb);
 
-    await expect(validateAndChargeVideo(tdb, video.id)).rejects.toThrow(
+    await expect(validateAndChargeVideo(tdb, video.id, { watermark: false })).rejects.toThrow(
       /no shots/
     );
   });
@@ -282,7 +282,7 @@ describe('video estimation and charging', () => {
     const { video } = await createProjectWithVideo(alpha);
     await addShots(alpha, video.id, [5]);
 
-    await expect(validateAndChargeVideo(beta, video.id)).rejects.toThrow(
+    await expect(validateAndChargeVideo(beta, video.id, { watermark: false })).rejects.toThrow(
       /not found for this tenant/
     );
     expect(await getBalance(beta)).toBe(500);
@@ -292,7 +292,7 @@ describe('video estimation and charging', () => {
     const tdb = await createTenant('Alpha', { credits: 500 });
     const { video } = await createProjectWithVideo(tdb);
     await addShots(tdb, video.id, [6, 8, 5, 6]);
-    await validateAndChargeVideo(tdb, video.id);
+    await validateAndChargeVideo(tdb, video.id, { watermark: false });
 
     const result = await refundVideo(tdb, video.id);
 
@@ -307,7 +307,7 @@ describe('video estimation and charging', () => {
     const tdb = await createTenant('Alpha', { credits: 500 });
     const { video } = await createProjectWithVideo(tdb);
     await addShots(tdb, video.id, [5]);
-    await validateAndChargeVideo(tdb, video.id);
+    await validateAndChargeVideo(tdb, video.id, { watermark: false });
 
     await refundVideo(tdb, video.id);
     await refundVideo(tdb, video.id);
@@ -365,6 +365,36 @@ describe('the two credit pockets', () => {
     const tenant = await tdb.getTenant();
     expect(tenant?.creditsPlan).toBe(0);
     expect(tenant?.creditsTopup).toBe(80);
+  });
+
+  it('treats the replay of a debit that spanned both pockets as a no-op', async () => {
+    // Les lignes d'un débit fractionné portent des clés suffixées
+    // (`k:plan`, `k:topup`) : le replay qui sonde la clé exacte doit quand
+    // même retrouver la trace du premier passage.
+    const tdb = await createTenant('Alpha');
+    await grantCredits(tdb, { amount: 30, reason: 'subscription_grant' });
+    await grantCredits(tdb, { amount: 100, reason: 'topup' });
+
+    const first = await debitCredits(tdb, {
+      amount: 50,
+      reason: 'video_debit',
+      idempotencyKey: 'video:1:debit',
+    });
+    expect(first.replayed).toBe(false);
+
+    const replay = await debitCredits(tdb, {
+      amount: 50,
+      reason: 'video_debit',
+      idempotencyKey: 'video:1:debit',
+    });
+    expect(replay.replayed).toBe(true);
+    expect(replay.balance).toBe(first.balance);
+
+    const debits = await listLedger(tdb);
+    expect(debits.filter((row) => row.delta < 0)).toHaveLength(2);
+
+    const tenant = await tdb.getTenant();
+    expect(tenant?.creditsBalance).toBe(80);
   });
 
   it('keeps the balance equal to the sum of its pockets', async () => {

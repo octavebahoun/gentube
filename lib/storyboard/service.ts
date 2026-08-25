@@ -8,6 +8,7 @@ import {
   validateAndChargeVideo,
 } from '@/lib/credits';
 import { getProject } from '@/lib/projects';
+import { getEntitlements } from '@/lib/billing/entitlements';
 import { VideoError, assertDraft, getVideo } from '@/lib/videos';
 import {
   keepKnownSounds,
@@ -580,7 +581,8 @@ export async function validateStoryboard(
     );
   }
 
-  return await validateAndChargeVideo(tdb, videoId);
+  const { watermark } = await getEntitlements(tdb);
+  return await validateAndChargeVideo(tdb, videoId, { watermark });
 }
 
 export { VideoError };
