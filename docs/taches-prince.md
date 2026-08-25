@@ -104,7 +104,21 @@ jamais en tapant un nombre.
       C'est l'aperçu, gratuit.
 - [ ] Indiquer clairement le passage estimé → mesuré (c'est là que l'argent
       se décide)
-- [ ] **Embarquer `@hyperframes/studio`** — décision actée. C'est une vraie
+- [ ] **Embarquer `@hyperframes/studio`** — décision actée.
+      Maquette de référence : `docs/wireframes/13-studio-hyperframes.svg`.
+
+      **La règle qui tient tout :** une scène est un bloc **indivisible** —
+      visuel + narration + ses SFX. On la **déplace**, on ne la **redimensionne
+      jamais**. Sa durée est verrouillée à l'audio mesuré.
+
+      Donc quand l'utilisateur glisse le bloc visuel #2, sa narration et ses
+      bruitages suivent dans le même geste. Sinon l'image et la voix se
+      désynchronisent, et le prix affiché ne correspond plus à la vidéo.
+
+      Restent en place, eux : la musique et les ambiances, qui courent sur
+      toute la vidéo et n'appartiennent à aucune scène.
+
+      Décision actée à l'origine. C'est une vraie
       bibliothèque React 19 + Tailwind, avec timeline visuelle et scrub.
       Deux prérequis avant de commencer, on les vérifie :
       son serveur (`@hyperframes/studio-server`) doit pouvoir lire par tenant,
