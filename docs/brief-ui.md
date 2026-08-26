@@ -121,8 +121,42 @@ navigation-menu, pagination, popover, progress, radio-group, resizable,
 scroll-area, select, separator, sheet, sidebar, skeleton, slider, spinner,
 switch, table, tabs, textarea, toast, toggle, toggle-group, tooltip…
 
-**Écrans** (`/home/precieux/my-app/app/dashboard/`) : `creer`, `editeur`,
-`fabrication`, `credits`, `videos`, `series`, `modeles`, `qualite`, `marque`.
+### Combien d'écrans, exactement
+
+my-app porte **32 pages, ~6 000 lignes**. GenTube en a 13. Tous ne servent
+pas — voici le tri.
+
+**10 écrans clients à reprendre** (`/home/precieux/my-app/app/dashboard/`) :
+
+| Écran | Lignes | Équivalent GenTube |
+|---|---|---|
+| `creer` | 333 | création de vidéo — existe en version brute |
+| `editeur` | 257 | éditeur de storyboard — **le plus important** |
+| `series` | 242 | projets |
+| `fabrication` | 202 | production en direct — **n'existe pas** |
+| `videos/[slug]` | 201 | détail d'une vidéo |
+| `marque` | 194 | style et voix du projet |
+| `credits` | 191 | facturation |
+| `videos` | — | bibliothèque |
+| `modeles` | — | templates de montage |
+| `page.tsx` | — | accueil du tableau de bord |
+
+**4 écrans autour** : `(auth)/login`, `(auth)/signup`, `onboarding`, et
+`tarifs` (page publique, 194 lignes).
+
+**15 écrans d'administration en bonus** (`/home/precieux/my-app/app/admin/`) :
+comptes, grand-livre, paiements, fabrication, santé, audit, événements,
+qualité, modèles, tarifs, paramètres, clés-api. **GenTube n'a aucun
+back-office aujourd'hui.** Ne les prends qu'une fois les écrans clients
+posés.
+
+**Deux à ignorer :** `developpeurs` (clés API — GenTube n'expose pas d'API
+publique) et `qualite` si son contenu ne correspond à rien chez nous.
+
+**Le vrai travail n'est pas la copie.** Ces écrans lisent Supabase ; GenTube
+est sur Drizzle avec des server actions. Ce qui migre, c'est la couche
+visuelle. Compte le débranchement des données comme la moitié du temps, pas
+comme un détail.
 
 **Chrome applicatif** (`/home/precieux/my-app/components/`) : `app-sidebar`,
 `app-header`, `nav-main`, `nav-user`, `team-switcher`, `sidebar-credits`,
