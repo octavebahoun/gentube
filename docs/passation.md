@@ -336,9 +336,12 @@ Tous ces points ont été trouvés en appelant le service, aucun n'était écrit
 **Remotion devient payant au-delà de 3 personnes.** C'est ce qui a fait
 basculer le projet vers HyperFrames.
 
-**Les paquets npm `@hyperframes/*` n'ont aucun champ `license`**, alors que le
-dépôt est en Apache 2.0. Un audit de dépendances les signalera. À savoir avant
-qu'on vous le demande.
+**Les paquets npm `@hyperframes/*` n'ont aucun champ `license` dans leur
+`package.json`** — mais ils embarquent bien un fichier `LICENSE` Apache 2.0.
+La licence existe donc ; c'est la métadonnée qui manque. Un outil d'audit qui
+lit `package.json` les signalera quand même en « licence inconnue ». À savoir
+avant qu'on vous le demande, surtout pour une équipe qui a changé de
+framework *à cause* d'une licence.
 
 ### Des invariants affirmés mais faux
 

@@ -48,3 +48,11 @@ assets/sounds/
 render/gentube-v1/index.html
 render/gentube-v1/media/
 render/gentube-v1/voice/
+
+# Fichier d'etat ecrit par `hyperframes lambda deploy` : coordonnees de la pile
+# et region. Propre a la machine qui a deploye, et le serveur lit .env a la
+# place — donc rien a versionner ici.
+.hyperframes/
+# Rendus de demonstration. Regenerables, et un binaire entre dans l'historique
+# git pour toujours.
+render/*.mp4
