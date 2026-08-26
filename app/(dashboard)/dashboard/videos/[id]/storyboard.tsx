@@ -250,9 +250,6 @@ function GenerateButton({
       <Button
         type="submit"
         variant={hasShots ? 'outline' : 'default'}
-        className={
-          hasShots ? undefined : 'bg-orange-500 hover:bg-orange-600 text-white'
-        }
         disabled={isPending}
       >
         {isPending ? (
@@ -289,7 +286,6 @@ function VoiceoverForm({ videoId }: { videoId: number }) {
       <input type="hidden" name="videoId" value={videoId} />
       <Button
         type="submit"
-        className="bg-orange-500 hover:bg-orange-600 text-white"
         disabled={isPending}
       >
         {isPending ? (
@@ -335,7 +331,6 @@ function ValidateForm({
       <input type="hidden" name="videoId" value={videoId} />
       <Button
         type="submit"
-        className="bg-orange-500 hover:bg-orange-600 text-white"
         disabled={isPending || !canAfford}
       >
         {isPending ? (

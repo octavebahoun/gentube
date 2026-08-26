@@ -57,11 +57,6 @@ export function CheckoutButton({
         onClick={start}
         disabled={disabled || pending}
         variant={variant}
-        className={
-          variant === 'default'
-            ? 'bg-orange-500 hover:bg-orange-600 text-white'
-            : undefined
-        }
       >
         {pending ? (
           <>

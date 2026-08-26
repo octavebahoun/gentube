@@ -66,7 +66,7 @@ export default async function ProjectPage({
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Videos</CardTitle>
           <Link href={`/dashboard/projects/${project.id}/videos/new`}>
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Button size="sm">
               <PlusCircle className="mr-2 h-4 w-4" />
               New video
             </Button>
@@ -84,7 +84,7 @@ export default async function ProjectPage({
                 <li key={video.id}>
                   <Link
                     href={`/dashboard/videos/${video.id}`}
-                    className="flex items-center justify-between gap-4 rounded-md border border-transparent px-1 py-1 text-sm hover:border-orange-200"
+                    className="flex items-center justify-between gap-4 rounded-md border border-transparent px-1 py-1 text-sm hover:border-primary/40"
                   >
                     <span className="min-w-0 truncate font-medium">
                       {video.title}

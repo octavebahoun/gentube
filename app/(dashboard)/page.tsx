@@ -9,11 +9,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-12 lg:gap-8">
             <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
+              <h1 className="text-4xl font-bold text-foreground tracking-tight sm:text-5xl md:text-6xl">
                 Turn a prompt into
-                <span className="block text-orange-500">a published video</span>
+                <span className="block text-brand-accent">a published video</span>
               </h1>
-              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
+              <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
                 Describe a theme, edit the AI storyboard in a kanban, validate.
                 The pipeline generates every shot, assembles the video and
                 publishes it to YouTube.
@@ -41,11 +41,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 bg-white w-full">
+      <section className="py-16 bg-card w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-3 lg:gap-8">
             <div>
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
+              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
                 <svg viewBox="0 0 24 24" className="h-6 w-6">
                   <path
                     fill="currentColor"
@@ -54,10 +54,10 @@ export default function HomePage() {
                 </svg>
               </div>
               <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
+                <h2 className="text-lg font-medium text-foreground">
                   Next.js and React
                 </h2>
-                <p className="mt-2 text-base text-gray-500">
+                <p className="mt-2 text-base text-muted-foreground">
                   Leverage the power of modern web technologies for optimal
                   performance and developer experience.
                 </p>
@@ -65,14 +65,14 @@ export default function HomePage() {
             </div>
 
             <div className="mt-10 lg:mt-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
+              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
                 <Database className="h-6 w-6" />
               </div>
               <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
+                <h2 className="text-lg font-medium text-foreground">
                   Postgres and Drizzle ORM
                 </h2>
-                <p className="mt-2 text-base text-gray-500">
+                <p className="mt-2 text-base text-muted-foreground">
                   Robust database solution with an intuitive ORM for efficient
                   data management and scalability.
                 </p>
@@ -80,14 +80,14 @@ export default function HomePage() {
             </div>
 
             <div className="mt-10 lg:mt-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
+              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
                 <Coins className="h-6 w-6" />
               </div>
               <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
+                <h2 className="text-lg font-medium text-foreground">
                   Credits and tenant isolation
                 </h2>
-                <p className="mt-2 text-base text-gray-500">
+                <p className="mt-2 text-base text-muted-foreground">
                   A ledger-backed credit balance per tenant, debited at
                   storyboard validation, and every query scoped to its tenant.
                 </p>
@@ -97,14 +97,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-muted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
                 Ready to create your first video?
               </h2>
-              <p className="mt-3 max-w-3xl text-lg text-gray-500">
+              <p className="mt-3 max-w-3xl text-lg text-muted-foreground">
                 Set up a project once — style, voice, YouTube channel — then
                 every new video reuses it.
               </p>

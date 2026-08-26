@@ -158,7 +158,6 @@ export function NewProjectForm() {
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
       <Button
         type="submit"
-        className="bg-orange-500 hover:bg-orange-600 text-white"
         disabled={isPending}
       >
         {isPending ? (
@@ -188,7 +187,6 @@ export function EditProjectForm({ project }: { project: Project }) {
       {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
       <Button
         type="submit"
-        className="bg-orange-500 hover:bg-orange-600 text-white"
         disabled={isPending}
       >
         {isPending ? (

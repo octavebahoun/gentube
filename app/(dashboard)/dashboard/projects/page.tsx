@@ -32,7 +32,7 @@ export default async function ProjectsPage() {
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-lg lg:text-2xl font-medium">Projects</h1>
         <Link href="/dashboard/projects/new">
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
             New project
           </Button>
@@ -49,7 +49,7 @@ export default async function ProjectsPage() {
               pipeline. Every video you generate starts from one.
             </p>
             <Link href="/dashboard/projects/new">
-              <Button className="mt-2 bg-orange-500 hover:bg-orange-600 text-white">
+              <Button className="mt-2">
                 Create the first one
               </Button>
             </Link>
@@ -60,7 +60,7 @@ export default async function ProjectsPage() {
           {projects.map((project) => (
             <li key={project.id}>
               <Link href={`/dashboard/projects/${project.id}`}>
-                <Card className="transition-colors hover:border-orange-300">
+                <Card className="transition-colors hover:border-primary/50">
                   <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="font-medium">{project.name}</p>
