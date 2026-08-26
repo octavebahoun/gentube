@@ -245,6 +245,14 @@ export const videos = pgTable(
      * réclamerait le rendu propre de sa vidéo d'essai — et il aurait raison.
      */
     watermarked: boolean('watermarked').notNull().default(false),
+    /**
+     * Clé R2 du MP4 final. Vide jusqu'à la fin du montage.
+     *
+     * Stockée plutôt que dérivée d'une convention : un rendu qui échoue et
+     * qu'on relance produit une nouvelle exécution, et c'est celle qui a
+     * abouti qui doit être servie au client.
+     */
+    outputUrl: text('output_url'),
     creditsEstimated: integer('credits_estimated').notNull().default(0),
     creditsConsumed: integer('credits_consumed').notNull().default(0),
     youtubeVideoId: varchar('youtube_video_id', { length: 32 }),

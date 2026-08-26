@@ -40,6 +40,12 @@ for (const name of [
   'ELEVENLABS_API_KEY',
   // Storyboard
   'DEEPSEEK_API_KEY',
+  // Montage — AWS Lambda. Un rendu lance une execution Step Functions et
+  // facture des Go-secondes : un test qui en declenche une paie pour rien.
+  'AWS_ACCESS_KEY_ID',
+  'AWS_SECRET_ACCESS_KEY',
+  'HYPERFRAMES_RENDER_BUCKET',
+  'HYPERFRAMES_STATE_MACHINE_ARN',
 ]) {
   process.env[name] = '';
 }

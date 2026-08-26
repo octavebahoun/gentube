@@ -23,9 +23,15 @@ import { COMPOSITION_DIR, composeHtml } from './composition';
  * à chaque fois.
  */
 
-/** Ce qui sait lire un asset. Injectable, pour que les tests ne touchent pas R2. */
+/**
+ * La seule capacité dont la matérialisation a besoin : relire un objet.
+ *
+ * Un sous-ensemble d'`AssetStore`, pas un type parallèle — le store le
+ * satisfait donc sans adaptateur, et un test peut n'implémenter que la
+ * lecture.
+ */
 export interface AssetReader {
-  read(key: string): Promise<Buffer>;
+  get(key: string): Promise<Buffer>;
 }
 
 export type MaterializedRender = {
@@ -72,12 +78,12 @@ export async function materialize(
 
         if (scene.mediaPath) {
           const name = localName('media', index, scene.mediaPath);
-          await writeFile(join(dir, name), await reader.read(scene.mediaPath));
+          await writeFile(join(dir, name), await reader.get(scene.mediaPath));
           next.mediaPath = name;
         }
         if (scene.audioPath) {
           const name = localName('voice', index, scene.audioPath);
-          await writeFile(join(dir, name), await reader.read(scene.audioPath));
+          await writeFile(join(dir, name), await reader.get(scene.audioPath));
           next.audioPath = name;
         }
 
@@ -88,7 +94,7 @@ export async function materialize(
     let music = storyboard.music;
     if (music) {
       const name = localName('media', storyboard.scenes.length, music);
-      await writeFile(join(dir, name), await reader.read(music));
+      await writeFile(join(dir, name), await reader.get(music));
       music = name;
     }
 
