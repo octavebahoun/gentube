@@ -1,129 +1,399 @@
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Coins, Database } from 'lucide-react';
-import { Terminal } from './terminal';
+import Link from 'next/link';
+import {
+  ArrowRight,
+  Check,
+  Clapperboard,
+  Coins,
+  Film,
+  Image as ImageIcon,
+  Mic,
+  Music,
+  Palette,
+  Play,
+  Sparkles,
+  Subtitles,
+  Upload,
+  Video as VideoIcon,
+  Wand2,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+
+// ——— Sur-titre discret, rouge accent ———
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] font-semibold tracking-[0.18em] text-brand-accent uppercase">
+      {children}
+    </p>
+  );
+}
 
 export default function HomePage() {
   return (
-    <main>
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-            <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-              <h1 className="text-4xl font-bold text-foreground tracking-tight sm:text-5xl md:text-6xl">
-                Turn a prompt into
-                <span className="block text-brand-accent">a published video</span>
-              </h1>
-              <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Describe a theme, edit the AI storyboard in a kanban, validate.
-                The pipeline generates every shot, assembles the video and
-                publishes it to YouTube.
-              </p>
-              <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <a
-                  href="https://vercel.com/templates/next.js/next-js-saas-starter"
-                  target="_blank"
-                >
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="text-lg rounded-full"
-                  >
-                    Deploy your own
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </a>
-              </div>
-            </div>
-            <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
-              <Terminal />
-            </div>
+    <main className="bg-background text-foreground">
+      {/* Header — noir, rouge, nav fantôme comme la maquette */}
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Play className="size-3.5 fill-current" />
+            </span>
+            <span className="text-sm font-semibold tracking-tight">
+              Gen<span className="text-brand-accent">Tube</span>
+            </span>
+          </Link>
+          <nav className="hidden items-center gap-6 text-xs text-muted-foreground md:flex">
+            <a href="#fonctionnalites" className="hover:text-foreground">Fonctionnalités</a>
+            <a href="#comment" className="hover:text-foreground">Comment ça marche</a>
+            <a href="#cas" className="hover:text-foreground">Cas d’usage</a>
+            <a href="#tarifs" className="hover:text-foreground">Tarifs</a>
+            <a href="#faq" className="hover:text-foreground">FAQ</a>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/sign-in"
+              className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground sm:inline-flex"
+            >
+              Se connecter
+            </Link>
+            <Link href="/sign-up" className={buttonVariants({ size: 'sm' }) + ' rounded-full'}>
+              Commencer
+            </Link>
           </div>
         </div>
-      </section>
+      </header>
 
-      <section className="py-16 bg-card w-full">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-            <div>
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
-                <svg viewBox="0 0 24 24" className="h-6 w-6">
-                  <path
-                    fill="currentColor"
-                    d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"
-                  />
-                </svg>
-              </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-foreground">
-                  Next.js and React
-                </h2>
-                <p className="mt-2 text-base text-muted-foreground">
-                  Leverage the power of modern web technologies for optimal
-                  performance and developer experience.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-10 lg:mt-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
-                <Database className="h-6 w-6" />
-              </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-foreground">
-                  Postgres and Drizzle ORM
-                </h2>
-                <p className="mt-2 text-base text-muted-foreground">
-                  Robust database solution with an intuitive ORM for efficient
-                  data management and scalability.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-10 lg:mt-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
-                <Coins className="h-6 w-6" />
-              </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-foreground">
-                  Credits and tenant isolation
-                </h2>
-                <p className="mt-2 text-base text-muted-foreground">
-                  A ledger-backed credit balance per tenant, debited at
-                  storyboard validation, and every query scoped to its tenant.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-muted">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-                Ready to create your first video?
-              </h2>
-              <p className="mt-3 max-w-3xl text-lg text-muted-foreground">
-                Set up a project once — style, voice, YouTube channel — then
-                every new video reuses it.
-              </p>
-            </div>
-            <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              <a href="https://github.com/nextjs/saas-starter" target="_blank">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg rounded-full"
-                >
-                  View the code
-                  <ArrowRight className="ml-3 h-6 w-6" />
-                </Button>
+      {/* Hero — thèse du produit */}
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
+        <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-6">
+            <Eyebrow>Création vidéo par IA — voix française, montage inclus</Eyebrow>
+            <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+              On tape un sujet,
+              <span className="block text-brand-accent">on récupère une vidéo prête à publier.</span>
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              GenTube écrit le texte, enregistre la voix off, génère chaque image et chaque plan animé,
+              cale les sous-titres mot à mot, la musique et le montage — et publie sur votre chaîne YouTube.
+              Les autres outils livrent des pièces détachées ; nous livrons une vidéo finie.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/sign-up" className={buttonVariants({ size: 'lg' }) + ' rounded-full'}>
+                Créer gratuitement
+                <ArrowRight className="size-4" />
+              </Link>
+              <a
+                href="#comment"
+                className={buttonVariants({ variant: 'outline', size: 'lg' }) + ' rounded-full'}
+              >
+                <Play className="size-4" />
+                Voir la démo
               </a>
             </div>
+            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-1 rounded-full bg-primary" />
+                Sans carte bancaire
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-1 rounded-full bg-primary" />
+                Générée en quelques minutes
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-1 rounded-full bg-primary" />
+                Mobile money
+              </span>
+            </div>
+          </div>
+
+          {/* Visuel hero — cadre sombre avec lueur rouge */}
+          <div className="relative lg:col-span-6">
+            <div className="absolute -inset-3 -z-10 rounded-2xl bg-primary/20 blur-2xl" />
+            <div className="overflow-hidden rounded-2xl border bg-card">
+              <div className="relative aspect-video bg-muted">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30">
+                    <Play className="size-6 fill-current" />
+                  </span>
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-full bg-black/60 px-3 py-1.5 text-[11px] text-white backdrop-blur">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="size-2 animate-pulse rounded-full bg-red-500" />
+                    16:9 · 848×480 → 1280×720 · 30 IPS
+                  </span>
+                  <span className="tabular-nums opacity-70">00:00 / 00:15</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between px-4 py-2 text-xs text-muted-foreground">
+                <span>Voix française · sous-titres karaoké</span>
+                <span className="tabular-nums">1 crédit = 1 s en 480p</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* 3 étapes */}
+      <section id="comment" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-2xl border bg-card p-6 sm:p-8">
+          <div className="text-center">
+            <Eyebrow>Simple, rapide, puissant</Eyebrow>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Votre vidéo en 3 étapes</h2>
+          </div>
+          <div className="relative mt-8 grid gap-6 sm:grid-cols-3">
+            <div className="absolute left-[16%] right-[16%] top-6 hidden h-px border-t border-dashed border-border sm:block" />
+            {[
+              { n: '01', icon: Wand2, title: 'Tapez votre sujet', desc: 'Un thème, un titre, ou un script. L’IA s’occupe du reste.' },
+              { n: '02', icon: Sparkles, title: 'L’IA fait sa magie', desc: 'Scènes, voix, images, musique et montage — tout est assemblé.' },
+              { n: '03', icon: Upload, title: 'Téléchargez & partagez', desc: 'Récupérez le MP4 ou publiez direct sur YouTube.' },
+            ].map((s) => (
+              <div key={s.n} className="relative flex flex-col items-center text-center">
+                <span className="flex size-12 items-center justify-center rounded-full border bg-background text-primary shadow-sm">
+                  <s.icon className="size-5" />
+                </span>
+                <p className="mt-3 text-xs font-semibold tracking-widest text-brand-accent">{s.n}</p>
+                <h3 className="text-sm font-semibold">{s.title}</h3>
+                <p className="mt-1 max-w-[22ch] text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Fonctionnalités — 6 cartes */}
+      <section id="fonctionnalites" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <Eyebrow>Le montage est le différenciateur</Eyebrow>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">Tout ce qu’il faut pour créer</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
+            La concurrence livre une image, une voix, un plan — et vous laisse assembler. GenTube monte :
+            HTML → MP4 via HyperFrames, calé à la frame, reproductible.
+          </p>
+        </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { icon: Film, title: 'Génération vidéo IA', desc: 'Des vidéos haute qualité à partir d’un simple sujet. Aucun montage manuel.' },
+            { icon: Mic, title: 'Voix & avatars IA', desc: 'Voix françaises naturelles (Polly / ElevenLabs) avec alignement mot à mot.' },
+            { icon: Music, title: 'Musique libre de droits', desc: 'Musique et bruitages calés sur les coupes, volumes par scène.' },
+            { icon: Subtitles, title: 'Sous-titres auto', desc: 'Karaoké mot à mot, style personnalisable, jamais hors cadre.' },
+            { icon: Palette, title: 'Styles multiples', desc: 'Cinématique, anime, réaliste, 3D — prompt visuel par scène.' },
+            { icon: Clapperboard, title: 'Formats multiples', desc: '16:9, 9:16, 1:1 — 848×480 ou 1280×720, multiples de 16.' },
+          ].map((f) => (
+            <Card key={f.title} className="bg-card">
+              <CardHeader>
+                <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <f.icon className="size-4" />
+                </span>
+                <CardTitle className="text-sm">{f.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs leading-relaxed text-muted-foreground">{f.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Cas d’usage — 4 cartes image */}
+      <section id="cas" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <Eyebrow>Pour créateurs, écoles, radios et PME d’Afrique de l’Ouest</Eyebrow>
+          <h2 className="text-2xl font-semibold tracking-tight">Des vidéos pour chaque usage</h2>
+        </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { title: 'Marketing & pubs', desc: 'Des annonces qui convertissent.', icon: VideoIcon },
+            { title: 'YouTube & contenu', desc: 'Faites grandir votre chaîne.', icon: Play },
+            { title: 'Formation & entreprise', desc: 'Des vidéos pro pour vos équipes.', icon: ImageIcon },
+            { title: 'Histoires & animation', desc: 'Donnez vie à vos idées.', icon: Sparkles },
+          ].map((c) => (
+            <Card key={c.title} className="overflow-hidden">
+              <div className="flex aspect-[4/3] items-center justify-center bg-muted">
+                <c.icon className="size-8 text-muted-foreground/60" />
+              </div>
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm">{c.title}</CardTitle>
+                <p className="text-xs text-muted-foreground">{c.desc}</p>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Tarifs — FCFA, deux poches, mobile money */}
+      <section id="tarifs" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <Eyebrow>Tarifs</Eyebrow>
+          <h2 className="text-2xl font-semibold tracking-tight">Simple, transparent</h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+            Payez en FCFA par mobile money. 1 crédit = 1 s d’image fixe en 480p. Un plan animé coûte 2× —
+            il nous coûte 100× plus.
+          </p>
+        </div>
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          {/* Essai */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-baseline gap-2 text-base">
+                Essai <span className="text-xs font-normal text-muted-foreground">— découvrir</span>
+              </CardTitle>
+              <p className="text-2xl font-bold">0 FCFA</p>
+              <p className="text-xs text-muted-foreground">120 crédits · 480p · filigrané</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> 1 min animée ou 2 min d’images</li>
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> Toutes les voix</li>
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> Idéal pour juger le résultat</li>
+              </ul>
+              <Link href="/sign-up" className={buttonVariants({ variant: 'outline' }) + ' w-full rounded-full'}>
+                Commencer
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Pro — mis en avant */}
+          <Card className="relative border-primary/50 shadow-lg shadow-primary/10">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+              Le plus populaire
+            </span>
+            <CardHeader>
+              <CardTitle className="flex items-baseline gap-2 text-base">
+                Starter <span className="text-xs font-normal text-muted-foreground">— créer</span>
+              </CardTitle>
+              <p className="text-2xl font-bold">
+                15 000 FCFA
+                <span className="text-xs font-normal text-muted-foreground"> / mois</span>
+              </p>
+              <p className="text-xs text-muted-foreground">2 640 crédits · 22 min animées ou 44 min d’images</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> Toutes résolutions (720p inclus)</li>
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> Sans filigrane</li>
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> Sous-titres karaoké</li>
+              </ul>
+              <Link href="/sign-up" className={buttonVariants() + ' w-full rounded-full'}>
+                Essai gratuit
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Pro */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-baseline gap-2 text-base">
+                Pro <span className="text-xs font-normal text-muted-foreground">— produire</span>
+              </CardTitle>
+              <p className="text-2xl font-bold">
+                30 000 FCFA
+                <span className="text-xs font-normal text-muted-foreground"> / mois</span>
+              </p>
+              <p className="text-xs text-muted-foreground">5 400 crédits · 45 min animées ou 90 min d’images</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> Recharge 5 000 F = 720 crédits</li>
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> Deux poches : quota / achetés</li>
+                <li className="flex items-center gap-2"><Check className="size-3.5 text-green-500" /> Support prioritaire</li>
+              </ul>
+              <a href="mailto:contact@gentube.example" className={buttonVariants({ variant: 'outline' }) + ' w-full rounded-full'}>
+                Nous contacter
+              </a>
+            </CardContent>
+          </Card>
+        </div>
+        <p className="mx-auto mt-4 max-w-2xl text-center text-xs text-muted-foreground">
+          Recharge : 5 000 FCFA = 720 crédits (n’expire jamais). Plafond GeniusPay 500 kF/mois pour toute la
+          plateforme.
+        </p>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <Eyebrow>FAQ</Eyebrow>
+          <h2 className="text-2xl font-semibold tracking-tight">Questions fréquentes</h2>
+        </div>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+          {[
+            ['Qu’est-ce que GenTube ?', 'Une IA qui transforme un sujet en vidéo montée et prête à publier sur YouTube. Pas un générateur d’images en vrac.'],
+            ['Quelle langue ?', 'Interface en français, prompts visuels en anglais (les modèles sont entraînés en anglais), voix en français.'],
+            ['Usage commercial ?', 'Oui. Vous possédez la vidéo. Le filigrane d’essai reste si la vidéo a été payée en essai.'],
+            ['Délai de génération ?', 'Quelques minutes selon la longueur. La page Fabrication suit chaque étape.'],
+            ['Compétences en montage ?', 'Aucune. Le montage est la partie que GenTube fait à votre place.'],
+            ['Résiliation ?', 'À tout moment. La recharge non consommée n’expire jamais — le quota mensuel, si.'],
+          ].map(([q, a]) => (
+            <div key={q} className="rounded-xl border bg-card p-4">
+              <h3 className="text-sm font-medium">{q}</h3>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border bg-primary p-6 text-primary-foreground sm:flex-row">
+          <div>
+            <h2 className="flex items-center gap-2 text-base font-semibold">
+              <span className="flex size-7 items-center justify-center rounded-full bg-white text-primary">
+                <Play className="size-3.5 fill-current" />
+              </span>
+              Prêt à créer votre première vidéo ?
+            </h2>
+            <p className="mt-1 text-xs text-primary-foreground/80">
+              Tapez un sujet. Récupérez une vidéo montée. Publiez.
+            </p>
+          </div>
+          <Link href="/sign-up" className={buttonVariants({ variant: 'secondary' }) + ' rounded-full'}>
+            Créer gratuitement
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <Play className="size-3 fill-current" />
+                </span>
+                GenTube
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">© 2026 GenTube. Tous droits réservés.</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold">Produit</p>
+              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                <li><a href="#fonctionnalites" className="hover:text-foreground">Fonctionnalités</a></li>
+                <li><a href="#comment" className="hover:text-foreground">Comment ça marche</a></li>
+                <li><a href="#tarifs" className="hover:text-foreground">Tarifs</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold">Entreprise</p>
+              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground">À propos</a></li>
+                <li><a href="#" className="hover:text-foreground">Contact</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold">Suivez-nous</p>
+              <div className="mt-2 flex gap-2 text-muted-foreground">
+                <span className="flex size-7 items-center justify-center rounded-full border text-xs">𝕏</span>
+                <span className="flex size-7 items-center justify-center rounded-full border text-xs">▶</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
