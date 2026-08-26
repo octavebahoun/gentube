@@ -8,7 +8,7 @@ On tape un sujet. On récupère une vidéo prête à publier.
 
 GenTube écrit le texte parlé, l'enregistre en voix française, découpe le récit
 en scènes, produit chaque image et chaque plan animé, allume les sous-titres
-mot par mot, cale la musique et les bruitages sur les coupes, monte le tout et
+mot par mot, cale la musique et les bruitages sur les coupes, monte le tout etune autre equipe prend relais du projet
 l'envoie sur la chaîne YouTube du client.
 
 Les outils existants s'arrêtent avant le montage : ils livrent une image, une
@@ -71,6 +71,7 @@ Ce qui distingue vraiment le projet, dans l'ordre où ça convainc un jury :
    que ce prix porte sur **la vidéo entière et montée**, et qu'il tient parce
    que la voix est enregistrée avant les images — donc la durée est mesurée au
    lieu d'être devinée.
+
 3. **Les coûts sont mesurés, pas supposés.** 400 FCFA la minute en 480p, 850
    en 720p. Une image en 480p nous coûte 0,00045 $, une seconde de plan animé
    0,0099 $ — cent fois plus. C'est pourquoi un plan fixe est facturé la

@@ -39,8 +39,8 @@ un thème.
 
 - **La publication est multi-réseaux** : TikTok, Instagram, YouTube. Nous
   n'avons que YouTube.
-- **La planification et les analytiques existent.** Chez nous, c'est écrit dans
-  les tâches.
+- **La planification et les analytiques existent.** Chez nous, ce n'est pas
+  encore construit.
 - **La traduction et le doublage** sont dans tous ses plans. Nous ne faisons
   que le français.
 - **Un plan à 1 970 FCFA** ouvre la porte. Notre entrée est à 15 000.
