@@ -38,8 +38,8 @@ function UserMenu() {
         >
           Pricing
         </Link>
-        <Button asChild className="rounded-full">
-          <Link href="/sign-up">Sign Up</Link>
+        <Button render={<Link href="/sign-up" />} className="rounded-full">
+          Sign Up
         </Button>
       </>
     );

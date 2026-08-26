@@ -55,16 +55,23 @@ function voice(durationS = 5.28) {
 
 function store() {
   const written: string[] = [];
+  const bytes = new Map<string, Buffer>();
   const assets: AssetStore = {
-    async put(key) {
+    async put(key, body) {
       written.push(key);
+      bytes.set(key, body);
       return key;
+    },
+    async get(key) {
+      const found = bytes.get(key);
+      if (!found) throw new Error(`No such object: ${key}`);
+      return found;
     },
     async signedUrl(key) {
       return `https://r2.test/${key}`;
     },
   };
-  return { assets, written };
+  return { assets, written, bytes };
 }
 
 async function draftWithScenes(

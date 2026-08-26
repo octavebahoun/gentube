@@ -163,6 +163,22 @@ export class R2Store implements AssetStore {
     return key;
   }
 
+  async get(key: string): Promise<Buffer> {
+    assertUsableKey(key);
+    const response = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.config.bucket,
+        Key: this.objectKey(key),
+      })
+    );
+    if (!response.Body) {
+      throw new Error(`R2 returned no body for ${key}.`);
+    }
+    // `transformToByteArray` lit le flux en entier. Acceptable ici : les
+    // objets sont des images et des pistes de narration, pas des rushes.
+    return Buffer.from(await response.Body.transformToByteArray());
+  }
+
   async signedUrl(
     key: string,
     expiresInSeconds: number = DEFAULT_SIGNED_URL_SECONDS

@@ -15,6 +15,16 @@
 export interface AssetStore {
   /** Stocke les octets et renvoie la clé par laquelle les relire. */
   put(key: string, body: Buffer, contentType: string): Promise<string>;
+  /**
+   * Relit les octets d'un objet.
+   *
+   * Distinct de `signedUrl()` parce que les deux ne servent pas le même
+   * appelant : une URL signée part vers un navigateur, `get()` sert le
+   * serveur — le rendu, qui doit poser les médias sur un disque avant de
+   * lancer Chrome. Passer par une URL signée là serait faire sortir l'octet
+   * du réseau pour l'y faire rentrer.
+   */
+  get(key: string): Promise<Buffer>;
   /** URL à durée de vie courte pour lire un objet. */
   signedUrl(key: string, expiresInSeconds?: number): Promise<string>;
 }
