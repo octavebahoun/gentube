@@ -18,10 +18,10 @@ const RESOLUTIONS = [
 ] as const;
 
 const PIPELINES = [
-  { value: 'inherit', label: 'Inherit from the project' },
-  { value: 'image', label: 'Images only' },
-  { value: 'video', label: 'Video only' },
-  { value: 'mixed', label: 'Mixed' },
+  { value: 'inherit', label: 'Hériter du projet' },
+  { value: 'image', label: 'Images fixes seulement' },
+  { value: 'video', label: 'Plans animés seulement' },
+  { value: 'mixed', label: 'Mixte (recommandé)' },
 ] as const;
 
 export function NewVideoForm({
@@ -49,7 +49,7 @@ export function NewVideoForm({
 
       <div>
         <Label htmlFor="title" className="mb-2">
-          Title
+          Titre
         </Label>
         <Input
           id="title"
@@ -62,22 +62,22 @@ export function NewVideoForm({
 
       <div>
         <Label htmlFor="theme" className="mb-2">
-          Theme
+          Thème — en quoi la vidéo parle
         </Label>
         <Textarea
           id="theme"
           name="theme"
-          placeholder="The women warriors of the kingdom of Dahomey, from their founding to the French conquest."
+          placeholder="Les guerrières du royaume du Dahomey, de leur fondation à la conquête française."
           maxLength={4000}
         />
         <p className="mt-1 text-xs text-muted-foreground">
-          What the storyboard is written from. Left empty, the title is used
-          instead.
+          Le storyboard est écrit à partir de ce texte. Laissez vide pour
+          utiliser le titre seul.
         </p>
       </div>
 
       <div>
-        <Label>Resolution</Label>
+        <Label>Résolution</Label>
         <RadioGroup name="resolution" defaultValue="480p" className="mt-2 space-y-2">
           {resolutions.map((option) => (
             <div key={option.value} className="flex items-start gap-2">
@@ -89,10 +89,9 @@ export function NewVideoForm({
               <div>
                 <Label htmlFor={`resolution-${option.value}`}>{option.label}</Label>
                 <p className="text-xs text-muted-foreground">
-                  {CREDITS_PER_SECOND.image[option.value]} credit
-                  {CREDITS_PER_SECOND.image[option.value] > 1 ? 's' : ''}/s for a
-                  still · {CREDITS_PER_SECOND.video[option.value]} for an animated
-                  shot
+                  {CREDITS_PER_SECOND.image[option.value]} crédit
+                  {CREDITS_PER_SECOND.image[option.value] > 1 ? 's' : ''}/s en
+                  fixe · {CREDITS_PER_SECOND.video[option.value]} en animé
                 </p>
               </div>
             </div>
@@ -135,17 +134,20 @@ export function NewVideoForm({
           actif débloque le 720p et retire la marque.
         </p>
       )}
-      <Button
-        type="submit"
-        disabled={isPending}
-      >
+      {!watermark && (
+        <p className="text-xs text-muted-foreground">
+          Le filigrane est décidé au débit, pas au rendu : une vidéo payée en
+          essai gardera sa marque même après abonnement.
+        </p>
+      )}
+      <Button type="submit" disabled={isPending}>
         {isPending ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Creating…
+            Création…
           </>
         ) : (
-          'Create video'
+          'Créer la vidéo'
         )}
       </Button>
     </form>

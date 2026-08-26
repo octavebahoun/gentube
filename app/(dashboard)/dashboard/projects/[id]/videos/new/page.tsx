@@ -41,11 +41,11 @@ export default async function NewVideoPage({
         <ArrowLeft className="mr-1 h-4 w-4" />
         {project.name}
       </Link>
-      <h1 className="mb-6 text-lg lg:text-2xl font-medium">New video</h1>
+      <h1 className="mb-6 text-lg lg:text-2xl font-medium">Nouvelle vidéo</h1>
 
       <Card className="max-w-2xl">
         <CardHeader>
-          <CardTitle>What are we making?</CardTitle>
+          <CardTitle>Que va-t-on fabriquer ?</CardTitle>
         </CardHeader>
         <CardContent>
           <NewVideoForm
