@@ -121,6 +121,16 @@ navigation-menu, pagination, popover, progress, radio-group, resizable,
 scroll-area, select, separator, sheet, sidebar, skeleton, slider, spinner,
 switch, table, tabs, textarea, toast, toggle, toggle-group, tooltip…
 
+**Chrome applicatif** (`/home/precieux/my-app/components/`) : `app-sidebar`,
+`app-header`, `nav-main`, `nav-user`, `team-switcher`, `sidebar-credits`,
+`login-form`, `signup-form`, `state-badge`, `logo`.
+
+**Dépendances utiles à récupérer** : `@base-ui/react`, `@dnd-kit/*`,
+`sonner`, `motion`, `recharts`, `@tanstack/react-table`, `next-themes`.
+
+`@dnd-kit` mérite une mention : le réordonnancement des scènes du storyboard
+se fait aujourd'hui avec **deux boutons haut/bas**.
+
 ### Combien d'écrans, exactement
 
 my-app porte **32 pages, ~6 000 lignes**. GenTube en a 13. Tous ne servent
@@ -157,16 +167,6 @@ publique) et `qualite` si son contenu ne correspond à rien chez nous.
 est sur Drizzle avec des server actions. Ce qui migre, c'est la couche
 visuelle. Compte le débranchement des données comme la moitié du temps, pas
 comme un détail.
-
-**Chrome applicatif** (`/home/precieux/my-app/components/`) : `app-sidebar`,
-`app-header`, `nav-main`, `nav-user`, `team-switcher`, `sidebar-credits`,
-`login-form`, `signup-form`, `state-badge`, `logo`.
-
-**Dépendances utiles à récupérer** : `@base-ui/react`, `@dnd-kit/*`,
-`sonner`, `motion`, `recharts`, `@tanstack/react-table`, `next-themes`.
-
-`@dnd-kit` mérite une mention : le réordonnancement des scènes du storyboard
-se fait aujourd'hui avec **deux boutons haut/bas**.
 
 ### Attention en reprenant
 
