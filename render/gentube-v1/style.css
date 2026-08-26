@@ -1,0 +1,130 @@
+/*
+ * Apparence de la composition GenTube.
+ *
+ * Séparé du TypeScript qui génère le HTML pour qu'on puisse retoucher le
+ * rendu — tailles, couleurs, position des sous-titres — sans recompiler.
+ *
+ * Deux règles à ne pas défaire :
+ *
+ *  - Le fond est peint par un élément (`#bg`), jamais par `body`. Une sortie
+ *    en séquence PNG est RGBA : un fond posé sur `body` disparaît.
+ *  - Aucun `filter: blur()` plein cadre. En rastérisation logicielle — celle
+ *    de Lambda, qui n'a pas de GPU — un flou plein cadre multiplie le temps de
+ *    rendu par trois.
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow: hidden;
+  background: transparent;
+}
+
+#bg {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+
+/* --- Scènes ------------------------------------------------------------- */
+
+.scene {
+  position: absolute;
+  inset: 0;
+  will-change: opacity;
+}
+
+/*
+ * L'image déborde volontairement de 6 % : le zoom lent de la scène a besoin
+ * de matière hors cadre, sinon il découvre un bord noir en s'éloignant.
+ */
+.media {
+  position: absolute;
+  inset: -6%;
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+}
+
+/* Voile bas, pour que les sous-titres restent lisibles sur une image claire. */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 55%,
+    rgba(0, 0, 0, 0.55) 88%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+}
+
+/* --- Sous-titres -------------------------------------------------------- */
+
+.captions {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 9%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.3em;
+  justify-content: center;
+  align-content: flex-end;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 1.18;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/*
+ * Chaque mot est un élément : c'est ce qui permet de l'allumer à son propre
+ * timing. Le contour est dessiné par quatre ombres plutôt que par
+ * `-webkit-text-stroke`, qui ronge l'intérieur des lettres aux petites tailles.
+ */
+.word {
+  color: rgba(255, 255, 255, 0.42);
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.55),
+    0 -2px 0 rgba(0, 0, 0, 0.55),
+    2px 0 0 rgba(0, 0, 0, 0.55),
+    -2px 0 0 rgba(0, 0, 0, 0.55),
+    0 6px 18px rgba(0, 0, 0, 0.6);
+  will-change: color, transform;
+}
+
+/* Le mot prononcé. Le rouge est celui de la marque : #CE1F20. */
+.word.on {
+  color: #fff;
+}
+
+/* --- Filigrane ---------------------------------------------------------- */
+
+/*
+ * Posé sur l'essai gratuit. Assez visible pour être un argument
+ * d'abonnement, assez discret pour que la vidéo reste montrable.
+ */
+.watermark {
+  position: absolute;
+  right: 3.5%;
+  bottom: 3.5%;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.watermark .dot {
+  display: block;
+  border-radius: 999px;
+  background: #ce1f20;
+}

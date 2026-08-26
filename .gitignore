@@ -43,3 +43,8 @@ postgres_data/
 # Bibliotheque de sons copiee depuis pipevideo — 131 Mo d audio.
 # Sa place est R2, pas git. Le catalogue lisible est docs/ ou la base.
 assets/sounds/
+
+# Composition générée pour l'aperçu — `npx tsx lib/render/preview.ts` la refait.
+render/gentube-v1/index.html
+render/gentube-v1/media/
+render/gentube-v1/voice/
