@@ -21,6 +21,7 @@ import {
   deleteShot,
   generateStoryboard,
   generateVoiceover,
+  moveShot,
   reorderShots,
   shotInputSchema,
   updateShot,
@@ -166,24 +167,25 @@ export const shotFormAction = validatedActionWithUser(
  */
 const reorderSchema = videoIdentity.extend({
   /** Les id, sérialisés : un champ répété serait écrasé par Object.fromEntries. */
-  orderedIds: z
-    .string()
-    .transform((raw, ctx) => {
-      try {
-        const ids = JSON.parse(raw);
-        if (
-          Array.isArray(ids) &&
-          ids.every((id) => Number.isInteger(id) && id > 0)
-        ) {
-          return ids as number[];
-        }
-      } catch {
-        // tombé dans le retour d'erreur ci-dessous
+  orderedIds: z.string().transform((raw, ctx) => {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (
+        Array.isArray(parsed) &&
+        parsed.length > 0 &&
+        parsed.every(
+          (id): id is number =>
+            typeof id === 'number' && Number.isInteger(id) && id > 0
+        )
+      ) {
+        return parsed;
       }
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Ordre invalide.' });
-      return z.NEVER;
-    })
-    .min(1, 'Ordre invalide.'),
+    } catch {
+      // tombé dans le retour d'erreur ci-dessous
+    }
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Ordre invalide.' });
+    return z.NEVER;
+  }),
 });
 
 export const reorderShotsAction = validatedActionWithUser(

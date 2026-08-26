@@ -1,10 +1,31 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
 import {
-  ArrowDown,
-  ArrowUp,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  restrictToParentElement,
+  restrictToVerticalAxis,
+} from '@dnd-kit/modifiers';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
   CheckCircle2,
+  GripVertical,
   Image as ImageIcon,
   Loader2,
   Mic,
@@ -12,17 +33,20 @@ import {
   Video as VideoIcon,
   Wand2,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
+import { creditsForShot } from '@/lib/credits/pricing';
 import type { Shot, Video } from '@/lib/db/schema';
 import {
   addShotAction,
   deleteVideoAction,
   generateStoryboardAction,
   generateVoiceoverAction,
+  reorderShotsAction,
   shotFormAction,
   validateVideoAction,
 } from '../actions';
@@ -30,23 +54,40 @@ import {
 type ActionState = { error?: string; success?: string };
 
 function seconds(value: number) {
-  // Durées mesurées sont fractionnaires (5,28 s) ; les estimations rarement.
-  return `${Number.isInteger(value) ? value : value.toFixed(2)}s`;
+  // Une durée mesurée est fractionnaire (5,28 s) ; une estimation rarement.
+  return `${value.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} s`;
 }
 
-/** La provenance d'une durée est ce qui distingue un devis d'un prix. */
+function frenchCredits(value: number) {
+  return value.toLocaleString('fr-FR');
+}
+
+/**
+ * La provenance d'une durée distingue un devis d'un prix : en pointillés
+ * tant que c'est lu dans le texte, plein dès que ça vient de l'audio. Même
+ * grammaire visuelle que le bandeau de prix, à petite échelle.
+ */
 function DurationBadge({ shot }: { shot: Shot }) {
   const measured = shot.durationSource === 'measured';
   return (
-    <span className="flex items-center gap-2 text-sm">
-      <span className="font-medium tabular-nums">{seconds(shot.durationS)}</span>
-      <span
-        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-          measured ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-        }`}
-      >
-        {measured ? 'measured' : 'estimated'}
-      </span>
+    <span
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium tabular-nums ${
+        measured
+          ? 'border-green-500/40 bg-green-500/10 text-green-400'
+          : 'border-dashed border-border text-muted-foreground'
+      }`}
+    >
+      {seconds(shot.durationS)} · {measured ? 'mesurée' : 'estimée'}
+    </span>
+  );
+}
+
+/** Coût de la scène, calculé sur la source unique de vérité des prix. */
+function ShotCredits({ shot, video }: { shot: Shot; video: Video }) {
+  const credits = creditsForShot(shot.durationS, shot.type, video.resolution);
+  return (
+    <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium tabular-nums text-secondary-foreground">
+      {frenchCredits(credits)} cr
     </span>
   );
 }
@@ -68,8 +109,8 @@ function TypeChoice({
       disabled={disabled}
     >
       {[
-        { value: 'image', label: 'Image', Icon: ImageIcon },
-        { value: 'video', label: 'Video', Icon: VideoIcon },
+        { value: 'image', label: 'Image fixe', Icon: ImageIcon },
+        { value: 'video', label: 'Plan animé', Icon: VideoIcon },
       ].map(({ value, label, Icon }) => (
         <div key={value} className="flex items-center gap-2">
           <RadioGroupItem value={value} id={`${idPrefix}-${value}`} />
@@ -84,73 +125,100 @@ function TypeChoice({
 }
 
 /**
- * One scene, one form. Save, delete and the two arrows all post here and are
- * told apart by the `intent` of the button pressed — HTML forbids nested forms,
- * and four separate forms would mean four error slots.
- *
- * The duration is displayed, never typed: it is read off the narration until
- * the voice-over exists, then off the audio itself.
+ * Les clés R2 ne sont pas des URLs : sans route de signature, aucun visuel
+ * n'est affichable. Le cadre reste honnête — plein quand la scène a son
+ * asset, pointillé sinon.
  */
-function ShotCard({
+function VisualFrame({ shot }: { shot: Shot }) {
+  const ready = Boolean(shot.assetUrl ?? shot.sourceImageUrl);
+  return (
+    <div
+      className={`flex aspect-video w-full shrink-0 items-center justify-center gap-2 rounded-md lg:w-44 ${
+        ready ? 'border border-primary/30' : 'border border-dashed'
+      }`}
+    >
+      <ImageIcon
+        className={`h-4 w-4 ${ready ? 'text-primary' : 'text-muted-foreground/60'}`}
+      />
+      <span
+        className={`text-xs ${ready ? 'text-muted-foreground' : 'text-muted-foreground/60'}`}
+      >
+        {ready ? 'Visuel généré' : 'Pas encore de visuel'}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Une scène, un formulaire. Enregistrer et supprimer postent ici et se
+ * distinguent par l'`intent` du bouton — HTML interdit les formulaires
+ * imbriqués.
+ *
+ * La durée s'affiche, elle ne se saisit jamais : lue dans la narration tant
+ * qu'il n'y a pas d'audio, puis dans l'audio lui-même.
+ */
+function SortableShotCard({
   shot,
   index,
-  total,
   editable,
+  video,
 }: {
   shot: Shot;
   index: number;
-  total: number;
   editable: boolean;
+  video: Video;
 }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     shotFormAction,
     {}
   );
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: shot.id, disabled: !editable });
 
   return (
-    <Card>
-      <CardContent>
-        <form action={formAction} className="space-y-4">
-          <input type="hidden" name="videoId" value={shot.videoId} />
-          <input type="hidden" name="shotId" value={shot.id} />
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={isDragging ? 'relative z-10 opacity-80' : undefined}
+    >
+      <Card>
+        <CardContent>
+          <form action={formAction} className="space-y-4">
+            <input type="hidden" name="videoId" value={shot.videoId} />
+            <input type="hidden" name="shotId" value={shot.id} />
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-4">
-              <span className="text-sm font-medium tabular-nums text-muted-foreground">
-                #{index + 1}
-              </span>
-              <TypeChoice
-                defaultValue={shot.type}
-                idPrefix={`shot-${shot.id}`}
-                disabled={!editable}
-              />
-              <DurationBadge shot={shot} />
-            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                {editable ? (
+                  <button
+                    type="button"
+                    className="cursor-grab touch-none rounded p-1 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+                    aria-label={`Déplacer la scène ${index + 1}`}
+                    {...attributes}
+                    {...listeners}
+                  >
+                    <GripVertical className="size-4" />
+                  </button>
+                ) : null}
+                <span className="text-sm font-medium tabular-nums text-brand-accent">
+                  #{String(index + 1).padStart(2, '0')}
+                </span>
+                <TypeChoice
+                  defaultValue={shot.type}
+                  idPrefix={`shot-${shot.id}`}
+                  disabled={!editable}
+                />
+                <DurationBadge shot={shot} />
+                <ShotCredits shot={shot} video={video} />
+              </div>
 
-            {editable && (
-              <div className="flex items-center gap-1">
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="up"
-                  variant="ghost"
-                  size="sm"
-                  disabled={isPending || index === 0}
-                  aria-label="Move up"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="down"
-                  variant="ghost"
-                  size="sm"
-                  disabled={isPending || index === total - 1}
-                  aria-label="Move down"
-                >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
+              {editable && (
                 <Button
                   type="submit"
                   name="intent"
@@ -158,77 +226,86 @@ function ShotCard({
                   variant="ghost"
                   size="sm"
                   disabled={isPending}
-                  aria-label="Delete scene"
+                  aria-label={`Supprimer la scène ${index + 1}`}
                 >
-                  <Trash2 className="h-4 w-4 text-red-500" />
+                  <Trash2 className="text-destructive" />
                 </Button>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-4 lg:flex-row">
+              <VisualFrame shot={shot} />
+
+              <div className="min-w-0 flex-1 space-y-4">
+                <div>
+                  <Label htmlFor={`narration-${shot.id}`} className="mb-2">
+                    Narration
+                  </Label>
+                  <Textarea
+                    id={`narration-${shot.id}`}
+                    name="narration"
+                    defaultValue={shot.narration ?? ''}
+                    maxLength={2000}
+                    disabled={!editable}
+                    className="min-h-20"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Ce que la voix lit. Sa longueur fait la durée de la scène —
+                    et le prix. La réécrire efface l&apos;audio déjà enregistré.
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor={`prompt-${shot.id}`} className="mb-2">
+                    Prompt visuel
+                  </Label>
+                  <Textarea
+                    id={`prompt-${shot.id}`}
+                    name="prompt"
+                    defaultValue={shot.prompt}
+                    maxLength={1000}
+                    disabled={!editable}
+                    className="min-h-20"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    En anglais : les modèles d&apos;image et de vidéo sont
+                    entraînés en anglais.
+                  </p>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div>
-            <Label htmlFor={`narration-${shot.id}`} className="mb-2">
-              Narration
-            </Label>
-            <Textarea
-              id={`narration-${shot.id}`}
-              name="narration"
-              defaultValue={shot.narration ?? ''}
-              maxLength={2000}
-              disabled={!editable}
-              className="min-h-20"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              What the voice reads. Its length is what the scene lasts — and
-              what you are charged for. Rewriting it drops the recorded audio.
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor={`prompt-${shot.id}`} className="mb-2">
-              Visual prompt
-            </Label>
-            <Textarea
-              id={`prompt-${shot.id}`}
-              name="prompt"
-              defaultValue={shot.prompt}
-              maxLength={1000}
-              disabled={!editable}
-              className="min-h-20"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              In English: the image and video models are trained on English.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {editable && (
-              <Button
-                type="submit"
-                name="intent"
-                value="save"
-                variant="outline"
-                size="sm"
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving…
-                  </>
-                ) : (
-                  'Save scene'
-                )}
-              </Button>
-            )}
-            {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-            {state?.success && (
-              <p className="text-sm text-green-600">{state.success}</p>
-            )}
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <div className="flex items-center gap-3">
+              {editable && (
+                <Button
+                  type="submit"
+                  name="intent"
+                  value="save"
+                  variant="outline"
+                  size="sm"
+                  disabled={isPending}
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Enregistrement…
+                    </>
+                  ) : (
+                    'Enregistrer la scène'
+                  )}
+                </Button>
+              )}
+              {state?.error && (
+                <p className="text-sm text-red-500">{state.error}</p>
+              )}
+              {state?.success && (
+                <p className="text-sm text-green-600">{state.success}</p>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </li>
   );
 }
 
@@ -254,19 +331,19 @@ function GenerateButton({
       >
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Writing the storyboard…
+            <Loader2 className="animate-spin" />
+            Écriture du storyboard…
           </>
         ) : (
           <>
-            <Wand2 className="mr-2 h-4 w-4" />
-            {hasShots ? 'Regenerate' : 'Generate storyboard'}
+            <Wand2 />
+            {hasShots ? 'Réécrire le storyboard' : 'Écrire le storyboard'}
           </>
         )}
       </Button>
       {hasShots && (
         <p className="text-xs text-muted-foreground">
-          Regenerating replaces every scene below.
+          Réécrire remplace toutes les scènes ci-dessous.
         </p>
       )}
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
@@ -284,28 +361,28 @@ function VoiceoverForm({ videoId }: { videoId: number }) {
   return (
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="videoId" value={videoId} />
-      <Button
-        type="submit"
-        disabled={isPending}
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Recording the voice…
+            <Loader2 className="animate-spin" />
+            Enregistrement de la voix…
           </>
         ) : (
           <>
-            <Mic className="mr-2 h-4 w-4" />
-            Record the voice-over
+            <Mic />
+            Enregistrer la voix off
           </>
         )}
       </Button>
-      <p className="text-xs text-muted-foreground">
-        Until the voice exists, the price above is only an estimate read off the
-        text. Recording it measures every scene — then the amount is exact.
+      <p className="max-w-xl text-xs text-muted-foreground">
+        Tant que la voix manque, le prix ci-dessus est une estimation lue dans
+        le texte. L&apos;enregistrement mesure chaque scène — ensuite, le
+        montant devient ferme.
       </p>
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+      {state?.success && (
+        <p className="text-sm text-green-600">{state.success}</p>
+      )}
     </form>
   );
 }
@@ -329,31 +406,30 @@ function ValidateForm({
   return (
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="videoId" value={videoId} />
-      <Button
-        type="submit"
-        disabled={isPending || !canAfford}
-      >
+      <Button type="submit" disabled={isPending || !canAfford}>
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Charging…
+            <Loader2 className="animate-spin" />
+            Débit en cours…
           </>
         ) : (
           <>
-            <CheckCircle2 className="mr-2 h-4 w-4" />
-            Validate and charge {creditsEstimated.toLocaleString('fr-FR')} credits
+            <CheckCircle2 />
+            Valider et débiter {frenchCredits(creditsEstimated)} crédits
           </>
         )}
       </Button>
       {!canAfford && (
         <p className="text-sm text-red-500">
-          Balance is {balance.toLocaleString('fr-FR')} credits — short of{' '}
-          {(creditsEstimated - balance).toLocaleString('fr-FR')}. Top up from
-          the billing page.
+          Solde : {frenchCredits(balance)} crédits — il manque{' '}
+          {frenchCredits(creditsEstimated - balance)}. Rechargez depuis la page
+          facturation.
         </p>
       )}
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+      {state?.success && (
+        <p className="text-sm text-green-600">{state.success}</p>
+      )}
     </form>
   );
 }
@@ -382,7 +458,7 @@ function AddShotForm({ videoId }: { videoId: number }) {
       </div>
       <div>
         <Label htmlFor="new-prompt" className="mb-2">
-          Visual prompt
+          Prompt visuel
         </Label>
         <Textarea
           id="new-prompt"
@@ -396,14 +472,62 @@ function AddShotForm({ videoId }: { videoId: number }) {
       <Button type="submit" variant="outline" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Adding…
+            <Loader2 className="animate-spin" />
+            Ajout…
           </>
         ) : (
-          'Add scene'
+          'Ajouter la scène'
         )}
       </Button>
     </form>
+  );
+}
+
+/**
+ * Le bandeau de prix : le seul endroit où l'estimation devient engagement.
+ * Pointillés tant que la voix off manque, plein rouge une fois mesuré — la
+ * bascule doit se voir, c'est elle qui explique au client pourquoi le prix a
+ * bougé.
+ */
+function PriceStrip({
+  credits,
+  durationsMeasured,
+  spokenSeconds,
+  sceneCount,
+  resolution,
+}: {
+  credits: number;
+  durationsMeasured: boolean;
+  spokenSeconds: number;
+  sceneCount: number;
+  resolution: string;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+      <div className="flex items-center gap-4">
+        <p className="text-3xl font-semibold tabular-nums">
+          {frenchCredits(credits)}
+        </p>
+        <span
+          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
+            durationsMeasured
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-dashed border-border text-muted-foreground'
+          }`}
+        >
+          {durationsMeasured ? 'prix ferme' : 'prix estimé'}
+        </span>
+      </div>
+      <p className="max-w-md text-sm text-muted-foreground">
+        {durationsMeasured
+          ? 'Mesuré sur la voix off enregistrée — c’est ce montant qui sera débité.'
+          : 'Indicatif : lu dans le texte, scène par scène. Enregistrez la voix off pour le verrouiller.'}
+      </p>
+      <p className="w-full text-xs tabular-nums text-muted-foreground sm:w-auto">
+        {seconds(Math.round(spokenSeconds * 10) / 10)} de narration ·{' '}
+        {sceneCount} scène{sceneCount === 1 ? '' : 's'} · {resolution}
+      </p>
+    </div>
   );
 }
 
@@ -427,6 +551,52 @@ export function StoryboardEditor({
   const editable = video.status === 'draft';
   const spokenSeconds = shots.reduce((total, shot) => total + shot.durationS, 0);
 
+  // Ordre optimiste : le glisser déplace tout de suite à l'écran, puis la
+  // confirmation serveur revalide la page. En cas de refus, on revient en
+  // arrière — les règles restent dans lib/storyboard.
+  const [items, setItems] = useState(shots);
+  const [reorderError, setReorderError] = useState<string | null>(null);
+  useEffect(() => {
+    setItems(shots);
+  }, [shots]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((shot) => shot.id === active.id);
+    const newIndex = items.findIndex((shot) => shot.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const previous = items;
+    const next = arrayMove(items, oldIndex, newIndex);
+    setItems(next);
+    setReorderError(null);
+
+    try {
+      const formData = new FormData();
+      formData.set('videoId', String(video.id));
+      formData.set('orderedIds', JSON.stringify(next.map((shot) => shot.id)));
+      const result = await reorderShotsAction({}, formData);
+      if (result && 'error' in result && result.error) {
+        setItems(previous);
+        setReorderError(result.error);
+      }
+    } catch {
+      setItems(previous);
+      setReorderError("L'ordre n'a pas pu être enregistré. Réessayez.");
+    }
+  }
+
   return (
     <div className="space-y-8">
       <Card>
@@ -434,25 +604,16 @@ export function StoryboardEditor({
           <CardTitle>Storyboard</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-2xl font-semibold tabular-nums">
-                {creditsEstimated.toLocaleString('fr-FR')}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                credits {durationsMeasured ? 'to pay' : 'estimated'} ·{' '}
-                {seconds(Math.round(spokenSeconds * 10) / 10)} of narration in{' '}
-                {shots.length} scene{shots.length === 1 ? '' : 's'} at{' '}
-                {video.resolution}
-              </p>
-            </div>
-            {editable && (
-              <GenerateButton videoId={video.id} hasShots={shots.length > 0} />
-            )}
-          </div>
+          <PriceStrip
+            credits={creditsEstimated}
+            durationsMeasured={durationsMeasured}
+            spokenSeconds={spokenSeconds}
+            sceneCount={items.length}
+            resolution={video.resolution}
+          />
 
           {editable &&
-            shots.length > 0 &&
+            items.length > 0 &&
             (durationsMeasured ? (
               <ValidateForm
                 videoId={video.id}
@@ -466,38 +627,55 @@ export function StoryboardEditor({
 
           {!editable && (
             <p className="text-sm text-muted-foreground">
-              This video is {video.status} — {video.creditsConsumed} credits were
-              charged. The storyboard is read-only from here.
+              Cette vidéo est {video.status} — {video.creditsConsumed} crédits
+              ont été débités. Le storyboard est en lecture seule à partir
+              d&apos;ici.
             </p>
+          )}
+
+          {reorderError && (
+            <p className="text-sm text-red-500">{reorderError}</p>
           )}
         </CardContent>
       </Card>
 
-      {shots.length === 0 ? (
+      {items.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            No scene yet. Generate a first draft, then rewrite what you want.
+            Aucune scène. Faites écrire un premier jet, puis reprenez à la main
+            ce que vous voulez.
           </CardContent>
         </Card>
       ) : (
-        <ul className="space-y-4">
-          {shots.map((shot, index) => (
-            <li key={shot.id}>
-              <ShotCard
-                shot={shot}
-                index={index}
-                total={shots.length}
-                editable={editable}
-              />
-            </li>
-          ))}
-        </ul>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={items.map((shot) => shot.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <ul className="space-y-4">
+              {items.map((shot, index) => (
+                <SortableShotCard
+                  key={shot.id}
+                  shot={shot}
+                  index={index}
+                  editable={editable}
+                  video={video}
+                />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
       )}
 
       {editable && (
         <Card>
           <CardHeader>
-            <CardTitle>Add a scene</CardTitle>
+            <CardTitle>Ajouter une scène</CardTitle>
           </CardHeader>
           <CardContent>
             <AddShotForm videoId={video.id} />
@@ -528,13 +706,13 @@ export function DeleteVideoButton({
       <Button type="submit" variant="outline" size="sm" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Deleting…
+            <Loader2 className="animate-spin" />
+            Suppression…
           </>
         ) : (
           <>
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete this draft
+            <Trash2 />
+            Supprimer ce brouillon
           </>
         )}
       </Button>
