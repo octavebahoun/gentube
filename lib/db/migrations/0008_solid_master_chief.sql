@@ -1,0 +1,1 @@
+ALTER TABLE "shots" ADD COLUMN "voice_provider" varchar(20);

@@ -57,6 +57,13 @@
       "when": 1787710282564,
       "tag": "0007_sharp_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787770603627,
+      "tag": "0008_solid_master_chief",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,7 @@
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "RenderStackDeploy",
       "Effect": "Allow",
       "Action": [
         "cloudformation:CreateChangeSet",
@@ -84,6 +85,15 @@
         "states:TagResource",
         "states:UntagResource",
         "states:UpdateStateMachine"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "VoiceSynthesis",
+      "Effect": "Allow",
+      "Action": [
+        "polly:SynthesizeSpeech",
+        "polly:DescribeVoices"
       ],
       "Resource": "*"
     }

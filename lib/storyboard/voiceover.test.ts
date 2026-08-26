@@ -5,12 +5,13 @@ import { createProject } from '@/lib/projects';
 import { createVideo } from '@/lib/videos';
 import type { AssetStore } from '@/lib/storage';
 import { StorageNotConfiguredError } from '@/lib/storage';
+import { StoryboardError } from './service';
 import { VoiceError, type VoiceSynthesizer } from '@/lib/voice/elevenlabs';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import { closeDb, createTenant, resetDb } from '@/lib/test/fixtures';
 import type { JsonCompleter } from '@/lib/llm/deepseek';
 import { NARRATION_CHARS_PER_SECOND, generateStoryboard, validateStoryboard } from './service';
-import { generateVoiceover } from './voiceover';
+import { finalizeVoiceover, generateVoiceover } from './voiceover';
 
 afterAll(async () => {
   await closeDb();
@@ -241,5 +242,106 @@ describe('recording the voice-over', () => {
     await expect(
       generateVoiceover(beta, video.id, { client: synthesizer, store: assets })
     ).rejects.toMatchObject({ statusCode: 404 });
+  });
+});
+
+describe('delivering the paid voice', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  /** Mesure avec Edge, valide, débite : l'état d'où part la passe de livraison. */
+  async function paid(durationS = 5.28) {
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await draftWithScenes(tdb, [line(4), line(6)]);
+    const { assets, written } = store();
+
+    await generateVoiceover(tdb, video.id, {
+      client: voice(durationS).synthesizer,
+      store: assets,
+    });
+    const { charged } = await validateStoryboard(tdb, video.id);
+
+    return { tdb, video, assets, written, charged };
+  }
+
+  it('marks who spoke, so a second pass pays nobody twice', async () => {
+    const { tdb, video, assets } = await paid();
+    const { synthesizer, calls } = voice(5.4);
+
+    const first = await finalizeVoiceover(tdb, video.id, {
+      client: synthesizer,
+      store: assets,
+    });
+    expect(first.voiced).toBe(2);
+    expect(first.shots.every((shot) => shot.voiceProvider === 'polly')).toBe(true);
+
+    const second = await finalizeVoiceover(tdb, video.id, {
+      client: synthesizer,
+      store: assets,
+    });
+    expect(second.voiced).toBe(0);
+    expect(second.skipped).toBe(2);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('leaves the invoice alone when the paid voice runs long', async () => {
+    // Le montant du bouton est le montant débité. La scène s'allonge pour que
+    // le renderer ne coupe pas un mot ; l'écart est pour nous.
+    const { tdb, video, assets, charged } = await paid(5.28);
+
+    const result = await finalizeVoiceover(tdb, video.id, {
+      client: voice(5.9).synthesizer,
+      store: assets,
+    });
+
+    expect(result.shots.map((shot) => shot.durationS)).toEqual([5.9, 5.9]);
+    const [fresh] = await tdb.findMany(videos, eq(videos.id, video.id));
+    expect(fresh.creditsConsumed).toBe(charged);
+  });
+
+  it('never shortens a scene below what was paid for', async () => {
+    // Une vidéo plus courte que la commande serait une livraison en deçà.
+    const { tdb, video, assets } = await paid(5.28);
+
+    const result = await finalizeVoiceover(tdb, video.id, {
+      client: voice(3.1).synthesizer,
+      store: assets,
+    });
+
+    expect(result.shots.map((shot) => shot.durationS)).toEqual([5.28, 5.28]);
+  });
+
+  it('overwrites the same object, so nothing else has to be updated', async () => {
+    const { tdb, video, assets, written } = await paid();
+    const before = [...written];
+
+    const result = await finalizeVoiceover(tdb, video.id, {
+      client: voice(5.4).synthesizer,
+      store: assets,
+    });
+
+    expect(written).toEqual([...before, ...before]);
+    expect(result.shots.map((shot) => shot.audioUrl)).toEqual(before);
+  });
+
+  it('refuses a draft, where nothing has been charged yet', async () => {
+    // Sans ce garde-fou, chaque devis abandonné paierait la voix premium.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await draftWithScenes(tdb, [line(4)]);
+    const { assets } = store();
+
+    await expect(
+      finalizeVoiceover(tdb, video.id, { client: voice().synthesizer, store: assets })
+    ).rejects.toThrow(StoryboardError);
+  });
+
+  it('refuses a video already delivered to its customer', async () => {
+    const { tdb, video, assets } = await paid();
+    await tdb.update(videos, { status: 'rendered' }, eq(videos.id, video.id));
+
+    await expect(
+      finalizeVoiceover(tdb, video.id, { client: voice().synthesizer, store: assets })
+    ).rejects.toThrow(/no longer be replaced/);
   });
 });

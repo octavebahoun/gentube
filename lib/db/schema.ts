@@ -291,6 +291,17 @@ export const shots = pgTable(
     /** Clé R2 de la voix off générée. */
     audioUrl: text('audio_url'),
     /**
+     * Quelle voix a produit `audioUrl` : `edge`, `polly` ou `elevenlabs`.
+     *
+     * La voix off se fait en **deux passes**, et cette colonne est ce qui les
+     * distingue. La première parle avant que le client ait payé — donc avec
+     * Edge TTS, gratuit — et c'est elle qui mesure la durée, donc le prix. La
+     * seconde, après validation, livre la voix du plan. Sans ce champ, la
+     * seconde passe ne saurait pas quelles scènes elle a déjà refaites et
+     * repaierait le fournisseur à chaque reprise.
+     */
+    voiceProvider: varchar('voice_provider', { length: 20 }),
+    /**
      * Secondes. Fractionnaires, car une piste audio mesurée fait 5,28 s,
      * pas 5. Écrite par l'estimateur avant la voix off puis écrasée par la
      * longueur réelle ensuite — voir `durationSource`.

@@ -1,5 +1,22 @@
 import { z } from 'zod';
 import type { WordTiming } from '@/lib/storyboard/render';
+import {
+  VoiceError,
+  VoiceNotConfiguredError,
+  read,
+  round,
+  type Voiceover,
+  type VoiceSynthesizer,
+} from './contract';
+
+// Réexportés : ce module était le seul fournisseur, et son test comme ses
+// appelants historiques nomment ces symboles ici.
+export {
+  VoiceError,
+  VoiceNotConfiguredError,
+  type Voiceover,
+  type VoiceSynthesizer,
+};
 
 /**
  * Voix off ElevenLabs avec timings au niveau du mot.
@@ -27,36 +44,12 @@ export const DEFAULT_VOICE = 'george';
 const DEFAULT_BASE_URL = 'https://api.elevenlabs.io/v1';
 const DEFAULT_MODEL = 'eleven_multilingual_v2';
 
-export class VoiceNotConfiguredError extends Error {
-  readonly statusCode = 503;
-
-  constructor(missing: string) {
-    super(`Voice-over is not configured: ${missing} is missing.`);
-    this.name = 'VoiceNotConfiguredError';
-  }
-}
-
-export class VoiceError extends Error {
-  readonly statusCode: number;
-
-  constructor(message: string, statusCode = 502) {
-    super(message);
-    this.name = 'VoiceError';
-    this.statusCode = statusCode;
-  }
-}
-
 export type VoiceConfig = {
   apiKey: string;
   baseUrl: string;
   model: string;
   defaultVoice: string;
 };
-
-function read(name: string): string | null {
-  const value = process.env[name]?.trim();
-  return value ? value : null;
-}
 
 export function voiceConfig(): VoiceConfig {
   const apiKey = read('ELEVENLABS_API_KEY');
@@ -98,8 +91,6 @@ const withTimestampsSchema = z.object({
   alignment: alignmentSchema.nullable().optional(),
   normalized_alignment: alignmentSchema.nullable().optional(),
 });
-
-const round = (value: number) => Number(value.toFixed(3));
 
 /**
  * Regroupe un alignement de caractères en timings de mots. Un espace ferme un
@@ -143,18 +134,6 @@ export function wordsFromAlignment(
   flush();
 
   return words;
-}
-
-export type Voiceover = {
-  audio: Buffer;
-  contentType: string;
-  words: WordTiming[];
-  /** Longueur de la parole en secondes, d'après l'alignement. */
-  durationS: number;
-};
-
-export interface VoiceSynthesizer {
-  synthesize(text: string, voice?: string | null): Promise<Voiceover>;
 }
 
 export class ElevenLabsClient implements VoiceSynthesizer {
@@ -224,6 +203,6 @@ export class ElevenLabsClient implements VoiceSynthesizer {
   }
 }
 
-export function createVoiceClient(): ElevenLabsClient {
+export function createElevenLabsClient(): ElevenLabsClient {
   return new ElevenLabsClient(voiceConfig());
 }

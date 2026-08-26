@@ -50,6 +50,25 @@ Le second fichier, [`iam-role-policy.json`](iam-role-policy.json), décrit le
 rôle que la pile crée **elle-même**. Il est là pour audit : rien à créer à la
 main.
 
+## La voix : une permission de plus
+
+Polly tourne sur le même compte et la même paire de clés que le rendu. La
+politique versionnée ici porte donc un second bloc, `VoiceSynthesis` —
+`polly:SynthesizeSpeech`, et `polly:DescribeVoices` pour pouvoir vérifier
+quelles voix existent en neural dans la région sans deviner.
+
+Vérifié le 26 août 2026 : sans ce bloc, l'appel est refusé net —
+
+```
+User: arn:aws:iam::902665993337:user/remotion-renderer-policy is not authorized
+to perform: polly:SynthesizeSpeech because no identity-based policy allows the
+polly:SynthesizeSpeech action
+```
+
+Si la politique `hyperframes-deployer` est déjà attachée, il faut la **remplacer**
+par la version à jour de [`iam-user-policy.json`](iam-user-policy.json) : IAM →
+Politiques → `hyperframes-deployer` → Modifier → JSON.
+
 ## Ensuite
 
 ```bash

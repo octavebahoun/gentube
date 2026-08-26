@@ -49,3 +49,9 @@ for (const name of [
 ]) {
   process.env[name] = '';
 }
+
+// Edge TTS n'a pas de clé : rien ne l'empêcherait d'être appelé pour de vrai
+// depuis un test qui a oublié d'injecter un double. Gratuit ne veut pas dire
+// qu'on a le droit de marteler le service de Microsoft depuis une CI — et un
+// test qui dépend du réseau n'est plus un test.
+process.env.EDGE_TTS_DISABLED = '1';
