@@ -21,7 +21,7 @@ import {
   deleteShot,
   generateStoryboard,
   generateVoiceover,
-  moveShot,
+  reorderShots,
   shotInputSchema,
   updateShot,
   validateStoryboard,
@@ -156,6 +156,47 @@ export const shotFormAction = validatedActionWithUser(
 
     revalidatePath(`/dashboard/videos/${data.videoId}`);
     return data.intent === 'save' ? { success: 'Shot saved.' } : {};
+  }
+);
+
+/**
+ * Nouvel ordre des scènes, tel que le glisser-déposer le produit. Toutes les
+ * règles restent dans lib/storyboard : liste exacte des id de la vidéo,
+ * brouillon uniquement, renumérotation en transaction.
+ */
+const reorderSchema = videoIdentity.extend({
+  /** Les id, sérialisés : un champ répété serait écrasé par Object.fromEntries. */
+  orderedIds: z
+    .string()
+    .transform((raw, ctx) => {
+      try {
+        const ids = JSON.parse(raw);
+        if (
+          Array.isArray(ids) &&
+          ids.every((id) => Number.isInteger(id) && id > 0)
+        ) {
+          return ids as number[];
+        }
+      } catch {
+        // tombé dans le retour d'erreur ci-dessous
+      }
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Ordre invalide.' });
+      return z.NEVER;
+    })
+    .min(1, 'Ordre invalide.'),
+});
+
+export const reorderShotsAction = validatedActionWithUser(
+  reorderSchema,
+  async (data, _formData, user) => {
+    try {
+      await reorderShots(tenantDb(user.tenantId), data.videoId, data.orderedIds);
+    } catch (error) {
+      return formError(error);
+    }
+
+    revalidatePath(`/dashboard/videos/${data.videoId}`);
+    return { success: 'Ordre enregistré.' };
   }
 );
 

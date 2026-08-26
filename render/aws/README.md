@@ -29,6 +29,13 @@ Dans la console AWS, sur le compte `902665993337` :
 1. **IAM → Politiques → Créer une politique → onglet JSON.** Coller le contenu
    de [`iam-user-policy.json`](iam-user-policy.json). L'appeler
    `hyperframes-deployer`.
+
+   > La politique générée par `hyperframes lambda policies user` contient une
+   > action qui n'existe pas — `s3:PutPublicAccessBlock`, au lieu de
+   > `s3:PutBucketPublicAccessBlock`. La console la refuse. Le fichier
+   > versionné ici est corrigé ; ne pas le régénérer sans refaire la
+   > correction. `s3:GetBucketPublicAccessBlock` a été ajouté au passage :
+   > CloudFormation relit la configuration au rollback.
 2. **IAM → Utilisateurs → `remotion-renderer-policy` → Ajouter des
    permissions.** Y attacher `hyperframes-deployer`.
 3. Vérifier :
