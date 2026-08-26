@@ -10,6 +10,7 @@
     "db:setup": "tsx lib/db/setup.ts",
     "db:seed": "tsx lib/db/seed.ts",
     "db:reset": "tsx lib/db/reset.ts",
+    "db:status": "tsx lib/db/status.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
