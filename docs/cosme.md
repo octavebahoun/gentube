@@ -1,7 +1,7 @@
-# Cosme — secrets et isolation multi-tenant
+# Cosme — sécurité logicielle, secrets et isolation
 
-Ton périmètre est le dépôt : où vivent les secrets, et ce qui empêche un client
-de lire les fichiers d'un autre. Tu n'as pas besoin de Merveille pour avancer, et
+Ton périmètre est le dépôt : ce qu'un client peut atteindre qui ne lui appartient
+pas, ce que le code exécute sans l'avoir vérifié, et où vivent les secrets. Tu n'as pas besoin de Merveille pour avancer, et
 lui n'a pas besoin de toi — voir la dernière section pour la seule surface que
 vous partagez.
 
@@ -34,7 +34,46 @@ Ce qu'il te reste à vérifier : que le bucket est bien fermé côté Cloudflare
 seulement côté code), et que la durée de vie des URLs signées est courte partout
 où on en émet.
 
-## 3. Sortir les secrets de `.env`
+## 3. La sécurité logicielle, y compris celle des agents
+
+C'est la partie qui n'appartenait à personne, et c'est pour ça qu'elle est chez
+toi : tu es déjà dans le code.
+
+**Le chemin qui me gêne le plus.** Le thème écrit par un client part chez
+DeepSeek, revient sous forme de storyboard, et ce texte devient du HTML que
+Chrome exécute au rendu. Une seule protection existe aujourd'hui : `js()` dans
+`lib/render/composition.ts` échappe `</` pour qu'un titre ne puisse pas fermer
+la balise de script. C'est un point du chemin, pas le chemin.
+
+Ce qu'il faut suivre de bout en bout : `videos.theme` → prompt DeepSeek →
+`shots.prompt` et `shots.narration` → `composeHtml()` → Chrome. À chaque
+frontière, demande ce qui est échappé et par qui.
+
+**L'autorisation dans les server actions.** Presque tout l'app passe par
+`validatedActionWithUser`. Ce motif garantit qu'un utilisateur est connecté — pas
+qu'il a le droit. Le rôle (`owner`, `admin`, `member`) existe en base ; ce qu'il
+faut vérifier, c'est qu'une action qui devrait être réservée à un `owner` le
+vérifie vraiment, et pas seulement dans l'écran qui l'appelle.
+
+**Les routes internes signées.** Ezechiel va écrire la surface que n8n appelle,
+authentifiée par `N8N_WEBHOOK_SECRET`. C'est une frontière machine-à-machine :
+elle mérite une revue par quelqu'un qui ne l'a pas écrite. Même chose pour le
+webhook GeniusPay, déjà en place — un appel mal signé est répondu 401 et rien
+n'est écrit ; vérifie que ça tient encore après chaque changement, parce que
+c'est le seul rempart entre un faux paiement et un crédit accordé.
+
+**Ce qu'un agent a le droit de faire.** Le pipeline appelle des modèles, et n8n
+enchaîne des étapes sans qu'un humain valide entre chacune. La question à tenir
+est simple à énoncer et facile à perdre de vue : **qu'est-ce que cette étape peut
+faire de pire si le modèle renvoie n'importe quoi ?** Un storyboard absurde ne
+coûte que des crédits. Une étape qui accepterait une clé d'objet venue du modèle,
+ou un identifiant de tenant, serait autre chose.
+
+C'est pour ça qu'`assetKey()` construit les clés au lieu de les recevoir. Toute
+étape future doit garder cette propriété : le modèle décide du contenu, jamais
+de la destination.
+
+## 4. Sortir les secrets de `.env`
 
 Aujourd'hui tout y vit : R2, Cloudflare Workers AI, DeepSeek, ElevenLabs,
 GeniusPay, AWS. C'est tenable à six personnes, pas au-delà. Le fichier n'est pas
