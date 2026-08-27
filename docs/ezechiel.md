@@ -1,7 +1,24 @@
-# Ezechiel — n8n et publication YouTube
+# Ezechiel — orchestration, publication et agents
 
-Deux chantiers, et ils se touchent : la publication est le dernier nœud du
-pipeline que tu vas câbler.
+Trois chantiers, et c'est le même : **tout ce qui agit sans qu'un humain
+clique.** L'orchestration enchaîne les étapes, la publication est le dernier
+nœud de la chaîne, et un agent est une étape qui décide elle-même. Un seul
+esprit doit tenir cet ensemble.
+
+## Pourquoi n8n ne se partage pas
+
+n8n n'est pas une étape, c'est **l'ordre des étapes**. Il décide de ce qui
+tourne, quand, de ce qui se relance et de ce qui ne doit jamais tourner deux
+fois.
+
+Le pipeline porte une règle qu'on ne peut pas violer : la voix mesure la durée
+**avant** le débit, le débit a lieu une fois, la voix payée arrive après.
+Inverser ces trois-là, c'est facturer un montant que le client n'a pas vu. Celui
+qui tient l'orchestration tient cette règle — à deux dessus, l'ordre cesse
+d'exister.
+
+C'est aussi la seule voie dont la panne arrête tout. Les autres dégradent une
+partie du produit ; une chaîne cassée ne produit rien.
 
 ## Ce qui existe déjà et que tu orchestres
 
@@ -65,6 +82,33 @@ existe aussi. Il n'y a **aucune** route OAuth : à écrire, sur
 Le piège est le quota. Un envoi coûte **1 600 unités** sur un quota de **10 000
 par jour pour tout le projet** — pas par tenant. Six envois par jour pour la
 plateforme entière. Demande l'augmentation avant d'avoir des clients, pas après.
+
+## Les deux agents
+
+Ils sont à toi pour la même raison que n8n : un agent qui agit sans validation
+humaine, c'est de l'orchestration sous un autre nom.
+
+**L'agent d'accueil.** Il reçoit la personne, retient son style d'écriture et le
+genre de vidéos qu'elle fait, lui propose un style et la suit dans le temps. Le
+projet porte déjà `projects.style_prompt` et `projects.voice_id` : c'est le
+début de cette mémoire, pas sa fin. Ce qu'il faut décider, c'est où vit le reste
+et ce qui a le droit d'y écrire.
+
+**L'agent d'analyse.** Il lit les performances d'une vidéo publiée et propose
+des corrections de format pour la suivante. Il dépend de deux choses qui
+n'existent pas encore, toutes deux chez Prince : les statistiques de
+publication, et un journal des événements réels — aujourd'hui `activity_logs`
+ne contient que des connexions.
+
+**La règle qui les gouverne, et qui n'est pas négociable.** Un agent ne décide
+jamais d'une **destination**. Il propose du contenu ; les clés d'objet, les
+identifiants de tenant et les montants sont construits par le code. C'est pour
+ça qu'`assetKey()` fabrique les clés au lieu de les recevoir. Cosme audite ce
+chemin — préviens-le quand tu ouvres une nouvelle surface d'agent.
+
+**Aucun des deux n'est dans les 48 heures.** Ta coupe hackathon reste la chaîne
+complète déclenchée par un calendrier : c'est déjà la colonne vertébrale de la
+démonstration.
 
 ## Ce qui t'appartient
 
