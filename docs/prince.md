@@ -88,7 +88,45 @@ de **notre** quota d'appels, pas des vues d'un client.
 Deux personnes attendent derrière : Ahmad pour l'écran de suivi, et l'agent
 d'analyse d'Ezechiel, qui ne peut rien proposer sans ces chiffres.
 
-### 5. Les notifications
+### 5. Ce que le storyboard doit imposer au modèle
+
+Trois règles décidées le 28 août 2026 (`docs/providers.md`) qui vivent toutes
+dans `lib/storyboard/`, donc chez toi. Elles se posent dans le prompt système
+**et** se font respecter côté serveur, comme le type de scène l'est déjà : le
+modèle propose, le serveur tranche.
+
+**Le plancher de cinq secondes sur une scène animée.** Wan facture au clip et
+non à la seconde : une scène de 3 secondes coûte le prix d'une de 5, et la
+différence est perdue. Cinq secondes de narration font environ 70 caractères au
+ratio de 14 par seconde. Le plafond, dix secondes, vient du modèle 720p.
+
+Une vérification est en cours côté compte : si un clip de 8 s coûte autant qu'un
+de 5 s, le plancher monte à 8. Écris-le comme une constante, pas comme un
+nombre au milieu d'une phrase de prompt.
+
+**Les règles de prompt visuel.** Le défaut d'images constaté ne venait pas du
+modèle mais des demandes : « des mains en prière sur une table », sans
+mentionner la personne, produit des mains coupées. Le modèle ne cadre que ce
+qu'on nomme. Décrire le sujet entier avant le cadrage, nommer le plan (large,
+moyen, gros plan), situer décor et lumière en une phrase, un seul sujet
+principal, éviter les mains détaillées, le texte dans l'image et les foules, en
+anglais et de 20 à 40 mots.
+
+**La table `sound_requests`.** Le LLM choisit toujours un son valide du
+catalogue, donc rien ne casse dans Lambda. Mais quand rien ne correspond
+vraiment, il enregistre en parallèle ce qu'il aurait voulu **avec le son de
+repli retenu**. Le catalogue grandit alors d'après l'usage réel, et le couple
+demande/repli dit si le remplacement était acceptable. C'est une migration, donc
+coordonne-toi avec Ezechiel.
+
+### 6. Le coût réel de chaque job
+
+Chaque job enregistre **son coût au moment de la génération**, pas au moment où
+on l'affiche. La vue de consommation ne dépend alors d'aucune API de
+fournisseur et survit à un changement de fournisseur. C'est aussi ce qui rend
+tes lectures d'admin possibles sans rappeler Replicate ou AWS.
+
+### 7. Les notifications
 
 « Ta vidéo est prête », et relancer un échec sans repayer.
 

@@ -94,8 +94,10 @@ describe('credit pricing', () => {
   });
 
   it('prices 720p above its real cost ratio instead of subsidizing it', () => {
-    // Le 720p coûte réellement ~2,1× le 480p (docs/tarifs.md) ; facturé 3×,
-    // il dégage de la marge au lieu d'être subventionné par le 480p.
+    // Le 720p coûte réellement ~2,0× le 480p depuis le passage à p-video sur
+    // cette résolution (docs/providers.md) ; facturé 3×, il dégage de la marge
+    // au lieu d'être subventionné par le 480p. Le seuil reste à 2,1 : il était
+    // le coût réel avant, il est une marge de sécurité maintenant.
     for (const type of ['image', 'video'] as const) {
       expect(
         CREDITS_PER_SECOND[type]['720p'] / CREDITS_PER_SECOND[type]['480p']

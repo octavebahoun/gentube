@@ -20,11 +20,21 @@ export const CREDITS_PER_SECOND: Record<ShotType, Record<Resolution, number>> = 
 };
 
 /**
- * Coût fournisseur réel, mesuré le 25 août 2026 sur `wan-2.2-i2v-fast`.
+ * Coût fournisseur réel. Deux modèles, pas un, depuis le 28 août 2026 —
+ * voir `docs/providers.md`.
  *
- * Replicate facture **par vidéo générée**, pas par seconde : 81 images à
- * 16 fps font 5,06 s de clip, à 0,05 $ en 480p et 0,11 $ en 720p. D'où les
- * valeurs par seconde ci-dessous.
+ * **480p : `wan-video/wan-2.2-i2v-fast`.** Replicate le facture **par vidéo
+ * générée**, pas par seconde : 81 images à 16 fps font 5,06 s de clip, à
+ * 0,05 $. D'où 0,00988 $/s ci-dessous.
+ *
+ * Conséquence directe et coûteuse : **une scène de 3 s se paie comme une de
+ * 5 s**, et la différence est perdue. Le storyboard doit donc refuser une
+ * narration animée sous 5 secondes. La règle vit dans lib/storyboard/, pas
+ * ici, mais c'est cette ligne-ci qui la justifie.
+ *
+ * **720p : `prunaai/p-video`**, à 0,02 $/s facturé à la seconde. Wan y
+ * demande 0,11 $ le clip de 5,06 s, soit 0,02174 $/s : l'avantage s'inverse
+ * au-dessus du 480p.
  *
  * Les images fixes passent par `flux-2-klein-4b` sur Cloudflare Workers AI,
  * facturé **par tuile de 512×512 générée** : 0,00045 $ pour une trame 848×480,
@@ -44,7 +54,7 @@ export const PROVIDER_COST_USD_PER_SECOND: Record<
   Record<Resolution, number>
 > = {
   image: { '480p': 0.00009, '720p': 0.0002 },
-  video: { '480p': 0.00988, '720p': 0.02174 },
+  video: { '480p': 0.00988, '720p': 0.02 },
 };
 
 export const FCFA_PER_USD = 625;

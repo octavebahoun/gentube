@@ -15,10 +15,11 @@ Chiffré le 25 août 2026. Base : 1 $ = 625 FCFA.
 
 Un plan animé coûte le double parce qu'il nous coûte réellement bien plus :
 ~400 FCFA la minute contre ~30 pour des images fixes. Facturer les deux au
-même prix faisait payer aux clients « diaporama » — l'usage d'entrée de gamme,
-le plus sensible au prix — le tarif de la vidéo générée.
+même prix faisait payer aux clients « diaporama », l'usage d'entrée de gamme et
+le plus sensible au prix, le tarif de la vidéo générée.
 
-Le 720p reste à 3× le 480p : il coûte réellement 2,1× plus cher.
+Le 720p reste à 3× le 480p, alors qu'il coûte réellement 2,0× plus cher depuis
+le passage à p-video sur cette résolution.
 
 ---
 
@@ -26,17 +27,37 @@ Le 720p reste à 3× le 480p : il coûte réellement 2,1× plus cher.
 
 | Poste | 480p | 720p |
 |---|---|---|
-| Clips Replicate — 12 × 5 s | 375 FCFA | 825 FCFA |
+| Clips Replicate | 375 FCFA | 750 FCFA |
 | Voix Amazon Polly Neural | 10 FCFA | 10 FCFA |
 | Rendu Lambda | ~12 FCFA | ~12 FCFA |
 | Script DeepSeek, stockage R2 | négligeable | négligeable |
-| **Total** | **~400 FCFA** | **~850 FCFA** |
+| **Total** | **~400 FCFA** | **~775 FCFA** |
 
-Replicate facture **par vidéo générée**, pas par seconde : 81 images à 16 fps
-font 5,06 s de clip, à 0,05 $ en 480p et 0,11 $ en 720p.
+**Deux modèles, pas un** (`docs/providers.md`, 28 août 2026) :
 
-Attention : l'option `interpolate_output` (30 fps) fait monter à 0,065 $ et
-0,145 $. À n'activer que si le rendu final le justifie.
+- **480p, `wan-2.2-i2v-fast`.** Facturé **par vidéo générée** et non par
+  seconde : 81 images à 16 fps font 5,06 s de clip, à 0,05 $. Douze clips font
+  la minute, soit 375 FCFA.
+- **720p, `prunaai/p-video`.** Facturé 0,02 $ la seconde, soit 1,20 $ la minute
+  et 750 FCFA. Wan y demanderait 0,11 $ le clip, soit 825 FCFA : l'avantage
+  s'inverse au-dessus du 480p.
+
+Attention en 480p : l'option `interpolate_output` (30 fps) fait monter le clip
+à 0,065 $. À n'activer que si le rendu final le justifie.
+
+### Le plancher de cinq secondes
+
+Wan facturant au clip, **une scène de 3 secondes coûte le prix d'une scène de
+5**, et la différence est perdue sèche. Le storyboard doit donc refuser une
+narration animée sous cinq secondes, soit environ 70 caractères. La règle se
+pose dans le prompt du LLM et se fait respecter côté serveur.
+
+Le plafond vient d'ailleurs : p-video ne dépasse pas dix secondes par clip. Une
+scène animée tient donc **entre 5 et 10 secondes**, le plancher pour la marge et
+le plafond pour le modèle.
+
+À vérifier avant d'ouvrir les inscriptions : si un clip de 8 s coûte autant
+qu'un de 5 s chez Wan, le plancher utile monte à 8 secondes.
 
 ---
 

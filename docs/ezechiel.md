@@ -34,8 +34,14 @@ n8n qui les enchaîne. Leurs verbes, dans l'ordre :
 | Images | `lib/storyboard/images.ts` | `generateImages` |
 | Montage | `lib/render/service.ts` | `startRender` puis `collectRender` |
 
-Les plans animés (Wan sur Replicate) arrivent et se brancheront entre images et
-montage.
+Les plans animés arrivent et se brancheront entre images et montage.
+
+Une contrainte d'orchestration les concerne, et elle est la raison même du choix
+de Replicate : **les clips d'une vidéo partent en parallèle.** Quinze clips en
+séquentiel prennent dix minutes, pendant lesquelles le client suivant attend son
+tour. Le fournisseur accepte 600 créations de prédiction par minute, donc rien
+ne justifie de les mettre à la queue leu leu. Et toujours par webhook, jamais en
+attendant une réponse.
 
 ## L'ordre n'est pas négociable
 

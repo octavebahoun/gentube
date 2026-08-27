@@ -407,6 +407,45 @@ Pourquoi pas `flux-1-schnell`, plus connu : il ne prend pas de dimensions et
 rend du carré 1024×1024. On paierait des pixels pour les jeter, et le sujet
 cadré par le prompt sortirait du champ une fois sur deux.
 
+### Le défaut vient des prompts, pas du modèle
+
+Une demande de « mains en prière sur une table » sans mentionner la personne
+produit des mains coupées : le modèle ne cadre que ce qu'on nomme. D'où six
+règles imposées au LLM (`docs/providers.md`) : décrire le sujet entier avant le
+cadrage, nommer le plan, situer décor et lumière en une phrase, un seul sujet
+principal, éviter les mains détaillées, le texte dans l'image et les foules, en
+anglais et de 20 à 40 mots.
+
+---
+
+## Plans animés — Replicate
+
+Pas encore codé, décisions arrêtées le 28 août 2026 dans `docs/providers.md`.
+
+| Résolution ou usage | Modèle | Prix |
+|---|---|---|
+| 480p | `wan-video/wan-2.2-i2v-fast` | 0,05 $ le clip de 5 s |
+| 720p | `prunaai/p-video` | 0,02 $ la seconde |
+| Avatar, lip-sync | `prunaai/p-video-avatar` | 0,025 $ la seconde |
+
+Une couche `lib/video/provider.ts` choisira le modèle, sur le modèle du routage
+de voix. Wan reste deux fois moins cher sur la résolution par défaut, p-video
+prend le dessus en 720p et sera seul à pouvoir servir du 1080p.
+
+**Une scène animée dure entre 5 et 10 secondes**, et les deux bornes viennent
+d'endroits différents. Wan facturant au clip, une scène de 3 secondes coûte le
+prix d'une de 5 : le plancher protège la marge. Le plafond de dix secondes est
+une limite de p-video.
+
+Replicate plutôt qu'un GPU loué : modèles toujours chauds, facturation par
+sortie connue d'avance, exécutions échouées non facturées, et 600 créations de
+prédiction par minute. Les quinze clips d'une vidéo partent en parallèle au lieu
+de prendre dix minutes en file.
+
+Un piège de compte qui ne dit pas son nom : Replicate **ralentit
+progressivement** quand le crédit s'épuise, jusqu'à une requête par seconde sans
+moyen de paiement enregistré. Aucune erreur, juste des générations lentes.
+
 ---
 
 ## Montage — HyperFrames sur AWS Lambda
@@ -688,8 +727,9 @@ gratuit et filigrane, stockage R2.
 
 ### Ce qui manque, et qui l'attend
 
-- **Les plans animés.** La dernière brique pour qu'une vidéo animée sorte.
-  L'étape des images est le modèle à imiter. Voir `docs/plans-animes.md`.
+- **Les plans animés.** La dernière brique pour qu'une vidéo animée sorte. Les
+  modèles sont choisis, le code reste à écrire, et la composition doit apprendre
+  à afficher un clip. Voir `docs/plans-animes.md` et `docs/providers.md`.
 - **L'orchestration n8n.** Chaque étape est aujourd'hui un appel manuel. Rien ne
   les enchaîne, donc un client ne peut pas encore aller du début à la fin seul.
 - **Le journal des événements réels.** `activity_logs` ne contient que des
@@ -701,6 +741,10 @@ gratuit et filigrane, stockage R2.
   statistiques de vidéo. Les statistiques YouTube ne viennent pas de l'API qui
   envoie, c'en est une autre.
 - **Les notifications**, et le canal reste un choix produit.
+- **La musique et le catalogue de sons.** Le moteur sait poser une piste, mais
+  aucun morceau ne peut encore être choisi et `sound_assets` est vide.
+- **Le coût réel par job**, enregistré au moment de la génération, pour que la
+  vue de consommation ne dépende d'aucune API de fournisseur.
 - **Les deux agents** : celui qui accueille et retient le style d'écriture,
   celui qui lit les performances et propose des corrections.
 - **Le support des clips dans la composition** (balise `<video>`), voir la
@@ -733,6 +777,7 @@ La répartition a été arrêtée le 26 août 2026. Chacun a sa fiche, écrite p
 `docs/passation.md` est le briefing général, et sa section 6 liste les pièges
 découverts. C'est la plus utile du document.
 
-Autres documents : `docs/tarifs.md` (le chiffrage complet, coûts fournisseurs
+Autres documents : `docs/providers.md` (le choix des modèles de génération et
+ce qu'il implique), `docs/tarifs.md` (le chiffrage complet, coûts fournisseurs
 compris), `docs/contrats.md` (jobs, n8n vers Next.js, nommage R2, publication),
 `docs/produit-et-wireframes.md` et `docs/brief-ui.md` (les écrans et la palette).
