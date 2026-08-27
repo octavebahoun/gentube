@@ -9,8 +9,14 @@ de Vercel — auth, sessions, middleware et structure d'équipe conservés, **to
 la partie Stripe supprimée** — la facturation passe par GeniusPay (mobile money
 et carte, en XOF).
 
-**Stack** : Next.js 15 (App Router, TypeScript) · Drizzle ORM + PostgreSQL ·
-Tailwind + shadcn/ui · déploiement Vercel.
+**Pile** : Next.js 15 (App Router, TypeScript) · Drizzle ORM + PostgreSQL ·
+Tailwind, `@base-ui/react` et `radix-ui` · Cloudflare R2 pour les assets et
+Workers AI pour les images · AWS Lambda et Step Functions pour le montage ·
+DeepSeek pour le texte · Edge TTS, Amazon Polly et ElevenLabs pour la voix.
+
+L'app se déploie sur Vercel, le montage tourne sur Lambda. Un Chrome et un
+FFmpeg qui travaillent trente secondes par vidéo ne justifient pas un serveur
+payé à l'année, et une vidéo se découpe en morceaux rendus en parallèle.
 
 ---
 
@@ -28,9 +34,13 @@ Comptes créés par le seed (mot de passe `admin123` pour tous) :
 
 | Email | Tenant | Rôle | Crédits |
 |---|---|---|---|
-| `owner@studio.test` | Studio Cotonou (pro) | owner | 2 700 |
+| `owner@studio.test` | Studio Cotonou (pro) | owner | 5 400 |
 | `editor@studio.test` | Studio Cotonou (pro) | member | — |
-| `owner@demo.test` | Kanal Demo (starter) | owner | 1 320 |
+| `owner@demo.test` | Kanal Demo (starter) | owner | 2 640 |
+
+Si `DATABASE_URL` désigne une base distante (Supabase), pose aussi
+`TEST_DATABASE_URL` sur le Postgres local : la suite de tests refuse de tourner
+ailleurs qu'en local, et elle a raison de le faire (voir « Tests »).
 
 ### Commandes
 
@@ -45,15 +55,28 @@ Comptes créés par le seed (mot de passe `admin123` pour tous) :
 | `pnpm db:migrate` | applique les migrations |
 | `pnpm db:seed` | remplit la base de démo |
 | `pnpm db:reset` | vide toutes les tables (dev uniquement) |
+| `pnpm db:status` | lecture seule : combien des migrations du dépôt sont appliquées, et quelles tables existent |
 | `pnpm db:studio` | Drizzle Studio |
 
 ### Tests
 
 `pnpm test` crée et migre une base **séparée** (`<votre_base>_test`) et la vide
-entre chaque test — la base de développement n'est jamais touchée. Il faut donc
-un `DATABASE_URL` valide et un Postgres accessible.
+entre chaque test. La base de développement n'est jamais touchée.
 
-60 tests : isolation tenant, ledger de crédits, estimation, chiffrement.
+**392 tests** : isolation tenant, grand livre de crédits, tarification,
+facturation GeniusPay, storyboard, voix off, images, montage, chiffrement.
+
+Deux garde-fous, tous deux nés d'un incident réel :
+
+- `lib/test/database.ts` **refuse** un hôte de base autre que `localhost`. La
+  suite tronque chaque table entre chaque test ; pointée sur une base distante
+  elle la viderait. `TEST_DATABASE_URL` sert à garder les tests en local quand
+  l'app parle à Supabase, et `ALLOW_REMOTE_TEST_DATABASE=1` lève le garde-fou
+  pour un conteneur de CI jetable.
+- `lib/test/setup.ts` vide les variables de **tous** les fournisseurs payants et
+  coupe Edge TTS. Sans ça, un test qui oublie d'injecter un double appelle le
+  vrai service. C'est exactement ce qui est arrivé le jour où l'adaptateur R2 a
+  existé : deux objets écrits dans le bucket de production.
 
 ---
 
@@ -100,9 +123,17 @@ sont commentées dans le code.
 
 ## Crédits
 
-Unité (specs §1) : **1 crédit = 1 seconde de vidéo générée en 480p**, 720p à
-3 crédits/seconde. Tout est dans `lib/credits/`, chiffrage complet dans
-`docs/tarifs.md`.
+Unité : **1 crédit = 1 seconde d'image fixe en 480p.**
+
+| | 480p | 720p |
+|---|---|---|
+| Plan en image fixe | 1 crédit/s | 3 crédits/s |
+| Plan animé | 2 crédits/s | 6 crédits/s |
+
+Un plan animé coûte le double parce qu'il nous coûte réellement bien plus : à
+peu près 400 FCFA la minute contre 30 pour des images fixes. Au même tarif, les
+clients « diaporama » paieraient la vidéo générée. Tout est dans `lib/credits/`,
+chiffrage complet dans `docs/tarifs.md`.
 
 - `pricing.ts` — barème, estimation, coût provider. Aucun nombre de tarification
   ailleurs dans le code.
@@ -130,17 +161,31 @@ Garanties :
 
 ### Tarifs retenus
 
-La colonne « Crédits » du tableau §1 des specs est inutilisable telle quelle
-(10 000 « crédits » y sont en réalité un budget compute en FCFA, pas un nombre
-de crédits). Les allocations ont été tranchées le 25 août 2026, chiffrées dans
-`docs/tarifs.md` :
+Chiffrés le 25 août 2026, détaillés dans `docs/tarifs.md` :
 
-- **Starter** 15 000 FCFA/mois = **1 320 crédits ≈ 22 min** en 480p (marge 41 %)
-- **Pro** 30 000 FCFA/mois = **2 700 crédits ≈ 45 min** en 480p (marge 40 %)
-- **Recharge** 5 000 FCFA = **360 crédits ≈ 6 min**, plus chère à la minute que
-  l'abonnement volontairement — et désormais rentable (~52 % au coût réel).
-  Un test vérifie que les allocations correspondent aux minutes annoncées et
-  que le pack ne repasse jamais en perte.
+- **Starter** 15 000 FCFA/mois = **2 640 crédits**, soit 22 min animées ou
+  44 min d'images fixes en 480p (marge 41 %). Voix Amazon Polly Neural.
+- **Pro** 30 000 FCFA/mois = **5 400 crédits**, soit 45 min animées ou 90 min
+  d'images (marge 40 %). Voix ElevenLabs.
+- **Business** sur devis.
+- **Recharge** 5 000 FCFA = **720 crédits**, plus chère à la minute que
+  l'abonnement, volontairement.
+- **Essai gratuit** 120 crédits à l'inscription, 480p et filigrane. Au pire
+  400 FCFA de coût par compte créé : c'est un budget publicitaire.
+
+Un test vérifie que les dotations correspondent aux minutes annoncées et que le
+pack de recharge ne repasse jamais en perte.
+
+### Deux poches, pas un solde
+
+Les crédits du plan **expirent** en fin de cycle, les crédits achetés jamais.
+`tenants.credits_balance` est la somme dénormalisée de `credits_plan` et
+`credits_topup`, et un débit vide la poche qui expire d'abord. L'expiration est
+codée dans `lib/credits/ledger.ts`, avec une clé d'idempotence dérivée de la
+date d'échéance pour qu'un passage rejoué ne périme pas deux fois.
+
+Un écran qui n'afficherait qu'un seul nombre cacherait la seule information qui
+compte : ce qui va disparaître à la fin du mois.
 
 ---
 
@@ -171,9 +216,10 @@ Quatre règles, chacune testée :
 - **Suppression réservée aux `owner` / `admin`.** Créer et configurer reste
   ouvert à tout membre du workspace.
 
-`voice_id` et `youtube_channel_id` sont stockés mais **pas encore consommés** :
-la voix off et l'OAuth YouTube arrivent plus tard. L'UI le dit, plutôt que de
-laisser croire qu'un champ rempli déclenche quelque chose.
+`voice_id` est consommé : la voix off d'une vidéo qui n'en nomme pas hérite de
+celle du projet. `youtube_channel_id` est stocké mais **pas encore utilisé**,
+l'OAuth YouTube n'existant pas. L'UI le dit, plutôt que de laisser croire qu'un
+champ rempli déclenche quelque chose.
 
 ---
 
@@ -189,23 +235,26 @@ l'éditeur sur `/dashboard/videos/[id]`.
 
 ```
 1. le LLM écrit la NARRATION de chaque scène (+ prompt visuel, effets, sons)
-2. la voix off est générée  → sa longueur réelle devient la durée de la scène
-3. c'est cette durée qui donne le prix EXACT
-4. seulement ensuite : génération des visuels, qui coûtent cher
+2. Edge TTS lit chaque phrase, GRATUITEMENT → sa longueur devient la durée
+3. c'est cette durée qui donne le prix EXACT, affiché sur le bouton
+4. le client valide : le débit a lieu une fois, et il est figé
+5. la voix du plan (Polly ou ElevenLabs) remplace la voix de mesure
+6. les visuels, qui coûtent cher
+7. le montage sur Lambda
 ```
 
 **Une durée n'est jamais écrite à la main.** Avant que l'audio existe, elle est
 *estimée* depuis le texte (~14 caractères/seconde, calibré sur des voix off
 réellement mesurées : 69 caractères pour 5,28 s, 64 pour 4,82 s, 104 pour
-6,79 s). Après, elle est *mesurée* sur l'alignement renvoyé par ElevenLabs.
-La colonne `shots.duration_source` dit laquelle des deux, et
+6,79 s). Après, elle est *mesurée* sur les timings mot à mot de la voix. La
+colonne `shots.duration_source` dit laquelle des deux, et
 `validateStoryboard()` **refuse de débiter** tant qu'une seule scène est encore
 une estimation.
 
-La conséquence est le seul vrai arbitrage de cette étape : la voix off tourne
-**avant** le paiement. Elle coûte des centimes là où un clip vidéo coûte des
-dizaines de centimes, et en échange le montant affiché sur le bouton est le
-montant débité — pas d'écriture de correction dans le ledger d'un client.
+C'est le seul vrai arbitrage de cette étape : la voix tourne **avant** le
+paiement. En échange, le montant affiché sur le bouton est le montant débité,
+et aucune écriture de correction n'apparaît jamais dans le grand livre d'un
+client.
 
 ### Le LLM : DeepSeek
 
@@ -274,11 +323,127 @@ une transition ou une variante de titre est un déploiement, pas une migration.
 - Le réordonnancement exige la liste **exacte** des scènes.
 - Une scène appartenant à une autre vidéo du même tenant est refusée en 404.
 
-### Le kanban
+### L'éditeur
 
-Réordonnancement par flèches ↑/↓, pas de glisser-déposer. Le drag reste à faire
-(`@dnd-kit/sortable`) et se posera par-dessus `reorderShots(videoId, orderedIds)`
-sans toucher au serveur.
+Glisser-déposer avec `@dnd-kit/sortable`, prix par scène, et une bascule visible
+entre durée estimée et durée mesurée. Le drag passe par
+`reorderShotsAction`, qui appelle `reorderShots(videoId, orderedIds)` : le
+serveur exige la liste exacte des scènes, donc un réordonnancement partiel est
+refusé au lieu d'être devine.
+
+---
+
+## Voix off — deux passes, une seule facture
+
+C'est la partie la moins devinable du produit, et elle vient d'une contrainte de
+caisse. Le prix est la somme des durées, une durée s'obtient en faisant lire la
+phrase, donc il faut parler **avant** que le client valide. Y compris pour les
+devis qui n'aboutiront jamais. Payer Polly ou ElevenLabs à ce moment-là, c'est
+payer chaque devis.
+
+**Passe 1, mesurer** (`lib/voice/edge.ts`). Edge TTS, le service de lecture à
+voix haute du navigateur Edge. Gratuit, sans clé, et il renvoie des *word
+boundaries*, donc les timings mot à mot. Cette passe fixe le prix.
+
+**Passe 2, livrer** (`lib/voice/polly.ts`, `lib/voice/elevenlabs.ts`). Après
+validation, la voix du plan. Elle écrase le même objet R2 et refait les timings,
+qui doivent suivre la voix réellement entendue. `shots.voice_provider` dit qui a
+parlé, pour qu'une reprise ne repaie pas le fournisseur.
+
+Le routage vit dans `lib/voice/index.ts`. Un fournisseur mal configuré **lève**
+au lieu de basculer sur l'autre : une bascule silencieuse ferait payer la voix
+premium sur un plan Starter, ou servirait la voix d'entrée de gamme à qui a payé
+l'autre.
+
+**Le prix ne bouge jamais après la validation.** Si la voix livrée dure un peu
+plus longtemps, la scène s'allonge pour que le renderer ne coupe pas un mot, et
+l'écart est pour nous. Elle ne raccourcit jamais sous ce qui a été payé.
+
+### La durée, et deux pièges qui coûtaient de l'argent
+
+Polly ne dit ni la longueur de son audio, ni la fin du dernier mot : un *speech
+mark* ne porte qu'un instant de départ. La durée est donc lue dans les en-têtes
+de trames du mp3 (`lib/voice/mp3.ts`), sans dépendance audio.
+
+Deux corrections trouvées en comparant ce lecteur à `ffprobe` :
+
+- la trame qui porte l'en-tête Xing n'est pas de l'audio, elle existe pour être
+  lue et pas pour être entendue ;
+- LAME déclare le silence qu'il ajoute en tête et en queue.
+
+Sans les deux, chaque scène était surfacturée de 75 millisecondes.
+
+Et pour Edge, la durée retenue est celle de la **parole**, pas celle du fichier :
+mesuré sur un vrai appel, 6,12 s de mp3 pour 5,24 s de voix. Facturer le fichier
+aurait surfacturé de 17 %.
+
+Deux avertissements. Chez Polly les timings se demandent dans un second appel,
+facturé comme un appel de synthèse. Et Edge TTS n'est pas une API publique : ni
+contrat, ni garantie de stabilité, et il se trouve sur le chemin du prix.
+
+---
+
+## Images — Flux sur Cloudflare Workers AI
+
+`lib/images/flux.ts` et `lib/storyboard/images.ts`. Modèle
+`@cf/black-forest-labs/flux-2-klein-4b`. Coût mesuré : 0,00045 $ une image en
+480p, 0,00101 $ en 720p.
+
+Une image est générée pour **chaque** scène, animée comprise : Wan fait de
+l'image-to-video, donc la fixe est la matière première du clip. D'où deux
+colonnes, `shots.source_image_url` et `shots.asset_url`.
+
+Trois choses vérifiées contre l'API plutôt que supposées :
+
+- **Le corps doit être du `multipart/form-data`.** Un POST JSON est refusé par un
+  message qui ne dit pas de changer d'encodage.
+- **Les dimensions sont rabaissées au multiple de 16 inférieur**, en silence. On
+  a demandé 854×480 et reçu 848×480. Toutes nos trames sont donc des multiples
+  de 16.
+- **Un prompt vide est accepté et facturé.** Le client le refuse avant l'appel
+  réseau.
+
+Pourquoi pas `flux-1-schnell`, plus connu : il ne prend pas de dimensions et
+rend du carré 1024×1024. On paierait des pixels pour les jeter, et le sujet
+cadré par le prompt sortirait du champ une fois sur deux.
+
+---
+
+## Montage — HyperFrames sur AWS Lambda
+
+HTML plus Chrome headless plus FFmpeg. `render/gentube-v1/` est le projet de
+composition ; son `index.html` est **généré à chaque rendu** par
+`lib/render/composition.ts`, parce qu'une composition GenTube a autant de scènes
+que son storyboard.
+
+```ts
+await startRender(tdb, videoId);    // matérialise, lance l'exécution, rend la main
+await collectRender(tdb, videoId);  // relève l'état, range le MP4 sur R2
+```
+
+**Deux temps, et ce n'est pas un raffinement.** Lambda rend en morceaux
+parallèles pendant plusieurs minutes, et aucune requête HTTP ne doit attendre
+ça. Les deux verbes sont idempotents : relancer `startRender` renvoie le job
+existant plutôt que de démarrer une seconde exécution payante.
+
+Un rendu échoué laisse la vidéo en `rendering`, jamais en `failed`. Les crédits
+sont débités, les visuels existent, et une relance ne repaie rien.
+
+**La règle non négociable de la composition** : le moteur *cherche* chaque
+image, donc toute animation doit être un `fromTo` à des instants absolus. Un
+`to` ou un temps accumulé produit une vidéo différente à chaque rendu.
+
+Mesuré le 26 août 2026, pile déployée à Paris (`eu-west-3`) : une vidéo de
+16,4 s montée en 34 s de bout en bout, base de données et R2 comprises, pour
+0,0105 $. 492 images sur 52 machines en parallèle, sans discontinuité aux
+jointures de segments. Un second essai sur 49 s de vidéo a rendu 1 475 images en
+25 s pour 0,0157 $.
+
+**Ce que la composition ne sait pas encore faire : les clips.** Le média est
+posé en `background-image`, ce qui n'affiche qu'une image fixe. Un clip mp4
+rendrait du vide sans lever d'erreur. Le moteur sait pourtant gérer la vidéo,
+mais il lui faut une balise `<video>` portant son propre `data-start`. À écrire
+avec l'étape des plans animés.
 
 ---
 
@@ -361,7 +526,7 @@ et résolution de l'intent par sa référence) sont la même exception que
 
 ## Schéma
 
-15 tables (`lib/db/schema.ts`), migrations dans `lib/db/migrations/`.
+**18 tables** (`lib/db/schema.ts`), 9 migrations dans `lib/db/migrations/`.
 
 | Table | Rôle |
 |---|---|
@@ -378,15 +543,31 @@ et résolution de l'intent par sa référence) sont la même exception que
 | `billing_cycles` | une période facturée : montant XOF, crédits du cycle, statut |
 | `payment_attempts` | tentatives de paiement d'un cycle (c'est ce qui rend « retry puis suspend » comptable) |
 | `payment_intents` | paiement vu de la passerelle : référence unique, montant, crédits promis |
-| `payment_webhook_events` | journal des webhooks vérifiés, unique sur `event_id` — la garantie d'idempotence |
+| `payment_webhook_events` | journal des webhooks vérifiés, unique sur `event_id`, la garantie d'idempotence |
+| `sound_assets` | catalogue de sons au niveau plateforme, sans `tenant_id` |
+| `publications` | une publication d'une vidéo sur une chaîne |
+| `youtube_quota_usage` | notre consommation du quota YouTube, pas les vues d'un client |
 
 États d'une vidéo : `draft → validated → generating → rendering → rendered →
 published`, plus `failed` (ajouté : sans lui, un crash de pipeline laisse une
 vidéo bloquée en `generating`).
 
-Deux colonnes ajoutées par rapport aux specs, parce que le reste en dépend :
-`videos.resolution` (le barème de crédits en a besoin) et `jobs.external_id`
-en index **unique** (un webhook rejoué doit résoudre vers un seul job).
+Colonnes ajoutées en route, chacune parce que le reste en dépendait :
+
+- `videos.resolution`, dont le barème de crédits a besoin.
+- `jobs.external_id` en index **unique**, pour qu'un webhook rejoué résolve
+  exactement un job.
+- `videos.output_url`, la clé R2 du MP4 final. Stockée plutôt que déduite d'une
+  convention, car un rendu relancé produit une nouvelle exécution, et c'est
+  celle qui a abouti qui doit être servie.
+- `shots.source_image_url`, l'image fixe, distincte de `asset_url`, pour qu'une
+  reprise du clip ne repaie pas l'image.
+- `shots.voice_provider`, qui dit quelle voix a produit `audio_url`, pour que
+  la passe de livraison sache quelles scènes elle a déjà refaites.
+
+**Attention en équipe** : `lib/db/migrations/meta/_journal.json` casse dès que
+deux branches génèrent une migration en parallèle. Deux personnes seulement en
+génèrent.
 
 ---
 
@@ -415,10 +596,33 @@ Voir `.env.example`, documenté ligne par ligne. `pnpm db:setup` en génère un
 `.env` avec `AUTH_SECRET` et `ENCRYPTION_KEY` déjà remplis ; les clés provider
 restent vides, aucune n'est nécessaire à cette étape.
 
-`DATABASE_URL`, `BASE_URL`, `AUTH_SECRET`, `ENCRYPTION_KEY`, `R2_*`,
-`REPLICATE_API_TOKEN`, `REPLICATE_WEBHOOK_SECRET`, `ELEVENLABS_API_KEY`,
-`CLOUDFLARE_AI_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `YOUTUBE_CLIENT_ID`,
-`YOUTUBE_CLIENT_SECRET`, `N8N_WEBHOOK_SECRET`, `N8N_BASE_URL`.
+`DATABASE_URL`, `TEST_DATABASE_URL`, `BASE_URL`, `AUTH_SECRET`,
+`ENCRYPTION_KEY`, `R2_*`, `DEEPSEEK_API_KEY`, `CLOUDFLARE_AI_TOKEN`,
+`CLOUDFLARE_ACCOUNT_ID`, `ELEVENLABS_API_KEY`, `POLLY_*` et `EDGE_TTS_*` (tous
+optionnels, valeurs par défaut documentées), `REPLICATE_API_TOKEN`,
+`REPLICATE_WEBHOOK_SECRET`, `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`,
+`N8N_WEBHOOK_SECRET`, `N8N_BASE_URL`.
+
+### Le rendu sur AWS
+
+```
+AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
+AWS_REGION=eu-west-3
+HYPERFRAMES_RENDER_BUCKET
+HYPERFRAMES_STATE_MACHINE_ARN
+HYPERFRAMES_LAMBDA_MEMORY_MB / HYPERFRAMES_MAX_PARALLEL_CHUNKS
+```
+
+Les deux coordonnées de pile sont des **sorties du déploiement** : le serveur les
+lit ici, pas dans l'état local de la CLI, qu'une instance serverless n'aura
+jamais. Mise en place dans `render/aws/README.md`.
+
+Amazon Polly réutilise ces mêmes clés AWS. Il a fallu y ajouter
+`polly:SynthesizeSpeech`, que la politique du rendu ne contenait pas.
+
+Un piège qui a coûté des heures : **les quotas AWS sont par région.** Une
+augmentation accordée en `eu-west-3` ne se voit pas depuis `us-east-1`, et tout
+paraît plafonné sans raison.
 
 ### Facturation
 
@@ -464,46 +668,70 @@ Webhook à déclarer côté GeniusPay : `${BASE_URL}/api/webhooks/geniuspay`.
 
 ---
 
-## Pas encore implémenté
+## Où en est le produit
 
-Volontairement hors périmètre pour l'instant : Replicate, Hyperframes, YouTube,
-ElevenLabs et l'orchestration n8n. Le schéma, les crédits, l'isolation, la
-facturation, les projets et le storyboard sont en place pour les recevoir.
+**La chaîne fait six étapes, quatre fonctionnent, et une vidéo complète en
+images fixes sort aujourd'hui.**
 
-**Stockage R2 — fait.** `lib/storage/index.ts` porte le contrat (`AssetStore`,
-`assetKey` avec préfixe `tenant_id/` obligatoire) et `lib/storage/r2.ts`
-l'implémente sur Cloudflare R2. Rien n'est public : tout se lit par une URL
-signée de quinze minutes. `StorageNotConfiguredError` nomme les variables
-manquantes plutôt que d'échouer plus tard sur un appel réseau opaque.
+| Étape | État |
+|---|---|
+| Storyboard écrit par DeepSeek, éditable | ✅ |
+| Voix off en deux passes, timings mot à mot | ✅ |
+| Images Flux | ✅ |
+| Montage sur AWS Lambda | ✅ |
+| Plans animés (Wan sur Replicate) | ❌ |
+| Publication YouTube | ❌ |
 
-Les tests ne peuvent pas l'atteindre : `lib/test/setup.ts` vide les variables
-`R2_*`. Sans ce garde-fou, un test qui oublie d'injecter un store factice écrit
-dans le bucket de production — c'est arrivé dès la première exécution.
+Solide autour : comptes et cloisonnement, projets et vidéos, crédits à deux
+poches avec grand livre et idempotence, paiement GeniusPay et son webhook, essai
+gratuit et filigrane, stockage R2.
 
-**Glisser-déposer du kanban.** Le réordonnancement se fait aux flèches ; le
-drag-and-drop des specs reste à poser par-dessus le même appel serveur.
+### Ce qui manque, et qui l'attend
 
-**Templates Hyperframes.** Le contrat est porté et exprimé en secondes
-(`lib/storyboard/render.ts`) : `toHyperframesStoryboard()` produit les
-positions absolues, les dimensions et la durée totale. Les templates
-HTML/CSS/GSAP qui les consomment restent à écrire, avec
-`@hyperframes/shader-transitions` pour les transitions.
+- **Les plans animés.** La dernière brique pour qu'une vidéo animée sorte.
+  L'étape des images est le modèle à imiter. Voir `docs/plans-animes.md`.
+- **L'orchestration n8n.** Chaque étape est aujourd'hui un appel manuel. Rien ne
+  les enchaîne, donc un client ne peut pas encore aller du début à la fin seul.
+- **Le journal des événements réels.** `activity_logs` ne contient que des
+  connexions. Sans lui, l'administration n'a rien à afficher et la sécurité rien
+  à auditer. Deux chantiers sont bloqués derrière.
+- **L'administration.** Aucune route, aucun écran : le dépôt ne contient que
+  `app/(dashboard)`. Nombre de vidéos, erreurs, quotas consommés par tenant.
+- **La publication et ses statistiques.** Ni route OAuth, ni envoi, ni table de
+  statistiques de vidéo. Les statistiques YouTube ne viennent pas de l'API qui
+  envoie, c'en est une autre.
+- **Les notifications**, et le canal reste un choix produit.
+- **Les deux agents** : celui qui accueille et retient le style d'écriture,
+  celui qui lit les performances et propose des corrections.
+- **Le support des clips dans la composition** (balise `<video>`), voir la
+  section Montage.
+- **Résiliation et rétrogradation en autonomie.** `subscriptions.cancel_at`
+  existe, aucune route ne l'écrit.
 
-Les paquets ne sont pas encore installés. **Quand ils le seront, ils doivent
-être épinglés à la version exacte** : `@hyperframes/*` est en 0.8.x, publié
-plusieurs fois par jour. Un `^` sur du 0.x accepte des ruptures en silence.
+Un point à traiter tôt : le quota YouTube Data API est de 10 000 unités par jour
+**par projet Google Cloud**, et un envoi en coûte 1 600. Soit environ six
+publications par jour pour l'ensemble des tenants, pas par tenant. La demande
+d'augmentation passe par une revue Google qui prend des semaines.
 
-**Expiration du quota de plan.** Les specs §1 disent que les crédits achetés
-n'expirent pas mais que le quota du plan expire en fin de cycle. Le crédit du
-cycle est bien accordé et tracé (`billing_cycles.credits_granted`), mais rien ne
-l'expire : il faudrait distinguer crédits de plan et crédits achetés dans le
-ledger, et une tâche planifiée pour les périmer. À arbitrer — en l'état, un
-crédit non consommé reste acquis.
+---
 
-**Résiliation / rétrogradation self-service.** `subscriptions.cancel_at` existe
-dans le schéma, aucune route ne l'écrit encore.
+## Qui fait quoi
 
-Un point à traiter tôt : le quota YouTube Data API est de 10 000 unités/jour
-**par projet Google Cloud**, et un upload en coûte 1 600 — soit ~6 publications
-par jour pour l'ensemble des tenants, pas par tenant. La demande d'augmentation
-de quota passe par une revue Google qui prend des semaines.
+La répartition a été arrêtée le 26 août 2026. Chacun a sa fiche, écrite pour
+être lue seule le premier jour.
+
+| Qui | Sa voie | Sa fiche |
+|---|---|---|
+| Ezechiel TADAGBE | Orchestration n8n, publication YouTube, les deux agents | `docs/ezechiel.md` |
+| Prince KOUCHEME | Toute la logique directe : journal, API d'admin, quotas, statistiques, tooling, chemin de l'argent | `docs/prince.md` |
+| Ahmad OUOROU | Les écrans du parcours client | `docs/ahmad.md` |
+| Rosaire KAKPO | Les écrans compte et administration | `docs/rosaire.md` |
+| Merveille GANDJI | Cloisonnement des comptes, identités, quotas AWS | `docs/merveille.md` |
+| Cosme MISSIKPODE | Sécurité logicielle, secrets, isolation, plus les plans animés | `docs/cosme.md` |
+
+`docs/passation.md` est le briefing général, et sa section 6 liste les pièges
+découverts. C'est la plus utile du document.
+
+Autres documents : `docs/tarifs.md` (le chiffrage complet, coûts fournisseurs
+compris), `docs/contrats.md` (jobs, n8n vers Next.js, nommage R2, publication),
+`docs/produit-et-wireframes.md` et `docs/brief-ui.md` (les écrans et la palette).
