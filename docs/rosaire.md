@@ -42,6 +42,53 @@ produise une vidéo. Traite-les après facturation, équipe et projets.
 Le piège : une partie vient d'un autre projet et **lit Supabase directement**.
 Rebrancher les données sur nos server actions est la moitié du travail.
 
+## Le son, en plus des écrans
+
+Deux chantiers, décidés le 28 août 2026 (`docs/providers.md`). Le premier tient
+plus de l'opération que du développement, le second est une paire d'écrans.
+
+### Le catalogue d'effets sonores
+
+Environ **150 sons générés une seule fois** avec ElevenLabs Sound Effects, entre
+5 et 15 $ en tout, puis servis depuis R2 à coût nul pour toujours.
+
+- **60 effets** : whoosh de transition, impacts, montées, clics d'interface,
+  notifications, glitchs, tampons, page tournée, apparition de texte.
+- **50 ambiances** : rue, marché, bureau, salle de classe, forêt, pluie, océan,
+  vent, foule, voiture, cuisine, nuit.
+- **40 nappes musicales** : tension, résolution, curiosité, joie, mélancolie,
+  épique, suspense, légèreté.
+
+La table `sound_assets` et le script d'import existent déjà :
+
+```bash
+pnpm tsx lib/sounds/import-catalog.ts <catalogue>
+```
+
+**Les deux moitiés comptent.** Importer les lignes rend un son *choisissable*
+par le LLM qui écrit le storyboard ; le fichier doit atteindre R2 sous la même
+clé pour qu'il soit *jouable*. Un son choisissable mais absent de R2 ne casse
+pas chez toi, il casse dans Lambda plusieurs minutes plus tard, au milieu d'une
+vidéo déjà payée.
+
+Chaque son porte ses pics d'impact en secondes, comme le fait déjà le schéma.
+
+### La musique de fond
+
+`videos.music_url` et `videos.music_volume` existent, le moteur de montage sait
+poser une piste. Ce qui manque est le moyen d'en choisir une : un écran de
+bibliothèque, et un aperçu.
+
+ElevenLabs Music est retenu pour générer, à environ 0,40 $ la minute, licence
+commerciale incluse. La clé ElevenLabs est déjà en place, donc aucun compte
+nouveau à ouvrir.
+
+**Où passe la frontière avec Prince.** Choisir une piste dans une bibliothèque
+est un écran, donc à toi. Générer un morceau à la demande est un appel
+fournisseur, donc une server action à lui demander. Ne l'écris pas toi-même
+dans `lib/`, même si c'est tentant : c'est une dépense par appel, et ça se
+teste comme les autres fournisseurs.
+
 ## Ce que tu ne touches pas
 
 `lib/` — ni la base, ni les migrations, ni les fournisseurs. Il te manque une

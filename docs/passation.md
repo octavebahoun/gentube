@@ -391,8 +391,8 @@ La répartition a été arrêtée le 26 août 2026. Chacun a sa fiche, écrite p
 | Ezechiel TADAGBE | Orchestration n8n, publication YouTube, les deux agents | `docs/ezechiel.md` |
 | Prince KOUCHEME | Toute la logique directe : journal, API d'admin, quotas, statistiques, tooling, chemin de l'argent | `docs/prince.md` |
 | Ahmad OUOROU | Les écrans du parcours client | `docs/ahmad.md` |
-| Rosaire KAKPO | Les écrans compte et administration | `docs/rosaire.md` |
-| Merveille GANDJI | Cloisonnement des comptes, identités, quotas AWS | `docs/merveille.md` |
+| Rosaire KAKPO | Les écrans compte et administration, plus le son | `docs/rosaire.md` |
+| Merveille GANDJI | Cloisonnement des comptes, identités, quotas AWS et Replicate | `docs/merveille.md` |
 | Cosme MISSIKPODE | Sécurité logicielle, secrets, isolation, plus les plans animés | `docs/cosme.md` et `docs/plans-animes.md` |
 
 Trois règles qui évitent de se marcher dessus :

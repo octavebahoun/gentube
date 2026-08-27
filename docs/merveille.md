@@ -66,35 +66,6 @@ verra son étape traîner et cherchera dans son code.
 À faire : rechargement automatique activé, solde maintenu au-dessus de 20 $.
 Départ conseillé à 100 $ avec rechargement déclenché à 30 $.
 
-## 5. Le son, parce qu'il touche R2 plus que le code
-
-Deux choses, et la première est une opération ponctuelle plus qu'un
-développement.
-
-**Le catalogue d'effets sonores.** Environ 150 sons générés une seule fois avec
-ElevenLabs Sound Effects, entre 5 et 15 $ en tout, puis servis depuis R2 à coût
-nul. Soixante effets (whoosh, impacts, montées, clics, notifications, glitchs,
-page tournée), cinquante ambiances (rue, marché, bureau, forêt, pluie, océan,
-vent, foule, cuisine, nuit) et quarante nappes musicales (tension, résolution,
-curiosité, joie, mélancolie, épique, suspense, légèreté).
-
-La table `sound_assets` et l'import existent déjà :
-
-```bash
-pnpm tsx lib/sounds/import-catalog.ts <catalogue>
-```
-
-Importer les lignes rend les sons **choisissables** par le LLM ; les fichiers
-doivent atteindre R2 sous les mêmes clés pour être **jouables**. Les deux moitiés
-comptent.
-
-**La musique de fond.** ElevenLabs Music, environ 0,40 $ la minute générée,
-licence commerciale incluse. La clé ElevenLabs existe déjà, donc aucun compte
-nouveau. Lyria 3 de Google est cinq fois moins cher et sera à reconsidérer quand
-le volume le justifiera ; Suno et Udio sont écartés faute d'API officielle.
-
-Détails et raisons dans `docs/providers.md`.
-
 ## Les deux pièges qui ont coûté des heures
 
 **Les quotas AWS sont par région.** L'augmentation de concurrence à 1 000 avait
