@@ -257,8 +257,9 @@ GeniusPay, les générations ratées et les régénérations.
 ### Plafonds externes
 
 - **GeniusPay : 500 000 FCFA/mois** pour toute la plateforme.
-- **YouTube : ~6 publications par jour** pour toute la plateforme. Un envoi
-  coûte 1 600 unités sur un quota de 10 000 par jour. À faire augmenter tôt.
+- **YouTube : ~100 publications par jour** pour toute la plateforme. Les envois
+  ont leur propre quota depuis juin 2026, et un envoi coûte ~100 unités depuis
+  décembre 2025 au lieu de 1 600. La limite reste globale, plus un préalable.
 
 ---
 

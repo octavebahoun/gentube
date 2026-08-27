@@ -101,8 +101,9 @@ toute la période d'investissement.
 ## Plafonds externes
 
 - **GeniusPay : 500 000 FCFA/mois** pour toute la plateforme, commission 1,5 %.
-- **YouTube : 10 000 unités/jour**, soit ~6 publications par jour, tous
-  clients confondus.
+- **YouTube : ~100 publications/jour**, tous clients confondus. Les envois ont
+  leur propre quota depuis juin 2026, et un envoi coûte ~100 unités depuis
+  décembre 2025 au lieu de 1 600.
 
 ---
 

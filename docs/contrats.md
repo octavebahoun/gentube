@@ -169,11 +169,13 @@ réussie — même règle que `videos.status` face à `jobs`.
 
 ### Le quota YouTube
 
-**10 000 unités par jour pour toute la plateforme**, tous clients confondus.
-Un envoi coûte 1 600 unités, donc environ **six publications par jour**.
+Depuis juin 2026, les envois ont leur **propre quota dédié**, d'à peu près
+**100 appels par jour** ; et depuis décembre 2025 un envoi coûte environ 100
+unités au lieu de 1 600. Compte donc sur une centaine de publications par jour.
 
-Ce n'est pas une limite par client : c'est une limite sur nous. Deux clients
-qui publient trois vidéos chacun l'épuisent.
+Ce n'est toujours pas une limite par client : c'est une limite sur nous, tous
+clients confondus. À une centaine de vidéos par jour elle cesse d'être un
+plafond immédiat, sans cesser d'être un plafond.
 
 Table `youtube_quota_usage` : une ligne par jour (`date` unique,
 `units_used`). Le compteur est incrémenté **dans la transaction qui crée la

@@ -708,9 +708,10 @@ export const publications = pgTable(
 /**
  * Consommation quotidienne du quota YouTube, **pour toute la plateforme**.
  *
- * Ce n'est pas une limite par client : 10 000 unités par jour, un envoi en
- * coûte 1 600, donc environ six publications quotidiennes tous clients
- * confondus. Deux clients qui publient trois vidéos chacun l'épuisent.
+ * Ce n'est pas une limite par client, c'est une limite sur nous. Les envois ont
+ * leur propre quota depuis juin 2026, d'environ 100 appels par jour, et un envoi
+ * coûte ~100 unités depuis décembre 2025 au lieu de 1 600 : compter une centaine
+ * de publications quotidiennes, tous clients confondus.
  *
  * Pas de `tenant_id`, volontairement — même statut que `sound_assets` : c'est
  * une ressource de plateforme, pas la donnée d'un client. Le compteur est

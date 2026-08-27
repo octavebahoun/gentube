@@ -708,10 +708,11 @@ gratuit et filigrane, stockage R2.
 - **Résiliation et rétrogradation en autonomie.** `subscriptions.cancel_at`
   existe, aucune route ne l'écrit.
 
-Un point à traiter tôt : le quota YouTube Data API est de 10 000 unités par jour
-**par projet Google Cloud**, et un envoi en coûte 1 600. Soit environ six
-publications par jour pour l'ensemble des tenants, pas par tenant. La demande
-d'augmentation passe par une revue Google qui prend des semaines.
+Sur le quota YouTube : depuis décembre 2025 un envoi coûte environ **100
+unités** au lieu de 1 600, et depuis juin 2026 les envois disposent de leur
+**propre quota**, d'à peu près 100 appels par jour. Cela fait autour de 100
+publications quotidiennes pour la plateforme. La limite reste globale et non
+par tenant, mais elle n'est plus un préalable à demander.
 
 ---
 

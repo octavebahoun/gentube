@@ -79,9 +79,15 @@ force chaque tenant à reconnecter sa chaîne. La table `youtube_quota_usage`
 existe aussi. Il n'y a **aucune** route OAuth : à écrire, sur
 `${BASE_URL}/api/youtube/callback`.
 
-Le piège est le quota. Un envoi coûte **1 600 unités** sur un quota de **10 000
-par jour pour tout le projet** — pas par tenant. Six envois par jour pour la
-plateforme entière. Demande l'augmentation avant d'avoir des clients, pas après.
+Le quota, longtemps le piège de cette étape, s'est desserré. Depuis décembre
+2025 un envoi coûte environ **100 unités** au lieu de 1 600, et depuis juin 2026
+les envois ont leur **propre quota dédié**, d'à peu près 100 appels par jour.
+Compte donc sur une centaine de publications quotidiennes.
+
+Ce qui reste vrai : la limite porte sur **le projet Google, pas sur un tenant**.
+Le compteur `youtube_quota_usage` garde donc son utilité, et il est incrémenté
+dans la transaction qui crée la publication, jamais après l'envoi. Deux envois
+simultanés passeraient sinon tous les deux.
 
 ## Les deux agents
 

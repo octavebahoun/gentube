@@ -247,10 +247,11 @@ connexion de chaîne YouTube, publication, statistiques, page d'accueil publique
 
 ## 1.10 Contraintes structurelles à connaître avant de dessiner
 
-1. **Quota YouTube** : 10 000 unités/jour par projet Google, 1 600 par upload →
-   **~6 publications par jour pour tous les tenants confondus**. L'interface de
-   publication doit pouvoir dire « la file est pleine, ta vidéo part demain »
-   sans que ça ressemble à une panne.
+1. **Quota YouTube** : ~100 publications par jour pour tous les tenants
+   confondus. Les envois ont leur propre quota depuis juin 2026, et un envoi
+   coûte ~100 unités depuis décembre 2025 au lieu de 1 600. L'interface doit
+   quand même pouvoir dire « la file est pleine, ta vidéo part demain » sans que
+   ça ressemble à une panne : la limite est globale, pas par client.
 2. **Plafond GeniusPay** : 500 000 FCFA/mois encaissés.
 3. **Temps de génération** : ~30–40 s par clip en 480p, ~150 s en 720p. Une
    vidéo de 2 min en 480p ≈ 15 clips ≈ 10 min en séquentiel, quelques minutes
@@ -730,9 +731,9 @@ Montre aussi :
    l'autorisation est révoquée côté Google puis effacée chez nous.
 2. Un état d'erreur : "La connexion a expiré, reconnecte ta chaîne", pastille
    rouge, sans jamais afficher de jeton.
-3. Un encadré d'information sur le quota : "6 publications par jour maximum,
+3. Un encadré d'information sur le quota : "Environ 100 publications par jour,
    toutes chaînes confondues sur la plateforme. Au-delà, les vidéos sont mises
-   en file et publiées le lendemain." — présenté comme une règle du jeu, pas
+   en file et publiées le lendemain." Présenté comme une règle du jeu et non
    comme une panne.
 ```
 
