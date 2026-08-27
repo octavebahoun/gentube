@@ -45,7 +45,8 @@ Rebrancher les données sur nos server actions est la moitié du travail.
 ## Ce que tu ne touches pas
 
 `lib/` — ni la base, ni les migrations, ni les fournisseurs. Il te manque une
-server action ? Demande à Prince ou à moi.
+server action ? Demande à Prince. Les quotas consommés, en particulier, sont un
+calcul sur le grand livre des crédits, et ce calcul est à lui.
 
 À lire d'abord : `docs/tarifs.md` (les deux poches et les marges par plan), puis
 `docs/brief-ui.md`.

@@ -50,7 +50,7 @@ d'essai. L'écran doit le dire avant le paiement, pas après.
 ## Ce que tu ne touches pas
 
 `lib/` — ni la base, ni les migrations, ni les fournisseurs. Il te manque une
-server action ? Demande à Prince ou à moi ; ça se rajoute en dix minutes et ça
-évite deux implémentations du même appel.
+server action ? Demande à Prince : c'est lui qui écrit le côté données de tes
+écrans, et ça évite deux implémentations du même appel.
 
 À lire d'abord : `docs/brief-ui.md`, puis `docs/produit-et-wireframes.md`.

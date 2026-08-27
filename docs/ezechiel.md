@@ -112,8 +112,9 @@ démonstration.
 
 ## Ce qui t'appartient
 
-Tu peux toucher `lib/db/` — mais préviens : le `_journal.json` des migrations
-casse dès que deux personnes en génèrent en parallèle. On se coordonne à deux,
-pas à six.
+Tu peux toucher `lib/db/`, à une condition : préviens Prince avant de générer
+une migration. Le `_journal.json` de Drizzle casse dès que deux branches en
+produisent en parallèle, et vous êtes les deux seuls à y avoir droit. Prince en
+aura besoin pour le journal des événements et pour les statistiques.
 
 À lire d'abord : `docs/passation.md`, section 6 surtout (les pièges trouvés).

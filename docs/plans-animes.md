@@ -39,7 +39,8 @@ rejouer le dé.
 Le modèle exact (`wan-video/wan-2.2-*`), la durée de clip, et si un plan animé
 qui échoue retombe sur son image fixe au lieu de faire échouer la vidéo entière.
 
-Mon avis sur le dernier point : **oui, il retombe.** Une scène fixe dans une
+L'avis de celui qui a écrit l'étape des images, à prendre ou à laisser : **oui,
+il retombe.** Une scène fixe dans une
 vidéo livrée vaut mieux qu'une vidéo non livrée qui a été payée. Mais alors il
 faut le dire au client, et ne pas lui facturer le tarif animé pour une scène
 fixe — deux crédits la seconde contre un.
