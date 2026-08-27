@@ -1,7 +1,5 @@
 # GenTube — briefing de passation
 
-Écrit le 26 août 2026, pour l'équipe qui reprend le projet.
-
 Ce document explique **ce qui existe, pourquoi c'est comme ça, et ce que ça a
 coûté de l'apprendre**. Le code raconte le « comment » ; ici on raconte le
 « pourquoi », qui ne se lit nulle part ailleurs.
@@ -76,7 +74,7 @@ sur Pro et Business. La voix off n'est pas qu'un son : elle renvoie un
 **alignement mot à mot**, qui sert aux sous-titres karaoké et surtout à
 mesurer la durée réelle de chaque scène.
 
-Chez Polly, cet alignement s'appelle *Speech Marks* et se facture à part
+Chez Polly, cet alignement s'appelle _Speech Marks_ et se facture à part
 (4 $ le million). Il est obligatoire, pas optionnel.
 
 **État réel : seul ElevenLabs est codé.** Voir la section 5.
@@ -188,10 +186,10 @@ faux (section 6).
 
 **1 crédit = 1 seconde d'image fixe en 480p.**
 
-| | 480p | 720p |
-|---|---|---|
-| Image fixe | 1 crédit/s | 3 |
-| Plan animé | 2 crédits/s | 6 |
+|            | 480p        | 720p |
+| ---------- | ----------- | ---- |
+| Image fixe | 1 crédit/s  | 3    |
+| Plan animé | 2 crédits/s | 6    |
 
 Un plan animé coûte le double parce qu'il nous coûte réellement bien plus :
 une minute de clips revient à ~400 FCFA de fournisseur contre ~30 pour des
@@ -208,11 +206,11 @@ la marge au lieu d'être subventionné.
 
 ### Les plans
 
-| Plan | Prix | Crédits | Ce que ça achète |
-|---|---|---|---|
-| Starter | 15 000 FCFA | 2 640 | 22 min animées, ou 44 min d'images |
-| Pro | 30 000 FCFA | 5 400 | 45 min animées, ou 90 min d'images |
-| Business | sur devis | — | négocié par contrat |
+| Plan     | Prix        | Crédits | Ce que ça achète                   |
+| -------- | ----------- | ------- | ---------------------------------- |
+| Starter  | 15 000 FCFA | 2 640   | 22 min animées, ou 44 min d'images |
+| Pro      | 30 000 FCFA | 5 400   | 45 min animées, ou 90 min d'images |
+| Business | sur devis   | —       | négocié par contrat                |
 
 Recharge : **5 000 FCFA = 720 crédits**. Volontairement plus chère à la minute
 que l'abonnement (833 FCFA contre 682) — sinon personne ne s'abonne.
@@ -252,14 +250,14 @@ GeniusPay, les générations ratées et les régénérations.
 
 **La chaîne fait 6 étapes. 3 fonctionnent.**
 
-| Étape | État |
-|---|---|
-| Storyboard écrit par DeepSeek, éditable | ✅ |
-| Voix off avec timings mot à mot | ✅ |
-| Images Flux | ✅ |
-| Plans animés (Wan) | ❌ |
-| Montage (HyperFrames) | ❌ |
-| Publication YouTube | ❌ |
+| Étape                                   | État |
+| --------------------------------------- | ---- |
+| Storyboard écrit par DeepSeek, éditable | ✅   |
+| Voix off avec timings mot à mot         | ✅   |
+| Images Flux                             | ✅   |
+| Plans animés (Wan)                      | ❌   |
+| Montage (HyperFrames)                   | ❌   |
+| Publication YouTube                     | ❌   |
 
 **Donc aucune vidéo complète ne sort aujourd'hui.** C'est le seul chiffre qui
 compte.
@@ -341,7 +339,7 @@ basculer le projet vers HyperFrames.
 La licence existe donc ; c'est la métadonnée qui manque. Un outil d'audit qui
 lit `package.json` les signalera quand même en « licence inconnue ». À savoir
 avant qu'on vous le demande, surtout pour une équipe qui a changé de
-framework *à cause* d'une licence.
+framework _à cause_ d'une licence.
 
 ### Des invariants affirmés mais faux
 
