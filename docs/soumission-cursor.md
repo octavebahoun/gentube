@@ -41,8 +41,8 @@ monde doit faire.
 **Il écrit une phrase. Il reçoit une vidéo montée.**
 
 Pas des morceaux à assembler : un fichier MP4 prêt à publier. Les images, la
-voix, les sous-titres mot à mot, les transitions et la musique arrivent déjà
-assemblés au rythme de la narration.
+voix, les sous-titres mot à mot et les transitions arrivent déjà assemblés au
+rythme de la narration.
 
 **Il connaît le prix avant de payer.**
 
@@ -99,12 +99,23 @@ démonstration — un jury note ce qui tourne.
 | **Prince** | « Ta vidéo est prête », et la relance d'un échec | Une panne qui se répare sans repayer |
 | **Ahmad** | Les écrans du parcours : prompt, storyboard, fabrication, lecteur | Le produit tel qu'un client le vit |
 | **Rosaire** | Crédits et paiement mobile money à l'écran, en FCFA | Un achat qui aboutit, en monnaie locale |
-| **Merveille** | Musique de fond et sons par scène | Une vidéo qui s'entend, pas seulement qui se voit |
-| **Cosme** | Lien de partage à durée de vie courte | Une vidéo qu'on envoie sans la rendre publique |
+| **Merveille** | Le cloisonnement des comptes, prouvé à l'écran — plus les clés tournées et les droits resserrés | Un compte qui essaie d'atteindre la vidéo d'un autre, et qui échoue |
+| **Cosme** | Un lien de partage qui expire, et la revue d'autorisation de chaque surface écrite pendant ces 48 h | Un lien qui cesse de fonctionner à l'heure dite |
 | **Bahoun** | Les plans animés | Des scènes qui bougent, plus seulement des images |
 
 Quatre membres de l'équipe découvrent le code cette semaine. C'est pourquoi
 chaque voie est petite, autonome, et finissable en deux jours.
+
+Deux d'entre elles sont des voies de **sécurité**, et c'est délibéré : du code
+écrit en quarante-huit heures est exactement là où un contrôle d'autorisation se
+perd. Merveille et Cosme tiennent le cloisonnement des comptes et l'autorisation
+pendant que les cinq autres avancent — et leur périmètre ne s'arrête pas à la
+démonstration : la gestion des identités, la sortie des secrets et l'audit du
+chemin qui va du texte d'un client jusqu'au moteur de rendu leur appartiennent
+au-delà du hackathon.
+
+Un client ne doit jamais pouvoir atteindre le fichier d'un autre. C'est la seule
+promesse du produit qui ne se répare pas après coup : elle s'annonce.
 
 ---
 
