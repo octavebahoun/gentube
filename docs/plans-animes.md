@@ -1,7 +1,12 @@
 # Plans animés — Wan sur Replicate
 
-Ma part. Le fichier porte le nom du chantier et pas le mien : renomme-le si tu
-préfères.
+**Pour Cosme**, en plus de sa voie sécurité — voir `docs/cosme.md`.
+
+Deux raisons de le mettre là plutôt qu'ailleurs. C'est l'étape la plus isolée du
+pipeline : un appel fournisseur, un webhook, une boucle reprenable. Elle ne
+touche ni l'ordre des étapes, ni le chemin de l'argent. Et son point délicat est
+précisément ta compétence : **un webhook dont la signature ne vérifie pas doit
+être rejeté**, sans quoi n'importe qui peut déclarer qu'un clip est prêt.
 
 ## Où ça se branche
 
@@ -32,8 +37,16 @@ rejouer le dé.
 ## Ce qui reste à décider
 
 Le modèle exact (`wan-video/wan-2.2-*`), la durée de clip, et si un plan animé
-qui échoue retombe sur sa fixe au lieu de faire échouer la vidéo entière. Mon
-avis : oui, il retombe — une scène fixe dans une vidéo livrée vaut mieux qu'une
-vidéo non livrée qui a été payée.
+qui échoue retombe sur son image fixe au lieu de faire échouer la vidéo entière.
+
+Mon avis sur le dernier point : **oui, il retombe.** Une scène fixe dans une
+vidéo livrée vaut mieux qu'une vidéo non livrée qui a été payée. Mais alors il
+faut le dire au client, et ne pas lui facturer le tarif animé pour une scène
+fixe — deux crédits la seconde contre un.
 
 La demande de dépense est envoyée, donc ce chantier n'est plus bloqué.
+
+## Ce que ça n'est pas
+
+Ce n'est pas une étape à brancher dans n8n : ça, c'est chez Ezechiel. Tu écris
+l'étape et ses reprises ; il décide quand elle tourne.

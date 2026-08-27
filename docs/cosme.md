@@ -115,5 +115,20 @@ ensuite** — un magasin de secrets qu'on remplit avec une clé compromise ne se
 
 Il te préviendra quand c'est fait. C'est le seul point de rendez-vous.
 
+## En plus : les plans animés
+
+Tu es le plus à l'aise en Next.js des quatre, donc l'étape des plans animés
+(Wan sur Replicate) est à toi : voir `docs/plans-animes.md`.
+
+Elle est mise là pour deux raisons. C'est l'étape la plus **isolée** du pipeline
+— un appel fournisseur, un webhook, une boucle reprenable — elle ne touche ni
+l'ordre des étapes ni le chemin de l'argent. Et son point délicat est ta
+compétence : un webhook dont la signature ne vérifie pas doit être rejeté.
+
+Un avertissement quand même. Tu es aussi celui qui relit le code des autres.
+Quand les deux se disputent ton temps, **la relecture passe devant** : un défaut
+d'autorisation écrit par quelqu'un d'autre coûte plus cher qu'un plan animé
+livré une semaine plus tard.
+
 À lire d'abord : `.env.example` en entier, puis `docs/contrats.md` (le plan de
 nommage des objets) et `docs/passation.md` section 6.
