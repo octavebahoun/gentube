@@ -12,7 +12,9 @@
     "db:reset": "tsx lib/db/reset.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "geniuspay:connect": "tsx --conditions=react-server lib/payments/geniuspay/connect.ts",
+    "geniuspay:rotate-kek": "tsx --conditions=react-server lib/payments/geniuspay/rotate-kek.ts"
   },
   "dependencies": {
     "@tailwindcss/postcss": "4.1.7",

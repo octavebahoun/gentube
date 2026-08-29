@@ -45,7 +45,19 @@ type MovementInput = {
   videoId?: number;
   /** Set this on webhook-driven writes so a replay is a no-op. */
   idempotencyKey?: string;
+  /**
+   * Whether these credits belong to the expiring plan quota. Defaults to what
+   * the reason implies — a plan allowance expires at the end of the cycle,
+   * anything bought or refunded does not (specs §1).
+   */
+  expiring?: boolean;
 };
+
+/** Reasons whose credits die with the billing cycle. */
+const EXPIRING_REASONS: ReadonlySet<CreditReason> = new Set([
+  'signup_grant',
+  'subscription_grant',
+]);
 
 function assertAmount(amount: number): void {
   if (!Number.isInteger(amount) || amount <= 0) {
@@ -71,6 +83,21 @@ export async function getBalance(tdb: TenantDb): Promise<number> {
   return tenant.creditsBalance;
 }
 
+/** Total balance split into the expiring plan quota and purchased credits. */
+export async function getBalances(tdb: TenantDb): Promise<{
+  total: number;
+  plan: number;
+  purchased: number;
+}> {
+  const tenant = await tdb.getTenant();
+  if (!tenant) throw new Error(`Tenant ${tdb.tenantId} not found.`);
+  return {
+    total: tenant.creditsBalance,
+    plan: tenant.planCreditsBalance,
+    purchased: tenant.creditsBalance - tenant.planCreditsBalance,
+  };
+}
+
 export async function canAfford(
   tdb: TenantDb,
   amount: number
@@ -84,9 +111,20 @@ export async function canAfford(
  */
 export async function grantCredits(
   tdb: TenantDb,
-  { amount, reason, videoId, idempotencyKey }: MovementInput
+  {
+    amount,
+    reason,
+    videoId,
+    idempotencyKey,
+    expiring,
+    planPortion,
+  }: MovementInput & {
+    /** Forces how much lands in the plan bucket — used by refunds. */
+    planPortion?: number;
+  }
 ): Promise<LedgerResult> {
   assertAmount(amount);
+  const intoPlanBucket = expiring ?? EXPIRING_REASONS.has(reason);
 
   return await tdb.transaction(async (tx) => {
     const replay = await findReplay(tx, idempotencyKey);
@@ -94,14 +132,23 @@ export async function grantCredits(
       return { entry: replay, balance: await getBalance(tx), replayed: true };
     }
 
+    const planDelta =
+      planPortion !== undefined
+        ? Math.min(Math.max(planPortion, 0), amount)
+        : intoPlanBucket
+          ? amount
+          : 0;
+
     const [tenant] = await tx.updateTenant({
       creditsBalance: sql`${tenants.creditsBalance} + ${amount}`,
+      planCreditsBalance: sql`${tenants.planCreditsBalance} + ${planDelta}`,
       updatedAt: new Date(),
     });
     if (!tenant) throw new Error(`Tenant ${tx.tenantId} not found.`);
 
     const [entry] = await tx.insert(creditLedger, {
       delta: amount,
+      planDelta,
       reason,
       videoId: videoId ?? null,
       balanceAfter: tenant.creditsBalance,
@@ -120,7 +167,10 @@ export async function grantCredits(
  */
 export async function debitCredits(
   tdb: TenantDb,
-  { amount, reason, videoId, idempotencyKey }: MovementInput
+  { amount, reason, videoId, idempotencyKey, planPortion }: MovementInput & {
+    /** Forces how much comes out of the plan bucket — used by refunds. */
+    planPortion?: number;
+  }
 ): Promise<LedgerResult> {
   assertAmount(amount);
 
@@ -130,9 +180,29 @@ export async function debitCredits(
       return { entry: replay, balance: await getBalance(tx), replayed: true };
     }
 
+    // Locks the tenant row for the rest of the transaction, so the balance
+    // read below cannot go stale before the update lands. Concurrent debits
+    // queue here rather than racing.
+    const before = await tx.getTenantForUpdate();
+    if (!before) throw new Error(`Tenant ${tx.tenantId} not found.`);
+    if (before.creditsBalance < amount) {
+      throw new InsufficientCreditsError(amount, before.creditsBalance);
+    }
+
+    // The expiring quota is spent before purchased credits, so a tenant never
+    // loses credits it paid for while plan credits sat unused.
+    const fromPlan =
+      planPortion !== undefined
+        ? Math.min(planPortion, before.planCreditsBalance)
+        : Math.min(amount, before.planCreditsBalance);
+
+    // The `>= amount` guard is redundant under the lock above and kept anyway:
+    // it is the constraint that makes a negative balance impossible even if a
+    // future caller reaches this without a transaction.
     const [tenant] = await tx.updateTenant(
       {
         creditsBalance: sql`${tenants.creditsBalance} - ${amount}`,
+        planCreditsBalance: sql`${tenants.planCreditsBalance} - ${fromPlan}`,
         updatedAt: new Date(),
       },
       gte(tenants.creditsBalance, amount)
@@ -144,6 +214,7 @@ export async function debitCredits(
 
     const [entry] = await tx.insert(creditLedger, {
       delta: -amount,
+      planDelta: -fromPlan,
       reason,
       videoId: videoId ?? null,
       balanceAfter: tenant.creditsBalance,
@@ -151,6 +222,39 @@ export async function debitCredits(
     });
 
     return { entry, balance: tenant.creditsBalance, replayed: false };
+  });
+}
+
+/**
+ * Drops whatever is left of the plan allowance. Called when a billing cycle
+ * rolls over: the quota expires, purchased credits survive (specs §1).
+ */
+export async function expirePlanCredits(
+  tdb: TenantDb
+): Promise<{ expired: number; balance: number }> {
+  return await tdb.transaction(async (tx) => {
+    const before = await tx.getTenantForUpdate();
+    if (!before) throw new Error(`Tenant ${tx.tenantId} not found.`);
+
+    const expired = before.planCreditsBalance;
+    if (expired === 0) {
+      return { expired: 0, balance: before.creditsBalance };
+    }
+
+    const [tenant] = await tx.updateTenant({
+      creditsBalance: sql`${tenants.creditsBalance} - ${expired}`,
+      planCreditsBalance: 0,
+      updatedAt: new Date(),
+    });
+
+    await tx.insert(creditLedger, {
+      delta: -expired,
+      planDelta: -expired,
+      reason: 'plan_quota_expired',
+      balanceAfter: tenant.creditsBalance,
+    });
+
+    return { expired, balance: tenant.creditsBalance };
   });
 }
 
@@ -243,11 +347,20 @@ export async function refundVideo(
     let balance = await getBalance(tx);
 
     if (refunded > 0) {
+      // Credits go back to the bucket they were taken from. Without this, a
+      // charge paid out of the expiring plan quota would come back as a
+      // credit that never expires.
+      const debit = await tx.findFirst(
+        creditLedger,
+        eq(creditLedger.idempotencyKey, `video:${videoId}:debit`)
+      );
+
       ({ balance } = await grantCredits(tx, {
         amount: refunded,
         reason: 'video_refund',
         videoId,
         idempotencyKey: `video:${videoId}:refund`,
+        planPortion: debit ? Math.min(-debit.planDelta, refunded) : 0,
       }));
     }
 

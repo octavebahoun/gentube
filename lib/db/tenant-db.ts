@@ -7,11 +7,17 @@ import type {
 import { db } from './drizzle';
 import {
   activityLogs,
+  billingCycles,
   creditLedger,
+  gatewayCredentials,
   invitations,
   jobs,
+  paymentAttempts,
+  paymentIntents,
+  paymentWebhookEvents,
   projects,
   shots,
+  subscriptions,
   tenants,
   users,
   videos,
@@ -40,8 +46,17 @@ export class TenantScopeViolationError extends Error {
   }
 }
 
-/** Every tenant-owned table. The completeness test asserts this list matches
- *  the schema, so a new table cannot be added without a tenant_id column. */
+/**
+ * Every tenant-owned table. The completeness test asserts this list matches the
+ * schema, so a new table cannot be added without a tenant_id column.
+ *
+ * `gateway_credentials` and `payment_webhook_events` carry a *nullable*
+ * tenant_id and are still listed here on purpose: the filter behaves correctly
+ * either way — a NULL never matches `tenant_id = $x`, so the platform's own
+ * merchant row and an unresolved webhook stay invisible to every tenant. The
+ * two functions that legitimately reach those NULL rows do so explicitly and
+ * are named in lib/payments/credentials.ts and lib/payments/geniuspay/webhook.ts.
+ */
 export const TENANT_SCOPED_TABLES = [
   users,
   invitations,
@@ -52,6 +67,12 @@ export const TENANT_SCOPED_TABLES = [
   jobs,
   creditLedger,
   youtubeTokens,
+  gatewayCredentials,
+  subscriptions,
+  billingCycles,
+  paymentAttempts,
+  paymentIntents,
+  paymentWebhookEvents,
 ] as const;
 
 export type TenantScopedTable = PgTable & { tenantId: AnyPgColumn };
@@ -107,6 +128,14 @@ export interface TenantDb {
   ): Promise<T['$inferSelect'][]>;
 
   getTenant(): Promise<Tenant | null>;
+
+  /**
+   * The tenant row with `SELECT ... FOR UPDATE`. Only meaningful inside a
+   * transaction, where the lock it takes serialises concurrent balance
+   * changes; outside one the lock is released immediately and it degrades to
+   * a plain read.
+   */
+  getTenantForUpdate(): Promise<Tenant | null>;
 
   updateTenant(
     set: PgUpdateSetSource<typeof tenants>,
@@ -237,6 +266,16 @@ export function tenantDb(tenantId: number, executor: Executor = db): TenantDb {
         .from(tenants)
         .where(eq(tenants.id, tenantId))
         .limit(1);
+      return (row ?? null) as Tenant | null;
+    },
+
+    async getTenantForUpdate() {
+      const [row] = await (executor as any)
+        .select()
+        .from(tenants)
+        .where(eq(tenants.id, tenantId))
+        .limit(1)
+        .for('update');
       return (row ?? null) as Tenant | null;
     },
 

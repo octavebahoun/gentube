@@ -2,7 +2,13 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   resolve: {
-    alias: { '@': import.meta.dirname },
+    alias: {
+      '@': import.meta.dirname,
+      // `server-only` throws on import outside a React Server Component. It is
+      // a build-time guard for the Next bundle, not a runtime dependency, so
+      // tests resolve it to the package's own empty module.
+      'server-only': 'server-only/empty.js',
+    },
   },
   test: {
     environment: 'node',

@@ -38,7 +38,14 @@ export class DecryptionError extends Error {
   }
 }
 
-function parseKey(raw: string): Buffer {
+/**
+ * Decodes 32 bytes of key material from hex or base64.
+ *
+ * Shared with the payment credential vault, which holds its own separate key
+ * (`PAYMENT_CREDENTIALS_KEK`) — hence the variable name in the error message
+ * rather than a hardcoded one.
+ */
+export function parseKeyMaterial(raw: string, varName = 'ENCRYPTION_KEY'): Buffer {
   const trimmed = raw.trim();
   const key = /^[0-9a-fA-F]{64}$/.test(trimmed)
     ? Buffer.from(trimmed, 'hex')
@@ -46,7 +53,7 @@ function parseKey(raw: string): Buffer {
 
   if (key.length !== KEY_LENGTH) {
     throw new EncryptionKeyError(
-      `ENCRYPTION_KEY must decode to ${KEY_LENGTH} bytes, got ${key.length}. ` +
+      `${varName} must decode to ${KEY_LENGTH} bytes, got ${key.length}. ` +
         'Generate one with: openssl rand -hex 32'
     );
   }
@@ -61,7 +68,7 @@ export function getEncryptionKey(): Buffer {
   if (!raw) {
     throw new EncryptionKeyError('ENCRYPTION_KEY environment variable is not set.');
   }
-  cachedKey = parseKey(raw);
+  cachedKey = parseKeyMaterial(raw);
   return cachedKey;
 }
 

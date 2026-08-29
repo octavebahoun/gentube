@@ -43,6 +43,7 @@ async function writeEnvFile() {
   const generated: Record<string, string> = {
     AUTH_SECRET: crypto.randomBytes(32).toString('hex'),
     ENCRYPTION_KEY: crypto.randomBytes(32).toString('hex'),
+    PAYMENT_CREDENTIALS_KEK: crypto.randomBytes(32).toString('hex'),
   };
 
   const template = await fs.readFile(EXAMPLE_PATH, 'utf8');
@@ -56,7 +57,9 @@ async function writeEnvFile() {
     .join('\n');
 
   await fs.writeFile(ENV_PATH, filled);
-  console.log('.env created with a fresh AUTH_SECRET and ENCRYPTION_KEY.');
+  console.log(
+    '.env created with a fresh AUTH_SECRET, ENCRYPTION_KEY and PAYMENT_CREDENTIALS_KEK.'
+  );
   console.log(
     'Provider keys (Replicate, R2, ElevenLabs, YouTube, ...) are left blank — ' +
       'none of them are needed for this step.'
