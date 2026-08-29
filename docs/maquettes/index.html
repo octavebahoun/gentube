@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GenTube — planche des maquettes</title>
+<meta name="description" content="Les treize écrans de GenTube, du thème saisi au MP4 publié sur YouTube.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,400;100,500;100,600;125,700;125,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F7F6F3; --sheet:#FFFFFF; --recess:#EFEDE8;
+  --ink:#16161A; --ink-2:#45454E; --muted:#7C7C87;
+  --rule:#DEDCD6; --rule-strong:#B9B6AE;
+  --accent:#C9231A;
+  --sans:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --gut:clamp(18px,4vw,64px);
+  --measure:64ch;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#17161A; --sheet:#1D1C21; --recess:#121116;
+    --ink:#F1F0ED; --ink-2:#BEBDBA; --muted:#87868D;
+    --rule:#2D2C33; --rule-strong:#454450;
+    --accent:#FF4A3D;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#17161A; --sheet:#1D1C21; --recess:#121116;
+  --ink:#F1F0ED; --ink-2:#BEBDBA; --muted:#87868D;
+  --rule:#2D2C33; --rule-strong:#454450;
+  --accent:#FF4A3D;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.62;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--ink);text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.shell{max-width:1560px;margin:0 auto;padding:0 var(--gut)}
+.rule{height:1px;background:var(--rule);border:0;margin:0}
+.rule--strong{background:var(--rule-strong)}
+
+/* ---------- bandeau collant ---------- */
+.bar{
+  position:sticky;top:0;z-index:20;background:var(--paper);
+  border-bottom:1px solid var(--rule);
+}
+.bar .shell{display:flex;align-items:center;gap:14px;height:46px}
+.bar .id{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.06em}
+.bar .now{font-size:13px;font-weight:500;color:var(--ink-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .spacer{flex:1}
+.bar button{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+  background:none;border:1px solid var(--rule-strong);color:var(--muted);
+  padding:4px 9px;cursor:pointer;text-transform:uppercase;
+}
+.bar button:hover{color:var(--ink);border-color:var(--ink)}
+
+/* ---------- cartouche ---------- */
+.masthead{padding-block:clamp(44px,7vw,92px) 34px}
+.masthead h1{
+  font-family:var(--sans);font-variation-settings:'wdth' 125;font-weight:800;
+  font-size:clamp(34px,6.6vw,74px);line-height:.98;letter-spacing:-.035em;
+  margin:0 0 22px;max-width:16ch;text-wrap:balance;
+}
+.masthead h1 em{font-style:normal;color:var(--accent)}
+.masthead .lede{margin:0;max-width:var(--measure);font-size:clamp(15px,1.5vw,17px);color:var(--ink-2)}
+
+.spec{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
+  margin-top:40px;border-top:1px solid var(--rule-strong);
+}
+.spec div{padding:12px 0 14px;border-bottom:1px solid var(--rule);padding-right:20px}
+.spec dt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+.spec dd{margin:0;font-size:14px;font-weight:500}
+
+/* ---------- planche-contact ---------- */
+.contact{padding-block:52px 8px}
+.contact h2,.screens h2.sec{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);font-weight:500;margin:0 0 20px;
+}
+.sheet{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));
+  gap:1px;
+}
+.cell{padding:12px;display:flex;flex-direction:column;gap:9px;
+  box-shadow:0 0 0 1px var(--rule)}
+.cell:hover{background:var(--sheet)}
+.cell .thumb{
+  background:var(--recess);aspect-ratio:16/10;overflow:hidden;
+  display:flex;align-items:flex-start;justify-content:center;
+}
+.cell .thumb img{width:100%;height:auto;display:block}
+.cell .cap{display:flex;gap:8px;align-items:baseline}
+.cell .num{font-family:var(--mono);font-size:10.5px;color:var(--accent)}
+.cell .nm{font-size:12.5px;font-weight:500;line-height:1.3}
+
+/* ---------- écrans ---------- */
+.screens{padding-block:64px 0}
+.screen{padding:44px 0 52px;border-top:1px solid var(--rule)}
+.screen:first-of-type{border-top:1px solid var(--rule-strong)}
+.head{display:grid;grid-template-columns:64px minmax(0,1fr);gap:0 18px;align-items:start}
+.head .num{
+  font-family:var(--mono);font-size:clamp(22px,3vw,34px);font-weight:400;
+  color:var(--accent);line-height:1;padding-top:2px;
+}
+.head h3{
+  font-family:var(--sans);font-variation-settings:'wdth' 125;font-weight:700;
+  font-size:clamp(19px,2.4vw,27px);letter-spacing:-.02em;margin:0 0 6px;line-height:1.1;
+}
+.head p{margin:0;max-width:var(--measure);color:var(--ink-2);font-size:14.5px}
+.head .file{
+  font-family:var(--mono);font-size:10.5px;color:var(--muted);
+  margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 14px;
+}
+.plate{margin:26px 0 0;overflow-x:auto;background:var(--recess);
+  border:1px solid var(--rule);padding:clamp(10px,1.6vw,22px)}
+.plate img{display:block;width:100%;min-width:880px;height:auto}
+
+/* ---------- pied ---------- */
+footer{padding-block:56px 96px;margin-top:40px;border-top:1px solid var(--rule-strong)}
+footer p{margin:0 0 8px;max-width:var(--measure);color:var(--muted);font-size:13px}
+footer .mono{font-family:var(--mono);font-size:11.5px}
+
+@media (max-width:700px){
+  .head{grid-template-columns:44px minmax(0,1fr);gap:0 12px}
+  .plate img{min-width:700px}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="shell">
+    <span class="id" id="bar-id">00</span>
+    <span class="now" id="bar-now">Planche des maquettes</span>
+    <span class="spacer"></span>
+    <button type="button" id="theme" aria-label="Changer de thème">Thème</button>
+  </div>
+</div>
+
+<header class="shell masthead">
+  <h1>Treize écrans, du thème saisi au <em>MP4 publié</em></h1>
+  <p class="lede">GenTube transforme une phrase en vidéo YouTube : storyboard écrit par un modèle,
+  voix off mesurée à la seconde, images, montage et publication. Facturé en francs CFA,
+  par mobile money. Voici l’interface, écran par écran, dans l’ordre du parcours réel.</p>
+
+  <dl class="spec">
+    <div><dt>Écrans</dt><dd>13</dd></div>
+    <div><dt>Format</dt><dd>SVG vectoriel</dd></div>
+    <div><dt>Largeur</dt><dd>1440 px</dd></div>
+    <div><dt>Thème</dt><dd>Sombre, accent rouge</dd></div>
+    <div><dt>Dépôt</dt><dd><a href="https://github.com/octavebahoun/gentube">octavebahoun/gentube</a></dd></div>
+    <div><dt>Chemin</dt><dd>docs/maquettes/</dd></div>
+  </dl>
+</header>
+
+<section class="shell contact">
+  <h2>Planche-contact</h2>
+  <div class="sheet" id="sheet"></div>
+</section>
+
+<main class="shell screens" id="screens"></main>
+
+<footer class="shell">
+  <p>Les écrans suivent le parcours produit : un projet porte un style et une voix, une vidéo
+  en hérite, son storyboard est écrit puis mesuré, la validation débite les crédits une seule
+  fois, le pipeline produit et publie.</p>
+  <p class="mono">GenTube — Cotonou, Bénin. Chaque fichier de cette page est un SVG autonome,
+  ouvrable dans un navigateur et importable dans un outil de design.</p>
+</footer>
+
+<script>
+const SCREENS = [
+ ["01-accueil","Accueil","La page publique : la promesse, une démo, trois étapes, les tarifs en francs CFA."],
+ ["02-connexion-inscription","Connexion et inscription","Deux formulaires côte à côte, et les trois états du bouton d’envoi."],
+ ["03-dashboard-workspace","Workspace","Plan, solde de crédits, membres et invitation par rôle."],
+ ["04-liste-projets","Projets","La grille des projets, chacun avec sa vignette de style. Et l’état vide."],
+ ["05-projet-configuration","Configuration du projet","Pipeline par défaut, prompt de style, voix, chaîne YouTube, zone dangereuse."],
+ ["06-nouvelle-video","Nouvelle vidéo","Titre, thème, résolution, pipeline. Aucun crédit n’est débité à cette étape."],
+ ["07-storyboard","Storyboard","Le prix estimé, la voix off, les scènes éditables et leur sound design."],
+ ["08-storyboard-etats","Storyboard — six états","Vide, en écriture, voix en cours, voix partielle, solde insuffisant, validée."],
+ ["09-progression-pipeline","Progression du pipeline","Les étapes, les plans générés en parallèle, l’échec et son remboursement."],
+ ["10-facturation","Facturation","Les deux poches de crédits, le changement de plan, la recharge, l’historique."],
+ ["11-chaines-youtube","Chaînes YouTube","Connexion par OAuth, quota de publication, sécurité des jetons."],
+ ["12-publication-statistiques","Publication et statistiques","Le formulaire YouTube, la programmation, les métriques quotidiennes."],
+ ["13-studio-hyperframes","Studio Hyperframes","L’aperçu, l’inspecteur de scène et la timeline multipiste."]
+];
+
+const pad = n => String(n).padStart(2,"0");
+
+document.getElementById("sheet").innerHTML = SCREENS.map(([f,n],i)=>`
+  <a class="cell" href="#${f}">
+    <span class="thumb"><img src="${f}.svg" alt="" loading="lazy"></span>
+    <span class="cap"><span class="num">${pad(i+1)}</span><span class="nm">${n}</span></span>
+  </a>`).join("");
+
+document.getElementById("screens").innerHTML = SCREENS.map(([f,n,d],i)=>`
+  <section class="screen" id="${f}">
+    <div class="head">
+      <span class="num">${pad(i+1)}</span>
+      <div>
+        <h3>${n}</h3>
+        <p>${d}</p>
+        <div class="file"><span>${f}.svg</span><span>1440 px</span></div>
+      </div>
+    </div>
+    <figure class="plate"><img src="${f}.svg" alt="Maquette — ${n}" loading="lazy"></figure>
+  </section>`).join("");
+
+/* Le bandeau nomme l'écran en cours de lecture. */
+const barId = document.getElementById("bar-id"), barNow = document.getElementById("bar-now");
+const io = new IntersectionObserver(entries=>{
+  for (const e of entries){
+    if (!e.isIntersecting) continue;
+    const i = SCREENS.findIndex(s=>s[0]===e.target.id);
+    if (i < 0) continue;
+    barId.textContent = pad(i+1);
+    barNow.textContent = SCREENS[i][1];
+  }
+}, {rootMargin:"-45% 0px -50% 0px"});
+document.querySelectorAll(".screen").forEach(s=>io.observe(s));
+
+/* Thème : suit le système, sauf choix explicite conservé localement. */
+const root = document.documentElement, btn = document.getElementById("theme");
+try { const saved = localStorage.getItem("gentube-theme"); if (saved) root.dataset.theme = saved; } catch {}
+btn.addEventListener("click", ()=>{
+  const dark = root.dataset.theme
+    ? root.dataset.theme === "dark"
+    : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("gentube-theme", root.dataset.theme); } catch {}
+});
+</script>
+</body>
+</html>
