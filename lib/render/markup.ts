@@ -70,6 +70,7 @@ export function sceneMarkup(
   // Le titre cinétique s'anime mot à mot ; chaque mot est donc un élément,
   // comme pour le karaoké.
   const kinetic = kineticMarkup(scene, index);
+  const counter = counterMarkup(scene, index);
 
   // Un éclair est une nappe de couleur pleine trame. Elle est dans la scène
   // pour disparaître avec elle, jamais au-dessus du reste de la vidéo.
@@ -91,6 +92,7 @@ export function sceneMarkup(
     captions,
     overlay,
     kinetic,
+    counter,
     flash,
     '</div>',
   ]
@@ -145,6 +147,45 @@ export function videoMarkup(
     `data-duration="${scene.durationInSeconds}" data-track-index="${trackIndex}" ` +
     `data-volume="${volume}" data-playback-rate="${rate}" ` +
     `preload="auto" playsinline${volume === 0 ? ' muted' : ''}></video>`
+  );
+}
+
+/**
+ * Le compteur : un chiffre, ce qu'il compte, et rien d'autre.
+ *
+ * La valeur affichée ici est celle d'arrivée, pas celle de départ. Un rendu qui
+ * échouerait à jouer la timeline montrerait donc le bon chiffre, immobile,
+ * plutôt qu'un zéro — c'est la panne la moins mauvaise.
+ *
+ * La variante `ring` ajoute un anneau dont le remplissage est piloté par une
+ * variable CSS, pour qu'aucune géométrie ne soit calculée dans la page.
+ */
+export function counterMarkup(
+  scene: HyperframesScene,
+  index: number
+): string {
+  const counter = scene.counter;
+  if (!counter) return '';
+
+  const decimals = counter.decimals ?? 0;
+  const shown =
+    escapeHtml(counter.prefix ?? '') +
+    counter.value.toFixed(decimals) +
+    escapeHtml(counter.suffix ?? '');
+
+  const label = counter.label
+    ? `<div class="counter-label">${escapeHtml(counter.label)}</div>`
+    : '';
+
+  const digits = `<div class="counter-value" id="n${index}">${shown}</div>`;
+
+  return (
+    `<div class="counter counter-${escapeHtml(counter.variant ?? 'count')}">` +
+    (counter.variant === 'ring'
+      ? `<div class="counter-dial" id="g${index}">${digits}</div>`
+      : digits) +
+    label +
+    '</div>'
   );
 }
 

@@ -160,6 +160,31 @@ export const sceneRenderSchema = z.object({
       glowColor: z.string().optional(),
     })
     .optional(),
+  /**
+   * Un chiffre qui monte.
+   *
+   * Le plan le moins cher du catalogue : **aucune image n'est générée**, donc
+   * il ne coûte que sa voix off — dix FCFA la minute contre quatre cents pour
+   * un plan illustré (`docs/tarifs.md`). C'est ce qui rend viable le genre
+   * « les cinq chiffres de… », très courant en contenu sans visage.
+   */
+  counter: z
+    .object({
+      /** La valeur d'arrivée. C'est elle que le spectateur retient. */
+      value: z.number(),
+      /** Le départ. Zéro sauf si la progression elle-même veut dire quelque chose. */
+      from: z.number().optional(),
+      /** Ce que le chiffre compte. Sans lui, un nombre nu ne dit rien. */
+      label: z.string().optional(),
+      prefix: z.string().optional(),
+      suffix: z.string().optional(),
+      decimals: z.number().int().min(0).max(3).optional(),
+      /** `count` monte en chiffres, `ring` remplit un anneau autour d'eux. */
+      variant: z.enum(['count', 'ring']).optional(),
+      startInSeconds: z.number().min(0).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
   card: z
     .object({
@@ -174,6 +199,19 @@ export const sceneRenderSchema = z.object({
   showSubtitles: z.boolean().optional(),
   sounds: z.array(sceneSoundSchema).optional(),
 });
+
+/**
+ * Vrai quand la scène dessine son propre contenu et n'a aucune image à
+ * illustrer : une carte, un compteur.
+ *
+ * C'est cette fonction qui fait l'économie. Sans elle, l'étape image dessine
+ * une illustration pour un écran qui ne la montrera jamais — et la facture.
+ */
+export function rendersOwnContent(render: unknown): boolean {
+  const parsed = sceneRenderSchema.safeParse(render ?? {});
+  if (!parsed.success) return false;
+  return Boolean(parsed.data.card || parsed.data.counter);
+}
 
 export type WordTiming = z.infer<typeof wordTimingSchema>;
 export type SceneSound = z.infer<typeof sceneSoundSchema>;

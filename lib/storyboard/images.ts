@@ -8,6 +8,7 @@ import {
   createImageClient,
   type ImageGenerator,
 } from '@/lib/images/flux';
+import { rendersOwnContent } from './render';
 import { StoryboardError, listShots } from './service';
 
 /**
@@ -115,6 +116,14 @@ export async function generateImages(
 
   for (const shot of storyboard) {
     if (shot.sourceImageUrl) {
+      skipped += 1;
+      continue;
+    }
+
+    // Une carte ou un compteur dessine son propre écran. Lui générer une
+    // illustration, c'est payer une image que personne ne verra jamais — et
+    // c'est ce que faisait cette boucle depuis le début.
+    if (rendersOwnContent(shot.render)) {
       skipped += 1;
       continue;
     }

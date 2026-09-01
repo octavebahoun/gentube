@@ -245,6 +245,52 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the counter', () => {
+    const withCounter = (counter: Record<string, unknown>) =>
+      html([{ ...shot(), render: { counter } } as Shot]);
+
+    it('shows the value it lands on, not the one it starts from', () => {
+      // Une timeline qui ne jouerait pas laisserait le bon chiffre à l'écran,
+      // immobile. C'est la panne la moins mauvaise.
+      const page = withCounter({ value: 6000, label: 'soldates' });
+      expect(page).toContain('>6000</div>');
+      expect(page).toContain('soldates');
+    });
+
+    it('carries prefix, suffix and decimals into the markup', () => {
+      const page = withCounter({
+        value: 41.5,
+        decimals: 1,
+        prefix: '+',
+        suffix: ' %',
+      });
+      expect(page).toContain('+41.5 %');
+    });
+
+    it('animates a plain object, never an incrementing counter', () => {
+      // Incrémenter à chaque appel donnerait une vidéo différente à chaque
+      // rendu : le moteur cherche les images, il ne les joue pas dans l'ordre.
+      const page = withCounter({ value: 100 });
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('const state = { v: scene.counter.from }');
+      expect(script).toContain('state.v.toFixed');
+    });
+
+    it('drives the ring through a CSS variable, not through geometry', () => {
+      const page = withCounter({ value: 80, variant: 'ring' });
+      // La classe de l'anneau diffère du modificateur de variante : sous le
+      // même nom, le conteneur héritait de la taille de son enfant.
+      expect(page).toContain('class="counter-dial"');
+      expect(page).toContain('counter counter-ring');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('--fill');
+    });
+
+    it('leaves the page alone when no scene asks for one', () => {
+      expect(html([shot()])).not.toContain('class="counter');
+    });
+  });
+
   describe('the three subtitle styles', () => {
     const styled = (subtitleStyle: string) =>
       html([shot()], { video: { ...video, subtitleStyle } as Video });

@@ -154,6 +154,18 @@ export function composeHtml({
         overlay: scene.overlayText
           ? { at: ms(scene.startInSeconds + (scene.overlayText.startInSeconds ?? 0)) }
           : null,
+        counter: scene.counter
+          ? {
+              at: ms(scene.startInSeconds + (scene.counter.startInSeconds ?? 0)),
+              duration: scene.counter.durationInSeconds ?? 1.4,
+              from: scene.counter.from ?? 0,
+              to: scene.counter.value,
+              decimals: scene.counter.decimals ?? 0,
+              prefix: scene.counter.prefix ?? '',
+              suffix: scene.counter.suffix ?? '',
+              ring: scene.counter.variant === 'ring',
+            }
+          : null,
         kinetic: title
           ? {
               at: ms(scene.startInSeconds + (title.startInSeconds ?? 0)),
@@ -369,6 +381,47 @@ export function composeHtml({
               scene.kinetic.at + w * scene.kinetic.stagger
             );
           }
+        }
+
+        /*
+         * Le compteur.
+         *
+         * On anime un objet nu et on écrit le texte à chaque image. C'est la
+         * seule forme qui survive au saut arrière : le moteur cherche l'image,
+         * GSAP recalcule la valeur depuis le temps absolu, et le texte suit.
+         * Incrémenter un compteur à chaque appel donnerait une vidéo
+         * différente à chaque rendu.
+         */
+        if (scene.counter) {
+          const state = { v: scene.counter.from };
+          const box = document.getElementById("n" + scene.index);
+          const ring = scene.counter.ring
+            ? document.getElementById("g" + scene.index)
+            : null;
+          const spread = scene.counter.to - scene.counter.from || 1;
+
+          tl.fromTo(
+            state,
+            { v: scene.counter.from },
+            {
+              v: scene.counter.to,
+              duration: scene.counter.duration,
+              ease: "power2.out",
+              onUpdate: function () {
+                if (box) {
+                  box.textContent =
+                    scene.counter.prefix +
+                    state.v.toFixed(scene.counter.decimals) +
+                    scene.counter.suffix;
+                }
+                if (ring) {
+                  const part = (state.v - scene.counter.from) / spread;
+                  ring.style.setProperty("--fill", (part * 360).toFixed(1) + "deg");
+                }
+              },
+            },
+            scene.counter.at
+          );
         }
 
         // Trois styles, trois façons de faire apparaître la phrase.

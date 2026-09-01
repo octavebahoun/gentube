@@ -332,3 +332,80 @@ video.media {
   pointer-events: none;
   will-change: opacity;
 }
+
+/* --- Compteur ------------------------------------------------------------ */
+
+/*
+ * Un plan chiffré n'a pas d'image derrière lui : le fond noir de `#bg` sert de
+ * scène. Tout le poids visuel est donc dans le nombre.
+ */
+.counter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0 8%;
+  text-align: center;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+}
+
+.counter-value {
+  font-size: 4.6em;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+  /* Les chiffres changent à chaque image : sans chasse fixe, le nombre danse. */
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-label {
+  font-size: 1.05em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  max-width: 22ch;
+}
+
+/*
+ * L'anneau est un dégradé conique piloté par `--fill`, écrit par la timeline.
+ * Aucune géométrie n'est calculée dans la page, et rien n'est un `filter`.
+ */
+/*
+ * `counter-dial` et non `counter-ring` : le conteneur porte déjà
+ * `counter-<variante>` comme modificateur, et deux éléments imbriqués sous la
+ * même classe faisaient hériter au parent la taille et le positionnement de
+ * l'enfant. Le bloc entier se retrouvait collé en haut à gauche.
+ */
+.counter-dial {
+  --fill: 0deg;
+  /* Sans quoi le disque intérieur, absolu, se cale sur la scène entière. */
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7.2em;
+  height: 7.2em;
+  border-radius: 999px;
+  background:
+    conic-gradient(#ce1f20 var(--fill), rgba(255, 255, 255, 0.12) 0);
+}
+
+/* Le disque intérieur creuse l'anneau : pas de masque, pas de SVG. */
+.counter-dial::before {
+  content: "";
+  position: absolute;
+  inset: 0.65em;
+  border-radius: 999px;
+  background: #000;
+}
+
+.counter-dial .counter-value {
+  position: relative;
+  font-size: 2.1em;
+}
