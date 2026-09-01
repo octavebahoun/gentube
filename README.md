@@ -530,6 +530,28 @@ cent, parce que le mélange tient dans la capture d'écran déjà faite. Le paqu
 est figé dans `render/gentube-v1/vendor/`, comme GSAP : le Chrome de rendu n'a
 pas de réseau garanti.
 
+### Le son
+
+Trois couches, et le moteur les pose toutes les trois.
+
+La **musique** est une piste unique, bouclée sur toute la vidéo, à son propre
+volume. Les **sons de scène** sont autant de pistes que la scène en déclare,
+chacune sur sa propre bande — le moteur refuse deux éléments qui se chevauchent
+sur la même piste, et deux sons d'une scène se chevauchent souvent. La durée
+d'un son est ce qu'il reste de la scène après son décalage : un impact ne
+survit pas au plan qu'il ponctue.
+
+Les fondus passent par la timeline et non par le moteur, qui ne lit qu'un
+`data-volume` fixe. Le rognage d'un fichier source, lui, n'est **pas rendu** :
+aucun attribut ne décale la lecture dans le fichier. Les champs restent au
+contrat pour le jour où ce sera possible, avec la mention qu'ils sont inertes.
+
+**`onBeat` cale un effet sur la musique.** Les fiches de `assets/sounds/`
+portent les secondes où un morceau frappe ; une scène qui pose `onBeat` voit son
+éclair et son tremblement se déplacer vers le pic le plus proche, dans une
+fenêtre de 0,35 s. Au-delà on garde l'instant écrit : un effet déplacé d'une
+seconde ne ponctue plus ce qu'il devait ponctuer.
+
 ---
 
 ## Facturation — GeniusPay
@@ -784,8 +806,21 @@ gratuit et filigrane, stockage R2.
   statistiques de vidéo. Les statistiques YouTube ne viennent pas de l'API qui
   envoie, c'en est une autre.
 - **Les notifications**, et le canal reste un choix produit.
-- **La musique et le catalogue de sons.** Le moteur sait poser une piste, mais
-  aucun morceau ne peut encore être choisi et `sound_assets` est vide.
+- **L'import du catalogue de sons.** Côté moteur tout est prêt depuis le
+  2 septembre 2026 : une piste de musique, un ou plusieurs sons par scène avec
+  volume, boucle et fondus, et `onBeat` qui cale un éclair ou un tremblement sur
+  un temps fort du morceau.
+
+  Ce qui manque est en amont, et personne n'y est encore. `assets/sounds/`
+  contient 127 fichiers et un `CATALOG.md` décrivant 51 sons — type, ambiance,
+  bouclable, durée, tonalité, BPM, pics d'impact. `lib/sounds/import-catalog.ts`
+  sait lire ce tableau. Mais **aucune commande ne l'exécute**, `sound_assets`
+  compte zéro ligne, et les 161 Mo d'audio ne sont pas sur R2.
+
+  Tant que ces trois choses manquent, aucune vidéo ne peut choisir un son, et le
+  travail du moteur ne se voit nulle part. Il faut : une commande d'import, le
+  téléversement vers R2 sous les clés `sounds/<type>/<nom>.mp3` que le
+  `CATALOG.md` annonce déjà, et un moyen pour une vidéo de choisir sa musique.
 - **Le coût réel par job**, enregistré au moment de la génération, pour que la
   vue de consommation ne dépende d'aucune API de fournisseur.
 - **Les deux agents** : celui qui accueille et retient le style d'écriture,
