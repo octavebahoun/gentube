@@ -5,6 +5,7 @@ import type {
 } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
 import {
+  isMoveTransition,
   isShaderTransition,
   transitionDurationSeconds,
 } from '@/lib/storyboard/render';
@@ -125,9 +126,18 @@ export function transitionCues(
     const transition = scene.effects?.transition;
     const duration = transitionDurationSeconds(transition);
 
+    // Une couture sans `shader` est un fondu enchaîné côté compositeur. Pour
+    // une transformation il faut lui dire de ne rien faire — durée nulle, donc
+    // coupe franche — sinon il mélange les deux scènes pendant qu'elles se
+    // déplacent, et le mouvement disparaît sous le fondu.
+    const composited =
+      transition === 'none' || (transition && isMoveTransition(transition))
+        ? 0
+        : duration;
+
     return {
       time: ms(scene.startInSeconds),
-      duration: transition === 'none' ? 0 : duration,
+      duration: composited,
       ...(transition && isShaderTransition(transition)
         ? { shader: transition }
         : {}),
@@ -167,6 +177,10 @@ export function fadeInSeconds(scene: HyperframesScene, index: number): number {
   if (index === 0) return 0;
   const transition = scene.effects?.transition;
   if (transition === 'none') return 0;
+  // Une transition par transformation ne se fond pas : la scène entrante est
+  // opaque et arrive par le bord. Un fondu par-dessus la ferait apparaître
+  // fantomatique pendant tout son trajet.
+  if (transition && isMoveTransition(transition)) return 0;
   return transitionDurationSeconds(transition);
 }
 
@@ -498,6 +512,29 @@ export function composeHtml({
         ),
       };
     }),
+    /**
+     * Les transitions par transformation.
+     *
+     * Chacune anime **deux** scènes : celle qui sort et celle qui entre. C'est
+     * la seule famille qui touche à la scène précédente, d'où sa propre liste
+     * plutôt qu'un champ dans `scenes` — la scène `i` n'est pas propriétaire du
+     * mouvement de la scène `i-1`.
+     */
+    moves: scenes
+      .map((scene, index) => ({ scene, index }))
+      .filter(
+        ({ scene, index }) =>
+          index > 0 &&
+          scene.effects?.transition &&
+          isMoveTransition(scene.effects.transition)
+      )
+      .map(({ scene, index }) => ({
+        kind: scene.effects!.transition as string,
+        from: index - 1,
+        to: index,
+        at: ms(scene.startInSeconds),
+        duration: transitionDurationSeconds(scene.effects!.transition),
+      })),
     // Les fondus au noir : une nappe opaque qui monte et redescend sur la
     // couture. `black` n'est pas un fondu enchaîné, il passe par du noir franc.
     blackouts: scenes
@@ -718,6 +755,50 @@ export function composeHtml({
         }
       }
 
+      /*
+       * Les transitions par transformation.
+       *
+       * Chaque geste est une paire : ce que fait la scène sortante, ce que fait
+       * l'entrante. Tout est en pourcentage ou en échelle, donc indépendant de
+       * la résolution — la même poussée marche en 480p et en 720p.
+       *
+       * Les deux tweens sont des fromTo posés au même instant, comme le reste
+       * du fichier : le moteur cherche chaque image, un to ne survivrait pas au
+       * saut arriere.
+       */
+      const MOVES = {
+        "push-left":    { out: { x: "-100%" }, in: { x: "100%" } },
+        "push-right":   { out: { x: "100%" },  in: { x: "-100%" } },
+        "push-up":      { out: { y: "-100%" }, in: { y: "100%" } },
+        "zoom-through": { out: { scale: 1.6, opacity: 0 }, in: { scale: 0.72 } },
+        "zoom-out":     { out: { scale: 0.62, opacity: 0 }, in: { scale: 1.45 } },
+        "squeeze":      { out: { scaleX: 0, opacity: 0 },   in: { scaleX: 0 } },
+      };
+
+      for (const move of T.moves) {
+        const shape = MOVES[move.kind];
+        if (!shape) continue;
+
+        const rest = { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1 };
+        const ease = move.kind === "squeeze" ? "power2.inOut" : "power3.inOut";
+
+        // La sortante part de sa position de repos vers l'ailleurs du geste.
+        tl.fromTo(
+          "#s" + move.from,
+          { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1 },
+          Object.assign({ duration: move.duration, ease: ease }, shape.out),
+          move.at
+        );
+
+        // L'entrante fait le trajet inverse et finit au repos, opaque.
+        tl.fromTo(
+          "#s" + move.to,
+          Object.assign({ opacity: 1 }, shape.in),
+          Object.assign({ duration: move.duration, ease: ease }, rest),
+          move.at
+        );
+      }
+
       // Le fondu au noir : la nappe monte sur la première moitié de la
       // transition et redescend sur la seconde. C'est ce qui distingue
       // 'black' d'un fondu enchaîné — on passe par du noir franc.
@@ -746,7 +827,23 @@ export function composeHtml({
         );
       }
 
-      if (T.cuts.length > 0 && typeof HyperShader !== "undefined") {
+      /*
+       * Le compositeur n'est installé que si la vidéo demande vraiment un
+       * shader.
+       *
+       * init() prend la main sur la visibilité des scènes : il ne garde
+       * visible que la paire de sa propre couture et cache tout le reste. Une
+       * transition par transformation a besoin des deux scènes à l'écran
+       * pendant qu'elles bougent — la sortante disparaissait, et la poussée ne
+       * poussait rien qu'une bande noire.
+       *
+       * Conséquence à connaître : dans une vidéo qui contient au moins un
+       * shader, les transformations retombent en coupe franche. Les deux
+       * familles ne se mélangent pas.
+       */
+      const wantsShader = T.cuts.some(function (cut) { return !!cut.shader; });
+
+      if (wantsShader && typeof HyperShader !== "undefined") {
         HyperShader.init({
           bgColor: "#000000",
           accentColor: T.accent,

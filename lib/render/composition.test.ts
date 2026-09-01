@@ -184,6 +184,50 @@ describe('the composition HyperFrames renders', () => {
     expect(html([shot()])).toContain('class="captions');
   });
 
+  describe('the transform transitions', () => {
+    const withTransition = (transition: string) =>
+      html([
+        shot(),
+        { ...shot(), id: 2, order: 2, render: { effects: { transition } } } as Shot,
+      ]);
+
+    it('moves both scenes, not just the one arriving', () => {
+      const page = withTransition('push-left');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      // La scène 0 sort, la scène 1 entre : les deux doivent être pilotées.
+      expect(script).toContain('"#s" + move.from');
+      expect(script).toContain('"#s" + move.to');
+      expect(script).toContain('"push-left"');
+    });
+
+    const asScene = (transition: string) =>
+      ({ effects: { transition } }) as never;
+
+    it('never fades a scene that arrives by sliding', () => {
+      // Un fondu par-dessus une poussée rendrait la scène fantomatique
+      // pendant tout son trajet.
+      expect(fadeInSeconds(asScene('push-left'), 1)).toBe(0);
+      expect(fadeInSeconds(asScene('squeeze'), 1)).toBe(0);
+      expect(fadeInSeconds(asScene('fade'), 1)).toBeGreaterThan(0);
+    });
+
+    it('tells the compositor to cut, so the movement stays visible', () => {
+      const page = withTransition('push-up');
+      const cuts = JSON.parse(
+        /const T = (\{.*?\});/s.exec(page)![1]
+      ).cuts as { duration: number; shader?: string }[];
+      // Une couture composée mélangerait les deux scènes pendant qu'elles
+      // bougent, et le geste disparaîtrait sous le fondu.
+      expect(cuts.at(-1)).toEqual({ time: expect.any(Number), duration: 0 });
+    });
+
+    it('drives every movement from an absolute instant', () => {
+      const page = withTransition('zoom-through');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).not.toMatch(/\btl\.to\(/);
+    });
+  });
+
   describe('the three subtitle styles', () => {
     const styled = (subtitleStyle: string) =>
       html([shot()], { video: { ...video, subtitleStyle } as Video });

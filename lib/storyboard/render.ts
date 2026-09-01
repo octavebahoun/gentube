@@ -51,6 +51,36 @@ export const sceneSoundSchema = z.object({
 export const CSS_TRANSITIONS = ['none', 'fade', 'black'] as const;
 
 /**
+ * Transitions par transformation, transposées des paquets `transitions-*` du
+ * registre HyperFrames (`docs/vocabulaire-de-rendu.md`).
+ *
+ * Elles déplacent ou redimensionnent les deux scènes au lieu de les mélanger.
+ * Deux conséquences qui les rendent précieuses : elles ne demandent **aucun
+ * WebGL**, donc elles rendent partout sans dépendre du compositeur de shaders ;
+ * et elles couvrent des gestes qu'aucun shader ne fait — la poussée, l'écrasement,
+ * le zoom traversant.
+ *
+ * Les transitions à flou du registre ne sont pas reprises : l'en-tête de
+ * `render/gentube-v1/style.css` interdit le flou, que la rastérisation
+ * logicielle de Lambda paie au triple.
+ */
+export const MOVE_TRANSITIONS = [
+  'push-left',
+  'push-right',
+  'push-up',
+  'zoom-through',
+  'zoom-out',
+  'squeeze',
+] as const;
+
+export type MoveTransition = (typeof MOVE_TRANSITIONS)[number];
+
+/** Vrai quand la transition déplace les scènes au lieu de les mélanger. */
+export function isMoveTransition(transition: string): boolean {
+  return (MOVE_TRANSITIONS as readonly string[]).includes(transition);
+}
+
+/**
  * Transitions de `@hyperframes/shader-transitions`, reprises sous leurs noms
  * exacts.
  *
@@ -75,7 +105,11 @@ export const SHADER_TRANSITIONS = [
   'light-leak',
 ] as const;
 
-export const TRANSITIONS = [...CSS_TRANSITIONS, ...SHADER_TRANSITIONS] as const;
+export const TRANSITIONS = [
+  ...CSS_TRANSITIONS,
+  ...MOVE_TRANSITIONS,
+  ...SHADER_TRANSITIONS,
+] as const;
 
 export type Transition = (typeof TRANSITIONS)[number];
 
@@ -190,6 +224,14 @@ export const TRANSITION_DURATIONS: Record<Transition, number> = {
   none: 0,
   fade: DEFAULT_TRANSITION_SECONDS,
   black: 0.85,
+  // Les poussées sont courtes : un mouvement plein cadre qui s'attarde donne
+  // le mal de mer, là où un fondu peut respirer.
+  'push-left': 0.5,
+  'push-right': 0.5,
+  'push-up': 0.5,
+  'zoom-through': 0.55,
+  'zoom-out': 0.55,
+  squeeze: 0.45,
   'domain-warp': 0.9,
   'ridged-burn': 0.9,
   'whip-pan': 0.65,
