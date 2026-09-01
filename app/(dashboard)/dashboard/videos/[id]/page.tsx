@@ -127,6 +127,7 @@ export default async function VideoPage({
             <VideoSettings
               videoId={board.video.id}
               resolution={board.video.resolution}
+              ratio={board.video.ratio}
               subtitleStyle={board.video.subtitleStyle}
               musicUrl={board.video.musicUrl}
               musics={musics}

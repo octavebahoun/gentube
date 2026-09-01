@@ -12,6 +12,7 @@ import { VoiceError, VoiceNotConfiguredError } from '@/lib/voice/elevenlabs';
 import { ImageError, ImageNotConfiguredError } from '@/lib/images/flux';
 import { AnimationError, AnimationNotConfiguredError } from '@/lib/video';
 import {
+  RATIOS,
   RESOLUTIONS,
   SUBTITLE_STYLES,
   VideoError,
@@ -303,6 +304,7 @@ export const generateVisualsAction = validatedActionWithUser(
 export const videoSettingsAction = validatedActionWithUser(
   videoIdentity.extend({
     resolution: z.enum(RESOLUTIONS).optional(),
+    ratio: z.enum(RATIOS).optional(),
     subtitleStyle: z.enum(SUBTITLE_STYLES).optional(),
     musicUrl: z.string().optional(),
   }),
@@ -310,6 +312,7 @@ export const videoSettingsAction = validatedActionWithUser(
     try {
       await updateVideo(tenantDb(user.tenantId), data.videoId, {
         resolution: data.resolution,
+        ratio: data.ratio,
         subtitleStyle: data.subtitleStyle,
         musicUrl: data.musicUrl,
       });

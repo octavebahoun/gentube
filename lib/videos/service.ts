@@ -2,6 +2,7 @@ import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import {
+  ratioEnum,
   subtitleStyleEnum,
   creditLedger,
   jobs,
@@ -33,6 +34,9 @@ export class VideoError extends Error {
 export const VIDEO_TITLE_MAX = 200;
 export const VIDEO_THEME_MAX = 4_000;
 export const RESOLUTIONS = ['480p', '720p'] as const;
+
+/** Les cadrages vendus, dans l'ordre de `ratio` en base. */
+export const RATIOS = ratioEnum.enumValues;
 
 /**
  * Les apparences de sous-titres, lues sur l'enum de la base plutôt que
@@ -76,6 +80,11 @@ export const videoInputSchema = z.object({
    * pouvait donc pas quitter le karaoké, quoi qu'en dise la colonne.
    */
   subtitleStyle: z.enum(SUBTITLE_STYLES).optional(),
+  /**
+   * Le cadrage. Change les dimensions de rendu et la place des sous-titres :
+   * en 9:16 ils remontent pour dégager l'interface des plateformes.
+   */
+  ratio: z.enum(RATIOS).optional(),
   /**
    * La clé du morceau, copiée du catalogue — `sounds/music/<nom>.mp3`.
    *
@@ -173,6 +182,7 @@ export async function updateVideo(
     'pipelineOverride',
     'subtitleStyle',
     'musicUrl',
+    'ratio',
   ] as const) {
     if (data[field] !== undefined) patch[field] = data[field];
   }

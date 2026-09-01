@@ -305,4 +305,16 @@ describe('the trial', () => {
     const sans = await updateVideo(tdb, video.id, { musicUrl: '' });
     expect(sans.musicUrl).toBeNull();
   });
+
+  it('lets a draft switch to vertical', async () => {
+    // Le cadrage change les dimensions de rendu et la place des sous-titres :
+    // c'est un réglage de production, pas une préférence d'affichage.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const project = await createProject(tdb, { name: 'Docs' });
+    const video = await createVideo(tdb, { projectId: project.id, title: 'Short' });
+
+    expect(video.ratio).toBe('16:9');
+    const vertical = await updateVideo(tdb, video.id, { ratio: '9:16' });
+    expect(vertical.ratio).toBe('9:16');
+  });
 });

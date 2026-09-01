@@ -42,12 +42,14 @@ const SOUS_TITRES: Record<string, { label: string; aide: string }> = {
 export function VideoSettings({
   videoId,
   resolution,
+  ratio,
   subtitleStyle,
   musicUrl,
   musics,
 }: {
   videoId: number;
   resolution: string;
+  ratio: string;
   subtitleStyle: string;
   musicUrl: string | null;
   musics: MusicChoice[];
@@ -76,6 +78,18 @@ export function VideoSettings({
           </select>
           <p className="text-xs text-muted-foreground">
             Le 720p coûte trois fois plus. C’est l’argent du client, il choisit.
+          </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="ratio">Cadrage</Label>
+          <select id="ratio" name="ratio" defaultValue={ratio} className={CHAMP}>
+            <option value="16:9">Paysage 16:9</option>
+            <option value="9:16">Vertical 9:16</option>
+          </select>
+          <p className="text-xs text-muted-foreground">
+            En vertical, les sous-titres remontent pour passer au-dessus de
+            l’interface de TikTok, Reels et Shorts.
           </p>
         </div>
 
