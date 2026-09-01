@@ -59,6 +59,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@hyperframes/shader-transitions": "0.7.106",
     "hyperframes": "0.7.106",
     "tsx": "^4.23.12",
     "vitest": "^4.1.11"

@@ -128,3 +128,167 @@ body {
   border-radius: 999px;
   background: #ce1f20;
 }
+
+/* --- Plans animés -------------------------------------------------------- */
+
+/*
+ * Une balise vidéo occupe la même place qu'une image de fond, et porte le même
+ * id : le zoom, le tremblement et l'opacité s'appliquent sans savoir lequel
+ * des deux est là.
+ */
+video.media {
+  object-fit: cover;
+  width: 112%;
+  height: 112%;
+}
+
+/* --- Carte texte --------------------------------------------------------- */
+
+/* Écran noir, texte centré. Pas de média, pas de voix : une respiration. */
+.card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  padding: 0 10%;
+  background: #000;
+  text-align: center;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+}
+
+.card-text {
+  font-size: 2.4em;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.card-subtext {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/* --- Bandeau posé sur l'image -------------------------------------------- */
+
+.overlay {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 9%;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  font-size: 1.6em;
+  font-weight: 800;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
+  will-change: opacity, transform;
+}
+
+/* --- Titre cinétique ----------------------------------------------------- */
+
+/*
+ * Quatre variantes, une seule mécanique : un élément par mot, animé avec un
+ * décalage. Ce qui change d'une variante à l'autre est uniquement l'apparence.
+ */
+.kinetic {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.18em 0.32em;
+  justify-content: center;
+  align-items: center;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  font-size: 2.6em;
+  font-weight: 900;
+  line-height: 1.05;
+  text-align: center;
+  --kt-accent: #ce1f20;
+  --kt-glow: #ff5a3c;
+}
+
+.kt-center {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.kt-bottom {
+  bottom: 20%;
+}
+
+.kt-word {
+  display: inline-block;
+  will-change: opacity, transform;
+}
+
+/* `reveal` : blanc franc, ombre portée. La variante par défaut. */
+.kt-reveal .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `neon` : lueur colorée, contour lumineux. */
+.kt-neon .kt-word {
+  color: #fff;
+  text-shadow:
+    0 0 8px var(--kt-glow),
+    0 0 22px var(--kt-glow),
+    0 0 46px var(--kt-accent);
+}
+
+/* `pin` : chaque mot dans sa propre pastille. */
+.kt-pin .kt-word {
+  padding: 0.1em 0.34em;
+  border-radius: 0.14em;
+  background: var(--kt-accent);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* `icon` : un pictogramme ouvre la ligne, le texte suit. */
+.kt-icon-label {
+  font-size: 0.42em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kt-accent);
+}
+
+.kinetic .kt-icon {
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.kt-icon .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* --- Éclair et fondu au noir --------------------------------------------- */
+
+/*
+ * Deux nappes pleine trame, distinctes par leur portée : l'éclair vit dans sa
+ * scène et part avec elle, le noir vit au-dessus de toutes et sert les
+ * coupures. Aucune des deux n'est un filtre — voir l'en-tête du fichier.
+ */
+.flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+#blackout {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+}

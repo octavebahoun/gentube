@@ -3,7 +3,10 @@ import type {
   HyperframesStoryboard,
   WordTiming,
 } from '@/lib/storyboard/render';
-import { transitionDurationSeconds } from '@/lib/storyboard/render';
+import {
+  isShaderTransition,
+  transitionDurationSeconds,
+} from '@/lib/storyboard/render';
 
 /**
  * Génère l'`index.html` que HyperFrames rend.
@@ -40,6 +43,9 @@ const WATERMARK_HEIGHT_RATIO = 0.032;
 /** Amplitude du zoom lent sur une image fixe. 6 % sur toute la scène. */
 const KEN_BURNS_SCALE = 1.06;
 
+/** Le rouge de la marque, repris par les shaders pour leurs lueurs. */
+const ACCENT_COLOR = '#ce1f20';
+
 export type CompositionInput = {
   storyboard: HyperframesStoryboard;
   /** Pose la marque GenTube. Décidé au débit, pas ici. */
@@ -67,6 +73,47 @@ function js(value: unknown): string {
 
 /** Arrondi à la milliseconde, comme le reste du contrat de rendu. */
 const ms = (seconds: number) => Math.round(seconds * 1000) / 1000;
+
+/**
+ * Un plan animé est un fichier vidéo, pas une image.
+ *
+ * La distinction se lit sur l'extension plutôt que sur `shot.type` : la
+ * composition ne connaît que le storyboard aplati, et un chemin dit déjà tout
+ * ce qu'il faut. Un `.mp4` posé en `background-image` ne rendrait rien du
+ * tout — pas d'erreur, juste un cadre noir.
+ */
+const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mov'];
+
+export function isVideoPath(path?: string): boolean {
+  if (!path) return false;
+  const lower = path.toLowerCase();
+  return VIDEO_EXTENSIONS.some((extension) => lower.endsWith(extension));
+}
+
+/**
+ * Les coutures entre scènes, telles que `HyperShader.init` les attend.
+ *
+ * **Une par intervalle, pas une par shader.** Le paquet exige exactement
+ * `scènes - 1` entrées et refuse d'y déroger : il compose la vidéo entière,
+ * pas seulement les endroits spectaculaires. Une couture sans `shader` est un
+ * fondu enchaîné CSS — c'est ainsi qu'on déclare `fade`, `black` et `none`.
+ */
+export function transitionCues(
+  scenes: HyperframesScene[]
+): { time: number; shader?: string; duration: number }[] {
+  return scenes.slice(1).map((scene) => {
+    const transition = scene.effects?.transition;
+    const duration = transitionDurationSeconds(transition);
+
+    return {
+      time: ms(scene.startInSeconds),
+      duration: transition === 'none' ? 0 : duration,
+      ...(transition && isShaderTransition(transition)
+        ? { shader: transition }
+        : {}),
+    };
+  });
+}
 
 /**
  * Le zoom d'une scène, sous forme d'échelles de départ et d'arrivée.
@@ -137,7 +184,7 @@ export function wordsOrFallback(
 function sceneMarkup(
   scene: HyperframesScene,
   index: number,
-  { subtitles }: { subtitles: boolean }
+  { subtitles, trackIndex }: { subtitles: boolean; trackIndex: number }
 ): string {
   const words = subtitles ? wordsOrFallback(scene) : [];
 
@@ -153,30 +200,174 @@ function sceneMarkup(
           .join('')}</div>`
       : '';
 
-  // Une carte de fin n'a pas d'image : c'est un écran noir avec du texte.
+  // Une carte n'a pas d'image : c'est un écran noir avec du texte.
   //
   // Le chemin traverse deux couches d'échappement — CSS puis attribut HTML —
   // et `encodeURI` règle la première : il neutralise les guillemets et les
   // espaces sans toucher aux séparateurs de chemin.
-  const media = scene.mediaPath
-    ? `<div class="media" id="m${index}" style="background-image:url(&quot;${escapeHtml(
-        encodeURI(scene.mediaPath)
-      )}&quot;)"></div>`
+  const media = mediaMarkup(scene, index);
+
+  // Le texte d'une carte remplace le média, il ne s'y superpose pas.
+  const card = scene.card
+    ? `<div class="card">` +
+      `<p class="card-text">${escapeHtml(scene.card.text)}</p>` +
+      (scene.card.subtext
+        ? `<p class="card-subtext">${escapeHtml(scene.card.subtext)}</p>`
+        : '') +
+      '</div>'
     : '';
 
-  // Piste `index + 1` : la 0 porte le fond. `hyperframes check` refuse deux
-  // clips qui se chevauchent sur la même piste, et le fond couvre toute la
-  // vidéo — il chevauche donc forcément la première scène.
+  // Un bandeau posé sur l'image, distinct des sous-titres : il ne suit pas la
+  // voix, il annonce ou commente.
+  const overlay = scene.overlayText
+    ? `<div class="overlay" id="o${index}">${escapeHtml(
+        scene.overlayText.text
+      )}</div>`
+    : '';
+
+  // Le titre cinétique s'anime mot à mot ; chaque mot est donc un élément,
+  // comme pour le karaoké.
+  const kinetic = kineticMarkup(scene, index);
+
+  // Un éclair est une nappe de couleur pleine trame. Elle est dans la scène
+  // pour disparaître avec elle, jamais au-dessus du reste de la vidéo.
+  const flash = scene.effects?.flash
+    ? `<div class="flash" id="f${index}" style="background:${escapeHtml(
+        scene.effects.flash.color ?? '#ffffff'
+      )}"></div>`
+    : '';
+
+  // La piste vient de `trackPlan` : la 0 porte le fond, et `hyperframes check`
+  // refuse deux clips qui se chevauchent sur la même piste — or le fond couvre
+  // toute la vidéo, il chevauche donc forcément la première scène.
   return [
     `<div class="scene clip" id="s${index}" data-start="${scene.startInSeconds}" ` +
-      `data-duration="${scene.durationInSeconds}" data-track-index="${index + 1}">`,
+      `data-duration="${scene.durationInSeconds}" data-track-index="${trackIndex}">`,
     media,
+    card,
     captions ? '<div class="veil"></div>' : '',
     captions,
+    overlay,
+    kinetic,
+    flash,
     '</div>',
   ]
     .filter(Boolean)
     .join('\n      ');
+}
+
+/**
+ * Le média d'une scène : une image de fond, ou une balise vidéo.
+ *
+ * Les deux portent le même id `m<index>` — c'est lui que le zoom anime, et
+ * c'est par lui que le moteur découvre un élément média. Un plan animé garde
+ * donc exactement le même traitement caméra qu'une fixe.
+ *
+ * `data-volume` par défaut à 0 : un clip généré arrive avec sa propre bande
+ * son, et la laisser passer sous la voix off produit deux audios qui se
+ * marchent dessus. Une scène qui veut ce son le demande par `mediaVolume`.
+ */
+function mediaMarkup(scene: HyperframesScene, index: number): string {
+  // Un plan animé n'a pas son média ici : une balise vidéo minutée imbriquée
+  // dans une scène minutée sort **gelée** au rendu, le moteur ne sachant pas
+  // laquelle des deux horloges commande. `hyperframes check` le refuse, et il
+  // a raison. Les clips sont donc posés au niveau de la scène-mère par
+  // `videoMarkup`, avec leur propre piste.
+  if (!scene.mediaPath || isVideoPath(scene.mediaPath)) return '';
+
+  const source = escapeHtml(encodeURI(scene.mediaPath));
+  return `<div class="media" id="m${index}" style="background-image:url(&quot;${source}&quot;)"></div>`;
+}
+
+/**
+ * Le clip d'un plan animé, posé au niveau de la scène-mère.
+ *
+ * Il porte `clip` pour rester invisible avant son instant, et son volume est
+ * nul par défaut : un clip généré arrive avec sa propre bande son, et la
+ * laisser passer sous la voix off produit deux audios qui se marchent dessus.
+ */
+function videoMarkup(
+  scene: HyperframesScene,
+  index: number,
+  trackIndex: number
+): string {
+  if (!scene.mediaPath || !isVideoPath(scene.mediaPath)) return '';
+
+  const volume = scene.mediaVolume ?? 0;
+  const rate = scene.playbackRate ?? 1;
+
+  return (
+    `<video class="media clip" id="m${index}" src="${escapeHtml(
+      encodeURI(scene.mediaPath)
+    )}" data-start="${scene.startInSeconds}" ` +
+    `data-duration="${scene.durationInSeconds}" data-track-index="${trackIndex}" ` +
+    `data-volume="${volume}" data-playback-rate="${rate}" ` +
+    `preload="auto" playsinline${volume === 0 ? ' muted' : ''}></video>`
+  );
+}
+
+/**
+ * Les pistes, attribuées d'un seul passage.
+ *
+ * La 0 porte le fond. Ensuite chaque scène prend la sienne, et un plan animé
+ * en prend une de plus, **juste en dessous** : le clip doit rester sous les
+ * sous-titres et le bandeau de sa propre scène, qui vivent dans le div.
+ *
+ * Le compteur avance scène par scène plutôt que par une formule, pour qu'une
+ * composition sans clip garde exactement la numérotation d'avant.
+ */
+export function trackPlan(
+  scenes: HyperframesScene[]
+): { scene: number; video: number | null }[] {
+  let next = 1;
+  return scenes.map((scene) => {
+    const video = isVideoPath(scene.mediaPath) ? next++ : null;
+    return { video, scene: next++ };
+  });
+}
+
+/**
+ * Le titre cinétique, un élément par mot.
+ *
+ * La variante décide de l'apparence en CSS ; le décalage entre les mots est
+ * une donnée de timeline, calculée ici pour que la page n'ait aucun calcul de
+ * temps à faire.
+ */
+function kineticMarkup(scene: HyperframesScene, index: number): string {
+  const title = scene.kineticTitle;
+  if (!title) return '';
+
+  const words = title.text.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '';
+
+  const style = [
+    title.fontSize ? `font-size:${escapeHtml(title.fontSize)}` : '',
+    title.highlightColor ? `--kt-accent:${escapeHtml(title.highlightColor)}` : '',
+    title.glowColor ? `--kt-glow:${escapeHtml(title.glowColor)}` : '',
+  ]
+    .filter(Boolean)
+    .join(';');
+
+  const icon =
+    title.variant === 'icon' && title.icon
+      ? `<span class="kt-icon" aria-hidden="true">${escapeHtml(title.icon)}</span>` +
+        (title.iconLabel
+          ? `<span class="kt-icon-label">${escapeHtml(title.iconLabel)}</span>`
+          : '')
+      : '';
+
+  return (
+    `<div class="kinetic kt-${escapeHtml(title.variant ?? 'reveal')} ` +
+    `kt-${escapeHtml(title.position ?? 'center')}"${style ? ` style="${style}"` : ''}>` +
+    icon +
+    words
+      .map(
+        (word, wordIndex) =>
+          `<span class="kt-word" id="k${index}-${wordIndex}">${escapeHtml(word)}</span>`
+      )
+      .join('') +
+    '</div>'
+  );
 }
 
 /**
@@ -207,7 +398,12 @@ export function composeHtml({
   watermark = false,
 }: CompositionInput): string {
   const { width, height, durationInSeconds, scenes } = storyboard;
-  const audioTrackBase = scenes.length + 10;
+
+  // Les clips prennent des pistes en plus des scènes : la base audio se calcule
+  // sur le plan réel, pas sur le nombre de scènes.
+  const tracks = trackPlan(scenes);
+  const topTrack = tracks.reduce((high, t) => Math.max(high, t.scene), 0);
+  const audioTrackBase = topTrack + 10;
 
   const subtitleSize = Math.round(height * SUBTITLE_HEIGHT_RATIO);
   const watermarkSize = Math.round(height * WATERMARK_HEIGHT_RATIO);
@@ -229,17 +425,61 @@ export function composeHtml({
   // Le script embarque exactement ce dont il a besoin : des instants absolus
   // et des cibles. Aucun calcul de temps ne se fait dans la page.
   const timeline = {
-    scenes: scenes.map((scene, index) => ({
-      index,
-      start: scene.startInSeconds,
-      duration: scene.durationInSeconds,
-      fade: fadeInSeconds(scene, index),
-      hasMedia: Boolean(scene.mediaPath),
-      zoom: kenBurns(scene.effects?.zoom),
-      words: (storyboard.subtitles ? wordsOrFallback(scene) : []).map(
-        (word) => ({ at: ms(scene.startInSeconds + word.start) })
-      ),
-    })),
+    scenes: scenes.map((scene, index) => {
+      const title = scene.kineticTitle;
+      const flash = scene.effects?.flash;
+
+      return {
+        index,
+        start: scene.startInSeconds,
+        duration: scene.durationInSeconds,
+        fade: fadeInSeconds(scene, index),
+        hasMedia: Boolean(scene.mediaPath),
+        // Le clip vit hors du div de la scène : le fondu de la scène ne
+        // l'emporte plus avec lui, il faut le lui appliquer aussi.
+        hoisted: isVideoPath(scene.mediaPath),
+        // Un clip porte déjà son propre mouvement : lui ajouter un Ken Burns
+        // superpose deux caméras et donne le mal de mer.
+        zoom: isVideoPath(scene.mediaPath)
+          ? null
+          : kenBurns(scene.effects?.zoom),
+        rate: isVideoPath(scene.mediaPath) ? (scene.playbackRate ?? 1) : null,
+        shake: scene.effects?.shake === true,
+        flash: flash
+          ? {
+              at: ms(scene.startInSeconds + (flash.startInSeconds ?? 0)),
+              duration: flash.durationInSeconds ?? 0.18,
+            }
+          : null,
+        overlay: scene.overlayText
+          ? { at: ms(scene.startInSeconds + (scene.overlayText.startInSeconds ?? 0)) }
+          : null,
+        kinetic: title
+          ? {
+              at: ms(scene.startInSeconds + (title.startInSeconds ?? 0)),
+              duration: title.animationDuration ?? 0.5,
+              stagger: title.staggerDelay ?? 0.08,
+              count: title.text.trim().split(/\s+/).filter(Boolean).length,
+            }
+          : null,
+        words: (storyboard.subtitles ? wordsOrFallback(scene) : []).map(
+          (word) => ({ at: ms(scene.startInSeconds + word.start) })
+        ),
+      };
+    }),
+    // Les fondus au noir : une nappe opaque qui monte et redescend sur la
+    // couture. `black` n'est pas un fondu enchaîné, il passe par du noir franc.
+    blackouts: scenes
+      .map((scene, index) => ({ scene, index }))
+      .filter(
+        ({ scene, index }) => index > 0 && scene.effects?.transition === 'black'
+      )
+      .map(({ scene }) => ({
+        at: ms(scene.startInSeconds),
+        duration: transitionDurationSeconds('black'),
+      })),
+    cuts: transitionCues(scenes),
+    accent: ACCENT_COLOR,
   };
 
   return `<!doctype html>
@@ -249,6 +489,7 @@ export function composeHtml({
     <meta name="viewport" content="width=${width}, height=${height}" />
     <title>${escapeHtml(storyboard.title)}</title>
     <script src="vendor/gsap.min.js"></script>
+    <script src="vendor/shader-transitions.min.js"></script>
     <link rel="stylesheet" href="style.css" />
     <style>
       html, body { width: ${width}px; height: ${height}px; }
@@ -268,9 +509,18 @@ export function composeHtml({
       <div id="bg" class="clip" data-start="0" data-duration="${durationInSeconds}" data-track-index="0"></div>
       ${scenes
         .map((scene, index) =>
-          sceneMarkup(scene, index, { subtitles: storyboard.subtitles })
+          [
+            videoMarkup(scene, index, tracks[index].video ?? 0),
+            sceneMarkup(scene, index, {
+              subtitles: storyboard.subtitles,
+              trackIndex: tracks[index].scene,
+            }),
+          ]
+            .filter(Boolean)
+            .join('\n      ')
         )
         .join('\n      ')}
+      <div id="blackout"></div>
       ${watermarkMarkup}
       ${scenes
         .map((scene, index) => audioMarkup(scene, index, audioTrackBase))
@@ -294,15 +544,93 @@ export function composeHtml({
             { opacity: 1, duration: scene.fade, ease: "power2.inOut" },
             scene.start
           );
+
+          if (scene.hoisted) {
+            tl.fromTo(
+              "#m" + scene.index,
+              { opacity: 0 },
+              { opacity: 1, duration: scene.fade, ease: "power2.inOut" },
+              scene.start
+            );
+          }
         }
 
-        if (scene.hasMedia) {
+        if (scene.hasMedia && scene.zoom) {
           tl.fromTo(
             "#m" + scene.index,
             { scale: scene.zoom.from },
             { scale: scene.zoom.to, duration: scene.duration, ease: "none" },
             scene.start
           );
+        }
+
+        // Un clip lu à une autre vitesse que la sienne : posé sur
+        // l'élément, pas sur la timeline, le moteur cherche chaque image.
+        if (scene.rate && scene.rate !== 1) {
+          const clip = document.getElementById("m" + scene.index);
+          if (clip) clip.playbackRate = scene.rate;
+        }
+
+        // Le tremblement : une secousse courte et répétée, jamais une dérive.
+        // Le yoyo revient toujours à zéro, donc un saut arrière retombe juste.
+        if (scene.shake) {
+          tl.fromTo(
+            "#m" + scene.index,
+            { x: -6, y: 3 },
+            {
+              x: 6,
+              y: -3,
+              duration: 0.06,
+              ease: "none",
+              repeat: Math.round(scene.duration / 0.06),
+              yoyo: true,
+            },
+            scene.start
+          );
+        }
+
+        // L'éclair : une nappe pleine trame qui monte vite et retombe.
+        if (scene.flash) {
+          tl.fromTo(
+            "#f" + scene.index,
+            { opacity: 0 },
+            {
+              opacity: 0.9,
+              duration: scene.flash.duration / 2,
+              ease: "power2.out",
+              repeat: 1,
+              yoyo: true,
+            },
+            scene.flash.at
+          );
+        }
+
+        if (scene.overlay) {
+          tl.fromTo(
+            "#o" + scene.index,
+            { opacity: 0, y: 18 },
+            { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" },
+            scene.overlay.at
+          );
+        }
+
+        // Le titre cinétique : chaque mot entre à son tour. Le décalage est
+        // une donnée, calculée hors de la page.
+        if (scene.kinetic) {
+          for (let w = 0; w < scene.kinetic.count; w++) {
+            tl.fromTo(
+              "#k" + scene.index + "-" + w,
+              { opacity: 0, y: 26, scale: 0.92 },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: scene.kinetic.duration,
+                ease: "back.out(1.7)",
+              },
+              scene.kinetic.at + w * scene.kinetic.stagger
+            );
+          }
         }
 
         // Le mot s'allume à son instant et le reste : c'est la lecture
@@ -314,6 +642,37 @@ export function composeHtml({
             { color: "#ffffff", duration: 0.001, ease: "none" },
             word.at
           );
+        });
+      }
+
+      // Le fondu au noir : la nappe monte sur la première moitié de la
+      // transition et redescend sur la seconde. C'est ce qui distingue
+      // 'black' d'un fondu enchaîné — on passe par du noir franc.
+      for (const cut of T.blackouts) {
+        tl.fromTo(
+          "#blackout",
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: cut.duration / 2,
+            ease: "power2.inOut",
+            repeat: 1,
+            yoyo: true,
+          },
+          cut.at - cut.duration / 2
+        );
+      }
+
+      // Les transitions shader se posent PAR-DESSUS cette timeline. Sans le
+      // paquet — ou sans WebGL — il ne se passe rien ici et le fondu déjà
+      // programmé reste seul : la vidéo sort, en moins spectaculaire.
+      if (T.cuts.length > 0 && typeof HyperShader !== "undefined") {
+        HyperShader.init({
+          bgColor: "#000000",
+          accentColor: T.accent,
+          scenes: T.scenes.map(function (scene) { return "s" + scene.index; }),
+          transitions: T.cuts,
+          timeline: tl,
         });
       }
 
