@@ -811,16 +811,21 @@ gratuit et filigrane, stockage R2.
   volume, boucle et fondus, et `onBeat` qui cale un éclair ou un tremblement sur
   un temps fort du morceau.
 
-  Ce qui manque est en amont, et personne n'y est encore. `assets/sounds/`
-  contient 127 fichiers et un `CATALOG.md` décrivant 51 sons — type, ambiance,
-  bouclable, durée, tonalité, BPM, pics d'impact. `lib/sounds/import-catalog.ts`
-  sait lire ce tableau. Mais **aucune commande ne l'exécute**, `sound_assets`
-  compte zéro ligne, et les 161 Mo d'audio ne sont pas sur R2.
+  Ce qui manque est en amont. `assets/sounds/` contient 127 fichiers et un
+  `CATALOG.md` décrivant 51 sons — type, ambiance, bouclable, durée, tonalité,
+  BPM, pics d'impact. L'outil d'import existe et fonctionne :
 
-  Tant que ces trois choses manquent, aucune vidéo ne peut choisir un son, et le
-  travail du moteur ne se voit nulle part. Il faut : une commande d'import, le
-  téléversement vers R2 sous les clés `sounds/<type>/<nom>.mp3` que le
-  `CATALOG.md` annonce déjà, et un moyen pour une vidéo de choisir sa musique.
+  ```bash
+  pnpm tsx lib/sounds/import-catalog.ts assets/sounds/CATALOG.md
+  ```
+
+  Il n'a simplement jamais été lancé : `sound_assets` compte zéro ligne, et les
+  161 Mo d'audio ne sont pas sur R2. Deux gestes manquent donc, plus un
+  troisième côté produit : **téléverser** les fichiers sous les clés
+  `sounds/<type>/<nom>.mp3` que le `CATALOG.md` annonce déjà, **lancer
+  l'import** — en vérifiant que `DATABASE_URL` vise bien la base voulue — et
+  donner à une vidéo **un moyen de choisir sa musique**, `videoInputSchema`
+  ignorant `musicUrl`.
 - **Le coût réel par job**, enregistré au moment de la génération, pour que la
   vue de consommation ne dépende d'aucune API de fournisseur.
 - **Les deux agents** : celui qui accueille et retient le style d'écriture,

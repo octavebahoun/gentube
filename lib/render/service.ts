@@ -6,6 +6,7 @@ import { getVideo } from '@/lib/videos';
 import { assetKey, createAssetStore, type AssetStore } from '@/lib/storage';
 import { listShots } from '@/lib/storyboard/service';
 import { toHyperframesStoryboard } from '@/lib/storyboard/render';
+import { findSound } from '@/lib/sounds';
 import { StoryboardError } from '@/lib/storyboard/service';
 import { materialize } from './materialize';
 import {
@@ -118,8 +119,16 @@ export async function startRender(
   const assets = store ?? createAssetStore();
   const renderer = engine ?? createRenderEngine();
 
+  // Les pics du morceau vivent dans le catalogue, pas sur la vidéo, qui n'en
+  // garde que la clé. Sans cette lecture, une scène qui demande `onBeat` garde
+  // l'instant écrit — l'effet sort, simplement pas sur le temps fort.
+  const musique = video.musicUrl ? await findSound(video.musicUrl) : null;
+
   const hyperframes = toHyperframesStoryboard(video, storyboard, {
     fallbackVoice: project.voiceId,
+    music: musique
+      ? { impacts: musique.impacts, durationS: musique.durationS }
+      : null,
   });
 
   const prepared = await materialize(hyperframes, assets, {
