@@ -1,6 +1,6 @@
 import type { HyperframesScene, WordTiming } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
-import { isVideoPath, kenBurns, wordsOrFallback } from './plan';
+import { isVideoPath, kenBurns, ms, wordsOrFallback } from './plan';
 
 /**
  * Le balisage d'une scène : son média, sa carte, ses sous-titres, son bandeau,
@@ -148,6 +148,46 @@ export function videoMarkup(
     `data-volume="${volume}" data-playback-rate="${rate}" ` +
     `preload="auto" playsinline${volume === 0 ? ' muted' : ''}></video>`
   );
+}
+
+/**
+ * Les sons d'une scène : impact, ambiance, nappe.
+ *
+ * Une piste par son, sur sa propre bande de pistes — le moteur refuse deux
+ * éléments qui se chevauchent sur la même. Chacun porte le seul vocabulaire
+ * que le moteur lise : `data-start`, `data-duration`, `data-volume`,
+ * `data-loop`.
+ *
+ * La durée est celle qu'il reste à la scène après le décalage du son, et non
+ * celle du fichier, qu'on ne connaît pas ici. Un son plus court s'arrête tout
+ * seul ; un son plus long est coupé avec sa scène, ce qui est le comportement
+ * voulu — un impact ne survit pas au plan qu'il ponctue.
+ *
+ * Le volume est celui du son multiplié par le `sfxVolume` de la vidéo : le
+ * premier est une intention de mise en scène, le second un réglage global.
+ */
+export function soundsMarkup(
+  scene: HyperframesScene,
+  index: number,
+  { trackBase, sfxVolume }: { trackBase: number; sfxVolume: number }
+): string {
+  const sounds = scene.sounds ?? [];
+
+  return sounds
+    .map((sound, n) => {
+      const offset = sound.startInSeconds ?? 0;
+      const reste = Math.max(0.05, scene.durationInSeconds - offset);
+      const volume = (sound.volume ?? 1) * sfxVolume;
+
+      return (
+        `<audio id="sfx-${index}-${n}" src="${escapeHtml(sound.src)}" ` +
+        `data-start="${ms(scene.startInSeconds + offset)}" ` +
+        `data-duration="${ms(reste)}" ` +
+        `data-track-index="${trackBase + n}" ` +
+        `data-volume="${volume}"${sound.loop ? ' loop' : ''}></audio>`
+      );
+    })
+    .join('\n      ');
 }
 
 /**

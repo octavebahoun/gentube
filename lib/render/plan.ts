@@ -1,4 +1,8 @@
-import type { HyperframesScene, WordTiming } from '@/lib/storyboard/render';
+import type {
+  HyperframesScene,
+  HyperframesStoryboard,
+  WordTiming,
+} from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
 import {
   isMoveTransition,
@@ -17,6 +21,18 @@ import {
 
 /** Amplitude du zoom lent sur une image fixe. 6 % sur toute la scène. */
 const KEN_BURNS_SCALE = 1.06;
+
+/** Le rouge de la marque, repris par les shaders pour leurs lueurs. */
+const ACCENT_COLOR = '#ce1f20';
+
+/**
+ * Combien de sons une scène peut poser.
+ *
+ * Sert à réserver une bande de pistes par scène plutôt qu'à compter les sons
+ * réellement présents : deux scènes voisines ne doivent pas se disputer une
+ * piste parce que la première en a déclaré un de plus que prévu.
+ */
+export const MAX_SOUNDS_PER_SCENE = 8;
 
 /** Arrondi à la milliseconde, comme le reste du contrat de rendu. */
 export const ms = (seconds: number) => Math.round(seconds * 1000) / 1000;
@@ -174,4 +190,142 @@ export function trackPlan(
     const video = isVideoPath(scene.mediaPath) ? next++ : null;
     return { video, scene: next++ };
   });
+}
+
+/**
+ * Les données que la page recevra, calculées ici et jamais dans le navigateur.
+ *
+ * Tout y est en instants absolus : le moteur cherche chaque image, il ne joue
+ * pas la vidéo. Un calcul de temps fait dans la page dériverait d'un rendu à
+ * l'autre.
+ */
+export function buildTimeline(
+  storyboard: HyperframesStoryboard,
+  subtitleStyle: SubtitleStyle
+) {
+  const scenes = storyboard.scenes;
+  return {
+    scenes: scenes.map((scene, index) => {
+      const title = scene.kineticTitle;
+      const flash = scene.effects?.flash;
+
+      return {
+        index,
+        start: scene.startInSeconds,
+        duration: scene.durationInSeconds,
+        fade: fadeInSeconds(scene, index),
+        hasMedia: Boolean(scene.mediaPath),
+        // Le clip vit hors du div de la scène : le fondu de la scène ne
+        // l'emporte plus avec lui, il faut le lui appliquer aussi.
+        hoisted: isVideoPath(scene.mediaPath),
+        // Un clip porte déjà son propre mouvement : lui ajouter un Ken Burns
+        // superpose deux caméras et donne le mal de mer.
+        zoom: isVideoPath(scene.mediaPath)
+          ? null
+          : kenBurns(scene.effects?.zoom),
+        rate: isVideoPath(scene.mediaPath) ? (scene.playbackRate ?? 1) : null,
+        shake: scene.effects?.shake === true,
+        flash: flash
+          ? {
+              at: ms(scene.startInSeconds + (flash.startInSeconds ?? 0)),
+              duration: flash.durationInSeconds ?? 0.18,
+            }
+          : null,
+        overlay: scene.overlayText
+          ? { at: ms(scene.startInSeconds + (scene.overlayText.startInSeconds ?? 0)) }
+          : null,
+        counter: scene.counter
+          ? {
+              at: ms(scene.startInSeconds + (scene.counter.startInSeconds ?? 0)),
+              duration: scene.counter.durationInSeconds ?? 1.4,
+              from: scene.counter.from ?? 0,
+              to: scene.counter.value,
+              decimals: scene.counter.decimals ?? 0,
+              prefix: scene.counter.prefix ?? '',
+              suffix: scene.counter.suffix ?? '',
+              ring: scene.counter.variant === 'ring',
+            }
+          : null,
+        kinetic: title
+          ? {
+              at: ms(scene.startInSeconds + (title.startInSeconds ?? 0)),
+              duration: title.animationDuration ?? 0.5,
+              stagger: title.staggerDelay ?? 0.08,
+              count: title.text.trim().split(/\s+/).filter(Boolean).length,
+            }
+          : null,
+        words: (storyboard.subtitles ? wordsOrFallback(scene) : []).map(
+          (word) => ({ at: ms(scene.startInSeconds + word.start) })
+        ),
+      };
+    }),
+    /**
+     * Les transitions par transformation.
+     *
+     * Chacune anime **deux** scènes : celle qui sort et celle qui entre. C'est
+     * la seule famille qui touche à la scène précédente, d'où sa propre liste
+     * plutôt qu'un champ dans `scenes` — la scène `i` n'est pas propriétaire du
+     * mouvement de la scène `i-1`.
+     */
+    moves: scenes
+      .map((scene, index) => ({ scene, index }))
+      .filter(
+        ({ scene, index }) =>
+          index > 0 &&
+          scene.effects?.transition &&
+          isMoveTransition(scene.effects.transition)
+      )
+      .map(({ scene, index }) => ({
+        kind: scene.effects!.transition as string,
+        from: index - 1,
+        to: index,
+        at: ms(scene.startInSeconds),
+        duration: transitionDurationSeconds(scene.effects!.transition),
+      })),
+    // Les fondus au noir : une nappe opaque qui monte et redescend sur la
+    // couture. `black` n'est pas un fondu enchaîné, il passe par du noir franc.
+    blackouts: scenes
+      .map((scene, index) => ({ scene, index }))
+      .filter(
+        ({ scene, index }) => index > 0 && scene.effects?.transition === 'black'
+      )
+      .map(({ scene }) => ({
+        at: ms(scene.startInSeconds),
+        duration: transitionDurationSeconds('black'),
+      })),
+    /**
+     * Les fondus des sons.
+     *
+     * Le moteur ne connaît que `data-volume`, une valeur fixe. Un son qui doit
+     * monter ou retomber le fait donc par la timeline, sur la propriété
+     * `volume` de l'élément — la même mécanique que le reste du fichier, et
+     * elle survit au saut arrière pour la même raison.
+     */
+    sfx: scenes.flatMap((scene, index) =>
+      (scene.sounds ?? []).flatMap((sound, n) => {
+        const monte = sound.fadeInSeconds ?? 0;
+        const tombe = sound.fadeOutSeconds ?? 0;
+        if (monte <= 0 && tombe <= 0) return [];
+
+        const offset = sound.startInSeconds ?? 0;
+        const debut = ms(scene.startInSeconds + offset);
+        const reste = Math.max(0.05, scene.durationInSeconds - offset);
+        const cible = (sound.volume ?? 1) * storyboard.sfxVolume;
+
+        return [
+          {
+            id: `sfx-${index}-${n}`,
+            at: debut,
+            fin: ms(debut + reste),
+            monte,
+            tombe,
+            cible,
+          },
+        ];
+      })
+    ),
+    cuts: transitionCues(scenes),
+    accent: ACCENT_COLOR,
+    subtitleStyle,
+  };
 }

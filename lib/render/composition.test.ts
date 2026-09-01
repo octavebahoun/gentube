@@ -245,6 +245,59 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the scene sounds', () => {
+    const withSounds = (sounds: unknown[]) =>
+      html([{ ...shot(), render: { sounds } } as Shot]);
+
+    it('gives every sound its own id, or the track is dropped', () => {
+      // Le moteur découvre les médias par leur id : sans lui, la piste est
+      // ignorée et la vidéo sort sans le son, en silence et sans erreur.
+      const page = withSounds([{ src: 'sounds/sfx/pop.mp3' }, { src: 'sounds/amb/vent.mp3' }]);
+      expect(page).toContain('id="sfx-0-0"');
+      expect(page).toContain('id="sfx-0-1"');
+    });
+
+    it('never puts two sounds of a scene on the same track', () => {
+      const page = withSounds([{ src: 'a.mp3' }, { src: 'b.mp3' }]);
+      const pistes = [...page.matchAll(/id="sfx-0-\d" [^>]*data-track-index="(\d+)"/g)]
+        .map((m) => Number(m[1]));
+      expect(new Set(pistes).size).toBe(pistes.length);
+    });
+
+    it('multiplies the scene volume by the video sfx level', () => {
+      const page = html([{ ...shot(), render: { sounds: [{ src: 'a.mp3', volume: 0.5 }] } } as Shot], {
+        video: { ...video, sfxVolume: 0.4 } as Video,
+      });
+      expect(page).toContain('data-volume="0.2"');
+    });
+
+    it('cuts a sound with the scene it punctuates', () => {
+      // Un son n'a pas à survivre au plan : sa durée est ce qu'il reste de la
+      // scène après son décalage.
+      const page = withSounds([{ src: 'a.mp3', startInSeconds: 1 }]);
+      const found = /id="sfx-0-0"[^>]*data-duration="([\d.]+)"/.exec(page);
+      expect(Number(found?.[1])).toBeCloseTo(4, 3);
+    });
+
+    it('carries the loop flag through', () => {
+      expect(withSounds([{ src: 'a.mp3', loop: true }])).toMatch(/id="sfx-0-0"[^>]*loop/);
+      expect(withSounds([{ src: 'a.mp3' }])).not.toMatch(/id="sfx-0-0"[^>]*loop/);
+    });
+
+    it('fades through the timeline, since the engine only knows a fixed volume', () => {
+      const page = withSounds([{ src: 'a.mp3', fadeInSeconds: 0.5, fadeOutSeconds: 0.3 }]);
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('for (const son of T.sfx)');
+      expect(script).toContain('{ volume: 0 }');
+    });
+
+    it('declares no fade when none was asked for', () => {
+      const page = withSounds([{ src: 'a.mp3' }]);
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.sfx).toEqual([]);
+    });
+  });
+
   describe('the counter', () => {
     const withCounter = (counter: Record<string, unknown>) =>
       html([{ ...shot(), render: { counter } } as Shot]);

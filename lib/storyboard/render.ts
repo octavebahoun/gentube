@@ -39,7 +39,15 @@ export const sceneSoundSchema = z.object({
   loop: z.boolean().optional(),
   fadeInSeconds: z.number().min(0).optional(),
   fadeOutSeconds: z.number().min(0).optional(),
-  /** Rognage du fichier source, pour isoler un impact d'une prise plus longue. */
+  /**
+   * Rognage du fichier source, pour isoler un impact d'une prise plus longue.
+   *
+   * **Pas encore rendu.** Le moteur ne lit que `data-start`, `data-duration`,
+   * `data-volume` et `data-loop` sur une piste audio ; rien n'y décale la
+   * lecture dans le fichier. Les champs restent au contrat parce qu'un
+   * catalogue de sons en aura besoin, mais un storyboard qui les pose n'obtient
+   * rien — et le prompt système ne les propose pas.
+   */
   trimStart: z.number().min(0).optional(),
   trimEnd: z.number().min(0).optional(),
 });

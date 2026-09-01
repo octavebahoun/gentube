@@ -2,6 +2,8 @@ import type { HyperframesStoryboard } from '@/lib/storyboard/render';
 import { transitionDurationSeconds } from '@/lib/storyboard/render';
 import { isMoveTransition } from '@/lib/storyboard/render';
 import {
+  MAX_SOUNDS_PER_SCENE,
+  buildTimeline,
   fadeInSeconds,
   isVideoPath,
   kenBurns,
@@ -11,7 +13,13 @@ import {
   transitionCues,
   wordsOrFallback,
 } from './plan';
-import { audioMarkup, escapeHtml, sceneMarkup, videoMarkup } from './markup';
+import {
+  audioMarkup,
+  escapeHtml,
+  sceneMarkup,
+  soundsMarkup,
+  videoMarkup,
+} from './markup';
 
 /**
  * Génère l'`index.html` que HyperFrames rend.
@@ -47,9 +55,6 @@ const WATERMARK_HEIGHT_RATIO = 0.032;
 
 /** Amplitude du zoom lent sur une image fixe. 6 % sur toute la scène. */
 const KEN_BURNS_SCALE = 1.06;
-
-/** Le rouge de la marque, repris par les shaders pour leurs lueurs. */
-const ACCENT_COLOR = '#ce1f20';
 
 
 export type CompositionInput = {
@@ -104,6 +109,9 @@ export function composeHtml({
   const tracks = trackPlan(scenes);
   const topTrack = tracks.reduce((high, t) => Math.max(high, t.scene), 0);
   const audioTrackBase = topTrack + 10;
+  // Une bande par famille : le moteur refuse deux éléments qui se chevauchent
+  // sur la même piste, et deux sons d'une même scène se chevauchent souvent.
+  const sfxTrackBase = audioTrackBase + scenes.length + 10;
 
   const subtitleSize = Math.round(height * SUBTITLE_HEIGHT_RATIO);
   const watermarkSize = Math.round(height * WATERMARK_HEIGHT_RATIO);
@@ -124,99 +132,7 @@ export function composeHtml({
 
   // Le script embarque exactement ce dont il a besoin : des instants absolus
   // et des cibles. Aucun calcul de temps ne se fait dans la page.
-  const timeline = {
-    scenes: scenes.map((scene, index) => {
-      const title = scene.kineticTitle;
-      const flash = scene.effects?.flash;
-
-      return {
-        index,
-        start: scene.startInSeconds,
-        duration: scene.durationInSeconds,
-        fade: fadeInSeconds(scene, index),
-        hasMedia: Boolean(scene.mediaPath),
-        // Le clip vit hors du div de la scène : le fondu de la scène ne
-        // l'emporte plus avec lui, il faut le lui appliquer aussi.
-        hoisted: isVideoPath(scene.mediaPath),
-        // Un clip porte déjà son propre mouvement : lui ajouter un Ken Burns
-        // superpose deux caméras et donne le mal de mer.
-        zoom: isVideoPath(scene.mediaPath)
-          ? null
-          : kenBurns(scene.effects?.zoom),
-        rate: isVideoPath(scene.mediaPath) ? (scene.playbackRate ?? 1) : null,
-        shake: scene.effects?.shake === true,
-        flash: flash
-          ? {
-              at: ms(scene.startInSeconds + (flash.startInSeconds ?? 0)),
-              duration: flash.durationInSeconds ?? 0.18,
-            }
-          : null,
-        overlay: scene.overlayText
-          ? { at: ms(scene.startInSeconds + (scene.overlayText.startInSeconds ?? 0)) }
-          : null,
-        counter: scene.counter
-          ? {
-              at: ms(scene.startInSeconds + (scene.counter.startInSeconds ?? 0)),
-              duration: scene.counter.durationInSeconds ?? 1.4,
-              from: scene.counter.from ?? 0,
-              to: scene.counter.value,
-              decimals: scene.counter.decimals ?? 0,
-              prefix: scene.counter.prefix ?? '',
-              suffix: scene.counter.suffix ?? '',
-              ring: scene.counter.variant === 'ring',
-            }
-          : null,
-        kinetic: title
-          ? {
-              at: ms(scene.startInSeconds + (title.startInSeconds ?? 0)),
-              duration: title.animationDuration ?? 0.5,
-              stagger: title.staggerDelay ?? 0.08,
-              count: title.text.trim().split(/\s+/).filter(Boolean).length,
-            }
-          : null,
-        words: (storyboard.subtitles ? wordsOrFallback(scene) : []).map(
-          (word) => ({ at: ms(scene.startInSeconds + word.start) })
-        ),
-      };
-    }),
-    /**
-     * Les transitions par transformation.
-     *
-     * Chacune anime **deux** scènes : celle qui sort et celle qui entre. C'est
-     * la seule famille qui touche à la scène précédente, d'où sa propre liste
-     * plutôt qu'un champ dans `scenes` — la scène `i` n'est pas propriétaire du
-     * mouvement de la scène `i-1`.
-     */
-    moves: scenes
-      .map((scene, index) => ({ scene, index }))
-      .filter(
-        ({ scene, index }) =>
-          index > 0 &&
-          scene.effects?.transition &&
-          isMoveTransition(scene.effects.transition)
-      )
-      .map(({ scene, index }) => ({
-        kind: scene.effects!.transition as string,
-        from: index - 1,
-        to: index,
-        at: ms(scene.startInSeconds),
-        duration: transitionDurationSeconds(scene.effects!.transition),
-      })),
-    // Les fondus au noir : une nappe opaque qui monte et redescend sur la
-    // couture. `black` n'est pas un fondu enchaîné, il passe par du noir franc.
-    blackouts: scenes
-      .map((scene, index) => ({ scene, index }))
-      .filter(
-        ({ scene, index }) => index > 0 && scene.effects?.transition === 'black'
-      )
-      .map(({ scene }) => ({
-        at: ms(scene.startInSeconds),
-        duration: transitionDurationSeconds('black'),
-      })),
-    cuts: transitionCues(scenes),
-    accent: ACCENT_COLOR,
-    subtitleStyle,
-  };
+  const timeline = buildTimeline(storyboard, subtitleStyle);
 
   return `<!doctype html>
 <html lang="fr">
@@ -274,6 +190,15 @@ export function composeHtml({
       ${watermarkMarkup}
       ${scenes
         .map((scene, index) => audioMarkup(scene, index, audioTrackBase))
+        .filter(Boolean)
+        .join('\n      ')}
+      ${scenes
+        .map((scene, index) =>
+          soundsMarkup(scene, index, {
+            trackBase: sfxTrackBase + index * MAX_SOUNDS_PER_SCENE,
+            sfxVolume: storyboard.sfxVolume,
+          })
+        )
         .filter(Boolean)
         .join('\n      ')}
       ${music}
@@ -460,6 +385,34 @@ export function composeHtml({
               word.at
             );
           });
+        }
+      }
+
+      /*
+       * Les fondus des sons, posés sur la propriété volume de l'élément.
+       *
+       * Deux tweens séparés plutôt qu'un aller-retour : un son peut monter sans
+       * retomber, et l'inverse. Chacun part d'un instant absolu.
+       */
+      for (const son of T.sfx) {
+        const piste = document.getElementById(son.id);
+        if (!piste) continue;
+
+        if (son.monte > 0) {
+          tl.fromTo(
+            piste,
+            { volume: 0 },
+            { volume: son.cible, duration: son.monte, ease: "none" },
+            son.at
+          );
+        }
+        if (son.tombe > 0) {
+          tl.fromTo(
+            piste,
+            { volume: son.cible },
+            { volume: 0, duration: son.tombe, ease: "none" },
+            son.fin - son.tombe
+          );
         }
       }
 
