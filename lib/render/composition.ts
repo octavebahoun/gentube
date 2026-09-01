@@ -3,6 +3,7 @@ import type {
   HyperframesStoryboard,
   WordTiming,
 } from '@/lib/storyboard/render';
+import type { SubtitleStyle } from '@/lib/db/schema';
 import {
   isShaderTransition,
   transitionDurationSeconds,
@@ -45,6 +46,25 @@ const KEN_BURNS_SCALE = 1.06;
 
 /** Le rouge de la marque, repris par les shaders pour leurs lueurs. */
 const ACCENT_COLOR = '#ce1f20';
+
+/**
+ * Le style de sous-titre d'une vidéo, avec son repli.
+ *
+ * Trois valeurs vivent dans `videos.subtitle_style` depuis l'origine, et la
+ * composition n'en lisait aucune : toute vidéo sortait en karaoké, y compris
+ * celles qui avaient choisi autre chose. Le repli reste le karaoké parce que
+ * c'est ce que les vidéos déjà rendues ont eu.
+ */
+export function subtitleStyleOf(storyboard: {
+  subtitleStyle?: SubtitleStyle | null;
+}): SubtitleStyle {
+  return storyboard.subtitleStyle ?? 'karaoke';
+}
+
+/** Vrai quand le style allume les mots un par un. */
+export function lightsWords(style: SubtitleStyle): boolean {
+  return style !== 'cinematic';
+}
 
 export type CompositionInput = {
   storyboard: HyperframesStoryboard;
@@ -184,13 +204,17 @@ export function wordsOrFallback(
 function sceneMarkup(
   scene: HyperframesScene,
   index: number,
-  { subtitles, trackIndex }: { subtitles: boolean; trackIndex: number }
+  {
+    subtitles,
+    trackIndex,
+    subtitleStyle,
+  }: { subtitles: boolean; trackIndex: number; subtitleStyle: SubtitleStyle }
 ): string {
   const words = subtitles ? wordsOrFallback(scene) : [];
 
   const captions =
     words.length > 0
-      ? `<div class="captions" data-layout-allow-overlap>${words
+      ? `<div class="captions captions-${subtitleStyle}" id="c${index}" data-layout-allow-overlap>${words
           .map(
             (word, wordIndex) =>
               `<span class="word" id="w${index}-${wordIndex}">${escapeHtml(
@@ -393,6 +417,12 @@ function audioMarkup(
   );
 }
 
+/**
+ * **Aucun accent grave dans le HTML ci-dessous, commentaires compris.** Tout ce
+ * qui suit vit dans un littéral de gabarit : un accent grave le referme, et
+ * TypeScript rapporte alors une erreur de syntaxe à une ligne qui n'a rien à
+ * voir. Trois fois le même piège le 1er septembre 2026.
+ */
 export function composeHtml({
   storyboard,
   watermark = false,
@@ -401,6 +431,7 @@ export function composeHtml({
 
   // Les clips prennent des pistes en plus des scènes : la base audio se calcule
   // sur le plan réel, pas sur le nombre de scènes.
+  const subtitleStyle = subtitleStyleOf(storyboard);
   const tracks = trackPlan(scenes);
   const topTrack = tracks.reduce((high, t) => Math.max(high, t.scene), 0);
   const audioTrackBase = topTrack + 10;
@@ -480,6 +511,7 @@ export function composeHtml({
       })),
     cuts: transitionCues(scenes),
     accent: ACCENT_COLOR,
+    subtitleStyle,
   };
 
   return `<!doctype html>
@@ -527,6 +559,7 @@ export function composeHtml({
             sceneMarkup(scene, index, {
               subtitles: storyboard.subtitles,
               trackIndex: tracks[index].scene,
+              subtitleStyle,
             }),
           ]
             .filter(Boolean)
@@ -646,16 +679,43 @@ export function composeHtml({
           }
         }
 
-        // Le mot s'allume à son instant et le reste : c'est la lecture
-        // karaoké. Une durée nulle serait ignorée par GSAP, d'où le millième.
-        scene.words.forEach(function (word, i) {
-          tl.fromTo(
-            "#w" + scene.index + "-" + i,
-            { color: "rgba(255,255,255,0.42)" },
-            { color: "#ffffff", duration: 0.001, ease: "none" },
-            word.at
-          );
-        });
+        // Trois styles, trois façons de faire apparaître la phrase.
+        //
+        //  - karaoke  : le mot s'allume à son instant et le reste. Une durée
+        //               nulle serait ignorée par GSAP, d'où le millième.
+        //  - fondant  : le mot monte et se révèle, sans changer de couleur.
+        //               Pas de flou CSS — la rastérisation logicielle
+        //               de Lambda le paie cher (voir l'en-tête de style.css).
+        //  - cinematic: aucun mot ne bouge. La phrase entière apparaît avec la
+        //               scène, comme un sous-titre de film.
+        if (T.subtitleStyle === "cinematic") {
+          if (scene.words.length > 0) {
+            tl.fromTo(
+              "#c" + scene.index,
+              { opacity: 0 },
+              { opacity: 1, duration: 0.3, ease: "power2.out" },
+              scene.start
+            );
+          }
+        } else if (T.subtitleStyle === "fondant") {
+          scene.words.forEach(function (word, i) {
+            tl.fromTo(
+              "#w" + scene.index + "-" + i,
+              { opacity: 0.25, y: "0.22em" },
+              { opacity: 1, y: "0em", duration: 0.28, ease: "power2.out" },
+              word.at
+            );
+          });
+        } else {
+          scene.words.forEach(function (word, i) {
+            tl.fromTo(
+              "#w" + scene.index + "-" + i,
+              { color: "rgba(255,255,255,0.42)" },
+              { color: "#ffffff", duration: 0.001, ease: "none" },
+              word.at
+            );
+          });
+        }
       }
 
       // Le fondu au noir : la nappe monte sur la première moitié de la

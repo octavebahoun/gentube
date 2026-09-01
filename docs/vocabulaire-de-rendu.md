@@ -83,15 +83,74 @@ C'est là que se trouve la vraie extension du produit — et le vrai travail.
 
 ---
 
-## L'ordre retenu
+## Chronologie
 
-1. **`subtitleStyle`**, parce que la promesse est déjà en base et que le coût
-   est d'une demi-journée.
-2. **Les transitions CSS**, parce qu'elles élargissent le vocabulaire sans
-   toucher au coût de rendu ni au prompt.
-3. **Les incrustations et compteurs**, parce qu'un plan sans image générée est
-   le plan le plus rentable du catalogue.
-4. **Les plans structurés**, quand le reste tient.
+Quatre lots, dans cet ordre, parce que chacun lève une contrainte du suivant.
+
+### Lot 1 — Les styles de sous-titres  ·  palier 1
+
+**Ce qui sort** : `videos.subtitle_style` cesse d'être décoratif. Les trois
+valeurs déjà en base rendent trois apparences distinctes.
+
+| Étape | Fichier |
+|---|---|
+| Passer `subtitleStyle` à `sceneMarkup()` et le poser en classe | `lib/render/composition.ts` |
+| Écrire les trois apparences | `render/gentube-v1/style.css` |
+| Un test par style, sur le HTML rendu | `lib/render/composition.test.ts` |
+| Le choix dans l'éditeur | `components/storyboard/` |
+
+**Aucune migration, aucun champ nouveau, aucun appel fournisseur.** C'est le
+seul lot qui ne touche ni au prompt système ni au contrat de scène — d'où sa
+place en premier : il valide le chemin « registre → composition » sur le cas le
+plus simple, avant qu'on l'emprunte avec des enjeux.
+
+**Bloque** : rien. **Bloqué par** : rien.
+
+### Lot 2 — Les transitions sans WebGL  ·  palier 2
+
+**Ce qui sort** : 23 transitions de plus dans `TRANSITIONS`, en CSS et GSAP.
+
+Elles s'ajoutent à côté des quatorze shaders, pas à leur place. Deux raisons de
+les vouloir malgré les shaders : elles ne demandent aucun WebGL, donc elles
+rendent partout sans dépendre du drapeau de compositing ; et elles couvrent des
+gestes que les shaders ne font pas — volet, balayage d'horloge, poussée
+élastique.
+
+Chaque entrée demande son nom dans `TRANSITIONS`, sa durée dans
+`TRANSITION_DURATIONS`, son tween dans la timeline, et une ligne dans le prompt
+système pour que le LLM sache la demander.
+
+**Bloqué par** : le lot 1, qui aura montré comment on transpose un extrait du
+registre sans le recopier bêtement.
+
+### Lot 3 — Les incrustations et les compteurs  ·  palier 2
+
+**Ce qui sort** : `overlayText` gagne des variantes, et un plan peut afficher un
+chiffre qui monte sans qu'aucune image soit générée.
+
+C'est le lot le plus rentable du catalogue : un plan `count-up` coûte le prix de
+sa voix off et rien d'autre. Aucun appel à Flux, aucun appel à Replicate. Sur
+une minute facturée 400 FCFA de fournisseur, un plan de ce type en coûte dix.
+
+**Bloqué par** : le lot 2, qui aura étendu `sceneEffectsSchema` une première
+fois — donc établi comment un champ nouveau traverse le prompt système, le
+contrat zod et la composition.
+
+### Lot 4 — Les plans structurés  ·  palier 3
+
+**Ce qui sort** : des scènes dont le contenu est une donnée, pas une image —
+graphiques, cartes, fils de discussion, maquettes.
+
+C'est un chantier produit, pas une transposition. Une scène ne connaît
+aujourd'hui qu'un prompt visuel et une narration ; il faut qu'elle puisse porter
+des séries, des trajets, des messages. Donc le storyboard doit les décrire, donc
+le LLM doit les produire, donc le prompt système et `sceneRenderSchema`
+changent ensemble.
+
+À ne pas commencer avant que les trois premiers lots tiennent : c'est le seul
+qui peut casser des storyboards existants.
+
+**Bloqué par** : les lots 1 à 3, et par une décision produit sur ce qu'on vend.
 
 ---
 

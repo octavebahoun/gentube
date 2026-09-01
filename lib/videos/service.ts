@@ -2,6 +2,7 @@ import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import {
+  subtitleStyleEnum,
   creditLedger,
   jobs,
   shots,
@@ -33,6 +34,13 @@ export const VIDEO_TITLE_MAX = 200;
 export const VIDEO_THEME_MAX = 4_000;
 export const RESOLUTIONS = ['480p', '720p'] as const;
 
+/**
+ * Les apparences de sous-titres, lues sur l'enum de la base plutôt que
+ * recopiées : deux listes finissent toujours par diverger, et celle-ci décide
+ * de ce qu'une colonne accepte.
+ */
+export const SUBTITLE_STYLES = subtitleStyleEnum.enumValues;
+
 const title = z.preprocess(
   (value) => (typeof value === 'string' ? value.trim() : value),
   z
@@ -62,6 +70,12 @@ export const videoInputSchema = z.object({
   theme,
   resolution: z.enum(RESOLUTIONS).optional(),
   pipelineOverride,
+  /**
+   * L'apparence des sous-titres. Le champ existait en base et n'était réglable
+   * nulle part : ni ici, ni dans une route, ni dans un écran. Une vidéo ne
+   * pouvait donc pas quitter le karaoké, quoi qu'en dise la colonne.
+   */
+  subtitleStyle: z.enum(SUBTITLE_STYLES).optional(),
 });
 
 export const videoUpdateSchema = videoInputSchema
@@ -141,7 +155,13 @@ export async function updateVideo(
   }
 
   const patch: Record<string, unknown> = {};
-  for (const field of ['title', 'theme', 'resolution', 'pipelineOverride'] as const) {
+  for (const field of [
+    'title',
+    'theme',
+    'resolution',
+    'pipelineOverride',
+    'subtitleStyle',
+  ] as const) {
     if (data[field] !== undefined) patch[field] = data[field];
   }
 

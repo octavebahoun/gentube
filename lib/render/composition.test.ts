@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { Shot, Video } from '@/lib/db/schema';
 import { toHyperframesStoryboard } from '@/lib/storyboard/render';
-import { composeHtml, fadeInSeconds, kenBurns, wordsOrFallback } from './composition';
+import {
+  composeHtml,
+  fadeInSeconds,
+  kenBurns,
+  lightsWords,
+  subtitleStyleOf,
+  wordsOrFallback,
+} from './composition';
 
 function shot(overrides: Partial<Shot> = {}): Shot {
   return {
@@ -170,8 +177,49 @@ describe('the composition HyperFrames renders', () => {
     const page = html([shot()], {
       video: { ...video, subtitles: false } as Video,
     });
-    expect(page).not.toContain('class="captions"');
+    expect(page).not.toContain('class="captions');
     expect(page).not.toContain('class="veil"');
+    // Le test resterait vert sans cette ligne : la classe porte un suffixe de
+    // style, donc il faut vérifier qu'elle est là quand elle doit y être.
+    expect(html([shot()])).toContain('class="captions');
+  });
+
+  describe('the three subtitle styles', () => {
+    const styled = (subtitleStyle: string) =>
+      html([shot()], { video: { ...video, subtitleStyle } as Video });
+
+    it('marks the caption block with the style the video chose', () => {
+      expect(styled('karaoke')).toContain('captions captions-karaoke');
+      expect(styled('fondant')).toContain('captions captions-fondant');
+      expect(styled('cinematic')).toContain('captions captions-cinematic');
+    });
+
+    it('lights one word at a time for karaoke and fondant', () => {
+      // Trois mots dans la narration de `shot()`, donc trois tweens de mot.
+      for (const style of ['karaoke', 'fondant']) {
+        const script = styled(style).slice(styled(style).lastIndexOf('<script>'));
+        expect(script).toContain('"#w" + scene.index + "-" + i');
+      }
+    });
+
+    it('reveals the whole line at once for cinematic', () => {
+      const page = styled('cinematic');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('"cinematic"');
+      expect(page).toContain('id="c0"');
+    });
+
+    it('falls back to karaoke, which is what already-rendered videos got', () => {
+      expect(subtitleStyleOf({})).toBe('karaoke');
+      expect(subtitleStyleOf({ subtitleStyle: null })).toBe('karaoke');
+      expect(subtitleStyleOf({ subtitleStyle: 'fondant' })).toBe('fondant');
+    });
+
+    it('knows which styles animate word by word', () => {
+      expect(lightsWords('karaoke')).toBe(true);
+      expect(lightsWords('fondant')).toBe(true);
+      expect(lightsWords('cinematic')).toBe(false);
+    });
   });
 
   it('declares the frame the resolution is billed at', () => {

@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import type { Ratio, Resolution, Shot, Video } from '@/lib/db/schema';
+import type {
+  Ratio,
+  Resolution,
+  Shot,
+  SubtitleStyle,
+  Video,
+} from '@/lib/db/schema';
 
 /**
  * Le contrat de rendu — vérité partagée entre la base de données et la
@@ -318,7 +324,7 @@ export type HyperframesStoryboard = {
   ratio: Ratio;
   voice?: string;
   subtitles: boolean;
-  subtitleStyle: string;
+  subtitleStyle: SubtitleStyle;
   music?: string;
   musicVolume: number;
   sfxVolume: number;

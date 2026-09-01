@@ -103,6 +103,46 @@ body {
   color: #fff;
 }
 
+/* --- Les trois styles de sous-titres ------------------------------------- */
+
+/*
+ * `videos.subtitle_style` porte ces trois valeurs depuis l'origine. Ce qui
+ * change ici est l'apparence au repos ; la façon dont chaque mot arrive est
+ * dans la timeline, parce qu'elle dépend d'un instant et pas d'un état.
+ */
+
+/* `karaoke` : le mot éteint est gris, la timeline l'allume en blanc. */
+.captions-karaoke .word {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+/*
+ * `fondant` : tous les mots sont blancs, et c'est l'opacité qui les révèle.
+ * Plus doux que le karaoké, et lisible sur une image chargée sans dépendre
+ * d'un contraste entre deux gris.
+ */
+.captions-fondant .word {
+  color: #fff;
+  opacity: 0.25;
+}
+
+/*
+ * `cinematic` : un sous-titre de film. Aucune emphase par mot, une graisse
+ * plus basse, moins de contour, et la ligne entière apparaît d'un coup.
+ * Le voile du bas suffit à la détacher.
+ */
+.captions-cinematic {
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+
+.captions-cinematic .word {
+  color: #fff;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.45),
+    0 4px 14px rgba(0, 0, 0, 0.55);
+}
+
 /* --- Filigrane ---------------------------------------------------------- */
 
 /*
