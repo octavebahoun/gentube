@@ -488,6 +488,19 @@ export function composeHtml({
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=${width}, height=${height}" />
     <title>${escapeHtml(storyboard.title)}</title>
+    <script>
+      /*
+       * Le compositeur de shaders vit dans la page, pas dans le moteur.
+       *
+       * Le rendu distribué — celui de Lambda — câble 'usePageSideCompositing'
+       * à false en dur (@hyperframes/producer/dist/distributed.js) et
+       * n'injecte donc jamais ce drapeau. Mais il ne contrôle que ce que fait
+       * le producer : rien n'empêche la page de se déclarer elle-même.
+       *
+       * Posé avant le bundle, parce que c'est à son chargement qu'il le lit.
+       */
+      window.__HF_PAGE_SIDE_COMPOSITING__ = true;
+    </script>
     <script src="vendor/gsap.min.js"></script>
     <script src="vendor/shader-transitions.min.js"></script>
     <link rel="stylesheet" href="style.css" />
@@ -666,6 +679,13 @@ export function composeHtml({
       // Les transitions shader se posent PAR-DESSUS cette timeline. Sans le
       // paquet — ou sans WebGL — il ne se passe rien ici et le fondu déjà
       // programmé reste seul : la vidéo sort, en moins spectaculaire.
+      if (typeof HyperShader !== "undefined" && HyperShader.isPageSideCompositingSupported) {
+        console.log(
+          "[gentube] compositing page-side supporté :",
+          HyperShader.isPageSideCompositingSupported()
+        );
+      }
+
       if (T.cuts.length > 0 && typeof HyperShader !== "undefined") {
         HyperShader.init({
           bgColor: "#000000",
