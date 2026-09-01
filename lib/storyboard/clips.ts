@@ -11,6 +11,7 @@ import {
   type AnimationJobPayload,
   type VideoAnimator,
 } from '@/lib/video';
+import { sceneRenderSchema } from './render';
 import { StoryboardError, listShots } from './service';
 import { assertGeneratable } from './images';
 
@@ -56,6 +57,33 @@ const SOURCE_URL_TTL_S = 3_600;
 
 /** Un plan porte déjà un job vivant : le resoumettre paierait deux fois. */
 const LIVE = ['queued', 'running', 'succeeded'] as const;
+
+/**
+ * Ce qu'on demande au modèle d'animation.
+ *
+ * Le prompt visuel décrit la scène ; il a déjà servi à fabriquer l'image fixe.
+ * Ce qui manque au clip, c'est le **mouvement** — et le storyboard le dit dans
+ * `cameraMotion`, que le prompt système propose au modèle depuis le début et
+ * que personne ne lisait. La valeur était écrite en base et perdue là.
+ *
+ * Sans directive, on garde un mouvement neutre : un plan animé sans intention
+ * de caméra vaut mieux qu'un plan qui part dans une direction inventée.
+ */
+const CAMERA: Record<string, string> = {
+  orbit: 'slow orbital camera move around the subject',
+  dolly: 'steady dolly push toward the subject',
+  pan: 'smooth horizontal camera pan',
+  static: 'locked-off camera, only the subject moves',
+};
+
+export function animationPrompt(shot: Shot): string {
+  const parsed = sceneRenderSchema.safeParse(shot.render ?? {});
+  const motion = parsed.success ? parsed.data.effects?.cameraMotion : undefined;
+
+  return [shot.prompt.trim(), motion ? CAMERA[motion] : 'subtle natural motion']
+    .filter(Boolean)
+    .join(', ');
+}
 
 function callbackBaseUrl(): string {
   const base = process.env.BASE_URL?.trim();
@@ -147,7 +175,7 @@ export async function submitClips(
     try {
       const started = await client.submit({
         imageUrl: await assets.signedUrl(shot.sourceImageUrl, SOURCE_URL_TTL_S),
-        prompt: shot.prompt,
+        prompt: animationPrompt(shot),
         durationS: shot.durationS,
         resolution: video.resolution,
         ratio: video.ratio,

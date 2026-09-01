@@ -245,6 +245,26 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the per-scene subtitle switch', () => {
+    it('lets a scene refuse subtitles the video otherwise shows', () => {
+      // Un titre plein cadre ou un plan de respiration n'a pas à porter du
+      // texte parce que le reste de la vidéo en porte.
+      const page = html([{ ...shot(), render: { showSubtitles: false } } as Shot]);
+      expect(page).not.toContain('class="captions');
+      expect(page).not.toContain('class="veil"');
+    });
+
+    it('leaves the karaoke tweens out too, or they aim at nothing', () => {
+      const page = html([{ ...shot(), render: { showSubtitles: false } } as Shot]);
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].words).toEqual([]);
+    });
+
+    it('follows the video when the scene says nothing', () => {
+      expect(html([shot()])).toContain('class="captions');
+    });
+  });
+
   describe('the vertical safe area', () => {
     const bottom = (page: string) =>
       Number(/\.captions \{[^}]*bottom: ([\d.]+)%/.exec(page)?.[1]);

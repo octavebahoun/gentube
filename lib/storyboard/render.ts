@@ -126,14 +126,26 @@ export function isShaderTransition(transition: string): boolean {
   return (SHADER_TRANSITIONS as readonly string[]).includes(transition);
 }
 
-/** Les mouvements caméra sont des directives pour le *prompt*, pas pour le renderer. */
+/**
+ * Les mouvements caméra sont des directives pour le *prompt*, pas pour le
+ * renderer — et depuis le 2 septembre 2026 c'est vrai : `animationPrompt()`
+ * dans `lib/storyboard/clips.ts` les traduit pour le modèle d'animation.
+ * Auparavant la valeur était stockée et perdue là.
+ */
 export const CAMERA_MOTIONS = ['orbit', 'dolly', 'pan', 'static'] as const;
 
 export const sceneEffectsSchema = z.object({
   zoom: z.enum(['in', 'out', 'none']).optional(),
   transition: z.enum(TRANSITIONS).optional(),
   shake: z.boolean().optional(),
-  /** Directive : ce plan doit couper nettement avec la composition précédente. */
+  /**
+   * Directive : ce plan doit couper nettement avec la composition précédente.
+   *
+   * **Mort des deux côtés, au 2 septembre 2026.** Le prompt système ne le
+   * propose pas au modèle, et aucun rendu ne le lit. Gardé parce qu'un
+   * raccord dans le mouvement est une vraie intention de montage — mais tant
+   * que rien ne l'écrit ni ne le rend, il ne promet rien.
+   */
   matchCut: z.boolean().optional(),
   /**
    * Cale les effets ponctuels de la scène sur un temps fort de la musique.

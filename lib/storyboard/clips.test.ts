@@ -20,7 +20,7 @@ import {
 } from './service';
 import { generateVoiceover } from './voiceover';
 import { generateImages } from './images';
-import { submitClips } from './clips';
+import { animationPrompt, submitClips } from './clips';
 
 afterAll(async () => {
   await closeDb();
@@ -251,5 +251,21 @@ describe('submitting the clips', () => {
 
     expect(result.submitted).toBe(2);
     expect(result.costUsd).toBeCloseTo(0.1, 6);
+  });
+
+  it('asks the model for the camera move the scene wrote', () => {
+    // `cameraMotion` était proposé au modèle, stocké en base, et lu par
+    // personne : le clip partait avec un mouvement écrit en dur.
+    const shot = { prompt: 'a market at dawn', render: { effects: { cameraMotion: 'dolly' } } };
+    expect(animationPrompt(shot as never)).toContain('dolly push');
+    expect(animationPrompt(shot as never)).toContain('a market at dawn');
+  });
+
+  it('keeps a neutral move when the scene asks for none', () => {
+    // Mieux vaut un plan sans intention qu'un plan qui part dans une
+    // direction inventée.
+    expect(animationPrompt({ prompt: 'a river', render: {} } as never)).toContain(
+      'subtle natural motion'
+    );
   });
 });

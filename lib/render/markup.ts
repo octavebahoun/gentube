@@ -28,7 +28,12 @@ export function sceneMarkup(
     subtitleStyle,
   }: { subtitles: boolean; trackIndex: number; subtitleStyle: SubtitleStyle }
 ): string {
-  const words = subtitles ? wordsOrFallback(scene) : [];
+  // `showSubtitles` est une décision de scène, `subtitles` une décision de
+  // vidéo. La première l'emporte quand elle est écrite : un titre plein cadre
+  // ou un plan de respiration n'a pas à porter du texte parce que le reste de
+  // la vidéo en porte.
+  const montrer = scene.showSubtitles ?? subtitles;
+  const words = montrer ? wordsOrFallback(scene) : [];
 
   const captions =
     words.length > 0

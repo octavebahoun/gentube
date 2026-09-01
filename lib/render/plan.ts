@@ -261,7 +261,12 @@ export function buildTimeline(
               count: title.text.trim().split(/\s+/).filter(Boolean).length,
             }
           : null,
-        words: (storyboard.subtitles ? wordsOrFallback(scene) : []).map(
+        // Même règle que le balisage : sans mots posés, un tween de karaoké
+        // viserait un identifiant qui n'existe pas.
+        words: ((scene.showSubtitles ?? storyboard.subtitles)
+          ? wordsOrFallback(scene)
+          : []
+        ).map(
           (word) => ({ at: ms(scene.startInSeconds + word.start) })
         ),
       };
