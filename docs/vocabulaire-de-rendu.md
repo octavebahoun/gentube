@@ -177,6 +177,19 @@ La composition n'installe donc le compositeur que si la vidéo demande vraiment
 un shader. Dans une vidéo qui en contient un, les transformations retombent en
 coupe franche.
 
+**La cohabitation a été cherchée, elle n'existe pas.** Deux essais, tous deux
+concluants dans le mauvais sens :
+
+- Couture de durée nulle : le compositeur saute à l'état « après » et masque la
+  scène sortante. La poussée pousse une bande noire.
+- Couture de durée réelle : il pilote l'opacité des deux scènes pour son fondu
+  et écrase la nôtre. Cette fois c'est l'entrante qui manque, et le geste
+  devient « la sortante glisse pendant que l'entrante apparaît en fondu ».
+
+Les deux familles se disputent les mêmes propriétés — visibilité et opacité.
+Elles ne peuvent pas partager une couture, et le compositeur les gouverne pour
+toute la vidéo, pas seulement à ses propres coutures.
+
 **Ce que le produit doit en faire reste ouvert** : refuser le mélange à
 l'écriture du storyboard, choisir une famille par vidéo, ou laisser la coupe
 franche comme repli silencieux. C'est une règle produit, pas une contrainte
