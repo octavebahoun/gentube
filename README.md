@@ -836,9 +836,10 @@ gratuit et filigrane, stockage R2.
   Neuf morceaux de `assets/sounds/music/sacred/` restent dehors : ils n'ont pas
   de fiche, donc pas de ligne dans `CATALOG.md`.
 
-  Reste un geste, côté produit : donner à une vidéo **un moyen de choisir sa
-  musique**. `videoInputSchema` ignore `musicUrl`, exactement comme il ignorait
-  `subtitleStyle`.
+  `musicUrl` est réglable depuis `videoInputSchema` : une vidéo en brouillon
+  choisit sa musique en copiant la clé du catalogue, et une chaîne vide la
+  retire. Il ne manque plus qu'un écran pour la choisir — le même écran de
+  réglages de rendu qui manque au ratio, à la voix et aux sous-titres.
 - **Le coût réel par job**, enregistré au moment de la génération, pour que la
   vue de consommation ne dépende d'aucune API de fournisseur.
 - **Les deux agents** : celui qui accueille et retient le style d'écriture,

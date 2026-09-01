@@ -288,4 +288,21 @@ describe('the trial', () => {
 
     expect(video.resolution).toBe('720p');
   });
+
+  it('lets a draft choose its music, and drop it again', async () => {
+    // Le champ existait en base et n'était réglable nulle part : une vidéo ne
+    // pouvait pas porter de musique, quoi qu'en dise la colonne.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const project = await createProject(tdb, { name: 'Docs' });
+    const video = await createVideo(tdb, { projectId: project.id, title: 'Test' });
+
+    const avec = await updateVideo(tdb, video.id, {
+      musicUrl: 'sounds/music/weightless-horizon.mp3',
+    });
+    expect(avec.musicUrl).toBe('sounds/music/weightless-horizon.mp3');
+
+    // Une chaîne vide retire la musique plutôt que d'enregistrer du vide.
+    const sans = await updateVideo(tdb, video.id, { musicUrl: '' });
+    expect(sans.musicUrl).toBeNull();
+  });
 });

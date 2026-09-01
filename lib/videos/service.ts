@@ -76,6 +76,17 @@ export const videoInputSchema = z.object({
    * pouvait donc pas quitter le karaoké, quoi qu'en dise la colonne.
    */
   subtitleStyle: z.enum(SUBTITLE_STYLES).optional(),
+  /**
+   * La clé du morceau, copiée du catalogue — `sounds/music/<nom>.mp3`.
+   *
+   * `null` retire la musique. La clé n'est pas vérifiée ici : `sound_assets`
+   * est partagé et le rendu tolère une clé disparue, la vidéo sortant alors
+   * sans musique plutôt qu'en échouant.
+   */
+  musicUrl: z.preprocess(
+    (value) => (value === '' || value === 'none' ? null : value),
+    z.string().max(200).nullable().optional()
+  ),
 });
 
 export const videoUpdateSchema = videoInputSchema
@@ -161,6 +172,7 @@ export async function updateVideo(
     'resolution',
     'pipelineOverride',
     'subtitleStyle',
+    'musicUrl',
   ] as const) {
     if (data[field] !== undefined) patch[field] = data[field];
   }
