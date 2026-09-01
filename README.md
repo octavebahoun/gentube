@@ -4,6 +4,16 @@ SaaS multi-tenant de génération vidéo IA : un projet définit un style, une v
 et une chaîne YouTube ; chaque vidéo part d'un storyboard généré, éditable en
 kanban, validé par l'utilisateur, puis produit par un pipeline asynchrone.
 
+**C'est un éditeur vidéo complet, pas un générateur d'un seul genre.** Le prompt
+du client et ses choix décident du résultat : documentaire sans visage,
+démonstration produit, notification animée, clip rythmé sur une musique. Ce que
+la composition sait dessiner est donc la limite haute de ce qu'un client peut
+demander — d'où `docs/vocabulaire-de-rendu.md`, qui dit comment l'élargir.
+
+La seule chose hors de portée aujourd'hui : filmer soi-même ou déposer sa propre
+vidéo pour la faire monter. Recevoir des fichiers clients demande une capacité
+serveur que nous n'avons pas.
+
 Base : template officiel [Next.js SaaS Starter](https://github.com/nextjs/saas-starter)
 de Vercel — auth, sessions, middleware et structure d'équipe conservés, **toute
 la partie Stripe supprimée** — la facturation passe par GeniusPay (mobile money
@@ -420,22 +430,40 @@ anglais et de 20 à 40 mots.
 
 ## Plans animés — Replicate
 
-Pas encore codé, décisions arrêtées le 28 août 2026 dans `docs/providers.md`.
+Codé le 1er septembre 2026. `lib/video/` reprend le moule de `lib/voice/` : un
+contrat, un client, une fabrique. Le métier n'appelle que `createAnimator()`.
 
 | Résolution ou usage | Modèle | Prix |
 |---|---|---|
-| 480p | `wan-video/wan-2.2-i2v-fast` | 0,05 $ le clip de 5 s |
+| 480p | `wan-video/wan-2.2-i2v-fast` | 0,00988 $ la seconde rendue |
 | 720p | `prunaai/p-video` | 0,02 $ la seconde |
-| Avatar, lip-sync | `prunaai/p-video-avatar` | 0,025 $ la seconde |
+| Avatar, lip-sync | `prunaai/p-video-avatar` | pas encore routé |
 
-Une couche `lib/video/provider.ts` choisira le modèle, sur le modèle du routage
-de voix. Wan reste deux fois moins cher sur la résolution par défaut, p-video
-prend le dessus en 720p et sera seul à pouvoir servir du 1080p.
+`lib/video/provider.ts` choisit le modèle sur la résolution. L'avatar n'y est
+pas : rien dans le schéma ne distingue encore un plan avatar d'un plan animé
+ordinaire, et une route que personne ne peut demander est une route qu'on ne
+peut pas tester.
 
-**Une scène animée dure entre 5 et 10 secondes**, et les deux bornes viennent
-d'endroits différents. Wan facturant au clip, une scène de 3 secondes coûte le
-prix d'une de 5 : le plancher protège la marge. Le plafond de dix secondes est
-une limite de p-video.
+**Trois corrections lues sur le schéma du fournisseur**, et non dans sa
+documentation :
+
+- Wan n'a **pas** de paramètre de cadrage : il suit l'image d'entrée.
+- Sa durée se demande en images, de **81 à 121**, soit **5,06 s à 7,56 s** à
+  16 fps. Sans ce calcul il rend ses cinq secondes d'usine et la voix off finit
+  sur une image arrêtée.
+- Il facture **à la durée rendue**, pas au clip. Le plancher de 81 images reste,
+  donc une scène de 3 s se paie 5,06 s — mais au-delà c'est linéaire.
+
+**Une scène animée dure donc entre 5,06 s et 7,56 s en 480p**, et jusqu'à 10 s
+en 720p, plafond de p-video. Au-delà, la soumission refuse en nommant la scène :
+ralentir un clip pour couvrir la voix se verrait.
+
+Rien n'attend un clip. `submitClips()` écrit un job **avant** de soumettre, et
+l'URL de rappel le nomme (`?job=<id>`) — c'est ce qui ferme la course entre le
+retour de `submit()` et l'écriture de l'identifiant de prédiction. Le webhook
+`app/api/webhooks/replicate` pose le clip sur R2. Un clip échoué rembourse la
+vidéo : les crédits ont été débités à la validation, et Replicate ne facture pas
+une exécution qui a échoué.
 
 Replicate plutôt qu'un GPU loué : modèles toujours chauds, facturation par
 sortie connue d'avance, exécutions échouées non facturées, et 600 créations de
@@ -478,11 +506,29 @@ Mesuré le 26 août 2026, pile déployée à Paris (`eu-west-3`) : une vidéo de
 jointures de segments. Un second essai sur 49 s de vidéo a rendu 1 475 images en
 25 s pour 0,0157 $.
 
-**Ce que la composition ne sait pas encore faire : les clips.** Le média est
-posé en `background-image`, ce qui n'affiche qu'une image fixe. Un clip mp4
-rendrait du vide sans lever d'erreur. Le moteur sait pourtant gérer la vidéo,
-mais il lui faut une balise `<video>` portant son propre `data-start`. À écrire
-avec l'étape des plans animés.
+**Les clips s'affichent depuis le 1er septembre 2026.** Ils étaient posés en
+`background-image`, ce qu'un mp4 ne remplit pas — pas d'erreur, juste un cadre
+noir. La balise `<video>` vit désormais au niveau de la scène-mère, avec sa
+propre piste : imbriquée dans une scène minutée, elle sortirait **gelée** au
+rendu, et `hyperframes check` le refuse à juste titre. Le zoom ne s'y applique
+pas non plus — deux caméras superposées donnent le mal de mer.
+
+**Les transitions shader rendent aussi, et sur Lambda.** Elles n'y sortaient
+qu'en fondu, parce que `@hyperframes/producer/dist/distributed.js` — le code que
+Lambda exécute — câble `usePageSideCompositing: false` **en dur**. Deux variables
+d'environnement posées sur la fonction n'y ont rien changé : on ne configure pas
+un littéral.
+
+Mais ce drapeau ne gouverne que ce que le *producer* injecte. Le compositeur,
+lui, vit dans la page : `@hyperframes/shader-transitions` lit
+`window.__HF_PAGE_SIDE_COMPOSITING__` à son chargement et s'installe seul. La
+page se déclare donc elle-même, en une ligne posée avant le bundle, et le chemin
+chunké n'y voit rien.
+
+Coût mesuré : **0,0270 $ contre 0,0252 $** pour la même vidéo de 78 s. Sept pour
+cent, parce que le mélange tient dans la capture d'écran déjà faite. Le paquet
+est figé dans `render/gentube-v1/vendor/`, comme GSAP : le Chrome de rendu n'a
+pas de réseau garanti.
 
 ---
 
@@ -709,8 +755,8 @@ Webhook à déclarer côté GeniusPay : `${BASE_URL}/api/webhooks/geniuspay`.
 
 ## Où en est le produit
 
-**La chaîne fait six étapes, quatre fonctionnent, et une vidéo complète en
-images fixes sort aujourd'hui.**
+**La chaîne fait six étapes, cinq fonctionnent, et une vidéo complète — images
+fixes et plans animés — sort aujourd'hui.**
 
 | Étape | État |
 |---|---|
@@ -718,7 +764,7 @@ images fixes sort aujourd'hui.**
 | Voix off en deux passes, timings mot à mot | ✅ |
 | Images Flux | ✅ |
 | Montage sur AWS Lambda | ✅ |
-| Plans animés (Wan sur Replicate) | ❌ |
+| Plans animés (Wan sur Replicate) | ✅ |
 | Publication YouTube | ❌ |
 
 Solide autour : comptes et cloisonnement, projets et vidéos, crédits à deux
@@ -727,9 +773,6 @@ gratuit et filigrane, stockage R2.
 
 ### Ce qui manque, et qui l'attend
 
-- **Les plans animés.** La dernière brique pour qu'une vidéo animée sorte. Les
-  modèles sont choisis, le code reste à écrire, et la composition doit apprendre
-  à afficher un clip. Voir `docs/plans-animes.md` et `docs/providers.md`.
 - **L'orchestration n8n.** Chaque étape est aujourd'hui un appel manuel. Rien ne
   les enchaîne, donc un client ne peut pas encore aller du début à la fin seul.
 - **Le journal des événements réels.** `activity_logs` ne contient que des
@@ -747,8 +790,10 @@ gratuit et filigrane, stockage R2.
   vue de consommation ne dépende d'aucune API de fournisseur.
 - **Les deux agents** : celui qui accueille et retient le style d'écriture,
   celui qui lit les performances et propose des corrections.
-- **Le support des clips dans la composition** (balise `<video>`), voir la
-  section Montage.
+- **L'élargissement du vocabulaire de rendu.** `videos.subtitle_style` promet
+  trois styles de sous-titres et la composition n'en rend qu'un. Le registre
+  HyperFrames en offre dix-sept, plus 23 transitions sans WebGL. Plan et ordre
+  dans `docs/vocabulaire-de-rendu.md`.
 - **Résiliation et rétrogradation en autonomie.** `subscriptions.cancel_at`
   existe, aucune route ne l'écrit.
 
