@@ -14,6 +14,8 @@ import { soundAssets, type SoundAsset, type SoundKind } from '@/lib/db/schema';
 export type SoundChoice = {
   /** Ce qu'un storyboard écrit dans `sounds[].src`. */
   src: string;
+  /** Le nom lisible, pour une liste de choix. La clé ne se montre pas. */
+  name: string;
   kind: SoundKind;
   mood: string | null;
   loopable: boolean;
@@ -26,6 +28,7 @@ export type SoundChoice = {
 function toChoice(row: SoundAsset): SoundChoice {
   return {
     src: row.key,
+    name: row.name,
     kind: row.kind,
     mood: row.mood,
     loopable: row.loopable,

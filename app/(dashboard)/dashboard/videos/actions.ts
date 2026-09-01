@@ -12,9 +12,12 @@ import { VoiceError, VoiceNotConfiguredError } from '@/lib/voice/elevenlabs';
 import { ImageError, ImageNotConfiguredError } from '@/lib/images/flux';
 import { AnimationError, AnimationNotConfiguredError } from '@/lib/video';
 import {
+  RESOLUTIONS,
+  SUBTITLE_STYLES,
   VideoError,
   createVideo,
   deleteVideo,
+  updateVideo,
   videoInputSchema,
 } from '@/lib/videos';
 import {
@@ -283,6 +286,35 @@ export const generateVisualsAction = validatedActionWithUser(
             'under way — they will appear as the provider returns them.'
           : `${drawn}.`,
       };
+    } catch (error) {
+      return formError(error);
+    }
+  }
+);
+
+/**
+ * Les réglages de rendu d'une vidéo : résolution, sous-titres, musique.
+ *
+ * Trois colonnes qui existaient depuis l'origine sans qu'aucun écran ne les
+ * touche. `updateVideo` refuse tout ce qui n'est plus un brouillon : passé la
+ * validation, les crédits sont débités sur une définition, et la changer
+ * ferait payer une vidéo pour en produire une autre.
+ */
+export const videoSettingsAction = validatedActionWithUser(
+  videoIdentity.extend({
+    resolution: z.enum(RESOLUTIONS).optional(),
+    subtitleStyle: z.enum(SUBTITLE_STYLES).optional(),
+    musicUrl: z.string().optional(),
+  }),
+  async (data, _formData, user) => {
+    try {
+      await updateVideo(tenantDb(user.tenantId), data.videoId, {
+        resolution: data.resolution,
+        subtitleStyle: data.subtitleStyle,
+        musicUrl: data.musicUrl,
+      });
+      revalidatePath(`/dashboard/videos/${data.videoId}`);
+      return { success: 'Réglages enregistrés.' };
     } catch (error) {
       return formError(error);
     }

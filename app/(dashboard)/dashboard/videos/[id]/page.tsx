@@ -10,6 +10,8 @@ import { getStoryboard } from '@/lib/storyboard';
 import { isLlmConfigured } from '@/lib/llm/deepseek';
 import { isVoiceConfigured } from '@/lib/voice/elevenlabs';
 import { DeleteVideoButton, StoryboardEditor } from './storyboard';
+import { VideoSettings } from '@/components/storyboard/video-settings';
+import { listSounds } from '@/lib/sounds';
 
 const STATUS_STYLE: Record<string, string> = {
   draft: 'bg-secondary text-secondary-foreground',
@@ -41,6 +43,17 @@ export default async function VideoPage({
   }
 
   const project = await getProject(tdb, board.video.projectId);
+
+  // Le catalogue est partagé entre tous les projets : il ne passe pas par le
+  // scope tenant. Lu ici plutôt que dans le composant, qui est client.
+  const musics =
+    board.video.status === 'draft'
+      ? (await listSounds('music')).map((sound) => ({
+          key: sound.src,
+          name: sound.name,
+          mood: sound.mood,
+        }))
+      : [];
   const pipeline = board.video.pipelineOverride ?? project.defaultPipeline;
 
   return (
@@ -104,6 +117,23 @@ export default async function VideoPage({
         canAfford={board.canAfford}
         durationsMeasured={board.durationsMeasured}
       />
+
+      {board.video.status === 'draft' && (
+        <Card className="mt-8 max-w-2xl">
+          <CardHeader>
+            <CardTitle>Réglages de rendu</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <VideoSettings
+              videoId={board.video.id}
+              resolution={board.video.resolution}
+              subtitleStyle={board.video.subtitleStyle}
+              musicUrl={board.video.musicUrl}
+              musics={musics}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {board.video.status === 'draft' && (
         <Card className="mt-8 max-w-2xl">
