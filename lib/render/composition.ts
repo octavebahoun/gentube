@@ -1,14 +1,17 @@
-import type {
-  HyperframesScene,
-  HyperframesStoryboard,
-  WordTiming,
-} from '@/lib/storyboard/render';
-import type { SubtitleStyle } from '@/lib/db/schema';
+import type { HyperframesStoryboard } from '@/lib/storyboard/render';
+import { transitionDurationSeconds } from '@/lib/storyboard/render';
+import { isMoveTransition } from '@/lib/storyboard/render';
 import {
-  isMoveTransition,
-  isShaderTransition,
-  transitionDurationSeconds,
-} from '@/lib/storyboard/render';
+  fadeInSeconds,
+  isVideoPath,
+  kenBurns,
+  ms,
+  subtitleStyleOf,
+  trackPlan,
+  transitionCues,
+  wordsOrFallback,
+} from './plan';
+import { audioMarkup, escapeHtml, sceneMarkup, videoMarkup } from './markup';
 
 /**
  * Génère l'`index.html` que HyperFrames rend.
@@ -48,39 +51,12 @@ const KEN_BURNS_SCALE = 1.06;
 /** Le rouge de la marque, repris par les shaders pour leurs lueurs. */
 const ACCENT_COLOR = '#ce1f20';
 
-/**
- * Le style de sous-titre d'une vidéo, avec son repli.
- *
- * Trois valeurs vivent dans `videos.subtitle_style` depuis l'origine, et la
- * composition n'en lisait aucune : toute vidéo sortait en karaoké, y compris
- * celles qui avaient choisi autre chose. Le repli reste le karaoké parce que
- * c'est ce que les vidéos déjà rendues ont eu.
- */
-export function subtitleStyleOf(storyboard: {
-  subtitleStyle?: SubtitleStyle | null;
-}): SubtitleStyle {
-  return storyboard.subtitleStyle ?? 'karaoke';
-}
-
-/** Vrai quand le style allume les mots un par un. */
-export function lightsWords(style: SubtitleStyle): boolean {
-  return style !== 'cinematic';
-}
 
 export type CompositionInput = {
   storyboard: HyperframesStoryboard;
   /** Pose la marque GenTube. Décidé au débit, pas ici. */
   watermark?: boolean;
 };
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 /**
  * Échappe une chaîne pour l'intérieur d'un littéral JavaScript entre
@@ -92,341 +68,23 @@ function js(value: unknown): string {
   return JSON.stringify(value).replace(/<\//g, '<\\/');
 }
 
-/** Arrondi à la milliseconde, comme le reste du contrat de rendu. */
-const ms = (seconds: number) => Math.round(seconds * 1000) / 1000;
-
 /**
- * Un plan animé est un fichier vidéo, pas une image.
+ * Réexports de compatibilité.
  *
- * La distinction se lit sur l'extension plutôt que sur `shot.type` : la
- * composition ne connaît que le storyboard aplati, et un chemin dit déjà tout
- * ce qu'il faut. Un `.mp4` posé en `background-image` ne rendrait rien du
- * tout — pas d'erreur, juste un cadre noir.
+ * `composition.ts` était le seul point d'entrée avant le découpage ; les tests
+ * et `preview.ts` importent encore d'ici. Plutôt que de réécrire leurs imports,
+ * on les laisse passer par là.
  */
-const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mov'];
-
-export function isVideoPath(path?: string): boolean {
-  if (!path) return false;
-  const lower = path.toLowerCase();
-  return VIDEO_EXTENSIONS.some((extension) => lower.endsWith(extension));
-}
-
-/**
- * Les coutures entre scènes, telles que `HyperShader.init` les attend.
- *
- * **Une par intervalle, pas une par shader.** Le paquet exige exactement
- * `scènes - 1` entrées et refuse d'y déroger : il compose la vidéo entière,
- * pas seulement les endroits spectaculaires. Une couture sans `shader` est un
- * fondu enchaîné CSS — c'est ainsi qu'on déclare `fade`, `black` et `none`.
- */
-export function transitionCues(
-  scenes: HyperframesScene[]
-): { time: number; shader?: string; duration: number }[] {
-  return scenes.slice(1).map((scene) => {
-    const transition = scene.effects?.transition;
-    const duration = transitionDurationSeconds(transition);
-
-    // Une couture sans `shader` est un fondu enchaîné côté compositeur. Pour
-    // une transformation il faut lui dire de ne rien faire — durée nulle, donc
-    // coupe franche — sinon il mélange les deux scènes pendant qu'elles se
-    // déplacent, et le mouvement disparaît sous le fondu.
-    const composited = transition === 'none' ? 0 : duration;
-
-    return {
-      time: ms(scene.startInSeconds),
-      duration: composited,
-      ...(transition && isShaderTransition(transition)
-        ? { shader: transition }
-        : {}),
-    };
-  });
-}
-
-/**
- * Le zoom d'une scène, sous forme d'échelles de départ et d'arrivée.
- *
- * `none` ne rend pas une image parfaitement immobile : un plan fixe absolu au
- * milieu de plans animés se lit comme une image figée, pas comme un choix. Il
- * garde donc une dérive minuscule.
- */
-export function kenBurns(zoom?: string): { from: number; to: number } {
-  if (zoom === 'out') return { from: KEN_BURNS_SCALE, to: 1 };
-  if (zoom === 'none') return { from: 1, to: 1.01 };
-  return { from: 1, to: KEN_BURNS_SCALE };
-}
-
-/**
- * Le fondu d'entrée d'une scène.
- *
- * `sceneStartTimes()` a déjà reculé chaque scène de la durée de sa propre
- * transition, donc les scènes se chevauchent : il suffit de faire monter
- * l'opacité de celle qui arrive pour obtenir un fondu enchaîné.
- *
- * La première scène ne reçoit aucun fondu — elle ouvre la vidéo, il n'y a
- * rien sous elle. Une coupe franche (`none`) non plus.
- *
- * Seules les transitions CSS sont rendues ici. Les 14 transitions shader de
- * `@hyperframes/shader-transitions` demandent le paquet et un canvas WebGL :
- * elles tomberont sur un fondu tant qu'il n'est pas installé, plutôt que de
- * faire échouer un rendu.
- */
-export function fadeInSeconds(scene: HyperframesScene, index: number): number {
-  if (index === 0) return 0;
-  const transition = scene.effects?.transition;
-  if (transition === 'none') return 0;
-  // Une transition par transformation ne se fond pas : la scène entrante est
-  // opaque et arrive par le bord. Un fondu par-dessus la ferait apparaître
-  // fantomatique pendant tout son trajet.
-  if (transition && isMoveTransition(transition)) return 0;
-  return transitionDurationSeconds(transition);
-}
-
-/**
- * Découpe la narration en mots quand la voix off n'a pas fourni d'alignement.
- *
- * Sans timings, on ne peut pas allumer les mots un par un — mais afficher le
- * texte vaut mieux que ne rien afficher, donc chaque mot reçoit une part égale
- * de la narration. C'est visiblement moins bon, et c'est le but : on doit voir
- * qu'un alignement manque.
- */
-export function wordsOrFallback(
-  scene: HyperframesScene
-): WordTiming[] {
-  if (scene.words && scene.words.length > 0) return scene.words;
-
-  const spoken = (scene.subtitle ?? scene.narration ?? '').trim();
-  if (!spoken) return [];
-
-  const parts = spoken.split(/\s+/);
-  const each = scene.narrationSeconds / parts.length;
-  return parts.map((text, index) => ({
-    text,
-    start: ms(index * each),
-    duration: ms(each),
-  }));
-}
-
-/*
- * `data-layout-allow-overlap` sur les sous-titres : pendant un fondu enchaîné,
- * les mots de la scène sortante et ceux de la scène entrante occupent la même
- * bande. C'est ce qu'un fondu fait, et les deux sont à demi transparents à cet
- * instant. Sans cette marque, `hyperframes check` le signale à chaque couture.
- */
-function sceneMarkup(
-  scene: HyperframesScene,
-  index: number,
-  {
-    subtitles,
-    trackIndex,
-    subtitleStyle,
-  }: { subtitles: boolean; trackIndex: number; subtitleStyle: SubtitleStyle }
-): string {
-  const words = subtitles ? wordsOrFallback(scene) : [];
-
-  const captions =
-    words.length > 0
-      ? `<div class="captions captions-${subtitleStyle}" id="c${index}" data-layout-allow-overlap>${words
-          .map(
-            (word, wordIndex) =>
-              `<span class="word" id="w${index}-${wordIndex}">${escapeHtml(
-                word.text
-              )}</span>`
-          )
-          .join('')}</div>`
-      : '';
-
-  // Une carte n'a pas d'image : c'est un écran noir avec du texte.
-  //
-  // Le chemin traverse deux couches d'échappement — CSS puis attribut HTML —
-  // et `encodeURI` règle la première : il neutralise les guillemets et les
-  // espaces sans toucher aux séparateurs de chemin.
-  const media = mediaMarkup(scene, index);
-
-  // Le texte d'une carte remplace le média, il ne s'y superpose pas.
-  const card = scene.card
-    ? `<div class="card">` +
-      `<p class="card-text">${escapeHtml(scene.card.text)}</p>` +
-      (scene.card.subtext
-        ? `<p class="card-subtext">${escapeHtml(scene.card.subtext)}</p>`
-        : '') +
-      '</div>'
-    : '';
-
-  // Un bandeau posé sur l'image, distinct des sous-titres : il ne suit pas la
-  // voix, il annonce ou commente.
-  const overlay = scene.overlayText
-    ? `<div class="overlay" id="o${index}">${escapeHtml(
-        scene.overlayText.text
-      )}</div>`
-    : '';
-
-  // Le titre cinétique s'anime mot à mot ; chaque mot est donc un élément,
-  // comme pour le karaoké.
-  const kinetic = kineticMarkup(scene, index);
-
-  // Un éclair est une nappe de couleur pleine trame. Elle est dans la scène
-  // pour disparaître avec elle, jamais au-dessus du reste de la vidéo.
-  const flash = scene.effects?.flash
-    ? `<div class="flash" id="f${index}" style="background:${escapeHtml(
-        scene.effects.flash.color ?? '#ffffff'
-      )}"></div>`
-    : '';
-
-  // La piste vient de `trackPlan` : la 0 porte le fond, et `hyperframes check`
-  // refuse deux clips qui se chevauchent sur la même piste — or le fond couvre
-  // toute la vidéo, il chevauche donc forcément la première scène.
-  return [
-    `<div class="scene clip" id="s${index}" data-start="${scene.startInSeconds}" ` +
-      `data-duration="${scene.durationInSeconds}" data-track-index="${trackIndex}">`,
-    media,
-    card,
-    captions ? '<div class="veil"></div>' : '',
-    captions,
-    overlay,
-    kinetic,
-    flash,
-    '</div>',
-  ]
-    .filter(Boolean)
-    .join('\n      ');
-}
-
-/**
- * Le média d'une scène : une image de fond, ou une balise vidéo.
- *
- * Les deux portent le même id `m<index>` — c'est lui que le zoom anime, et
- * c'est par lui que le moteur découvre un élément média. Un plan animé garde
- * donc exactement le même traitement caméra qu'une fixe.
- *
- * `data-volume` par défaut à 0 : un clip généré arrive avec sa propre bande
- * son, et la laisser passer sous la voix off produit deux audios qui se
- * marchent dessus. Une scène qui veut ce son le demande par `mediaVolume`.
- */
-function mediaMarkup(scene: HyperframesScene, index: number): string {
-  // Un plan animé n'a pas son média ici : une balise vidéo minutée imbriquée
-  // dans une scène minutée sort **gelée** au rendu, le moteur ne sachant pas
-  // laquelle des deux horloges commande. `hyperframes check` le refuse, et il
-  // a raison. Les clips sont donc posés au niveau de la scène-mère par
-  // `videoMarkup`, avec leur propre piste.
-  if (!scene.mediaPath || isVideoPath(scene.mediaPath)) return '';
-
-  const source = escapeHtml(encodeURI(scene.mediaPath));
-  return `<div class="media" id="m${index}" style="background-image:url(&quot;${source}&quot;)"></div>`;
-}
-
-/**
- * Le clip d'un plan animé, posé au niveau de la scène-mère.
- *
- * Il porte `clip` pour rester invisible avant son instant, et son volume est
- * nul par défaut : un clip généré arrive avec sa propre bande son, et la
- * laisser passer sous la voix off produit deux audios qui se marchent dessus.
- */
-function videoMarkup(
-  scene: HyperframesScene,
-  index: number,
-  trackIndex: number
-): string {
-  if (!scene.mediaPath || !isVideoPath(scene.mediaPath)) return '';
-
-  const volume = scene.mediaVolume ?? 0;
-  const rate = scene.playbackRate ?? 1;
-
-  return (
-    `<video class="media clip" id="m${index}" src="${escapeHtml(
-      encodeURI(scene.mediaPath)
-    )}" data-start="${scene.startInSeconds}" ` +
-    `data-duration="${scene.durationInSeconds}" data-track-index="${trackIndex}" ` +
-    `data-volume="${volume}" data-playback-rate="${rate}" ` +
-    `preload="auto" playsinline${volume === 0 ? ' muted' : ''}></video>`
-  );
-}
-
-/**
- * Les pistes, attribuées d'un seul passage.
- *
- * La 0 porte le fond. Ensuite chaque scène prend la sienne, et un plan animé
- * en prend une de plus, **juste en dessous** : le clip doit rester sous les
- * sous-titres et le bandeau de sa propre scène, qui vivent dans le div.
- *
- * Le compteur avance scène par scène plutôt que par une formule, pour qu'une
- * composition sans clip garde exactement la numérotation d'avant.
- */
-export function trackPlan(
-  scenes: HyperframesScene[]
-): { scene: number; video: number | null }[] {
-  let next = 1;
-  return scenes.map((scene) => {
-    const video = isVideoPath(scene.mediaPath) ? next++ : null;
-    return { video, scene: next++ };
-  });
-}
-
-/**
- * Le titre cinétique, un élément par mot.
- *
- * La variante décide de l'apparence en CSS ; le décalage entre les mots est
- * une donnée de timeline, calculée ici pour que la page n'ait aucun calcul de
- * temps à faire.
- */
-function kineticMarkup(scene: HyperframesScene, index: number): string {
-  const title = scene.kineticTitle;
-  if (!title) return '';
-
-  const words = title.text.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return '';
-
-  const style = [
-    title.fontSize ? `font-size:${escapeHtml(title.fontSize)}` : '',
-    title.highlightColor ? `--kt-accent:${escapeHtml(title.highlightColor)}` : '',
-    title.glowColor ? `--kt-glow:${escapeHtml(title.glowColor)}` : '',
-  ]
-    .filter(Boolean)
-    .join(';');
-
-  const icon =
-    title.variant === 'icon' && title.icon
-      ? `<span class="kt-icon" aria-hidden="true">${escapeHtml(title.icon)}</span>` +
-        (title.iconLabel
-          ? `<span class="kt-icon-label">${escapeHtml(title.iconLabel)}</span>`
-          : '')
-      : '';
-
-  return (
-    `<div class="kinetic kt-${escapeHtml(title.variant ?? 'reveal')} ` +
-    `kt-${escapeHtml(title.position ?? 'center')}"${style ? ` style="${style}"` : ''}>` +
-    icon +
-    words
-      .map(
-        (word, wordIndex) =>
-          `<span class="kt-word" id="k${index}-${wordIndex}">${escapeHtml(word)}</span>`
-      )
-      .join('') +
-    '</div>'
-  );
-}
-
-/**
- * La piste de voix d'une scène.
- *
- * Sa durée est `narrationSeconds`, pas `durationInSeconds` : l'image reste à
- * l'écran après la fin de la phrase, la voix non. Confondre les deux fait
- * jouer la voix d'une scène par-dessus la suivante.
- */
-function audioMarkup(
-  scene: HyperframesScene,
-  index: number,
-  trackBase: number
-): string {
-  if (!scene.audioPath) return '';
-  // L'`id` n'est pas cosmétique : le moteur découvre les éléments média par
-  // leur id. Sans lui, la piste est ignorée et la vidéo sort **muette**, sans
-  // qu'aucune erreur ne soit levée.
-  return (
-    `<audio id="voice-${index}" src="${escapeHtml(scene.audioPath)}" ` +
-    `data-start="${scene.startInSeconds}" data-duration="${scene.narrationSeconds}" ` +
-    `data-track-index="${trackBase + index}" data-volume="1"></audio>`
-  );
-}
+export {
+  fadeInSeconds,
+  isVideoPath,
+  kenBurns,
+  lightsWords,
+  subtitleStyleOf,
+  trackPlan,
+  transitionCues,
+  wordsOrFallback,
+} from './plan';
 
 /**
  * **Aucun accent grave dans le HTML ci-dessous, commentaires compris.** Tout ce
