@@ -1,0 +1,52 @@
+# La régression visuelle du moteur
+
+```bash
+pnpm test:visual              # compare aux références
+npx tsx render/regression/run.ts --update   # les réécrit
+```
+
+## Pourquoi
+
+Les tests unitaires vérifient qu'un tween est déclaré au bon instant. Ils ne
+voient pas qu'une règle CSS l'a rendu invisible.
+
+Les deux erreurs de la nuit du 1er au 2 septembre 2026 sont passées à travers
+une suite entièrement verte : la bande noire des poussées, où le compositeur
+masquait la scène sortante ; et l'anneau du compteur collé en haut à gauche,
+parce que le conteneur et son enfant partageaient une classe. Aucune assertion
+ne pouvait les voir. Un œil, oui — et un œil n'est pas là tous les jours.
+
+## Ce qui est figé
+
+Quatre fonds unis et un silence, dans `media/` et `voice/`. Rien n'est généré :
+si l'image d'entrée changeait, l'image de sortie changerait, et le test ne
+dirait plus rien sur le moteur.
+
+Les durées sont écrites à la main dans `fixtures.ts`, alors qu'en production
+elles viennent de la voix off mesurée. Une durée mesurée dépendrait du service
+de synthèse, donc du réseau, donc du jour.
+
+Sept instants, un par geste : titre cinétique, fondu, poussée, shader, bandeau,
+compteur, carte de fin. Chacun surveille une chose, pour qu'un échec nomme le
+coupable plutôt que de dire « la vidéo a changé ».
+
+## Le rendu est forcé en SwiftShader
+
+`--no-browser-gpu`. Un GPU matériel ne rend pas deux fois le même pixel d'une
+machine à l'autre : la référence deviendrait un piège. En logiciel, les sept
+instants sortent à **1,0000** de similarité, deux passages de suite.
+
+## Le seuil
+
+SSIM à 0,995. Pas une égalité au pixel : l'antialiasing du texte bouge d'une
+version de Chrome à l'autre, et un test qui casse à chaque mise à jour finit
+désactivé.
+
+Mesuré : un déplacement des sous-titres de 9 % à 16 % de la hauteur fait tomber
+les sept instants entre 0,955 et 0,958. La marge est large.
+
+## Quand un instant change
+
+La capture fautive est gardée sous `echec-<nom>.png` — ignorée par git.
+Regardez-la. Si le changement est voulu, `--update` réécrit les références ;
+le diff des PNG dans la revue montrera alors ce que vous avez accepté.

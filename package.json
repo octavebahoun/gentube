@@ -13,7 +13,8 @@
     "db:status": "tsx lib/db/status.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test:visual": "tsx render/regression/run.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.1118.0",

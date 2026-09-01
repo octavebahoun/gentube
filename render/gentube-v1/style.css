@@ -111,10 +111,15 @@ body {
  * dans la timeline, parce qu'elle dépend d'un instant et pas d'un état.
  */
 
-/* `karaoke` : le mot éteint est gris, la timeline l'allume en blanc. */
-.captions-karaoke .word {
-  color: rgba(255, 255, 255, 0.42);
-}
+/*
+ * `karaoke` : rien ici.
+ *
+ * La couleur du mot éteint est posée par la timeline, parce que GSAP a besoin
+ * d'une valeur de départ explicite pour animer vers le blanc — et ce qu'elle
+ * écrit en style inline gagne sur n'importe quelle règle de ce fichier. Une
+ * déclaration ici serait du code mort, et elle l'a été : une modification de
+ * cette valeur n'a produit aucun changement à l'écran.
+ */
 
 /*
  * `fondant` : tous les mots sont blancs, et c'est l'opacité qui les révèle.
