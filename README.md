@@ -819,13 +819,26 @@ gratuit et filigrane, stockage R2.
   pnpm tsx lib/sounds/import-catalog.ts assets/sounds/CATALOG.md
   ```
 
-  Il n'a simplement jamais été lancé : `sound_assets` compte zéro ligne, et les
-  161 Mo d'audio ne sont pas sur R2. Deux gestes manquent donc, plus un
-  troisième côté produit : **téléverser** les fichiers sous les clés
-  `sounds/<type>/<nom>.mp3` que le `CATALOG.md` annonce déjà, **lancer
-  l'import** — en vérifiant que `DATABASE_URL` vise bien la base voulue — et
-  donner à une vidéo **un moyen de choisir sa musique**, `videoInputSchema`
-  ignorant `musicUrl`.
+  **Fait le 2 septembre 2026.** Les 51 sons sont sur R2 sous les clés du
+  catalogue, et `sound_assets` porte leurs 51 lignes — dont 28 avec leurs pics
+  d'impact. Deux commandes, dans cet ordre :
+
+  ```bash
+  pnpm tsx lib/sounds/upload-catalogue.ts assets/sounds/CATALOG.md   # --dry-run pour voir
+  pnpm tsx lib/sounds/import-catalog.ts assets/sounds/CATALOG.md
+  ```
+
+  Le téléversement vérifie que chaque son du catalogue existe sur le disque
+  **avant** d'écrire quoi que ce soit : un envoi à moitié fait laisserait un
+  catalogue qui promet des sons absents. Les deux sont rejouables — R2 écrase
+  une clé, l'import fait un upsert.
+
+  Neuf morceaux de `assets/sounds/music/sacred/` restent dehors : ils n'ont pas
+  de fiche, donc pas de ligne dans `CATALOG.md`.
+
+  Reste un geste, côté produit : donner à une vidéo **un moyen de choisir sa
+  musique**. `videoInputSchema` ignore `musicUrl`, exactement comme il ignorait
+  `subtitleStyle`.
 - **Le coût réel par job**, enregistré au moment de la génération, pour que la
   vue de consommation ne dépende d'aucune API de fournisseur.
 - **Les deux agents** : celui qui accueille et retient le style d'écriture,
