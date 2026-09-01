@@ -4,7 +4,12 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { toHyperframesStoryboard } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
-import { MOMENTS, REFERENCE_VIDEO, referenceShots } from './fixtures';
+import {
+  MOMENTS,
+  REFERENCE_VIDEO,
+  REFERENCE_VIDEO_VERTICALE,
+  referenceShots,
+} from './fixtures';
 
 /**
  * La régression visuelle du moteur.
@@ -29,8 +34,17 @@ const ECART_TOLERE = 0.995; // SSIM ; en dessous, l'image a visiblement changé.
 
 const update = process.argv.includes('--update');
 
+/**
+ * Les deux formats vendus. Le vertical n'a longtemps existé que dans l'enum ;
+ * il est ici pour qu'une régression dans un cadre étroit se voie aussi.
+ */
+const FORMATS = [
+  { nom: '16-9', video: REFERENCE_VIDEO },
+  { nom: '9-16', video: REFERENCE_VIDEO_VERTICALE },
+] as const;
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
-function projet(): string {
+function projet(video: typeof REFERENCE_VIDEO): string {
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
     cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
@@ -38,7 +52,7 @@ function projet(): string {
   cpSync(join(HERE, 'media'), join(dir, 'media'), { recursive: true });
   cpSync(join(HERE, 'voice'), join(dir, 'voice'), { recursive: true });
 
-  const storyboard = toHyperframesStoryboard(REFERENCE_VIDEO, referenceShots());
+  const storyboard = toHyperframesStoryboard(video, referenceShots());
   writeFileSync(join(dir, 'index.html'), composeHtml({ storyboard, watermark: true }));
   return dir;
 }
@@ -81,7 +95,26 @@ function similarite(a: string, b: string): number {
 }
 
 function main() {
-  const dir = projet();
+  let echecs = 0;
+
+  for (const format of FORMATS) {
+    console.log(`\n${format.nom} · ${format.video.resolution}`);
+    echecs += passer(format.nom, format.video);
+  }
+
+  if (echecs > 0) {
+    console.error(
+      `\n${echecs} instant(s) ont changé. Regardez les captures gardées : si le ` +
+        'changement est voulu, relancez avec --update.'
+    );
+    process.exit(1);
+  }
+  console.log(`\n${MOMENTS.length * FORMATS.length} instants conformes.`);
+}
+
+/** Un format : on assemble, on capture, on compare, on nettoie. */
+function passer(nom: string, video: typeof REFERENCE_VIDEO): number {
+  const dir = projet(video);
   let echecs = 0;
 
   try {
@@ -100,23 +133,24 @@ function main() {
 
     for (const [index, moment] of MOMENTS.entries()) {
       const prise = join(captures, fichiers[index]);
-      const reference = join(REFERENCES, `${moment.nom}.png`);
+      const etiquette = `${nom}-${moment.nom}`;
+      const reference = join(REFERENCES, `${etiquette}.png`);
 
       if (update || !existsSync(reference)) {
         cpSync(prise, reference);
-        console.log(`  référence écrite   ${moment.nom}`);
+        console.log(`  référence écrite   ${etiquette}`);
         continue;
       }
 
       const score = similarite(reference, prise);
       if (score >= ECART_TOLERE) {
-        console.log(`  ✓ ${moment.nom.padEnd(20)} ${score.toFixed(4)}`);
+        console.log(`  ✓ ${etiquette.padEnd(26)} ${score.toFixed(4)}`);
       } else {
         echecs += 1;
-        const diff = join(HERE, `echec-${moment.nom}.png`);
+        const diff = join(HERE, `echec-${etiquette}.png`);
         cpSync(prise, diff);
         console.error(
-          `  ✗ ${moment.nom.padEnd(20)} ${score.toFixed(4)} — capture gardée : ${diff}`
+          `  ✗ ${etiquette.padEnd(26)} ${score.toFixed(4)} — capture gardée : ${diff}`
         );
       }
     }
@@ -124,14 +158,7 @@ function main() {
     rmSync(dir, { recursive: true, force: true });
   }
 
-  if (echecs > 0) {
-    console.error(
-      `\n${echecs} instant(s) ont changé. Regardez les captures gardées : si le ` +
-        'changement est voulu, relancez avec --update.'
-    );
-    process.exit(1);
-  }
-  console.log(`\n${MOMENTS.length} instants conformes.`);
+  return echecs;
 }
 
 main();

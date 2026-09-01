@@ -53,6 +53,23 @@ export const COMPOSITION_DIR = 'render/gentube-v1';
 const SUBTITLE_HEIGHT_RATIO = 0.058;
 const WATERMARK_HEIGHT_RATIO = 0.032;
 
+/**
+ * À quelle hauteur du bas les sous-titres s'arrêtent, par format.
+ *
+ * En 16:9 la vidéo occupe tout l'écran et 9 % suffisent à décoller le texte du
+ * bord. En 9:16 elle est lue dans TikTok, Reels ou Shorts, qui posent leur
+ * propre interface sur le bas du cadre — légende, boutons, nom du compte. Un
+ * sous-titre à 9 % passe dessous, et ça ne se voit sur aucun rendu : seulement
+ * sur la plateforme, une fois publié.
+ *
+ * 18 % dégage cette bande. C'est de la place perdue sur l'image, et c'est le
+ * prix d'un sous-titre qu'on peut lire.
+ */
+const SUBTITLE_BOTTOM: Record<string, number> = {
+  '16:9': 0.09,
+  '9:16': 0.18,
+};
+
 /** Amplitude du zoom lent sur une image fixe. 6 % sur toute la scène. */
 const KEN_BURNS_SCALE = 1.06;
 
@@ -115,6 +132,7 @@ export function composeHtml({
 
   const subtitleSize = Math.round(height * SUBTITLE_HEIGHT_RATIO);
   const watermarkSize = Math.round(height * WATERMARK_HEIGHT_RATIO);
+  const subtitleBottom = (SUBTITLE_BOTTOM[storyboard.ratio] ?? 0.09) * 100;
 
   const music = storyboard.music
     ? `<audio id="music" src="${escapeHtml(storyboard.music)}" data-start="0" ` +
@@ -158,7 +176,14 @@ export function composeHtml({
     <link rel="stylesheet" href="style.css" />
     <style>
       html, body { width: ${width}px; height: ${height}px; }
-      .captions { font-size: ${subtitleSize}px; }
+      .captions { font-size: ${subtitleSize}px; bottom: ${subtitleBottom}%; }
+      .veil {
+        --veil-start: ${Math.round(100 - subtitleBottom - 36)}%;
+        --veil-mid: ${Math.round(100 - subtitleBottom - 3)}%;
+      }
+      /* Même raison que les sous-titres : un filigrane couvert par l'interface
+         de la plateforme ne défend plus la marque. */
+      .watermark { bottom: ${(subtitleBottom / 9) * 3.5}%; }
       .watermark { font-size: ${watermarkSize}px; }
     </style>
   </head>

@@ -107,6 +107,21 @@ export const REFERENCE_VIDEO = {
 } as unknown as Video;
 
 /**
+ * La même référence, en vertical.
+ *
+ * `ratio` accepte `9:16` depuis l'origine et aucune composition n'y avait
+ * jamais été rendue : les seuls tests vérifiaient que `dimensionsFor` rend les
+ * bons nombres. Or c'est le format des Shorts et des Reels, et tout ce que la
+ * composition dessine y change de proportions — les sous-titres, les titres
+ * cinétiques, l'anneau du compteur.
+ */
+export const REFERENCE_VIDEO_VERTICALE = {
+  ...REFERENCE_VIDEO,
+  title: 'Reference visuelle GenTube — vertical',
+  ratio: '9:16',
+} as unknown as Video;
+
+/**
  * Les instants capturés, et ce que chacun surveille.
  *
  * Pris au milieu des gestes plutôt qu'à leur début : une transition ne dit rien

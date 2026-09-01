@@ -51,14 +51,20 @@ body {
   will-change: transform;
 }
 
-/* Voile bas, pour que les sous-titres restent lisibles sur une image claire. */
+/*
+ * Voile bas, pour que les sous-titres restent lisibles sur une image claire.
+ *
+ * Ses arrêts suivent la position des sous-titres, posée par la composition
+ * selon le format : en 9:16 le texte remonte pour dégager l'interface de la
+ * plateforme, et un voile resté en bas le laisserait pâle sur une image claire.
+ */
 .veil {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    transparent 55%,
-    rgba(0, 0, 0, 0.55) 88%,
+    transparent var(--veil-start, 55%),
+    rgba(0, 0, 0, 0.55) var(--veil-mid, 88%),
     rgba(0, 0, 0, 0.72) 100%
   );
 }

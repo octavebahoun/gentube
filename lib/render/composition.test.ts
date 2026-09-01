@@ -245,6 +245,25 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the vertical safe area', () => {
+    const bottom = (page: string) =>
+      Number(/\.captions \{[^}]*bottom: ([\d.]+)%/.exec(page)?.[1]);
+
+    it('keeps the subtitles clear of the platform interface in 9:16', () => {
+      // TikTok, Reels et Shorts posent leur légende et leurs boutons sur le bas
+      // du cadre. Un sous-titre à 9 % passe dessous, et ça ne se voit sur aucun
+      // rendu — seulement une fois publié.
+      const vertical = html([shot()], {
+        video: { ...video, ratio: '9:16' } as Video,
+      });
+      expect(bottom(vertical)).toBeGreaterThan(15);
+    });
+
+    it('ne perd pas de place en 16:9, où la vidéo occupe tout l’écran', () => {
+      expect(bottom(html([shot()]))).toBeLessThan(12);
+    });
+  });
+
   describe('effects on the beat', () => {
     const onBeatPage = (onBeat: boolean) =>
       composeHtml({
