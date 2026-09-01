@@ -163,37 +163,31 @@ qui peut casser des storyboards existants.
 
 ---
 
-## Une exclusion découverte au rendu
+## Un conflit d'ordre, pas une exclusion
 
-**Les shaders et les transitions par transformation ne se mélangent pas dans une
-même vidéo.**
+**Les shaders et les transitions par transformation cohabitent.** Il a fallu
+trois essais pour le comprendre, et les deux premiers m'avaient fait conclure
+l'inverse.
 
-`HyperShader.init()` prend la main sur la visibilité des scènes : il ne garde
-visible que la paire de sa propre couture et cache tout le reste. Une poussée a
-besoin des deux scènes à l'écran pendant qu'elles bougent — avec le compositeur
-installé, la sortante disparaît et la poussée ne pousse qu'une bande noire.
+Le moteur cherche chaque image. À chaque image, le compositeur de shaders et
+nos tweens écrivent sur les mêmes propriétés — `visibility` et `opacity`. Celui
+qui écrit en dernier gagne, et rien d'autre ne départage.
 
-La composition n'installe donc le compositeur que si la vidéo demande vraiment
-un shader. Dans une vidéo qui en contient un, les transformations retombent en
-coupe franche.
+Ce qui échouait, et pourquoi :
 
-**La cohabitation a été cherchée, elle n'existe pas.** Deux essais, tous deux
-concluants dans le mauvais sens :
+- **Couture de durée nulle** : le compositeur saute à l'état d'après et masque
+  la scène sortante. La poussée pousse une bande noire.
+- **Couture de durée réelle, gestes posés avant l'init** : il pilote l'opacité
+  des deux scènes pour son fondu et écrase la nôtre. Cette fois c'est
+  l'entrante qui manque.
 
-- Couture de durée nulle : le compositeur saute à l'état « après » et masque la
-  scène sortante. La poussée pousse une bande noire.
-- Couture de durée réelle : il pilote l'opacité des deux scènes pour son fondu
-  et écrase la nôtre. Cette fois c'est l'entrante qui manque, et le geste
-  devient « la sortante glisse pendant que l'entrante apparaît en fondu ».
+Ce qui marche : **la couture garde sa vraie durée** — c'est elle qui maintient
+les deux scènes vivantes — et **les gestes sont posés après `HyperShader.init()`**,
+en réaffirmant `visibility: "visible"`. Une opacité seule ne suffit pas : le
+compositeur cache par `visibility`, qu'aucun tween d'opacité ne rallume.
 
-Les deux familles se disputent les mêmes propriétés — visibilité et opacité.
-Elles ne peuvent pas partager une couture, et le compositeur les gouverne pour
-toute la vidéo, pas seulement à ses propres coutures.
-
-**Ce que le produit doit en faire reste ouvert** : refuser le mélange à
-l'écriture du storyboard, choisir une famille par vidéo, ou laisser la coupe
-franche comme repli silencieux. C'est une règle produit, pas une contrainte
-technique de plus.
+Trois tests tiennent cet ordre, parce qu'il est invisible à la lecture et qu'un
+déplacement innocent du bloc le casserait en silence.
 
 ---
 

@@ -130,10 +130,7 @@ export function transitionCues(
     // une transformation il faut lui dire de ne rien faire — durée nulle, donc
     // coupe franche — sinon il mélange les deux scènes pendant qu'elles se
     // déplacent, et le mouvement disparaît sous le fondu.
-    const composited =
-      transition === 'none' || (transition && isMoveTransition(transition))
-        ? 0
-        : duration;
+    const composited = transition === 'none' ? 0 : duration;
 
     return {
       time: ms(scene.startInSeconds),
@@ -755,50 +752,6 @@ export function composeHtml({
         }
       }
 
-      /*
-       * Les transitions par transformation.
-       *
-       * Chaque geste est une paire : ce que fait la scène sortante, ce que fait
-       * l'entrante. Tout est en pourcentage ou en échelle, donc indépendant de
-       * la résolution — la même poussée marche en 480p et en 720p.
-       *
-       * Les deux tweens sont des fromTo posés au même instant, comme le reste
-       * du fichier : le moteur cherche chaque image, un to ne survivrait pas au
-       * saut arriere.
-       */
-      const MOVES = {
-        "push-left":    { out: { x: "-100%" }, in: { x: "100%" } },
-        "push-right":   { out: { x: "100%" },  in: { x: "-100%" } },
-        "push-up":      { out: { y: "-100%" }, in: { y: "100%" } },
-        "zoom-through": { out: { scale: 1.6, opacity: 0 }, in: { scale: 0.72 } },
-        "zoom-out":     { out: { scale: 0.62, opacity: 0 }, in: { scale: 1.45 } },
-        "squeeze":      { out: { scaleX: 0, opacity: 0 },   in: { scaleX: 0 } },
-      };
-
-      for (const move of T.moves) {
-        const shape = MOVES[move.kind];
-        if (!shape) continue;
-
-        const rest = { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1 };
-        const ease = move.kind === "squeeze" ? "power2.inOut" : "power3.inOut";
-
-        // La sortante part de sa position de repos vers l'ailleurs du geste.
-        tl.fromTo(
-          "#s" + move.from,
-          { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1 },
-          Object.assign({ duration: move.duration, ease: ease }, shape.out),
-          move.at
-        );
-
-        // L'entrante fait le trajet inverse et finit au repos, opaque.
-        tl.fromTo(
-          "#s" + move.to,
-          Object.assign({ opacity: 1 }, shape.in),
-          Object.assign({ duration: move.duration, ease: ease }, rest),
-          move.at
-        );
-      }
-
       // Le fondu au noir : la nappe monte sur la première moitié de la
       // transition et redescend sur la seconde. C'est ce qui distingue
       // 'black' d'un fondu enchaîné — on passe par du noir franc.
@@ -841,9 +794,7 @@ export function composeHtml({
        * shader, les transformations retombent en coupe franche. Les deux
        * familles ne se mélangent pas.
        */
-      const wantsShader = T.cuts.some(function (cut) { return !!cut.shader; });
-
-      if (wantsShader && typeof HyperShader !== "undefined") {
+      if (T.cuts.length > 0 && typeof HyperShader !== "undefined") {
         HyperShader.init({
           bgColor: "#000000",
           accentColor: T.accent,
@@ -852,6 +803,60 @@ export function composeHtml({
           timeline: tl,
         });
       }
+
+      /*
+       * Les mouvements sont posés APRÈS le compositeur, volontairement.
+       *
+       * Le moteur cherche chaque image, et à chaque image les deux systèmes
+       * écrivent sur les mêmes propriétés. Celui qui écrit en dernier gagne.
+       * Posés avant, nos gestes étaient effacés par la gestion de visibilité
+       * du compositeur — la scène sortante ou l'entrante disparaissait selon
+       * la durée de couture.
+       */
+      /*
+       * Les transitions par transformation.
+       *
+       * Chaque geste est une paire : ce que fait la scène sortante, ce que fait
+       * l'entrante. Tout est en pourcentage ou en échelle, donc indépendant de
+       * la résolution — la même poussée marche en 480p et en 720p.
+       *
+       * Les deux tweens sont des fromTo posés au même instant, comme le reste
+       * du fichier : le moteur cherche chaque image, un to ne survivrait pas au
+       * saut arriere.
+       */
+      const MOVES = {
+        "push-left":    { out: { x: "-100%" }, in: { x: "100%" } },
+        "push-right":   { out: { x: "100%" },  in: { x: "-100%" } },
+        "push-up":      { out: { y: "-100%" }, in: { y: "100%" } },
+        "zoom-through": { out: { scale: 1.6, opacity: 0 }, in: { scale: 0.72 } },
+        "zoom-out":     { out: { scale: 0.62, opacity: 0 }, in: { scale: 1.45 } },
+        "squeeze":      { out: { scaleX: 0, opacity: 0 },   in: { scaleX: 0 } },
+      };
+
+      for (const move of T.moves) {
+        const shape = MOVES[move.kind];
+        if (!shape) continue;
+
+        const rest = { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1 };
+        const ease = move.kind === "squeeze" ? "power2.inOut" : "power3.inOut";
+
+        // La sortante part de sa position de repos vers l'ailleurs du geste.
+        tl.fromTo(
+          "#s" + move.from,
+          { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1, visibility: "visible" },
+          Object.assign({ duration: move.duration, ease: ease, visibility: "visible" }, shape.out),
+          move.at
+        );
+
+        // L'entrante fait le trajet inverse et finit au repos, opaque.
+        tl.fromTo(
+          "#s" + move.to,
+          Object.assign({ opacity: 1, visibility: "visible" }, shape.in),
+          Object.assign({ duration: move.duration, ease: ease, visibility: "visible" }, rest),
+          move.at
+        );
+      }
+
 
       window.__timelines = window.__timelines || {};
       window.__timelines["main"] = tl;

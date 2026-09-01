@@ -211,14 +211,31 @@ describe('the composition HyperFrames renders', () => {
       expect(fadeInSeconds(asScene('fade'), 1)).toBeGreaterThan(0);
     });
 
-    it('tells the compositor to cut, so the movement stays visible', () => {
+    it('keeps the compositor holding both scenes open', () => {
       const page = withTransition('push-up');
       const cuts = JSON.parse(
         /const T = (\{.*?\});/s.exec(page)![1]
       ).cuts as { duration: number; shader?: string }[];
-      // Une couture composée mélangerait les deux scènes pendant qu'elles
-      // bougent, et le geste disparaîtrait sous le fondu.
-      expect(cuts.at(-1)).toEqual({ time: expect.any(Number), duration: 0 });
+      // La couture garde sa vraie durée : c'est elle qui maintient les deux
+      // scènes vivantes pendant le geste. Une durée nulle ferait sauter le
+      // compositeur à l'état d'après, et la sortante disparaîtrait.
+      expect(cuts.at(-1)!.duration).toBeGreaterThan(0);
+      expect(cuts.at(-1)).not.toHaveProperty('shader');
+    });
+
+    it('writes the movement after the compositor, never before', () => {
+      // Le moteur cherche chaque image, et les deux systèmes écrivent sur les
+      // mêmes propriétés : le dernier gagne. Posé avant, le geste est effacé.
+      const page = withTransition('push-left');
+      expect(page.indexOf('HyperShader.init')).toBeLessThan(
+        page.indexOf('for (const move of T.moves)')
+      );
+    });
+
+    it('re-asserts visibility, which opacity alone would not restore', () => {
+      const page = withTransition('push-left');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('visibility: "visible"');
     });
 
     it('drives every movement from an absolute instant', () => {

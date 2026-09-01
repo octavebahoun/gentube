@@ -124,3 +124,23 @@ tenir dans la même vidéo, et c'est expliqué plus haut.
    aujourd'hui — ni ratio, ni voix, ni sous-titres, ni musique.
 3. Si les plans à contenu structuré entrent dans le produit, ce qui ouvre le
    catalogue en grand mais demande que le LLM apprenne à les décrire.
+
+
+---
+
+## Correction du matin
+
+**L'exclusion n'existait pas.** Tu as demandé « on ne peut pas faire par
+frame ? », et c'était la bonne question : le conflit n'était pas de nature, il
+était d'ordre.
+
+Le moteur cherche chaque image ; à chaque image le compositeur et mes tweens
+écrivent sur `visibility` et `opacity`, et le dernier gagne. Mes gestes étaient
+posés **avant** `HyperShader.init()`, donc systématiquement écrasés.
+
+Posés après, en réaffirmant `visibility: "visible"`, les deux familles
+cohabitent. Une vidéo peut donc mélanger shaders et transformations.
+
+Ce que j'aurais dû faire hier : essayer avant de conclure. J'avais deux essais
+ratés et j'en ai tiré une impossibilité, alors qu'ils ne montraient que deux
+façons de perdre la course.
