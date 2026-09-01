@@ -204,6 +204,9 @@ export function buildTimeline(
   subtitleStyle: SubtitleStyle
 ) {
   const scenes = storyboard.scenes;
+  // Calculés une fois pour toute la vidéo : chaque scène qui demande le rythme
+  // y pioche, plutôt que de reconstruire la liste des pics.
+  const beats = musicBeats(storyboard);
   return {
     scenes: scenes.map((scene, index) => {
       const title = scene.kineticTitle;
@@ -225,9 +228,13 @@ export function buildTimeline(
           : kenBurns(scene.effects?.zoom),
         rate: isVideoPath(scene.mediaPath) ? (scene.playbackRate ?? 1) : null,
         shake: scene.effects?.shake === true,
+        // Un tremblement calé démarre sur la frappe plutôt qu'avec la scène.
+        shakeAt: scene.effects?.shake
+          ? onBeat(scene, beats, scene.startInSeconds)
+          : null,
         flash: flash
           ? {
-              at: ms(scene.startInSeconds + (flash.startInSeconds ?? 0)),
+              at: onBeat(scene, beats, scene.startInSeconds + (flash.startInSeconds ?? 0)),
               duration: flash.durationInSeconds ?? 0.18,
             }
           : null,
@@ -328,4 +335,68 @@ export function buildTimeline(
     accent: ACCENT_COLOR,
     subtitleStyle,
   };
+}
+
+
+/**
+ * Tous les temps forts de la vidéo, pics du morceau répétés tant qu'il boucle.
+ *
+ * La musique tourne en boucle du début à la fin ; ses pics reviennent donc à
+ * chaque tour. Sans cette répétition, un `onBeat` posé à la trentième seconde
+ * d'une nappe de trente et une secondes ne trouverait jamais rien.
+ *
+ * Rendue triée, parce que `snapToBeat` s'arrête au premier écart croissant.
+ */
+export function musicBeats(storyboard: HyperframesStoryboard): number[] {
+  const pics = storyboard.musicImpacts ?? [];
+  const tour = storyboard.musicDurationS ?? 0;
+  if (pics.length === 0) return [];
+  if (tour <= 0) return [...pics].sort((a, b) => a - b);
+
+  const tous: number[] = [];
+  for (let debut = 0; debut < storyboard.durationInSeconds; debut += tour) {
+    for (const pic of pics) {
+      const instant = debut + pic;
+      if (instant <= storyboard.durationInSeconds) tous.push(instant);
+    }
+  }
+  return tous.sort((a, b) => a - b);
+}
+
+/**
+ * L'instant écrit, ou le temps fort le plus proche s'il est assez près.
+ *
+ * La fenêtre borne le déplacement : un effet qu'on décale d'une seconde pour
+ * l'accrocher à un pic ne ponctue plus ce qu'il devait ponctuer. Au-delà, on
+ * garde l'instant d'origine — mieux vaut un effet hors rythme qu'un effet au
+ * mauvais endroit.
+ */
+export function snapToBeat(
+  at: number,
+  beats: number[],
+  fenetre = 0.35
+): number {
+  let meilleur = at;
+  let ecart = fenetre;
+
+  for (const beat of beats) {
+    const distance = Math.abs(beat - at);
+    if (distance <= ecart) {
+      ecart = distance;
+      meilleur = beat;
+    } else if (beat > at && distance > ecart) {
+      break;
+    }
+  }
+  return ms(meilleur);
+}
+
+
+/** L'instant d'un effet, calé sur le rythme quand la scène le demande. */
+function onBeat(
+  scene: HyperframesScene,
+  beats: number[],
+  at: number
+): number {
+  return scene.effects?.onBeat ? snapToBeat(at, beats) : ms(at);
 }

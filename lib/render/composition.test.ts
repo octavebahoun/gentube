@@ -245,6 +245,37 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('effects on the beat', () => {
+    const onBeatPage = (onBeat: boolean) =>
+      composeHtml({
+        storyboard: {
+          ...toHyperframesStoryboard(video, [
+            {
+              ...shot(),
+              render: {
+                effects: {
+                  onBeat,
+                  flash: { startInSeconds: 1.2, durationInSeconds: 0.2 },
+                },
+              },
+            } as Shot,
+          ]),
+          musicImpacts: [1.35],
+          musicDurationS: 30,
+        },
+      });
+
+    it('moves the flash onto the nearest impact when asked', () => {
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(onBeatPage(true))![1]);
+      expect(T.scenes[0].flash.at).toBe(1.35);
+    });
+
+    it('leaves the written instant alone otherwise', () => {
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(onBeatPage(false))![1]);
+      expect(T.scenes[0].flash.at).toBe(1.2);
+    });
+  });
+
   describe('the scene sounds', () => {
     const withSounds = (sounds: unknown[]) =>
       html([{ ...shot(), render: { sounds } } as Shot]);

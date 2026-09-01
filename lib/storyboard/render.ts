@@ -135,6 +135,18 @@ export const sceneEffectsSchema = z.object({
   shake: z.boolean().optional(),
   /** Directive : ce plan doit couper nettement avec la composition précédente. */
   matchCut: z.boolean().optional(),
+  /**
+   * Cale les effets ponctuels de la scène sur un temps fort de la musique.
+   *
+   * Les fiches de `assets/sounds/` portent les secondes où un morceau frappe
+   * réellement (`peaks`, repris en `sound_assets.impacts`). Un éclair posé à
+   * 0,8 s de la scène tombe n'importe où ; le même éclair calé sur le pic le
+   * plus proche fait entendre le montage. C'est ce qui sépare une vidéo
+   * automatique d'une vidéo rythmée.
+   *
+   * Sans musique, ou sans pic assez proche, l'effet garde son instant écrit.
+   */
+  onBeat: z.boolean().optional(),
   cameraMotion: z.enum(CAMERA_MOTIONS).optional(),
   flash: z
     .object({
@@ -414,6 +426,10 @@ export type HyperframesStoryboard = {
   subtitles: boolean;
   subtitleStyle: SubtitleStyle;
   music?: string;
+  /** Secondes où la musique frappe, depuis son propre début. */
+  musicImpacts?: number[];
+  /** Longueur du morceau, pour retrouver ses pics quand il boucle. */
+  musicDurationS?: number;
   musicVolume: number;
   sfxVolume: number;
   /** Durée totale, calculée une fois ici pour que personne ne la recalcule. */
@@ -448,7 +464,20 @@ export function toHyperframesStoryboard(
     | 'sfxVolume'
   >,
   shots: Shot[],
-  { fallbackVoice }: { fallbackVoice?: string | null } = {}
+  {
+    fallbackVoice,
+    music,
+  }: {
+    fallbackVoice?: string | null;
+    /**
+     * Les pics du morceau et sa longueur, lus dans `sound_assets`.
+     *
+     * Optionnels parce que la vidéo ne stocke qu'une URL de musique : ses
+     * métadonnées vivent dans le catalogue, et c'est l'appelant qui les
+     * apporte. Sans elles, `onBeat` reste sans effet plutôt que de deviner.
+     */
+    music?: { impacts?: number[]; durationS?: number | null } | null;
+  } = {}
 ): HyperframesStoryboard {
   const parsed = shots.map((shot) => {
     const render = sceneRenderSchema.safeParse(shot.render ?? {});
@@ -471,6 +500,8 @@ export function toHyperframesStoryboard(
     subtitles: video.subtitles,
     subtitleStyle: video.subtitleStyle,
     music: video.musicUrl ?? undefined,
+    musicImpacts: music?.impacts?.length ? music.impacts : undefined,
+    musicDurationS: music?.durationS ?? undefined,
     musicVolume: video.musicVolume,
     sfxVolume: video.sfxVolume,
     durationInSeconds: totalDurationSeconds(parsed),

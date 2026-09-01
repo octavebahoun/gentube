@@ -260,7 +260,7 @@ export function composeHtml({
               repeat: Math.round(scene.duration / 0.06),
               yoyo: true,
             },
-            scene.start
+            scene.shakeAt ?? scene.start
           );
         }
 
