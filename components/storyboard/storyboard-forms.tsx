@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   addShotAction,
   generateStoryboardAction,
+  generateVisualsAction,
   generateVoiceoverAction,
   validateVideoAction,
 } from '@/app/(dashboard)/dashboard/videos/actions';
@@ -133,6 +134,50 @@ export function ValidateForm({
           Rechargez depuis la page facturation.
         </p>
       )}
+      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
+      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+    </form>
+  );
+}
+
+/**
+ * Étape quatre : les visuels. Les fixes sont dessinées dans la foulée, les
+ * clips seulement **lancés** — un plan animé prend une minute chez le
+ * fournisseur, et une vidéo en compte une quinzaine. Le bouton rend donc la
+ * main avant que les clips existent, et c'est voulu.
+ */
+export function VisualsForm({
+  videoId,
+  hasAnimated,
+}: {
+  videoId: number;
+  hasAnimated: boolean;
+}) {
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    generateVisualsAction,
+    {}
+  );
+  return (
+    <form action={formAction} className="space-y-2">
+      <input type="hidden" name="videoId" value={videoId} />
+      <Button type="submit" disabled={isPending}>
+        {isPending ? (
+          <>
+            <Loader2 className="animate-spin" />
+            {hasAnimated ? 'Dessin des images et lancement des clips…' : 'Dessin des images…'}
+          </>
+        ) : (
+          <>
+            {hasAnimated ? <VideoIcon /> : <ImageIcon />}
+            {hasAnimated ? 'Générer les images et les clips' : 'Générer les images'}
+          </>
+        )}
+      </Button>
+      <p className="max-w-xl text-xs text-muted-foreground">
+        {hasAnimated
+          ? 'Chaque scène reçoit d’abord son image fixe — c’est elle que le modèle anime. Les clips partent ensuite chez le fournisseur et arrivent au fil de l’eau : rechargez la page pour suivre.'
+          : 'Chaque scène reçoit son image fixe. Rien d’autre à attendre : ce pipeline n’a pas de plan animé.'}
+      </p>
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
       {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
     </form>
