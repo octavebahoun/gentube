@@ -123,18 +123,27 @@ système pour que le LLM sache la demander.
 **Bloqué par** : le lot 1, qui aura montré comment on transpose un extrait du
 registre sans le recopier bêtement.
 
-### Lot 3 — Les incrustations et les compteurs  ·  palier 2
+### Lot 3 — Les incrustations et les compteurs  ·  palier 3, pas 2
 
-**Ce qui sort** : `overlayText` gagne des variantes, et un plan peut afficher un
-chiffre qui monte sans qu'aucune image soit générée.
+**Reclassé le 2 septembre 2026, après examen des blocs.** Je les croyais
+présentationnels ; ils ne le sont pas.
 
-C'est le lot le plus rentable du catalogue : un plan `count-up` coûte le prix de
-sa voix off et rien d'autre. Aucun appel à Flux, aucun appel à Replicate. Sur
-une minute facturée 400 FCFA de fournisseur, un plan de ce type en coûte dix.
+Un `lt-*` du registre n'est pas une variante d'apparence de notre `overlayText`.
+`overlayText` porte **une chaîne** ; un tiers inférieur porte un nom *et* une
+fonction, un `count-up` une valeur *et* un format, un `conic-progress-ring` un
+pourcentage. Ce sont des plans dont le contenu est structuré — donc le même
+problème que le lot 4, à une échelle plus petite.
 
-**Bloqué par** : le lot 2, qui aura étendu `sceneEffectsSchema` une première
-fois — donc établi comment un champ nouveau traverse le prompt système, le
-contrat zod et la composition.
+Ce qui reste faisable sans toucher au contenu, et qui vaut peu : la position et
+l'emphase de la ligne existante.
+
+**Ce lot rejoint donc le palier 3**, et son intérêt tient à une chose : un plan
+`count-up` ne coûte que sa voix off. Aucun appel à Flux ni à Replicate. Sur une
+minute facturée 400 FCFA de fournisseur, un plan de ce type en coûte dix. C'est
+la marge la plus haute du catalogue, et elle justifie le travail de contenu.
+
+**Bloqué par** : une décision produit sur ce que le storyboard doit savoir
+décrire.
 
 ### Lot 4 — Les plans structurés  ·  palier 3
 
@@ -151,6 +160,27 @@ changent ensemble.
 qui peut casser des storyboards existants.
 
 **Bloqué par** : les lots 1 à 3, et par une décision produit sur ce qu'on vend.
+
+---
+
+## Une exclusion découverte au rendu
+
+**Les shaders et les transitions par transformation ne se mélangent pas dans une
+même vidéo.**
+
+`HyperShader.init()` prend la main sur la visibilité des scènes : il ne garde
+visible que la paire de sa propre couture et cache tout le reste. Une poussée a
+besoin des deux scènes à l'écran pendant qu'elles bougent — avec le compositeur
+installé, la sortante disparaît et la poussée ne pousse qu'une bande noire.
+
+La composition n'installe donc le compositeur que si la vidéo demande vraiment
+un shader. Dans une vidéo qui en contient un, les transformations retombent en
+coupe franche.
+
+**Ce que le produit doit en faire reste ouvert** : refuser le mélange à
+l'écriture du storyboard, choisir une famille par vidéo, ou laisser la coupe
+franche comme repli silencieux. C'est une règle produit, pas une contrainte
+technique de plus.
 
 ---
 

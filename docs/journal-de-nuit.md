@@ -85,3 +85,42 @@ t'appartient.
 ne peut plus montrer les deux familles, par construction. Le rendu à regarder
 est `render/demo/amazones-transformations.mp4` ; celui aux shaders reste
 `amazones-pageside.mp4`.
+
+---
+
+## Lot 3 — arrêté avant d'écrire une ligne
+
+**Je l'ai reclassé au lieu de l'implémenter.** Je le croyais présentationnel ; en
+ouvrant les blocs, il ne l'est pas. Un `lt-*` porte un nom *et* une fonction, un
+`count-up` une valeur *et* un format. Notre `overlayText` ne porte qu'une chaîne.
+
+Ce sont donc des plans à **contenu structuré**, le même problème que le lot 4 à
+plus petite échelle : il faut que le storyboard sache les décrire, donc que le
+LLM les produise, donc que le prompt et le schéma changent ensemble.
+
+**C'est une décision produit, pas technique**, et je ne la prends pas seul à
+quatre heures du matin. `docs/vocabulaire-de-rendu.md` est corrigé en
+conséquence.
+
+Ce qui reste vrai et vaut le travail : un plan `count-up` ne coûte que sa voix
+off. Dix FCFA la minute contre quatre cents. C'est la marge la plus haute du
+catalogue.
+
+---
+
+## Ce qui t'attend au réveil
+
+**Fait, testé, rendu, commité** : les trois styles de sous-titres, les six
+transitions par transformation. 431 tests verts.
+
+**À regarder** : `render/demo/amazones-transformations.mp4` pour les mouvements,
+`render/demo/amazones-pageside.mp4` pour les shaders. Les deux ne peuvent pas
+tenir dans la même vidéo, et c'est expliqué plus haut.
+
+**À trancher par toi**, dans l'ordre où ça bloque :
+
+1. Ce que le storyboard fait de l'exclusion shaders / transformations.
+2. S'il existe un écran de réglages de rendu, et lequel. Aucun n'existe
+   aujourd'hui — ni ratio, ni voix, ni sous-titres, ni musique.
+3. Si les plans à contenu structuré entrent dans le produit, ce qui ouvre le
+   catalogue en grand mais demande que le LLM apprenne à les décrire.
