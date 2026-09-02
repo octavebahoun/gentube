@@ -183,6 +183,23 @@ export async function processReplicateWebhook(
   const payload = (job.payload ?? {}) as Partial<AnimationJobPayload>;
   const status = prediction.status;
 
+  /**
+   * Trois issues, pas deux.
+   *
+   * `webhook_events_filter: ['completed']` ne garantit pas qu'aucun rappel
+   * intermédiaire n'arrive : un rejeu, un mauvais réglage côté fournisseur, un
+   * statut inconnu d'une version future. Les traiter comme un échec définitif
+   * marquait le job perdu **et remboursait la vidéo**, que `assertGeneratable`
+   * refuse ensuite — un seul rappel `processing` détruisait tout.
+   *
+   * On distingue donc comme `ReplicateAnimator.outcome()` le fait déjà :
+   * réussi, échoué, ou pas encore. Le dernier cas ne touche à rien.
+   */
+  const TERMINÉS = ['succeeded', 'failed', 'canceled'];
+  if (typeof status !== 'string' || !TERMINÉS.includes(status)) {
+    return reply(200, `Prediction is still ${String(status)}.`);
+  }
+
   if (status !== 'succeeded') {
     // `canceled` compris : dans les deux cas le clip ne viendra pas, et
     // Replicate ne facture pas une exécution qui a échoué.

@@ -238,6 +238,16 @@ describe('the composition HyperFrames renders', () => {
       expect(script).toContain('visibility: "visible"');
     });
 
+    it('carries the hoisted clip with its scene', () => {
+      // Un plan animé a son element video hors du div de scène : déplacer le
+      // div ne déplace pas le clip. Sans ça une poussée faisait glisser les
+      // sous-titres pendant que l'image restait immobile.
+      const page = withTransition('push-left');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('"#m" + move.from');
+      expect(script).toContain('"#m" + move.to');
+    });
+
     it('drives every movement from an absolute instant', () => {
       const page = withTransition('zoom-through');
       const script = page.slice(page.lastIndexOf('<script>'));

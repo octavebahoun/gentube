@@ -646,21 +646,43 @@ export function composeHtml({
         const rest = { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1 };
         const ease = move.kind === "squeeze" ? "power2.inOut" : "power3.inOut";
 
+        /*
+         * Les deux scènes ET leurs clips.
+         *
+         * Un plan animé porte son element video hors du div de scène, avec sa
+         * propre piste — imbriqué, le moteur le sortirait gelé. Conséquence :
+         * déplacer le div ne déplace pas le clip. Sans ces cibles en plus, une
+         * poussée faisait glisser les sous-titres pendant que l'image restait
+         * immobile.
+         */
+        const partants = ["#s" + move.from];
+        const entrants = ["#s" + move.to];
+        if (T.scenes[move.from] && T.scenes[move.from].hoisted) {
+          partants.push("#m" + move.from);
+        }
+        if (T.scenes[move.to] && T.scenes[move.to].hoisted) {
+          entrants.push("#m" + move.to);
+        }
+
         // La sortante part de sa position de repos vers l'ailleurs du geste.
-        tl.fromTo(
-          "#s" + move.from,
-          { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1, visibility: "visible" },
-          Object.assign({ duration: move.duration, ease: ease, visibility: "visible" }, shape.out),
-          move.at
-        );
+        for (const cible of partants) {
+          tl.fromTo(
+            cible,
+            { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1, visibility: "visible" },
+            Object.assign({ duration: move.duration, ease: ease, visibility: "visible" }, shape.out),
+            move.at
+          );
+        }
 
         // L'entrante fait le trajet inverse et finit au repos, opaque.
-        tl.fromTo(
-          "#s" + move.to,
-          Object.assign({ opacity: 1, visibility: "visible" }, shape.in),
-          Object.assign({ duration: move.duration, ease: ease, visibility: "visible" }, rest),
-          move.at
-        );
+        for (const cible of entrants) {
+          tl.fromTo(
+            cible,
+            Object.assign({ opacity: 1, visibility: "visible" }, shape.in),
+            Object.assign({ duration: move.duration, ease: ease, visibility: "visible" }, rest),
+            move.at
+          );
+        }
       }
 
 

@@ -289,4 +289,23 @@ describe('resolving a clip callback', () => {
     const [untouched] = await tdb.findMany(jobs, eq(jobs.id, job.id));
     expect(untouched.status).toBe('running');
   });
+
+  it('ne détruit pas la vidéo sur un rappel intermédiaire', async () => {
+    // Trouvé à la revue : tout statut non terminal était traité comme un
+    // échec définitif — le job perdu, la vidéo remboursée et marquée `failed`,
+    // que `assertGeneratable` refuse ensuite. Un seul rappel `processing`
+    // suffisait à tout détruire.
+    const tdb = await createTenant('Alpha', { credits: 5_000 });
+    const { video, job } = await awaitingClip(tdb);
+
+    const { headers, raw } = callback({ id: 'pred_1', status: 'processing' });
+    const result = await processReplicateWebhook(headers, raw, { jobId: job.id });
+
+    expect(result.status).toBe(200);
+
+    const [intact] = await tdb.findMany(jobs, eq(jobs.id, job.id));
+    expect(intact.status).toBe('running');
+    const [encore] = await tdb.findMany(videos, eq(videos.id, video.id));
+    expect(encore.status).not.toBe('failed');
+  });
 });
