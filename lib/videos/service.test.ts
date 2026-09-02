@@ -288,4 +288,33 @@ describe('the trial', () => {
 
     expect(video.resolution).toBe('720p');
   });
+
+  it('lets a draft choose its music, and drop it again', async () => {
+    // Le champ existait en base et n'était réglable nulle part : une vidéo ne
+    // pouvait pas porter de musique, quoi qu'en dise la colonne.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const project = await createProject(tdb, { name: 'Docs' });
+    const video = await createVideo(tdb, { projectId: project.id, title: 'Test' });
+
+    const avec = await updateVideo(tdb, video.id, {
+      musicUrl: 'sounds/music/weightless-horizon.mp3',
+    });
+    expect(avec.musicUrl).toBe('sounds/music/weightless-horizon.mp3');
+
+    // Une chaîne vide retire la musique plutôt que d'enregistrer du vide.
+    const sans = await updateVideo(tdb, video.id, { musicUrl: '' });
+    expect(sans.musicUrl).toBeNull();
+  });
+
+  it('lets a draft switch to vertical', async () => {
+    // Le cadrage change les dimensions de rendu et la place des sous-titres :
+    // c'est un réglage de production, pas une préférence d'affichage.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const project = await createProject(tdb, { name: 'Docs' });
+    const video = await createVideo(tdb, { projectId: project.id, title: 'Short' });
+
+    expect(video.ratio).toBe('16:9');
+    const vertical = await updateVideo(tdb, video.id, { ratio: '9:16' });
+    expect(vertical.ratio).toBe('9:16');
+  });
 });

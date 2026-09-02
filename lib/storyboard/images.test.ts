@@ -14,6 +14,7 @@ import {
   validateStoryboard,
 } from './service';
 import { generateVoiceover } from './voiceover';
+import { listShots } from './service';
 import { generateImages, visualPrompt } from './images';
 
 afterAll(async () => {
@@ -315,5 +316,28 @@ describe('generating the stills', () => {
     await expect(
       generateImages(tdb, video.id, { client: generator().client, store: store().assets })
     ).rejects.toThrow(/no scene to illustrate/);
+  });
+
+  it('draws nothing for a scene that draws itself', async () => {
+    // Une carte ou un compteur affiche son propre écran : lui générer une
+    // illustration, c'est payer une image que personne ne verra.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await validatedVideo(tdb, ['image', 'image']);
+    const [first] = await listShots(tdb, video.id);
+    await tdb.update(
+      shots,
+      { render: { counter: { value: 6000, label: 'soldates' } } },
+      eq(shots.id, first.id)
+    );
+
+    const { client, calls } = generator();
+    const result = await generateImages(tdb, video.id, {
+      client,
+      store: store().assets,
+    });
+
+    expect(result.generated).toBe(1);
+    expect(result.skipped).toBe(1);
+    expect(calls).toHaveLength(1);
   });
 });

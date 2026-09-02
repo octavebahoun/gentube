@@ -8,6 +8,7 @@ import {
   createImageClient,
   type ImageGenerator,
 } from '@/lib/images/flux';
+import { rendersOwnContent } from './render';
 import { StoryboardError, listShots } from './service';
 
 /**
@@ -115,6 +116,24 @@ export async function generateImages(
 
   for (const shot of storyboard) {
     if (shot.sourceImageUrl) {
+      skipped += 1;
+      continue;
+    }
+
+    // Une carte ou un compteur dessine son propre écran. Lui générer une
+    // illustration, c'est payer une image que personne ne verra jamais.
+    //
+    // Mais la sauter ne suffit pas : sans passage à `ready`, elle reste
+    // `pending` avec un `assetUrl` nul, et l'assemblage refuse toute la vidéo
+    // en disant qu'une scène n'a pas de visuel. Elle en a un — c'est elle.
+    if (rendersOwnContent(shot.render)) {
+      if (shot.status !== 'ready') {
+        await tdb.update(
+          shots,
+          { status: 'ready' as const, updatedAt: new Date() },
+          eq(shots.id, shot.id)
+        );
+      }
       skipped += 1;
       continue;
     }

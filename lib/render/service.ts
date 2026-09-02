@@ -5,7 +5,11 @@ import { getProject } from '@/lib/projects';
 import { getVideo } from '@/lib/videos';
 import { assetKey, createAssetStore, type AssetStore } from '@/lib/storage';
 import { listShots } from '@/lib/storyboard/service';
-import { toHyperframesStoryboard } from '@/lib/storyboard/render';
+import {
+  rendersOwnContent,
+  toHyperframesStoryboard,
+} from '@/lib/storyboard/render';
+import { findSound } from '@/lib/sounds';
 import { StoryboardError } from '@/lib/storyboard/service';
 import { materialize } from './materialize';
 import {
@@ -105,7 +109,14 @@ export async function startRender(
 
   // Un plan sans média produirait un trou noir au milieu d'une vidéo déjà
   // payée. On refuse avant de dépenser du temps Lambda.
-  const missing = storyboard.filter((shot) => !shot.assetUrl);
+  //
+  // Une carte ou un compteur n'a pas de média et n'en attend pas : son écran
+  // est dessiné par la composition. Les compter comme manquants bloquait toute
+  // vidéo qui en contient une, définitivement — l'étape image les saute, donc
+  // relancer ne changeait rien.
+  const missing = storyboard.filter(
+    (shot) => !shot.assetUrl && !rendersOwnContent(shot.render)
+  );
   if (missing.length > 0) {
     throw new StoryboardError(
       `${missing.length} scene${missing.length > 1 ? 's have' : ' has'} no ` +
@@ -118,8 +129,16 @@ export async function startRender(
   const assets = store ?? createAssetStore();
   const renderer = engine ?? createRenderEngine();
 
+  // Les pics du morceau vivent dans le catalogue, pas sur la vidéo, qui n'en
+  // garde que la clé. Sans cette lecture, une scène qui demande `onBeat` garde
+  // l'instant écrit — l'effet sort, simplement pas sur le temps fort.
+  const musique = video.musicUrl ? await findSound(video.musicUrl) : null;
+
   const hyperframes = toHyperframesStoryboard(video, storyboard, {
     fallbackVoice: project.voiceId,
+    music: musique
+      ? { impacts: musique.impacts, durationS: musique.durationS }
+      : null,
   });
 
   const prepared = await materialize(hyperframes, assets, {

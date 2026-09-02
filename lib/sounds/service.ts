@@ -14,6 +14,8 @@ import { soundAssets, type SoundAsset, type SoundKind } from '@/lib/db/schema';
 export type SoundChoice = {
   /** Ce qu'un storyboard écrit dans `sounds[].src`. */
   src: string;
+  /** Le nom lisible, pour une liste de choix. La clé ne se montre pas. */
+  name: string;
   kind: SoundKind;
   mood: string | null;
   loopable: boolean;
@@ -26,6 +28,7 @@ export type SoundChoice = {
 function toChoice(row: SoundAsset): SoundChoice {
   return {
     src: row.key,
+    name: row.name,
     kind: row.kind,
     mood: row.mood,
     loopable: row.loopable,
@@ -33,6 +36,26 @@ function toChoice(row: SoundAsset): SoundChoice {
     impacts: Array.isArray(row.impacts) ? (row.impacts as number[]) : [],
     usage: row.usage,
   };
+}
+
+/**
+ * Un son par sa clé, ou rien.
+ *
+ * Sert au rendu : une vidéo ne stocke que la clé de sa musique, et le moteur a
+ * besoin de ses pics pour caler un effet dessus. Sans cette lecture, `onBeat`
+ * reste inerte — le catalogue sait quand le morceau frappe, la composition
+ * l'ignore.
+ *
+ * Non scopé au tenant : le catalogue est partagé entre tous les projets, comme
+ * le dit `assets/sounds/README.md`.
+ */
+export async function findSound(key: string): Promise<SoundChoice | null> {
+  const [row] = await db
+    .select()
+    .from(soundAssets)
+    .where(eq(soundAssets.key, key))
+    .limit(1);
+  return row ? toChoice(row) : null;
 }
 
 export async function listSounds(kind?: SoundKind): Promise<SoundChoice[]> {

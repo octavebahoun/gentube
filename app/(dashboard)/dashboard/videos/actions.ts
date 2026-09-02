@@ -9,19 +9,27 @@ import { InsufficientCreditsError } from '@/lib/credits';
 import { LlmError, LlmNotConfiguredError } from '@/lib/llm/deepseek';
 import { StorageNotConfiguredError } from '@/lib/storage';
 import { VoiceError, VoiceNotConfiguredError } from '@/lib/voice/elevenlabs';
+import { ImageError, ImageNotConfiguredError } from '@/lib/images/flux';
+import { AnimationError, AnimationNotConfiguredError } from '@/lib/video';
 import {
+  RATIOS,
+  RESOLUTIONS,
+  SUBTITLE_STYLES,
   VideoError,
   createVideo,
   deleteVideo,
+  updateVideo,
   videoInputSchema,
 } from '@/lib/videos';
 import {
   StoryboardError,
   addShot,
   deleteShot,
+  generateImages,
   generateStoryboard,
   generateVoiceover,
   moveShot,
+  submitClips,
   reorderShots,
   shotInputSchema,
   updateShot,
@@ -51,6 +59,10 @@ function formError(error: unknown): { error: string } {
     error instanceof LlmNotConfiguredError ||
     error instanceof VoiceError ||
     error instanceof VoiceNotConfiguredError ||
+    error instanceof ImageError ||
+    error instanceof ImageNotConfiguredError ||
+    error instanceof AnimationError ||
+    error instanceof AnimationNotConfiguredError ||
     error instanceof StorageNotConfiguredError
   ) {
     return { error: error.message };
@@ -241,6 +253,71 @@ export const validateVideoAction = validatedActionWithUser(
       );
       revalidatePath(`/dashboard/videos/${data.videoId}`);
       return { success: `Validated — ${charged} credits charged.` };
+    } catch (error) {
+      return formError(error);
+    }
+  }
+);
+
+/**
+ * Les visuels : les fixes d'abord, les clips ensuite.
+ *
+ * L'ordre n'est pas une commodité. Tous les modèles retenus font de
+ * l'image-to-video : sans sa fixe, un plan animé n'a rien à animer.
+ *
+ * L'action rend la main dès que les clips sont **soumis**, pas rendus. Un clip
+ * met une minute et une vidéo en compte une quinzaine ; c'est le webhook de
+ * Replicate qui les posera sur R2 au fur et à mesure.
+ */
+export const generateVisualsAction = validatedActionWithUser(
+  videoIdentity,
+  async (data, _formData, user) => {
+    const tdb = tenantDb(user.tenantId);
+
+    try {
+      const stills = await generateImages(tdb, data.videoId);
+      const clips = await submitClips(tdb, data.videoId);
+
+      revalidatePath(`/dashboard/videos/${data.videoId}`);
+
+      const drawn = `${stills.generated} still${stills.generated === 1 ? '' : 's'} drawn`;
+      return {
+        success: clips.submitted
+          ? `${drawn}, ${clips.submitted} clip${clips.submitted === 1 ? '' : 's'} ` +
+            'under way — they will appear as the provider returns them.'
+          : `${drawn}.`,
+      };
+    } catch (error) {
+      return formError(error);
+    }
+  }
+);
+
+/**
+ * Les réglages de rendu d'une vidéo : résolution, sous-titres, musique.
+ *
+ * Trois colonnes qui existaient depuis l'origine sans qu'aucun écran ne les
+ * touche. `updateVideo` refuse tout ce qui n'est plus un brouillon : passé la
+ * validation, les crédits sont débités sur une définition, et la changer
+ * ferait payer une vidéo pour en produire une autre.
+ */
+export const videoSettingsAction = validatedActionWithUser(
+  videoIdentity.extend({
+    resolution: z.enum(RESOLUTIONS).optional(),
+    ratio: z.enum(RATIOS).optional(),
+    subtitleStyle: z.enum(SUBTITLE_STYLES).optional(),
+    musicUrl: z.string().optional(),
+  }),
+  async (data, _formData, user) => {
+    try {
+      await updateVideo(tenantDb(user.tenantId), data.videoId, {
+        resolution: data.resolution,
+        ratio: data.ratio,
+        subtitleStyle: data.subtitleStyle,
+        musicUrl: data.musicUrl,
+      });
+      revalidatePath(`/dashboard/videos/${data.videoId}`);
+      return { success: 'Réglages enregistrés.' };
     } catch (error) {
       return formError(error);
     }

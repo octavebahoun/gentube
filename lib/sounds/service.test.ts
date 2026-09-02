@@ -58,7 +58,8 @@ describe('the catalogue as the model sees it', () => {
     const rendered = renderSoundCatalogue([
       {
         src: 'sounds/sfx/pop.mp3',
-        kind: 'sfx',
+        name: 'pop',
+    kind: 'sfx',
         mood: 'sec',
         loopable: false,
         durationS: 2.8,
@@ -75,6 +76,7 @@ describe('the catalogue as the model sees it', () => {
   it('stays bounded: a prompt carrying every sound costs more than it helps', () => {
     const many = Array.from({ length: 200 }, (_, index) => ({
       src: `sounds/sfx/s${index}.mp3`,
+      name: `s${index}`,
       kind: 'sfx' as const,
       mood: null,
       loopable: false,
@@ -93,7 +95,8 @@ describe('filtering what the model picked', () => {
   const library = [
     {
       src: 'sounds/sfx/pop.mp3',
-      kind: 'sfx' as const,
+      name: 'pop',
+    kind: 'sfx' as const,
       mood: null,
       loopable: false,
       durationS: null,

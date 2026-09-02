@@ -30,6 +30,7 @@ import {
   AddShotForm,
   GenerateButton,
   ValidateForm,
+  VisualsForm,
   VoiceoverForm,
 } from '@/components/storyboard/storyboard-forms';
 import { type ActionState } from '@/components/storyboard/utils';
@@ -51,6 +52,11 @@ export function StoryboardEditor({
 }) {
   const editable = video.status === 'draft';
   const spokenSeconds = shots.reduce((t, s) => t + s.durationS, 0);
+
+  // Les visuels s'ouvrent une fois les crédits débités : `validated` au premier
+  // passage, `generating` pour une reprise après un échec partiel.
+  const producible = video.status === 'validated' || video.status === 'generating';
+  const hasAnimated = shots.some((shot) => shot.type === 'video');
 
   const [items, setItems] = useState(shots);
   const [reorderError, setReorderError] = useState<string | null>(null);
@@ -119,6 +125,7 @@ export function StoryboardEditor({
               storyboard est en lecture seule à partir d&apos;ici.
             </p>
           )}
+          {producible && <VisualsForm videoId={video.id} hasAnimated={hasAnimated} />}
           {reorderError && <p className="text-sm text-red-500">{reorderError}</p>}
         </CardContent>
       </Card>

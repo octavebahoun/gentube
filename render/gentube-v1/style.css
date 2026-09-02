@@ -51,14 +51,20 @@ body {
   will-change: transform;
 }
 
-/* Voile bas, pour que les sous-titres restent lisibles sur une image claire. */
+/*
+ * Voile bas, pour que les sous-titres restent lisibles sur une image claire.
+ *
+ * Ses arrêts suivent la position des sous-titres, posée par la composition
+ * selon le format : en 9:16 le texte remonte pour dégager l'interface de la
+ * plateforme, et un voile resté en bas le laisserait pâle sur une image claire.
+ */
 .veil {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    transparent 55%,
-    rgba(0, 0, 0, 0.55) 88%,
+    transparent var(--veil-start, 55%),
+    rgba(0, 0, 0, 0.55) var(--veil-mid, 88%),
     rgba(0, 0, 0, 0.72) 100%
   );
 }
@@ -103,6 +109,51 @@ body {
   color: #fff;
 }
 
+/* --- Les trois styles de sous-titres ------------------------------------- */
+
+/*
+ * `videos.subtitle_style` porte ces trois valeurs depuis l'origine. Ce qui
+ * change ici est l'apparence au repos ; la façon dont chaque mot arrive est
+ * dans la timeline, parce qu'elle dépend d'un instant et pas d'un état.
+ */
+
+/*
+ * `karaoke` : rien ici.
+ *
+ * La couleur du mot éteint est posée par la timeline, parce que GSAP a besoin
+ * d'une valeur de départ explicite pour animer vers le blanc — et ce qu'elle
+ * écrit en style inline gagne sur n'importe quelle règle de ce fichier. Une
+ * déclaration ici serait du code mort, et elle l'a été : une modification de
+ * cette valeur n'a produit aucun changement à l'écran.
+ */
+
+/*
+ * `fondant` : tous les mots sont blancs, et c'est l'opacité qui les révèle.
+ * Plus doux que le karaoké, et lisible sur une image chargée sans dépendre
+ * d'un contraste entre deux gris.
+ */
+.captions-fondant .word {
+  color: #fff;
+  opacity: 0.25;
+}
+
+/*
+ * `cinematic` : un sous-titre de film. Aucune emphase par mot, une graisse
+ * plus basse, moins de contour, et la ligne entière apparaît d'un coup.
+ * Le voile du bas suffit à la détacher.
+ */
+.captions-cinematic {
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+
+.captions-cinematic .word {
+  color: #fff;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.45),
+    0 4px 14px rgba(0, 0, 0, 0.55);
+}
+
 /* --- Filigrane ---------------------------------------------------------- */
 
 /*
@@ -127,4 +178,441 @@ body {
   display: block;
   border-radius: 999px;
   background: #ce1f20;
+}
+
+/* --- Plans animés -------------------------------------------------------- */
+
+/*
+ * Une balise vidéo occupe la même place qu'une image de fond, et porte le même
+ * id : le zoom, le tremblement et l'opacité s'appliquent sans savoir lequel
+ * des deux est là.
+ */
+video.media {
+  object-fit: cover;
+  width: 112%;
+  height: 112%;
+}
+
+/* --- Carte texte --------------------------------------------------------- */
+
+/* Écran noir, texte centré. Pas de média, pas de voix : une respiration. */
+.card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  padding: 0 10%;
+  background: #000;
+  text-align: center;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+}
+
+.card-text {
+  font-size: 2.4em;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.card-subtext {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/* --- Bandeau posé sur l'image -------------------------------------------- */
+
+.overlay {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 9%;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  font-size: 1.6em;
+  font-weight: 800;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
+  will-change: opacity, transform;
+}
+
+/* --- Titre cinétique ----------------------------------------------------- */
+
+/*
+ * Quatre variantes, une seule mécanique : un élément par mot, animé avec un
+ * décalage. Ce qui change d'une variante à l'autre est uniquement l'apparence.
+ */
+.kinetic {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.18em 0.32em;
+  justify-content: center;
+  align-items: center;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  font-size: 2.6em;
+  font-weight: 900;
+  line-height: 1.05;
+  text-align: center;
+  --kt-accent: #ce1f20;
+  --kt-glow: #ff5a3c;
+}
+
+.kt-center {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.kt-bottom {
+  bottom: 20%;
+}
+
+.kt-word {
+  display: inline-block;
+  will-change: opacity, transform;
+  /*
+   * La couleur est ici, à la base, et non dans chaque variante.
+   *
+   * Elle n'était posée que sur les quatre premières variantes ; les vingt
+   * suivantes sortaient en bleu sombre sur fond sombre, illisibles. Une
+   * variante qui veut autre chose le déclare — les autres n'ont plus à y
+   * penser, et une variante ajoutée demain sera lisible sans rien faire.
+   */
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `reveal` : blanc franc, ombre portée. La variante par défaut. */
+.kt-reveal .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `neon` : lueur colorée, contour lumineux. */
+.kt-neon .kt-word {
+  color: #fff;
+  text-shadow:
+    0 0 8px var(--kt-glow),
+    0 0 22px var(--kt-glow),
+    0 0 46px var(--kt-accent);
+}
+
+/* `pin` : chaque mot dans sa propre pastille. */
+.kt-pin .kt-word {
+  padding: 0.1em 0.34em;
+  border-radius: 0.14em;
+  background: var(--kt-accent);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* `icon` : un pictogramme ouvre la ligne, le texte suit. */
+.kt-icon-label {
+  font-size: 0.42em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kt-accent);
+}
+
+.kinetic .kt-icon {
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.kt-icon .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* --- Éclair et fondu au noir --------------------------------------------- */
+
+/*
+ * Deux nappes pleine trame, distinctes par leur portée : l'éclair vit dans sa
+ * scène et part avec elle, le noir vit au-dessus de toutes et sert les
+ * coupures. Aucune des deux n'est un filtre — voir l'en-tête du fichier.
+ */
+.flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+#blackout {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* --- Compteur ------------------------------------------------------------ */
+
+/*
+ * Un plan chiffré n'a pas d'image derrière lui : le fond noir de `#bg` sert de
+ * scène. Tout le poids visuel est donc dans le nombre.
+ */
+.counter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0 8%;
+  text-align: center;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+}
+
+.counter-value {
+  font-size: 4.6em;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+  /* Les chiffres changent à chaque image : sans chasse fixe, le nombre danse. */
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-label {
+  font-size: 1.05em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  max-width: 22ch;
+}
+
+/*
+ * L'anneau est un dégradé conique piloté par `--fill`, écrit par la timeline.
+ * Aucune géométrie n'est calculée dans la page, et rien n'est un `filter`.
+ */
+/*
+ * `counter-dial` et non `counter-ring` : le conteneur porte déjà
+ * `counter-<variante>` comme modificateur, et deux éléments imbriqués sous la
+ * même classe faisaient hériter au parent la taille et le positionnement de
+ * l'enfant. Le bloc entier se retrouvait collé en haut à gauche.
+ */
+.counter-dial {
+  --fill: 0deg;
+  /* Sans quoi le disque intérieur, absolu, se cale sur la scène entière. */
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7.2em;
+  height: 7.2em;
+  border-radius: 999px;
+  background:
+    conic-gradient(#ce1f20 var(--fill), rgba(255, 255, 255, 0.12) 0);
+}
+
+/* Le disque intérieur creuse l'anneau : pas de masque, pas de SVG. */
+.counter-dial::before {
+  content: "";
+  position: absolute;
+  inset: 0.65em;
+  border-radius: 999px;
+  background: #000;
+}
+
+.counter-dial .counter-value {
+  position: relative;
+  font-size: 2.1em;
+}
+
+/* --- Les styles transposés du registre ----------------------------------- */
+
+/*
+ * Six apparences reprises des composants `caption-*` de HyperFrames.
+ *
+ * Le mot porteur de sens est marqué `.fort` par la composition, depuis le
+ * champ `emphasis` de la scène. Les styles qui n'en font rien l'ignorent
+ * simplement — c'est une information disponible, pas une obligation.
+ */
+
+/*
+ * `highlight` : un bandeau de couleur balaie le mot actif. Style des shorts.
+ *
+ * Le bandeau est le **fond du mot**, pas un pseudo-élément. Un `::before` en
+ * `z-index: -1` passe derrière l'image de la scène, qui est opaque : le
+ * bandeau existait et ne se voyait jamais.
+ */
+.captions-highlight .word {
+  padding: 0.02em 0.16em;
+  border-radius: 0.1em;
+  color: rgba(255, 255, 255, 0.55);
+  /*
+   * Le balayage est un dégradé deux fois plus large que le mot, qu'on fait
+   * glisser. Deux approches ont échoué avant : une variable CSS interpolée,
+   * que GSAP n'anime pas ici, puis un `background-size` qui grandit, qu'il
+   * n'animait pas davantage. `background-position` marche.
+   */
+  background-image: linear-gradient(
+    to right,
+    #ce1f20 50%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  background-position: 100% 0;
+}
+
+.captions-highlight .word.fort {
+  background-image: linear-gradient(
+    to right,
+    #ff6b2b 50%,
+    rgba(0, 0, 0, 0) 50%
+  );
+}
+
+/* `pill` : chaque mot dans sa pastille. */
+.captions-pill {
+  gap: 0.22em 0.28em;
+}
+
+.captions-pill .word {
+  padding: 0.06em 0.34em;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  text-shadow: none;
+}
+
+.captions-pill .word.fort {
+  background: #ce1f20;
+}
+
+/* `wipe` : le mot se découvre de gauche à droite, sans bouger. */
+.captions-wipe .word {
+  color: #fff;
+}
+
+/* `neon` : lueur cyan et magenta, accent chaud sur les mots porteurs. */
+.captions-neon .word {
+  color: #fff;
+  text-shadow:
+    0 0 6px #4ad9ff,
+    0 0 18px rgba(74, 217, 255, 0.6),
+    0 0 34px rgba(255, 74, 200, 0.45);
+}
+
+.captions-neon .word.fort {
+  color: #ffe9a8;
+  text-shadow:
+    0 0 8px #ff8a3d,
+    0 0 22px rgba(255, 138, 61, 0.7),
+    0 0 40px rgba(206, 31, 32, 0.5);
+}
+
+/*
+ * `gradient` : le texte est découpé dans un dégradé.
+ * `background-clip: text` demande une couleur transparente ; le contour des
+ * autres styles ne s'applique donc pas, d'où l'ombre portée à la place.
+ */
+.captions-gradient .word {
+  background: linear-gradient(180deg, #ffffff 0%, #ffd7a0 55%, #ce1f20 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
+}
+
+/*
+ * `blend` : le texte s'inverse sur ce qu'il couvre.
+ *
+ * `mix-blend-mode: difference` rend le mot lisible sur n'importe quel fond
+ * sans voile ni contour — c'est le seul style qui n'a besoin d'aucun des deux.
+ */
+.captions-blend .word {
+  color: #fff;
+  mix-blend-mode: difference;
+  text-shadow: none;
+}
+
+.captions-blend .word.fort {
+  color: #ff9d3d;
+}
+
+/* L'emoji, quand la scène en pose un. Jamais plus d'un. */
+.word-emoji {
+  display: inline-block;
+  margin-left: 0.2em;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* --- Variantes de titre transposées du registre -------------------------- */
+
+/*
+ * La lettre doit être un bloc en ligne pour accepter une transformation : un
+ * `span` par défaut ne se laisse ni déplacer ni redimensionner.
+ */
+.kt-char {
+  display: inline-block;
+  will-change: opacity, transform;
+}
+
+/* `typewriter` : rien à styler, la lettre apparaît. Le curseur suit la fin. */
+.kt-typewriter .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `tracking` : l'interlettrage se resserre. Le geste des titres de marque. */
+.kt-tracking {
+  font-weight: 700;
+}
+
+.kt-tracking .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `cascade` : les lettres tombent d'en haut. */
+.kt-cascade .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `slam` : le mot arrive trop grand et se pose. Titre de bande-annonce. */
+.kt-slam {
+  font-size: 3.1em;
+  letter-spacing: -0.02em;
+}
+
+.kt-slam .kt-word {
+  color: #fff;
+  text-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.7),
+    0 8px 30px rgba(0, 0, 0, 0.85);
+}
+
+/* `rise` : le mot monte du flou vers le net. */
+.kt-rise .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
+}
+
+/*
+ * `glitch` : deux copies décalées en rouge et cyan, posées par des ombres
+ * plutôt que par des éléments — trois fois moins de nœuds à animer.
+ */
+.kt-glitch .kt-word {
+  color: #fff;
+  text-shadow:
+    0.04em 0 0 rgba(255, 0, 64, 0.85),
+    -0.04em 0 0 rgba(0, 220, 255, 0.85),
+    0 4px 18px rgba(0, 0, 0, 0.7);
 }

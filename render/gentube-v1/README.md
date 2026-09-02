@@ -14,6 +14,9 @@ Ce qui vit ici :
 - `hyperframes.json` — la configuration du projet
 - `vendor/gsap.min.js` — GSAP figé sur place. Pas de CDN : le rendu tourne
   dans un Chrome sans réseau garanti, et sur Lambda il n'en aura pas du tout.
+- `vendor/shader-transitions.min.js` — les quatorze transitions WebGL, figées
+  ici pour la même raison. Elles rendent en local ; la pile Lambda déployée les
+  ramène à un fondu, faute du code de compositing dans son moteur.
 - `style.css` — l'apparence, éditable sans toucher au TypeScript
 
 Pour voir à quoi ressemble une composition générée :

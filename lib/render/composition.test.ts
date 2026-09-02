@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { Shot, Video } from '@/lib/db/schema';
 import { toHyperframesStoryboard } from '@/lib/storyboard/render';
-import { composeHtml, fadeInSeconds, kenBurns, wordsOrFallback } from './composition';
+import {
+  composeHtml,
+  fadeInSeconds,
+  kenBurns,
+  lightsWords,
+  subtitleStyleOf,
+  wordsOrFallback,
+} from './composition';
 
 function shot(overrides: Partial<Shot> = {}): Shot {
   return {
@@ -170,8 +177,374 @@ describe('the composition HyperFrames renders', () => {
     const page = html([shot()], {
       video: { ...video, subtitles: false } as Video,
     });
-    expect(page).not.toContain('class="captions"');
+    expect(page).not.toContain('class="captions');
     expect(page).not.toContain('class="veil"');
+    // Le test resterait vert sans cette ligne : la classe porte un suffixe de
+    // style, donc il faut vérifier qu'elle est là quand elle doit y être.
+    expect(html([shot()])).toContain('class="captions');
+  });
+
+  describe('the transform transitions', () => {
+    const withTransition = (transition: string) =>
+      html([
+        shot(),
+        { ...shot(), id: 2, order: 2, render: { effects: { transition } } } as Shot,
+      ]);
+
+    it('moves both scenes, not just the one arriving', () => {
+      const page = withTransition('push-left');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      // La scène 0 sort, la scène 1 entre : les deux doivent être pilotées.
+      expect(script).toContain('"#s" + move.from');
+      expect(script).toContain('"#s" + move.to');
+      expect(script).toContain('"push-left"');
+    });
+
+    const asScene = (transition: string) =>
+      ({ effects: { transition } }) as never;
+
+    it('never fades a scene that arrives by sliding', () => {
+      // Un fondu par-dessus une poussée rendrait la scène fantomatique
+      // pendant tout son trajet.
+      expect(fadeInSeconds(asScene('push-left'), 1)).toBe(0);
+      expect(fadeInSeconds(asScene('squeeze'), 1)).toBe(0);
+      expect(fadeInSeconds(asScene('fade'), 1)).toBeGreaterThan(0);
+    });
+
+    it('keeps the compositor holding both scenes open', () => {
+      const page = withTransition('push-up');
+      const cuts = JSON.parse(
+        /const T = (\{.*?\});/s.exec(page)![1]
+      ).cuts as { duration: number; shader?: string }[];
+      // La couture garde sa vraie durée : c'est elle qui maintient les deux
+      // scènes vivantes pendant le geste. Une durée nulle ferait sauter le
+      // compositeur à l'état d'après, et la sortante disparaîtrait.
+      expect(cuts.at(-1)!.duration).toBeGreaterThan(0);
+      expect(cuts.at(-1)).not.toHaveProperty('shader');
+    });
+
+    it('writes the movement after the compositor, never before', () => {
+      // Le moteur cherche chaque image, et les deux systèmes écrivent sur les
+      // mêmes propriétés : le dernier gagne. Posé avant, le geste est effacé.
+      const page = withTransition('push-left');
+      expect(page.indexOf('HyperShader.init')).toBeLessThan(
+        page.indexOf('for (const move of T.moves)')
+      );
+    });
+
+    it('re-asserts visibility, which opacity alone would not restore', () => {
+      const page = withTransition('push-left');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('visibility: "visible"');
+    });
+
+    it('carries the hoisted clip with its scene', () => {
+      // Un plan animé a son element video hors du div de scène : déplacer le
+      // div ne déplace pas le clip. Sans ça une poussée faisait glisser les
+      // sous-titres pendant que l'image restait immobile.
+      const page = withTransition('push-left');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('"#m" + move.from');
+      expect(script).toContain('"#m" + move.to');
+    });
+
+    it('drives every movement from an absolute instant', () => {
+      const page = withTransition('zoom-through');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).not.toMatch(/\btl\.to\(/);
+    });
+  });
+
+  describe('the title variants', () => {
+    const titled = (variant: string) =>
+      html([
+        {
+          ...shot(),
+          render: { kineticTitle: { text: 'DEUX MOTS', variant } },
+        } as Shot,
+      ]);
+
+    it('animates letters for the three that need them, words otherwise', () => {
+      // Les lettres sont enveloppées dans leur mot : sans ça un titre se
+      // couperait au milieu d'un mot en fin de ligne.
+      expect(titled('typewriter')).toContain('class="kt-char"');
+      expect(titled('slam')).not.toContain('class="kt-char"');
+    });
+
+    it('computes its targets outside the page', () => {
+      const page = titled('cascade');
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      // « DEUX MOTS » : quatre lettres puis quatre lettres.
+      expect(T.scenes[0].kinetic.cibles).toHaveLength(8);
+      expect(T.scenes[0].kinetic.cibles[0]).toBe('k0-0-0');
+    });
+
+    it('targets words when the variant animates words', () => {
+      const page = titled('slam');
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].kinetic.cibles).toEqual(['k0-0', 'k0-1']);
+    });
+
+    it('emits a gesture for every variant the contract accepts', () => {
+      const script = titled('reveal').slice(titled('reveal').lastIndexOf('<script>'));
+      // Une variante déclarée au contrat mais absente de la table retomberait
+      // en `reveal` sans que rien ne le signale.
+      const declarees = [
+        'reveal', 'neon', 'icon', 'pin', 'typewriter', 'tracking', 'cascade',
+        'slam', 'rise', 'glitch', 'blur-out', 'explode', 'focus', 'lines',
+        'lockup', 'decode', 'crossfade', 'scan', 'axis-y', 'axis-z', 'reel',
+        'fade-up', 'strike', 'ticker', 'calm', 'split', 'weight', 'wave',
+        'backdrop', 'drop',
+      ];
+      for (const v of declarees) {
+        const cle = /^[a-z]+$/.test(v) ? `${v}: {` : `"${v}": {`;
+        expect(script, v).toContain(cle);
+      }
+    });
+  });
+
+  describe('the caption styles', () => {
+    const styled = (subtitleStyle: string, emphasis?: string[]) =>
+      html([{ ...shot(), render: emphasis ? { emphasis } : {} } as Shot], {
+        video: { ...video, subtitleStyle } as Video,
+      });
+
+    it('emits a gesture for every style the enum accepts', () => {
+      // Un style absent de la table retomberait en karaoké sans rien dire.
+      const script = styled('karaoke').slice(styled('karaoke').lastIndexOf('<script>'));
+      for (const style of ['karaoke', 'fondant', 'highlight', 'pill', 'wipe', 'neon', 'gradient', 'blend']) {
+        expect(script).toContain(`${style}: {`);
+      }
+    });
+
+    it('marks the words the scene says carry the meaning', () => {
+      // « Une phrase de trois mots. » — `trois` est le quatrième.
+      const page = styled('highlight', ['trois']);
+      expect(page).toMatch(/<span class="word fort" id="w0-3">/);
+      expect(page).toMatch(/<span class="word" id="w0-0">/);
+    });
+
+    it('compares emphasis without case or punctuation', () => {
+      // Le modèle écrit « Dahomey », le mot rendu peut être « Dahomey, ».
+      const page = html(
+        [{ ...shot({ narration: 'le Dahomey, tombe' }), render: { emphasis: ['dahomey'] } } as Shot],
+        { video: { ...video, subtitleStyle: 'pill' } as Video }
+      );
+      expect(page).toContain('class="word fort"');
+    });
+
+    it('carries one emoji when the scene poses one', () => {
+      const page = html([{ ...shot(), render: { emoji: '🔥' } } as Shot]);
+      expect(page).toContain('class="word-emoji"');
+      expect(html([shot()])).not.toContain('word-emoji');
+    });
+  });
+
+  describe('the per-scene subtitle switch', () => {
+    it('lets a scene refuse subtitles the video otherwise shows', () => {
+      // Un titre plein cadre ou un plan de respiration n'a pas à porter du
+      // texte parce que le reste de la vidéo en porte.
+      const page = html([{ ...shot(), render: { showSubtitles: false } } as Shot]);
+      expect(page).not.toContain('class="captions');
+      expect(page).not.toContain('class="veil"');
+    });
+
+    it('leaves the karaoke tweens out too, or they aim at nothing', () => {
+      const page = html([{ ...shot(), render: { showSubtitles: false } } as Shot]);
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].words).toEqual([]);
+    });
+
+    it('follows the video when the scene says nothing', () => {
+      expect(html([shot()])).toContain('class="captions');
+    });
+  });
+
+  describe('the vertical safe area', () => {
+    const bottom = (page: string) =>
+      Number(/\.captions \{[^}]*bottom: ([\d.]+)%/.exec(page)?.[1]);
+
+    it('keeps the subtitles clear of the platform interface in 9:16', () => {
+      // TikTok, Reels et Shorts posent leur légende et leurs boutons sur le bas
+      // du cadre. Un sous-titre à 9 % passe dessous, et ça ne se voit sur aucun
+      // rendu — seulement une fois publié.
+      const vertical = html([shot()], {
+        video: { ...video, ratio: '9:16' } as Video,
+      });
+      expect(bottom(vertical)).toBeGreaterThan(15);
+    });
+
+    it('ne perd pas de place en 16:9, où la vidéo occupe tout l’écran', () => {
+      expect(bottom(html([shot()]))).toBeLessThan(12);
+    });
+  });
+
+  describe('effects on the beat', () => {
+    const onBeatPage = (onBeat: boolean) =>
+      composeHtml({
+        storyboard: {
+          ...toHyperframesStoryboard(video, [
+            {
+              ...shot(),
+              render: {
+                effects: {
+                  onBeat,
+                  flash: { startInSeconds: 1.2, durationInSeconds: 0.2 },
+                },
+              },
+            } as Shot,
+          ]),
+          musicImpacts: [1.35],
+          musicDurationS: 30,
+        },
+      });
+
+    it('moves the flash onto the nearest impact when asked', () => {
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(onBeatPage(true))![1]);
+      expect(T.scenes[0].flash.at).toBe(1.35);
+    });
+
+    it('leaves the written instant alone otherwise', () => {
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(onBeatPage(false))![1]);
+      expect(T.scenes[0].flash.at).toBe(1.2);
+    });
+  });
+
+  describe('the scene sounds', () => {
+    const withSounds = (sounds: unknown[]) =>
+      html([{ ...shot(), render: { sounds } } as Shot]);
+
+    it('gives every sound its own id, or the track is dropped', () => {
+      // Le moteur découvre les médias par leur id : sans lui, la piste est
+      // ignorée et la vidéo sort sans le son, en silence et sans erreur.
+      const page = withSounds([{ src: 'sounds/sfx/pop.mp3' }, { src: 'sounds/amb/vent.mp3' }]);
+      expect(page).toContain('id="sfx-0-0"');
+      expect(page).toContain('id="sfx-0-1"');
+    });
+
+    it('never puts two sounds of a scene on the same track', () => {
+      const page = withSounds([{ src: 'a.mp3' }, { src: 'b.mp3' }]);
+      const pistes = [...page.matchAll(/id="sfx-0-\d" [^>]*data-track-index="(\d+)"/g)]
+        .map((m) => Number(m[1]));
+      expect(new Set(pistes).size).toBe(pistes.length);
+    });
+
+    it('multiplies the scene volume by the video sfx level', () => {
+      const page = html([{ ...shot(), render: { sounds: [{ src: 'a.mp3', volume: 0.5 }] } } as Shot], {
+        video: { ...video, sfxVolume: 0.4 } as Video,
+      });
+      expect(page).toContain('data-volume="0.2"');
+    });
+
+    it('cuts a sound with the scene it punctuates', () => {
+      // Un son n'a pas à survivre au plan : sa durée est ce qu'il reste de la
+      // scène après son décalage.
+      const page = withSounds([{ src: 'a.mp3', startInSeconds: 1 }]);
+      const found = /id="sfx-0-0"[^>]*data-duration="([\d.]+)"/.exec(page);
+      expect(Number(found?.[1])).toBeCloseTo(4, 3);
+    });
+
+    it('carries the loop flag through', () => {
+      expect(withSounds([{ src: 'a.mp3', loop: true }])).toMatch(/id="sfx-0-0"[^>]*loop/);
+      expect(withSounds([{ src: 'a.mp3' }])).not.toMatch(/id="sfx-0-0"[^>]*loop/);
+    });
+
+    it('fades through the timeline, since the engine only knows a fixed volume', () => {
+      const page = withSounds([{ src: 'a.mp3', fadeInSeconds: 0.5, fadeOutSeconds: 0.3 }]);
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('for (const son of T.sfx)');
+      expect(script).toContain('{ volume: 0 }');
+    });
+
+    it('declares no fade when none was asked for', () => {
+      const page = withSounds([{ src: 'a.mp3' }]);
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.sfx).toEqual([]);
+    });
+  });
+
+  describe('the counter', () => {
+    const withCounter = (counter: Record<string, unknown>) =>
+      html([{ ...shot(), render: { counter } } as Shot]);
+
+    it('shows the value it lands on, not the one it starts from', () => {
+      // Une timeline qui ne jouerait pas laisserait le bon chiffre à l'écran,
+      // immobile. C'est la panne la moins mauvaise.
+      const page = withCounter({ value: 6000, label: 'soldates' });
+      expect(page).toContain('>6000</div>');
+      expect(page).toContain('soldates');
+    });
+
+    it('carries prefix, suffix and decimals into the markup', () => {
+      const page = withCounter({
+        value: 41.5,
+        decimals: 1,
+        prefix: '+',
+        suffix: ' %',
+      });
+      expect(page).toContain('+41.5 %');
+    });
+
+    it('animates a plain object, never an incrementing counter', () => {
+      // Incrémenter à chaque appel donnerait une vidéo différente à chaque
+      // rendu : le moteur cherche les images, il ne les joue pas dans l'ordre.
+      const page = withCounter({ value: 100 });
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('const state = { v: scene.counter.from }');
+      expect(script).toContain('state.v.toFixed');
+    });
+
+    it('drives the ring through a CSS variable, not through geometry', () => {
+      const page = withCounter({ value: 80, variant: 'ring' });
+      // La classe de l'anneau diffère du modificateur de variante : sous le
+      // même nom, le conteneur héritait de la taille de son enfant.
+      expect(page).toContain('class="counter-dial"');
+      expect(page).toContain('counter counter-ring');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('--fill');
+    });
+
+    it('leaves the page alone when no scene asks for one', () => {
+      expect(html([shot()])).not.toContain('class="counter');
+    });
+  });
+
+  describe('the three subtitle styles', () => {
+    const styled = (subtitleStyle: string) =>
+      html([shot()], { video: { ...video, subtitleStyle } as Video });
+
+    it('marks the caption block with the style the video chose', () => {
+      expect(styled('karaoke')).toContain('captions captions-karaoke');
+      expect(styled('fondant')).toContain('captions captions-fondant');
+      expect(styled('cinematic')).toContain('captions captions-cinematic');
+    });
+
+    it('lights one word at a time for karaoke and fondant', () => {
+      // Trois mots dans la narration de `shot()`, donc trois tweens de mot.
+      for (const style of ['karaoke', 'fondant']) {
+        const script = styled(style).slice(styled(style).lastIndexOf('<script>'));
+        expect(script).toContain('"#w" + scene.index + "-" + i');
+      }
+    });
+
+    it('reveals the whole line at once for cinematic', () => {
+      const page = styled('cinematic');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('"cinematic"');
+      expect(page).toContain('id="c0"');
+    });
+
+    it('falls back to karaoke, which is what already-rendered videos got', () => {
+      expect(subtitleStyleOf({})).toBe('karaoke');
+      expect(subtitleStyleOf({ subtitleStyle: null })).toBe('karaoke');
+      expect(subtitleStyleOf({ subtitleStyle: 'fondant' })).toBe('fondant');
+    });
+
+    it('knows which styles animate word by word', () => {
+      expect(lightsWords('karaoke')).toBe(true);
+      expect(lightsWords('fondant')).toBe(true);
+      expect(lightsWords('cinematic')).toBe(false);
+    });
   });
 
   it('declares the frame the resolution is billed at', () => {

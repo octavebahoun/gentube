@@ -36,6 +36,7 @@ afterAll(async () => {
 const LIBRARY: SoundChoice[] = [
   {
     src: 'sounds/sfx/pop.mp3',
+    name: 'pop',
     kind: 'sfx',
     mood: 'sec, dynamique',
     loopable: false,
@@ -45,6 +46,7 @@ const LIBRARY: SoundChoice[] = [
   },
   {
     src: 'sounds/ambient/arcade-room.mp3',
+    name: 'arcade-room',
     kind: 'ambient',
     mood: 'rétro, bruyant',
     loopable: true,

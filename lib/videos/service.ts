@@ -2,6 +2,8 @@ import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import {
+  ratioEnum,
+  subtitleStyleEnum,
   creditLedger,
   jobs,
   shots,
@@ -33,6 +35,16 @@ export const VIDEO_TITLE_MAX = 200;
 export const VIDEO_THEME_MAX = 4_000;
 export const RESOLUTIONS = ['480p', '720p'] as const;
 
+/** Les cadrages vendus, dans l'ordre de `ratio` en base. */
+export const RATIOS = ratioEnum.enumValues;
+
+/**
+ * Les apparences de sous-titres, lues sur l'enum de la base plutôt que
+ * recopiées : deux listes finissent toujours par diverger, et celle-ci décide
+ * de ce qu'une colonne accepte.
+ */
+export const SUBTITLE_STYLES = subtitleStyleEnum.enumValues;
+
 const title = z.preprocess(
   (value) => (typeof value === 'string' ? value.trim() : value),
   z
@@ -62,6 +74,28 @@ export const videoInputSchema = z.object({
   theme,
   resolution: z.enum(RESOLUTIONS).optional(),
   pipelineOverride,
+  /**
+   * L'apparence des sous-titres. Le champ existait en base et n'était réglable
+   * nulle part : ni ici, ni dans une route, ni dans un écran. Une vidéo ne
+   * pouvait donc pas quitter le karaoké, quoi qu'en dise la colonne.
+   */
+  subtitleStyle: z.enum(SUBTITLE_STYLES).optional(),
+  /**
+   * Le cadrage. Change les dimensions de rendu et la place des sous-titres :
+   * en 9:16 ils remontent pour dégager l'interface des plateformes.
+   */
+  ratio: z.enum(RATIOS).optional(),
+  /**
+   * La clé du morceau, copiée du catalogue — `sounds/music/<nom>.mp3`.
+   *
+   * `null` retire la musique. La clé n'est pas vérifiée ici : `sound_assets`
+   * est partagé et le rendu tolère une clé disparue, la vidéo sortant alors
+   * sans musique plutôt qu'en échouant.
+   */
+  musicUrl: z.preprocess(
+    (value) => (value === '' || value === 'none' ? null : value),
+    z.string().max(200).nullable().optional()
+  ),
 });
 
 export const videoUpdateSchema = videoInputSchema
@@ -115,12 +149,18 @@ export async function createVideo(
   // formulaire : une requête forgée passerait à côté du choix affiché.
   await assertResolutionAllowed(tdb, data.resolution ?? '480p');
 
+  // Tout ce que le schéma accepte est écrit. Trois champs y étaient entrés
+  // sans passer ici : une création demandant `ratio: '9:16'` validait
+  // proprement et produisait une vidéo en 16:9, sans que rien ne le signale.
   const [video] = await tdb.insert(videos, {
     projectId: data.projectId,
     title: data.title,
     theme: data.theme ?? null,
     resolution: data.resolution ?? '480p',
     pipelineOverride: data.pipelineOverride ?? null,
+    ...(data.ratio ? { ratio: data.ratio } : {}),
+    ...(data.subtitleStyle ? { subtitleStyle: data.subtitleStyle } : {}),
+    ...(data.musicUrl ? { musicUrl: data.musicUrl } : {}),
     status: 'draft',
   });
 
@@ -141,7 +181,15 @@ export async function updateVideo(
   }
 
   const patch: Record<string, unknown> = {};
-  for (const field of ['title', 'theme', 'resolution', 'pipelineOverride'] as const) {
+  for (const field of [
+    'title',
+    'theme',
+    'resolution',
+    'pipelineOverride',
+    'subtitleStyle',
+    'musicUrl',
+    'ratio',
+  ] as const) {
     if (data[field] !== undefined) patch[field] = data[field];
   }
 

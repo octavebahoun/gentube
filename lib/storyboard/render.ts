@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import type { Ratio, Resolution, Shot, Video } from '@/lib/db/schema';
+import type {
+  Ratio,
+  Resolution,
+  Shot,
+  SubtitleStyle,
+  Video,
+} from '@/lib/db/schema';
 
 /**
  * Le contrat de rendu — vérité partagée entre la base de données et la
@@ -33,7 +39,15 @@ export const sceneSoundSchema = z.object({
   loop: z.boolean().optional(),
   fadeInSeconds: z.number().min(0).optional(),
   fadeOutSeconds: z.number().min(0).optional(),
-  /** Rognage du fichier source, pour isoler un impact d'une prise plus longue. */
+  /**
+   * Rognage du fichier source, pour isoler un impact d'une prise plus longue.
+   *
+   * **Pas encore rendu.** Le moteur ne lit que `data-start`, `data-duration`,
+   * `data-volume` et `data-loop` sur une piste audio ; rien n'y décale la
+   * lecture dans le fichier. Les champs restent au contrat parce qu'un
+   * catalogue de sons en aura besoin, mais un storyboard qui les pose n'obtient
+   * rien — et le prompt système ne les propose pas.
+   */
   trimStart: z.number().min(0).optional(),
   trimEnd: z.number().min(0).optional(),
 });
@@ -42,7 +56,45 @@ export const sceneSoundSchema = z.object({
  * Transitions rendues en CSS : elles n'ont pas d'équivalent shader et n'en
  * ont pas besoin. `none` ne dure rien, `black` passe par un noir franc.
  */
+/**
+ * Combien de sons une scène peut poser.
+ *
+ * La composition réserve cette largeur de bande par scène. Deux définitions
+ * divergeraient : celle-ci est la source, `lib/render/plan.ts` la réexporte.
+ */
+export const MAX_SOUNDS_PER_SCENE = 8;
+
 export const CSS_TRANSITIONS = ['none', 'fade', 'black'] as const;
+
+/**
+ * Transitions par transformation, transposées des paquets `transitions-*` du
+ * registre HyperFrames (`docs/vocabulaire-de-rendu.md`).
+ *
+ * Elles déplacent ou redimensionnent les deux scènes au lieu de les mélanger.
+ * Deux conséquences qui les rendent précieuses : elles ne demandent **aucun
+ * WebGL**, donc elles rendent partout sans dépendre du compositeur de shaders ;
+ * et elles couvrent des gestes qu'aucun shader ne fait — la poussée, l'écrasement,
+ * le zoom traversant.
+ *
+ * Les transitions à flou du registre ne sont pas reprises : l'en-tête de
+ * `render/gentube-v1/style.css` interdit le flou, que la rastérisation
+ * logicielle de Lambda paie au triple.
+ */
+export const MOVE_TRANSITIONS = [
+  'push-left',
+  'push-right',
+  'push-up',
+  'zoom-through',
+  'zoom-out',
+  'squeeze',
+] as const;
+
+export type MoveTransition = (typeof MOVE_TRANSITIONS)[number];
+
+/** Vrai quand la transition déplace les scènes au lieu de les mélanger. */
+export function isMoveTransition(transition: string): boolean {
+  return (MOVE_TRANSITIONS as readonly string[]).includes(transition);
+}
 
 /**
  * Transitions de `@hyperframes/shader-transitions`, reprises sous leurs noms
@@ -69,7 +121,11 @@ export const SHADER_TRANSITIONS = [
   'light-leak',
 ] as const;
 
-export const TRANSITIONS = [...CSS_TRANSITIONS, ...SHADER_TRANSITIONS] as const;
+export const TRANSITIONS = [
+  ...CSS_TRANSITIONS,
+  ...MOVE_TRANSITIONS,
+  ...SHADER_TRANSITIONS,
+] as const;
 
 export type Transition = (typeof TRANSITIONS)[number];
 
@@ -78,15 +134,39 @@ export function isShaderTransition(transition: string): boolean {
   return (SHADER_TRANSITIONS as readonly string[]).includes(transition);
 }
 
-/** Les mouvements caméra sont des directives pour le *prompt*, pas pour le renderer. */
+/**
+ * Les mouvements caméra sont des directives pour le *prompt*, pas pour le
+ * renderer — et depuis le 2 septembre 2026 c'est vrai : `animationPrompt()`
+ * dans `lib/storyboard/clips.ts` les traduit pour le modèle d'animation.
+ * Auparavant la valeur était stockée et perdue là.
+ */
 export const CAMERA_MOTIONS = ['orbit', 'dolly', 'pan', 'static'] as const;
 
 export const sceneEffectsSchema = z.object({
   zoom: z.enum(['in', 'out', 'none']).optional(),
   transition: z.enum(TRANSITIONS).optional(),
   shake: z.boolean().optional(),
-  /** Directive : ce plan doit couper nettement avec la composition précédente. */
+  /**
+   * Directive : ce plan doit couper nettement avec la composition précédente.
+   *
+   * **Mort des deux côtés, au 2 septembre 2026.** Le prompt système ne le
+   * propose pas au modèle, et aucun rendu ne le lit. Gardé parce qu'un
+   * raccord dans le mouvement est une vraie intention de montage — mais tant
+   * que rien ne l'écrit ni ne le rend, il ne promet rien.
+   */
   matchCut: z.boolean().optional(),
+  /**
+   * Cale les effets ponctuels de la scène sur un temps fort de la musique.
+   *
+   * Les fiches de `assets/sounds/` portent les secondes où un morceau frappe
+   * réellement (`peaks`, repris en `sound_assets.impacts`). Un éclair posé à
+   * 0,8 s de la scène tombe n'importe où ; le même éclair calé sur le pic le
+   * plus proche fait entendre le montage. C'est ce qui sépare une vidéo
+   * automatique d'une vidéo rythmée.
+   *
+   * Sans musique, ou sans pic assez proche, l'effet garde son instant écrit.
+   */
+  onBeat: z.boolean().optional(),
   cameraMotion: z.enum(CAMERA_MOTIONS).optional(),
   flash: z
     .object({
@@ -114,10 +194,79 @@ export const sceneRenderSchema = z.object({
       highlightColor: z.string().optional(),
       fontSize: z.string().optional(),
       position: z.enum(['bottom', 'center']).optional(),
-      variant: z.enum(['reveal', 'neon', 'icon', 'pin']).optional(),
+      /**
+       * L'apparence du titre.
+       *
+       * Les six dernières sont transposées des entrées de typographie du
+       * registre HyperFrames. Elles vivent dans la colonne `render`, en jsonb :
+       * en ajouter une est un déploiement, pas une migration — c'est
+       * exactement ce pour quoi le contrat de rendu y a été mis.
+       *
+       * `typewriter`, `tracking` et `cascade` animent la **lettre** ; les
+       * autres le mot.
+       */
+      variant: z
+        .enum([
+          'reveal',
+          'neon',
+          'icon',
+          'pin',
+          'typewriter',
+          'tracking',
+          'cascade',
+          'slam',
+          'rise',
+          'glitch',
+          'blur-out',
+          'explode',
+          'focus',
+          'lines',
+          'lockup',
+          'decode',
+          'crossfade',
+          'scan',
+          'axis-y',
+          'axis-z',
+          'reel',
+          'fade-up',
+          'strike',
+          'ticker',
+          'calm',
+          'split',
+          'weight',
+          'wave',
+          'backdrop',
+          'drop',
+        ])
+        .optional(),
       icon: z.string().optional(),
       iconLabel: z.string().optional(),
       glowColor: z.string().optional(),
+    })
+    .optional(),
+  /**
+   * Un chiffre qui monte.
+   *
+   * Le plan le moins cher du catalogue : **aucune image n'est générée**, donc
+   * il ne coûte que sa voix off — dix FCFA la minute contre quatre cents pour
+   * un plan illustré (`docs/tarifs.md`). C'est ce qui rend viable le genre
+   * « les cinq chiffres de… », très courant en contenu sans visage.
+   */
+  counter: z
+    .object({
+      /** La valeur d'arrivée. C'est elle que le spectateur retient. */
+      value: z.number(),
+      /** Le départ. Zéro sauf si la progression elle-même veut dire quelque chose. */
+      from: z.number().optional(),
+      /** Ce que le chiffre compte. Sans lui, un nombre nu ne dit rien. */
+      label: z.string().optional(),
+      prefix: z.string().optional(),
+      suffix: z.string().optional(),
+      decimals: z.number().int().min(0).max(3).optional(),
+      /** `count` monte en chiffres, `ring` remplit un anneau autour d'eux. */
+      variant: z.enum(['count', 'ring']).optional(),
+      startInSeconds: z.number().min(0).optional(),
+      durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
@@ -127,13 +276,53 @@ export const sceneRenderSchema = z.object({
       subtext: z.string().optional(),
     })
     .optional(),
+  /**
+   * Les mots qui portent le sens de la phrase.
+   *
+   * Deux ou trois par scène, écrits par le modèle avec la narration. Plusieurs
+   * styles de sous-titres s'en servent pour accentuer : une couleur, une
+   * graisse, une taille. Sans eux ces styles s'appliquent uniformément et
+   * perdent ce qui fait leur intérêt.
+   *
+   * Comparés sans casse ni ponctuation : le modèle écrit « Dahomey », le mot
+   * rendu peut être « Dahomey, ».
+   */
+  emphasis: z.array(z.string()).optional(),
+  /**
+   * Un emoji posé avec la phrase, quand le style en accepte un.
+   *
+   * Un seul : deux emoji dans un sous-titre lisent comme du bruit.
+   */
+  emoji: z.string().max(8).optional(),
   /** Volume de l'audio propre au clip. 0 le rend muet. */
   mediaVolume: z.number().min(0).max(1).optional(),
   /** Ralentit un clip court pour remplir la scène sans boucle visible. */
   playbackRate: z.number().positive().optional(),
   showSubtitles: z.boolean().optional(),
-  sounds: z.array(sceneSoundSchema).optional(),
+  /**
+   * Les sons de la scène, bornés.
+   *
+   * La composition réserve une bande de pistes par scène ; au-delà de la
+   * limite, un son déborde sur la bande de la scène suivante et le moteur
+   * refuse deux éléments qui se chevauchent sur une piste. La borne est ici
+   * plutôt qu'au rendu : mieux vaut un storyboard refusé qu'un rendu qui
+   * échoue après le débit.
+   */
+  sounds: z.array(sceneSoundSchema).max(MAX_SOUNDS_PER_SCENE).optional(),
 });
+
+/**
+ * Vrai quand la scène dessine son propre contenu et n'a aucune image à
+ * illustrer : une carte, un compteur.
+ *
+ * C'est cette fonction qui fait l'économie. Sans elle, l'étape image dessine
+ * une illustration pour un écran qui ne la montrera jamais — et la facture.
+ */
+export function rendersOwnContent(render: unknown): boolean {
+  const parsed = sceneRenderSchema.safeParse(render ?? {});
+  if (!parsed.success) return false;
+  return Boolean(parsed.data.card || parsed.data.counter);
+}
 
 export type WordTiming = z.infer<typeof wordTimingSchema>;
 export type SceneSound = z.infer<typeof sceneSoundSchema>;
@@ -184,6 +373,14 @@ export const TRANSITION_DURATIONS: Record<Transition, number> = {
   none: 0,
   fade: DEFAULT_TRANSITION_SECONDS,
   black: 0.85,
+  // Les poussées sont courtes : un mouvement plein cadre qui s'attarde donne
+  // le mal de mer, là où un fondu peut respirer.
+  'push-left': 0.5,
+  'push-right': 0.5,
+  'push-up': 0.5,
+  'zoom-through': 0.55,
+  'zoom-out': 0.55,
+  squeeze: 0.45,
   'domain-warp': 0.9,
   'ridged-burn': 0.9,
   'whip-pan': 0.65,
@@ -318,8 +515,12 @@ export type HyperframesStoryboard = {
   ratio: Ratio;
   voice?: string;
   subtitles: boolean;
-  subtitleStyle: string;
+  subtitleStyle: SubtitleStyle;
   music?: string;
+  /** Secondes où la musique frappe, depuis son propre début. */
+  musicImpacts?: number[];
+  /** Longueur du morceau, pour retrouver ses pics quand il boucle. */
+  musicDurationS?: number;
   musicVolume: number;
   sfxVolume: number;
   /** Durée totale, calculée une fois ici pour que personne ne la recalcule. */
@@ -354,7 +555,20 @@ export function toHyperframesStoryboard(
     | 'sfxVolume'
   >,
   shots: Shot[],
-  { fallbackVoice }: { fallbackVoice?: string | null } = {}
+  {
+    fallbackVoice,
+    music,
+  }: {
+    fallbackVoice?: string | null;
+    /**
+     * Les pics du morceau et sa longueur, lus dans `sound_assets`.
+     *
+     * Optionnels parce que la vidéo ne stocke qu'une URL de musique : ses
+     * métadonnées vivent dans le catalogue, et c'est l'appelant qui les
+     * apporte. Sans elles, `onBeat` reste sans effet plutôt que de deviner.
+     */
+    music?: { impacts?: number[]; durationS?: number | null } | null;
+  } = {}
 ): HyperframesStoryboard {
   const parsed = shots.map((shot) => {
     const render = sceneRenderSchema.safeParse(shot.render ?? {});
@@ -377,6 +591,8 @@ export function toHyperframesStoryboard(
     subtitles: video.subtitles,
     subtitleStyle: video.subtitleStyle,
     music: video.musicUrl ?? undefined,
+    musicImpacts: music?.impacts?.length ? music.impacts : undefined,
+    musicDurationS: music?.durationS ?? undefined,
     musicVolume: video.musicVolume,
     sfxVolume: video.sfxVolume,
     durationInSeconds: totalDurationSeconds(parsed),

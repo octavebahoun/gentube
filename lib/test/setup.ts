@@ -55,3 +55,32 @@ for (const name of [
 // qu'on a le droit de marteler le service de Microsoft depuis une CI — et un
 // test qui dépend du réseau n'est plus un test.
 process.env.EDGE_TTS_DISABLED = '1';
+
+/**
+ * Le réseau lui-même, coupé.
+ *
+ * Vider les clés empêche un client de se construire ; ça n'empêche pas un
+ * `fetch` écrit en dur d'atteindre le monde. Le cas s'est produit le
+ * 2 septembre 2026 : un test du webhook Replicate suivait l'URL du clip
+ * jusqu'à une résolution DNS réelle, et rien ne l'a arrêté — c'est le service
+ * distant qui a dit non.
+ *
+ * On remplace donc `fetch` par un refus qui **nomme l'URL demandée**. Un test
+ * qui a besoin d'une réponse la pose lui-même avec `vi.stubGlobal('fetch', …)`,
+ * ce qui rend la dépendance visible dans le test plutôt que dans les journaux
+ * de la CI.
+ */
+globalThis.fetch = (async (input: RequestInfo | URL) => {
+  const url =
+    typeof input === 'string'
+      ? input
+      : input instanceof URL
+        ? input.href
+        : input.url;
+
+  throw new Error(
+    `Un test a tenté d'atteindre le réseau : ${url}\n` +
+      "Posez un double avec vi.stubGlobal('fetch', …) plutôt que d'appeler " +
+      'le vrai service.'
+  );
+}) as typeof fetch;

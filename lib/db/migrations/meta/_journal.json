@@ -64,6 +64,13 @@
       "when": 1787770603627,
       "tag": "0008_solid_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788307488891,
+      "tag": "0009_fuzzy_susan_delgado",
+      "breakpoints": true
     }
   ]
 }

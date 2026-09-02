@@ -13,7 +13,8 @@
     "db:status": "tsx lib/db/status.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test:visual": "tsx render/regression/run.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.1118.0",
@@ -59,6 +60,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@hyperframes/shader-transitions": "0.7.106",
     "hyperframes": "0.7.106",
     "tsx": "^4.23.12",
     "vitest": "^4.1.11"
