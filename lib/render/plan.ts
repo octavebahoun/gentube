@@ -28,11 +28,11 @@ const ACCENT_COLOR = '#ce1f20';
 /**
  * Combien de sons une scène peut poser.
  *
- * Sert à réserver une bande de pistes par scène plutôt qu'à compter les sons
- * réellement présents : deux scènes voisines ne doivent pas se disputer une
- * piste parce que la première en a déclaré un de plus que prévu.
+ * Réexporté du contrat, qui borne aussi le tableau à l'entrée : réserver une
+ * largeur de bande sans la faire respecter laissait un neuvième son écrire sur
+ * la bande de la scène suivante.
  */
-export const MAX_SOUNDS_PER_SCENE = 8;
+export { MAX_SOUNDS_PER_SCENE } from '@/lib/storyboard/render';
 
 /** Arrondi à la milliseconde, comme le reste du contrat de rendu. */
 export const ms = (seconds: number) => Math.round(seconds * 1000) / 1000;
@@ -86,10 +86,10 @@ export function transitionCues(
     const transition = scene.effects?.transition;
     const duration = transitionDurationSeconds(transition);
 
-    // Une couture sans `shader` est un fondu enchaîné côté compositeur. Pour
-    // une transformation il faut lui dire de ne rien faire — durée nulle, donc
-    // coupe franche — sinon il mélange les deux scènes pendant qu'elles se
-    // déplacent, et le mouvement disparaît sous le fondu.
+    // Une couture sans `shader` est un fondu enchaîné côté compositeur, et
+    // c'est ce qu'on veut même pour une transformation : sa durée réelle est
+    // ce qui garde les deux scènes vivantes pendant le geste. Seule `none`
+    // coupe franc.
     const composited = transition === 'none' ? 0 : duration;
 
     return {
@@ -422,7 +422,7 @@ function onBeat(
  * reste du fichier : le moteur cherche chaque image, et un calcul fait dans le
  * navigateur dériverait d'un rendu à l'autre.
  */
-const TITRE_PAR_LETTRE = new Set(['typewriter', 'tracking', 'cascade']);
+export const TITRE_PAR_LETTRE = new Set(['typewriter', 'tracking', 'cascade']);
 
 export function titleTargets(
   title: { text: string; variant?: string },

@@ -1,6 +1,4 @@
 import type { HyperframesStoryboard } from '@/lib/storyboard/render';
-import { transitionDurationSeconds } from '@/lib/storyboard/render';
-import { isMoveTransition } from '@/lib/storyboard/render';
 import {
   MAX_SOUNDS_PER_SCENE,
   buildTimeline,
@@ -70,9 +68,6 @@ const SUBTITLE_BOTTOM: Record<string, number> = {
   '9:16': 0.18,
 };
 
-/** Amplitude du zoom lent sur une image fixe. 6 % sur toute la scène. */
-const KEN_BURNS_SCALE = 1.06;
-
 
 export type CompositionInput = {
   storyboard: HyperframesStoryboard;
@@ -135,7 +130,7 @@ export function composeHtml({
   const subtitleBottom = (SUBTITLE_BOTTOM[storyboard.ratio] ?? 0.09) * 100;
 
   const music = storyboard.music
-    ? `<audio id="music" src="${escapeHtml(storyboard.music)}" data-start="0" ` +
+    ? `<audio id="music" src="${escapeHtml(encodeURI(storyboard.music))}" data-start="0" ` +
       `data-duration="${durationInSeconds}" data-track-index="${audioTrackBase - 1}" ` +
       `data-volume="${storyboard.musicVolume}" loop></audio>`
     : '';

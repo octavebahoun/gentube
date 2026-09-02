@@ -56,6 +56,14 @@ export const sceneSoundSchema = z.object({
  * Transitions rendues en CSS : elles n'ont pas d'équivalent shader et n'en
  * ont pas besoin. `none` ne dure rien, `black` passe par un noir franc.
  */
+/**
+ * Combien de sons une scène peut poser.
+ *
+ * La composition réserve cette largeur de bande par scène. Deux définitions
+ * divergeraient : celle-ci est la source, `lib/render/plan.ts` la réexporte.
+ */
+export const MAX_SOUNDS_PER_SCENE = 8;
+
 export const CSS_TRANSITIONS = ['none', 'fade', 'black'] as const;
 
 /**
@@ -291,7 +299,16 @@ export const sceneRenderSchema = z.object({
   /** Ralentit un clip court pour remplir la scène sans boucle visible. */
   playbackRate: z.number().positive().optional(),
   showSubtitles: z.boolean().optional(),
-  sounds: z.array(sceneSoundSchema).optional(),
+  /**
+   * Les sons de la scène, bornés.
+   *
+   * La composition réserve une bande de pistes par scène ; au-delà de la
+   * limite, un son déborde sur la bande de la scène suivante et le moteur
+   * refuse deux éléments qui se chevauchent sur une piste. La borne est ici
+   * plutôt qu'au rendu : mieux vaut un storyboard refusé qu'un rendu qui
+   * échoue après le débit.
+   */
+  sounds: z.array(sceneSoundSchema).max(MAX_SOUNDS_PER_SCENE).optional(),
 });
 
 /**

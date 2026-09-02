@@ -145,7 +145,7 @@ function main() {
     );
     process.exit(1);
   }
-  console.log(`\n${MOMENTS.length * FORMATS.length} instants conformes.`);
+  console.log(`\n${MOMENTS.length * jeux.length} instants conformes.`);
 }
 
 /** Un format : on assemble, on capture, on compare, on nettoie. */

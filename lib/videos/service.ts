@@ -149,12 +149,18 @@ export async function createVideo(
   // formulaire : une requête forgée passerait à côté du choix affiché.
   await assertResolutionAllowed(tdb, data.resolution ?? '480p');
 
+  // Tout ce que le schéma accepte est écrit. Trois champs y étaient entrés
+  // sans passer ici : une création demandant `ratio: '9:16'` validait
+  // proprement et produisait une vidéo en 16:9, sans que rien ne le signale.
   const [video] = await tdb.insert(videos, {
     projectId: data.projectId,
     title: data.title,
     theme: data.theme ?? null,
     resolution: data.resolution ?? '480p',
     pipelineOverride: data.pipelineOverride ?? null,
+    ...(data.ratio ? { ratio: data.ratio } : {}),
+    ...(data.subtitleStyle ? { subtitleStyle: data.subtitleStyle } : {}),
+    ...(data.musicUrl ? { musicUrl: data.musicUrl } : {}),
     status: 'draft',
   });
 

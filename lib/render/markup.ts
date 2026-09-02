@@ -1,6 +1,7 @@
 import type { HyperframesScene, WordTiming } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
 import { isVideoPath, kenBurns, ms, wordsOrFallback } from './plan';
+import { TITRE_PAR_LETTRE as PAR_LETTRE } from './plan';
 
 /**
  * Le balisage d'une scène : son média, sa carte, ses sous-titres, son bandeau,
@@ -195,7 +196,10 @@ export function soundsMarkup(
       const volume = (sound.volume ?? 1) * sfxVolume;
 
       return (
-        `<audio id="sfx-${index}-${n}" src="${escapeHtml(sound.src)}" ` +
+        // `encodeURI` comme pour les images : une clé du catalogue contenant
+        // un espace ou un dièse produisait un `src` cassé, et la piste
+        // disparaissait sans erreur.
+        `<audio id="sfx-${index}-${n}" src="${escapeHtml(encodeURI(sound.src))}" ` +
         `data-start="${ms(scene.startInSeconds + offset)}" ` +
         `data-duration="${ms(reste)}" ` +
         `data-track-index="${trackBase + n}" ` +
@@ -293,7 +297,6 @@ function kineticMarkup(scene: HyperframesScene, index: number): string {
  * mot. Le mot reste l'unité de retour à la ligne, la lettre devient l'unité
  * d'animation.
  */
-const PAR_LETTRE = new Set(['typewriter', 'tracking', 'cascade']);
 
 function lettres(
   word: string,
@@ -332,7 +335,7 @@ export function audioMarkup(
   // leur id. Sans lui, la piste est ignorée et la vidéo sort **muette**, sans
   // qu'aucune erreur ne soit levée.
   return (
-    `<audio id="voice-${index}" src="${escapeHtml(scene.audioPath)}" ` +
+    `<audio id="voice-${index}" src="${escapeHtml(encodeURI(scene.audioPath))}" ` +
     `data-start="${scene.startInSeconds}" data-duration="${scene.narrationSeconds}" ` +
     `data-track-index="${trackBase + index}" data-volume="1"></audio>`
   );

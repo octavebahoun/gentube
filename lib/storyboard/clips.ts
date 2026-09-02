@@ -187,6 +187,11 @@ export async function submitClips(
         webhookUrl: `${base}/api/webhooks/replicate?job=${job.id}`,
       });
 
+      // `eq(status, 'queued')` ferme l'autre moitié de la course. Écrire le
+      // job avant de soumettre garantit qu'un rappel le trouve ; ça n'empêche
+      // pas ce retour d'écraser un `succeeded` déjà posé par le webhook, ce
+      // qui remettait le plan en `generating` et le job en `running` — donc
+      // sauté à jamais, puisque `LIVE` contient `running`.
       await tdb.update(
         jobs,
         {
@@ -200,13 +205,13 @@ export async function submitClips(
           } satisfies AnimationJobPayload,
           updatedAt: new Date(),
         },
-        eq(jobs.id, job.id)
+        and(eq(jobs.id, job.id), eq(jobs.status, 'queued'))
       );
 
       await tdb.update(
         shots,
         { status: 'generating', updatedAt: new Date() },
-        eq(shots.id, shot.id)
+        and(eq(shots.id, shot.id), eq(shots.status, 'pending'))
       );
 
       submitted += 1;
