@@ -245,6 +245,44 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the title variants', () => {
+    const titled = (variant: string) =>
+      html([
+        {
+          ...shot(),
+          render: { kineticTitle: { text: 'DEUX MOTS', variant } },
+        } as Shot,
+      ]);
+
+    it('animates letters for the three that need them, words otherwise', () => {
+      // Les lettres sont enveloppées dans leur mot : sans ça un titre se
+      // couperait au milieu d'un mot en fin de ligne.
+      expect(titled('typewriter')).toContain('class="kt-char"');
+      expect(titled('slam')).not.toContain('class="kt-char"');
+    });
+
+    it('computes its targets outside the page', () => {
+      const page = titled('cascade');
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      // « DEUX MOTS » : quatre lettres puis quatre lettres.
+      expect(T.scenes[0].kinetic.cibles).toHaveLength(8);
+      expect(T.scenes[0].kinetic.cibles[0]).toBe('k0-0-0');
+    });
+
+    it('targets words when the variant animates words', () => {
+      const page = titled('slam');
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].kinetic.cibles).toEqual(['k0-0', 'k0-1']);
+    });
+
+    it('emits a gesture for every variant the contract accepts', () => {
+      const script = titled('reveal').slice(titled('reveal').lastIndexOf('<script>'));
+      for (const v of ['reveal', 'neon', 'icon', 'pin', 'typewriter', 'tracking', 'cascade', 'slam', 'rise', 'glitch']) {
+        expect(script).toContain(`${v}: {`);
+      }
+    });
+  });
+
   describe('the caption styles', () => {
     const styled = (subtitleStyle: string, emphasis?: string[]) =>
       html([{ ...shot(), render: emphasis ? { emphasis } : {} } as Shot], {

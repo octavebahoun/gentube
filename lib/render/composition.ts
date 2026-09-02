@@ -244,6 +244,30 @@ export function composeHtml({
        * style.css interdit le flou plein cadre, qui triple le temps de
        * rendu en rastérisation logicielle. Un mot n'est pas plein cadre.
        */
+      /*
+       * Ce que chaque variante de titre fait de sa cible — un mot ou une
+       * lettre selon la variante, décidé hors de la page.
+       */
+      const TITRES = {
+        // L'entrée d'origine : le mot monte et grossit en rebondissant.
+        reveal: { de: { opacity: 0, y: 26, scale: 0.92 }, vers: { opacity: 1, y: 0, scale: 1 }, ease: "back.out(1.7)" },
+        neon: { de: { opacity: 0, y: 26, scale: 0.92 }, vers: { opacity: 1, y: 0, scale: 1 }, ease: "back.out(1.7)" },
+        icon: { de: { opacity: 0, y: 26, scale: 0.92 }, vers: { opacity: 1, y: 0, scale: 1 }, ease: "back.out(1.7)" },
+        pin: { de: { opacity: 0, y: 26, scale: 0.92 }, vers: { opacity: 1, y: 0, scale: 1 }, ease: "back.out(1.7)" },
+        // La lettre apparaît, sans transition : une machine à écrire ne fond pas.
+        typewriter: { de: { opacity: 0 }, vers: { opacity: 1 }, ease: "none" },
+        // L'interlettrage se resserre. Le geste des titres de marque.
+        tracking: { de: { opacity: 0, letterSpacing: "0.5em" }, vers: { opacity: 1, letterSpacing: "0em" }, ease: "power3.out" },
+        // Les lettres tombent d'en haut, l'une après l'autre.
+        cascade: { de: { opacity: 0, y: "-0.9em" }, vers: { opacity: 1, y: "0em" }, ease: "power2.out" },
+        // Le mot arrive trop grand et se pose. Le titre de bande-annonce.
+        slam: { de: { opacity: 0, scale: 2.4 }, vers: { opacity: 1, scale: 1 }, ease: "power4.out" },
+        // Le mot monte du flou vers le net. Le flou est sur un mot, pas plein cadre.
+        rise: { de: { opacity: 0, y: "0.5em", filter: "blur(8px)" }, vers: { opacity: 1, y: "0em", filter: "blur(0px)" }, ease: "power2.out" },
+        // Une secousse chromatique brève, puis le mot se pose.
+        glitch: { de: { opacity: 0, x: -8, skewX: 12 }, vers: { opacity: 1, x: 0, skewX: 0 }, ease: "steps(4)" },
+      };
+
       const MOTS = {
         // Le mot s'allume et le reste. La lecture karaoké.
         karaoke: {
@@ -368,20 +392,18 @@ export function composeHtml({
         // Le titre cinétique : chaque mot entre à son tour. Le décalage est
         // une donnée, calculée hors de la page.
         if (scene.kinetic) {
-          for (let w = 0; w < scene.kinetic.count; w++) {
+          const geste = TITRES[scene.kinetic.variant] || TITRES.reveal;
+          scene.kinetic.cibles.forEach(function (cible, w) {
             tl.fromTo(
-              "#k" + scene.index + "-" + w,
-              { opacity: 0, y: 26, scale: 0.92 },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: scene.kinetic.duration,
-                ease: "back.out(1.7)",
-              },
+              "#" + cible,
+              Object.assign({}, geste.de),
+              Object.assign(
+                { duration: scene.kinetic.duration, ease: geste.ease },
+                geste.vers
+              ),
               scene.kinetic.at + w * scene.kinetic.stagger
             );
-          }
+          });
         }
 
         /*

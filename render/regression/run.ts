@@ -52,13 +52,21 @@ const FORMATS = [
  * Hors du jeu par défaut : neuf styles font neuf rendus, et la garde doit
  * rester assez rapide pour être lancée à chaque changement.
  */
+const TITRES = [
+  'reveal', 'typewriter', 'tracking', 'cascade', 'slam', 'rise', 'glitch',
+].map((variant) => ({
+  nom: `titre-${variant}`,
+  video: REFERENCE_VIDEO,
+  variant,
+}));
+
 const STYLES = SUBTITLE_STYLES.map((style) => ({
   nom: `style-${style}`,
   video: { ...REFERENCE_VIDEO, subtitleStyle: style } as typeof REFERENCE_VIDEO,
 }));
 
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
-function projet(video: typeof REFERENCE_VIDEO): string {
+function projet(video: typeof REFERENCE_VIDEO, variant?: string): string {
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
     cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
@@ -66,7 +74,13 @@ function projet(video: typeof REFERENCE_VIDEO): string {
   cpSync(join(HERE, 'media'), join(dir, 'media'), { recursive: true });
   cpSync(join(HERE, 'voice'), join(dir, 'voice'), { recursive: true });
 
-  const storyboard = toHyperframesStoryboard(video, referenceShots());
+  const shots = referenceShots();
+  if (variant) {
+    // La scène d'ouverture porte le titre : c'est elle qu'on décline.
+    const render = shots[0].render as { kineticTitle?: { variant?: string } };
+    if (render.kineticTitle) render.kineticTitle.variant = variant;
+  }
+  const storyboard = toHyperframesStoryboard(video, shots);
   writeFileSync(join(dir, 'index.html'), composeHtml({ storyboard, watermark: true }));
   return dir;
 }
@@ -111,11 +125,14 @@ function similarite(a: string, b: string): number {
 function main() {
   let echecs = 0;
 
-  const jeux = process.argv.includes('--styles') ? [...FORMATS, ...STYLES] : FORMATS;
+  let jeux: readonly { nom: string; video: typeof REFERENCE_VIDEO; variant?: string }[] =
+    FORMATS;
+  if (process.argv.includes('--styles')) jeux = [...jeux, ...STYLES];
+  if (process.argv.includes('--titres')) jeux = [...jeux, ...TITRES];
 
   for (const format of jeux) {
     console.log(`\n${format.nom} · ${format.video.resolution}`);
-    echecs += passer(format.nom, format.video);
+    echecs += passer(format.nom, format.video, format.variant);
   }
 
   if (echecs > 0) {
@@ -129,8 +146,12 @@ function main() {
 }
 
 /** Un format : on assemble, on capture, on compare, on nettoie. */
-function passer(nom: string, video: typeof REFERENCE_VIDEO): number {
-  const dir = projet(video);
+function passer(
+  nom: string,
+  video: typeof REFERENCE_VIDEO,
+  variant?: string
+): number {
+  const dir = projet(video, variant);
   let echecs = 0;
 
   try {

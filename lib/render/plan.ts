@@ -258,7 +258,15 @@ export function buildTimeline(
               at: ms(scene.startInSeconds + (title.startInSeconds ?? 0)),
               duration: title.animationDuration ?? 0.5,
               stagger: title.staggerDelay ?? 0.08,
-              count: title.text.trim().split(/\s+/).filter(Boolean).length,
+              variant: title.variant ?? 'reveal',
+              /**
+               * Les identifiants à animer, dans l'ordre d'apparition.
+               *
+               * Calculés ici parce que trois variantes animent la lettre et
+               * les autres le mot : la page ne doit pas avoir à redécouper le
+               * titre pour savoir quoi viser.
+               */
+              cibles: titleTargets(title, index),
             }
           : null,
         // Même règle que le balisage : sans mots posés, un tween de karaoké
@@ -404,4 +412,27 @@ function onBeat(
   at: number
 ): number {
   return scene.effects?.onBeat ? snapToBeat(at, beats) : ms(at);
+}
+
+
+/**
+ * Ce qu'une variante de titre anime : ses mots, ou ses lettres.
+ *
+ * Le découpage vit ici et pas dans la page, pour la même raison que tout le
+ * reste du fichier : le moteur cherche chaque image, et un calcul fait dans le
+ * navigateur dériverait d'un rendu à l'autre.
+ */
+const TITRE_PAR_LETTRE = new Set(['typewriter', 'tracking', 'cascade']);
+
+export function titleTargets(
+  title: { text: string; variant?: string },
+  index: number
+): string[] {
+  const mots = title.text.trim().split(/\s+/).filter(Boolean);
+  if (!title.variant || !TITRE_PAR_LETTRE.has(title.variant)) {
+    return mots.map((_, i) => `k${index}-${i}`);
+  }
+  return mots.flatMap((mot, i) =>
+    [...mot].map((_, j) => `k${index}-${i}-${j}`)
+  );
 }

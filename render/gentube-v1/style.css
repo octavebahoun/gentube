@@ -542,3 +542,67 @@ video.media {
   font-size: 1.1em;
   line-height: 1;
 }
+
+/* --- Variantes de titre transposées du registre -------------------------- */
+
+/*
+ * La lettre doit être un bloc en ligne pour accepter une transformation : un
+ * `span` par défaut ne se laisse ni déplacer ni redimensionner.
+ */
+.kt-char {
+  display: inline-block;
+  will-change: opacity, transform;
+}
+
+/* `typewriter` : rien à styler, la lettre apparaît. Le curseur suit la fin. */
+.kt-typewriter .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `tracking` : l'interlettrage se resserre. Le geste des titres de marque. */
+.kt-tracking {
+  font-weight: 700;
+}
+
+.kt-tracking .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `cascade` : les lettres tombent d'en haut. */
+.kt-cascade .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* `slam` : le mot arrive trop grand et se pose. Titre de bande-annonce. */
+.kt-slam {
+  font-size: 3.1em;
+  letter-spacing: -0.02em;
+}
+
+.kt-slam .kt-word {
+  color: #fff;
+  text-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.7),
+    0 8px 30px rgba(0, 0, 0, 0.85);
+}
+
+/* `rise` : le mot monte du flou vers le net. */
+.kt-rise .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
+}
+
+/*
+ * `glitch` : deux copies décalées en rouge et cyan, posées par des ombres
+ * plutôt que par des éléments — trois fois moins de nœuds à animer.
+ */
+.kt-glitch .kt-word {
+  color: #fff;
+  text-shadow:
+    0.04em 0 0 rgba(255, 0, 64, 0.85),
+    -0.04em 0 0 rgba(0, 220, 255, 0.85),
+    0 4px 18px rgba(0, 0, 0, 0.7);
+}

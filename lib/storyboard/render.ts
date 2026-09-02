@@ -186,7 +186,31 @@ export const sceneRenderSchema = z.object({
       highlightColor: z.string().optional(),
       fontSize: z.string().optional(),
       position: z.enum(['bottom', 'center']).optional(),
-      variant: z.enum(['reveal', 'neon', 'icon', 'pin']).optional(),
+      /**
+       * L'apparence du titre.
+       *
+       * Les six dernières sont transposées des entrées de typographie du
+       * registre HyperFrames. Elles vivent dans la colonne `render`, en jsonb :
+       * en ajouter une est un déploiement, pas une migration — c'est
+       * exactement ce pour quoi le contrat de rendu y a été mis.
+       *
+       * `typewriter`, `tracking` et `cascade` animent la **lettre** ; les
+       * autres le mot.
+       */
+      variant: z
+        .enum([
+          'reveal',
+          'neon',
+          'icon',
+          'pin',
+          'typewriter',
+          'tracking',
+          'cascade',
+          'slam',
+          'rise',
+          'glitch',
+        ])
+        .optional(),
       icon: z.string().optional(),
       iconLabel: z.string().optional(),
       glowColor: z.string().optional(),

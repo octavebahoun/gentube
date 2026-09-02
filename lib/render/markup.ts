@@ -279,13 +279,40 @@ function kineticMarkup(scene: HyperframesScene, index: number): string {
     `kt-${escapeHtml(title.position ?? 'center')}"${style ? ` style="${style}"` : ''}>` +
     icon +
     words
-      .map(
-        (word, wordIndex) =>
-          `<span class="kt-word" id="k${index}-${wordIndex}">${escapeHtml(word)}</span>`
-      )
+      .map((word, wordIndex) => lettres(word, index, wordIndex, title.variant))
       .join('') +
     '</div>'
   );
+}
+
+/**
+ * Trois variantes animent la lettre, les autres le mot.
+ *
+ * Les lettres sont enveloppées **dans** leur mot plutôt que posées à plat :
+ * sans ça un titre se couperait n'importe où en fin de ligne, au milieu d'un
+ * mot. Le mot reste l'unité de retour à la ligne, la lettre devient l'unité
+ * d'animation.
+ */
+const PAR_LETTRE = new Set(['typewriter', 'tracking', 'cascade']);
+
+function lettres(
+  word: string,
+  index: number,
+  wordIndex: number,
+  variant?: string
+): string {
+  const id = `k${index}-${wordIndex}`;
+  if (!variant || !PAR_LETTRE.has(variant)) {
+    return `<span class="kt-word" id="${id}">${escapeHtml(word)}</span>`;
+  }
+
+  const chars = [...word]
+    .map(
+      (char, i) =>
+        `<span class="kt-char" id="${id}-${i}">${escapeHtml(char)}</span>`
+    )
+    .join('');
+  return `<span class="kt-word" id="${id}">${chars}</span>`;
 }
 
 /**
