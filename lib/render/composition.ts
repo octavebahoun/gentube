@@ -236,6 +236,57 @@ export function composeHtml({
       const T = ${js(timeline)};
       const tl = gsap.timeline({ paused: true });
 
+      /*
+       * Ce que chaque style fait d'un mot à son instant.
+       *
+       * Une durée nulle serait ignorée par GSAP, d'où le millième là où le
+       * changement doit être instantané. Le flou est permis ici : la règle de
+       * style.css interdit le flou plein cadre, qui triple le temps de
+       * rendu en rastérisation logicielle. Un mot n'est pas plein cadre.
+       */
+      const MOTS = {
+        // Le mot s'allume et le reste. La lecture karaoké.
+        karaoke: {
+          de: { color: "rgba(255,255,255,0.42)" },
+          vers: { color: "#ffffff", duration: 0.001, ease: "none" },
+        },
+        // Le mot monte et se révèle, sans changer de couleur.
+        fondant: {
+          de: { opacity: 0.25, y: "0.22em", filter: "blur(3px)" },
+          vers: { opacity: 1, y: "0em", filter: "blur(0px)", duration: 0.28, ease: "power2.out" },
+        },
+        // Un bandeau de couleur balaie le mot actif. C'est le style des shorts.
+        highlight: {
+          de: { backgroundPosition: "100% 0", color: "rgba(255,255,255,0.55)" },
+          vers: { backgroundPosition: "0% 0", color: "#ffffff", duration: 0.16, ease: "power1.out" },
+        },
+        // Chaque mot dans sa pastille, qui gonfle à son tour.
+        pill: {
+          de: { scale: 0.72, opacity: 0.4 },
+          vers: { scale: 1, opacity: 1, duration: 0.22, ease: "back.out(2.2)" },
+        },
+        // Le mot se découvre de gauche à droite, sans bouger.
+        wipe: {
+          de: { clipPath: "inset(0 100% 0 0)", opacity: 1 },
+          vers: { clipPath: "inset(0 0% 0 0)", duration: 0.24, ease: "power2.out" },
+        },
+        // La lueur monte avec le mot. Les mots porteurs gardent leur accent.
+        neon: {
+          de: { opacity: 0.25, scale: 0.94 },
+          vers: { opacity: 1, scale: 1, duration: 0.2, ease: "power2.out" },
+        },
+        // Le dégradé apparaît en rebondissant.
+        gradient: {
+          de: { opacity: 0, scale: 0.88 },
+          vers: { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(1.8)" },
+        },
+        // Le texte s'inverse sur ce qu'il couvre : rien à animer que sa venue.
+        blend: {
+          de: { opacity: 0 },
+          vers: { opacity: 1, duration: 0.12, ease: "none" },
+        },
+      };
+
       for (const scene of T.scenes) {
         if (scene.fade > 0) {
           tl.fromTo(
@@ -374,15 +425,17 @@ export function composeHtml({
           );
         }
 
-        // Trois styles, trois façons de faire apparaître la phrase.
-        //
-        //  - karaoke  : le mot s'allume à son instant et le reste. Une durée
-        //               nulle serait ignorée par GSAP, d'où le millième.
-        //  - fondant  : le mot monte et se révèle, sans changer de couleur.
-        //               Pas de flou CSS — la rastérisation logicielle
-        //               de Lambda le paie cher (voir l'en-tête de style.css).
-        //  - cinematic: aucun mot ne bouge. La phrase entière apparaît avec la
-        //               scène, comme un sous-titre de film.
+        /*
+         * Le style de sous-titre, en une table plutôt qu'en chaîne de tests.
+         *
+         * Tous ces styles font la même chose — révéler un mot à son instant —
+         * et ne diffèrent que par la propriété animée. Une entrée par style
+         * garde la boucle unique et rend l'ajout d'un style suivant sans
+         * risque pour les précédents.
+         *
+         * 'cinematic' est à part : il ne révèle pas les mots un par un mais la
+         * phrase entière avec la scène, comme un sous-titre de film.
+         */
         if (T.subtitleStyle === "cinematic") {
           if (scene.words.length > 0) {
             tl.fromTo(
@@ -392,21 +445,13 @@ export function composeHtml({
               scene.start
             );
           }
-        } else if (T.subtitleStyle === "fondant") {
-          scene.words.forEach(function (word, i) {
-            tl.fromTo(
-              "#w" + scene.index + "-" + i,
-              { opacity: 0.25, y: "0.22em" },
-              { opacity: 1, y: "0em", duration: 0.28, ease: "power2.out" },
-              word.at
-            );
-          });
         } else {
+          const geste = MOTS[T.subtitleStyle] || MOTS.karaoke;
           scene.words.forEach(function (word, i) {
             tl.fromTo(
               "#w" + scene.index + "-" + i,
-              { color: "rgba(255,255,255,0.42)" },
-              { color: "#ffffff", duration: 0.001, ease: "none" },
+              Object.assign({}, geste.de),
+              Object.assign({}, geste.vers),
               word.at
             );
           });

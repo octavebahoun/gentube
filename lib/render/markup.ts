@@ -35,16 +35,26 @@ export function sceneMarkup(
   const montrer = scene.showSubtitles ?? subtitles;
   const words = montrer ? wordsOrFallback(scene) : [];
 
+  // Les mots que la scène désigne comme porteurs de sens. Comparés sans casse
+  // ni ponctuation : le modèle écrit « Dahomey », le mot rendu « Dahomey, ».
+  const nu = (mot: string) =>
+    mot.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+  const portants = new Set((scene.emphasis ?? []).map(nu));
+
   const captions =
     words.length > 0
       ? `<div class="captions captions-${subtitleStyle}" id="c${index}" data-layout-allow-overlap>${words
-          .map(
-            (word, wordIndex) =>
-              `<span class="word" id="w${index}-${wordIndex}">${escapeHtml(
-                word.text
-              )}</span>`
-          )
-          .join('')}</div>`
+          .map((word, wordIndex) => {
+            const fort = portants.has(nu(word.text)) ? ' fort' : '';
+            return `<span class="word${fort}" id="w${index}-${wordIndex}">${escapeHtml(
+              word.text
+            )}</span>`;
+          })
+          .join('')}${
+          scene.emoji
+            ? `<span class="word-emoji">${escapeHtml(scene.emoji)}</span>`
+            : ''
+        }</div>`
       : '';
 
   // Une carte n'a pas d'image : c'est un écran noir avec du texte.

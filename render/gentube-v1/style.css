@@ -420,3 +420,125 @@ video.media {
   position: relative;
   font-size: 2.1em;
 }
+
+/* --- Les styles transposés du registre ----------------------------------- */
+
+/*
+ * Six apparences reprises des composants `caption-*` de HyperFrames.
+ *
+ * Le mot porteur de sens est marqué `.fort` par la composition, depuis le
+ * champ `emphasis` de la scène. Les styles qui n'en font rien l'ignorent
+ * simplement — c'est une information disponible, pas une obligation.
+ */
+
+/*
+ * `highlight` : un bandeau de couleur balaie le mot actif. Style des shorts.
+ *
+ * Le bandeau est le **fond du mot**, pas un pseudo-élément. Un `::before` en
+ * `z-index: -1` passe derrière l'image de la scène, qui est opaque : le
+ * bandeau existait et ne se voyait jamais.
+ */
+.captions-highlight .word {
+  padding: 0.02em 0.16em;
+  border-radius: 0.1em;
+  color: rgba(255, 255, 255, 0.55);
+  /*
+   * Le balayage est un dégradé deux fois plus large que le mot, qu'on fait
+   * glisser. Deux approches ont échoué avant : une variable CSS interpolée,
+   * que GSAP n'anime pas ici, puis un `background-size` qui grandit, qu'il
+   * n'animait pas davantage. `background-position` marche.
+   */
+  background-image: linear-gradient(
+    to right,
+    #ce1f20 50%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  background-position: 100% 0;
+}
+
+.captions-highlight .word.fort {
+  background-image: linear-gradient(
+    to right,
+    #ff6b2b 50%,
+    rgba(0, 0, 0, 0) 50%
+  );
+}
+
+/* `pill` : chaque mot dans sa pastille. */
+.captions-pill {
+  gap: 0.22em 0.28em;
+}
+
+.captions-pill .word {
+  padding: 0.06em 0.34em;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  text-shadow: none;
+}
+
+.captions-pill .word.fort {
+  background: #ce1f20;
+}
+
+/* `wipe` : le mot se découvre de gauche à droite, sans bouger. */
+.captions-wipe .word {
+  color: #fff;
+}
+
+/* `neon` : lueur cyan et magenta, accent chaud sur les mots porteurs. */
+.captions-neon .word {
+  color: #fff;
+  text-shadow:
+    0 0 6px #4ad9ff,
+    0 0 18px rgba(74, 217, 255, 0.6),
+    0 0 34px rgba(255, 74, 200, 0.45);
+}
+
+.captions-neon .word.fort {
+  color: #ffe9a8;
+  text-shadow:
+    0 0 8px #ff8a3d,
+    0 0 22px rgba(255, 138, 61, 0.7),
+    0 0 40px rgba(206, 31, 32, 0.5);
+}
+
+/*
+ * `gradient` : le texte est découpé dans un dégradé.
+ * `background-clip: text` demande une couleur transparente ; le contour des
+ * autres styles ne s'applique donc pas, d'où l'ombre portée à la place.
+ */
+.captions-gradient .word {
+  background: linear-gradient(180deg, #ffffff 0%, #ffd7a0 55%, #ce1f20 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
+}
+
+/*
+ * `blend` : le texte s'inverse sur ce qu'il couvre.
+ *
+ * `mix-blend-mode: difference` rend le mot lisible sur n'importe quel fond
+ * sans voile ni contour — c'est le seul style qui n'a besoin d'aucun des deux.
+ */
+.captions-blend .word {
+  color: #fff;
+  mix-blend-mode: difference;
+  text-shadow: none;
+}
+
+.captions-blend .word.fort {
+  color: #ff9d3d;
+}
+
+/* L'emoji, quand la scène en pose un. Jamais plus d'un. */
+.word-emoji {
+  display: inline-block;
+  margin-left: 0.2em;
+  font-size: 1.1em;
+  line-height: 1;
+}

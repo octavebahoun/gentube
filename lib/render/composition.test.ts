@@ -245,6 +245,43 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the caption styles', () => {
+    const styled = (subtitleStyle: string, emphasis?: string[]) =>
+      html([{ ...shot(), render: emphasis ? { emphasis } : {} } as Shot], {
+        video: { ...video, subtitleStyle } as Video,
+      });
+
+    it('emits a gesture for every style the enum accepts', () => {
+      // Un style absent de la table retomberait en karaoké sans rien dire.
+      const script = styled('karaoke').slice(styled('karaoke').lastIndexOf('<script>'));
+      for (const style of ['karaoke', 'fondant', 'highlight', 'pill', 'wipe', 'neon', 'gradient', 'blend']) {
+        expect(script).toContain(`${style}: {`);
+      }
+    });
+
+    it('marks the words the scene says carry the meaning', () => {
+      // « Une phrase de trois mots. » — `trois` est le quatrième.
+      const page = styled('highlight', ['trois']);
+      expect(page).toMatch(/<span class="word fort" id="w0-3">/);
+      expect(page).toMatch(/<span class="word" id="w0-0">/);
+    });
+
+    it('compares emphasis without case or punctuation', () => {
+      // Le modèle écrit « Dahomey », le mot rendu peut être « Dahomey, ».
+      const page = html(
+        [{ ...shot({ narration: 'le Dahomey, tombe' }), render: { emphasis: ['dahomey'] } } as Shot],
+        { video: { ...video, subtitleStyle: 'pill' } as Video }
+      );
+      expect(page).toContain('class="word fort"');
+    });
+
+    it('carries one emoji when the scene poses one', () => {
+      const page = html([{ ...shot(), render: { emoji: '🔥' } } as Shot]);
+      expect(page).toContain('class="word-emoji"');
+      expect(html([shot()])).not.toContain('word-emoji');
+    });
+  });
+
   describe('the per-scene subtitle switch', () => {
     it('lets a scene refuse subtitles the video otherwise shows', () => {
       // Un titre plein cadre ou un plan de respiration n'a pas à porter du

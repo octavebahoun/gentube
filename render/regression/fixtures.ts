@@ -27,6 +27,8 @@ const FIXTURES: Fixture[] = [
     render: {
       effects: { transition: 'none', zoom: 'in' },
       kineticTitle: { text: 'TITRE CINETIQUE', variant: 'reveal', position: 'center' },
+      // Deux mots porteurs, pour que les styles qui accentuent aient de quoi.
+      emphasis: ['trois', 'six'],
     },
   },
   // 2. Un fondu enchaîné, le geste le plus banal et le plus utilisé.

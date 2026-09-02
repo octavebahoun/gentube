@@ -35,8 +35,14 @@ const CHAMP =
  */
 const SOUS_TITRES: Record<string, { label: string; aide: string }> = {
   karaoke: { label: 'Karaoké', aide: 'chaque mot s’allume à son tour' },
-  fondant: { label: 'Fondant', aide: 'les mots se révèlent en douceur' },
+  fondant: { label: 'Fondant', aide: 'les mots montent et se révèlent' },
   cinematic: { label: 'Cinéma', aide: 'la phrase entière, sans emphase' },
+  highlight: { label: 'Surligné', aide: 'un bandeau balaie le mot actif — le style des shorts' },
+  pill: { label: 'Pastilles', aide: 'chaque mot dans sa capsule sombre' },
+  wipe: { label: 'Balayage', aide: 'le mot se découvre de gauche à droite' },
+  neon: { label: 'Néon', aide: 'lueur froide, accent chaud sur les mots forts' },
+  gradient: { label: 'Dégradé', aide: 'le texte découpé dans un dégradé' },
+  blend: { label: 'Inversé', aide: 'le texte s’inverse sur ce qu’il couvre, sans voile' },
 };
 
 export function VideoSettings({

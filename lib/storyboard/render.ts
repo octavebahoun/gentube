@@ -224,6 +224,24 @@ export const sceneRenderSchema = z.object({
       subtext: z.string().optional(),
     })
     .optional(),
+  /**
+   * Les mots qui portent le sens de la phrase.
+   *
+   * Deux ou trois par scène, écrits par le modèle avec la narration. Plusieurs
+   * styles de sous-titres s'en servent pour accentuer : une couleur, une
+   * graisse, une taille. Sans eux ces styles s'appliquent uniformément et
+   * perdent ce qui fait leur intérêt.
+   *
+   * Comparés sans casse ni ponctuation : le modèle écrit « Dahomey », le mot
+   * rendu peut être « Dahomey, ».
+   */
+  emphasis: z.array(z.string()).optional(),
+  /**
+   * Un emoji posé avec la phrase, quand le style en accepte un.
+   *
+   * Un seul : deux emoji dans un sous-titre lisent comme du bruit.
+   */
+  emoji: z.string().max(8).optional(),
   /** Volume de l'audio propre au clip. 0 le rend muet. */
   mediaVolume: z.number().min(0).max(1).optional(),
   /** Ralentit un clip court pour remplir la scène sans boucle visible. */

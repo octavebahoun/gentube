@@ -38,10 +38,27 @@ export const videoStatusEnum = pgEnum('video_status', [
 
 export const ratioEnum = pgEnum('ratio', ['16:9', '9:16']);
 
+/**
+ * L'apparence des sous-titres.
+ *
+ * C'est l'élément le plus présent d'une vidéo : un titre passe trois fois, une
+ * transition dure une demi-seconde, un sous-titre est là du début à la fin.
+ * Son style décide donc de l'allure de toute la production, et c'est pour ça
+ * qu'il y en a plusieurs.
+ *
+ * Les six derniers sont transposés des composants `caption-*` du registre
+ * HyperFrames (`docs/vocabulaire-de-rendu.md`).
+ */
 export const subtitleStyleEnum = pgEnum('subtitle_style', [
   'karaoke',
   'fondant',
   'cinematic',
+  'highlight',
+  'pill',
+  'wipe',
+  'neon',
+  'gradient',
+  'blend',
 ]);
 
 /**

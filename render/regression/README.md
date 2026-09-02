@@ -45,6 +45,20 @@ désactivé.
 Mesuré : un déplacement des sous-titres de 9 % à 16 % de la hauteur fait tomber
 les sept instants entre 0,955 et 0,958. La marge est large.
 
+## Ne jamais lancer `--update` sans avoir comparé d'abord
+
+Le 2 septembre 2026, une erreur de syntaxe dans le script de la page a empêché
+**toute** la timeline de se charger : plus un sous-titre ne s'allumait. J'ai
+régénéré les références au lieu de comparer, et la garde a annoncé « conformes »
+sur une composition cassée.
+
+`--update` accepte ce qui est là. Il ne juge rien. Lancez la comparaison, lisez
+ce qui a bougé, et seulement ensuite décidez.
+
+Un filet en plus : `npx hyperframes validate render/gentube-v1` lit les erreurs
+JavaScript de la page. Une timeline qui ne se charge pas y apparaît en une
+ligne, là où les captures ne montrent qu'un rendu bizarrement figé.
+
 ## Quand un instant change
 
 La capture fautive est gardée sous `echec-<nom>.png` — ignorée par git.

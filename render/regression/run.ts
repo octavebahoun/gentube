@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { toHyperframesStoryboard } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
+import { SUBTITLE_STYLES } from '@/lib/videos';
 import {
   MOMENTS,
   REFERENCE_VIDEO,
@@ -42,6 +43,19 @@ const FORMATS = [
   { nom: '16-9', video: REFERENCE_VIDEO },
   { nom: '9-16', video: REFERENCE_VIDEO_VERTICALE },
 ] as const;
+
+/**
+ * Un format supplémentaire par style de sous-titre, activé à la demande.
+ *
+ *   pnpm tsx render/regression/run.ts --styles
+ *
+ * Hors du jeu par défaut : neuf styles font neuf rendus, et la garde doit
+ * rester assez rapide pour être lancée à chaque changement.
+ */
+const STYLES = SUBTITLE_STYLES.map((style) => ({
+  nom: `style-${style}`,
+  video: { ...REFERENCE_VIDEO, subtitleStyle: style } as typeof REFERENCE_VIDEO,
+}));
 
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(video: typeof REFERENCE_VIDEO): string {
@@ -97,7 +111,9 @@ function similarite(a: string, b: string): number {
 function main() {
   let echecs = 0;
 
-  for (const format of FORMATS) {
+  const jeux = process.argv.includes('--styles') ? [...FORMATS, ...STYLES] : FORMATS;
+
+  for (const format of jeux) {
     console.log(`\n${format.nom} · ${format.video.resolution}`);
     echecs += passer(format.nom, format.video);
   }
