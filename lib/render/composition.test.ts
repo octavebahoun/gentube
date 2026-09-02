@@ -277,8 +277,18 @@ describe('the composition HyperFrames renders', () => {
 
     it('emits a gesture for every variant the contract accepts', () => {
       const script = titled('reveal').slice(titled('reveal').lastIndexOf('<script>'));
-      for (const v of ['reveal', 'neon', 'icon', 'pin', 'typewriter', 'tracking', 'cascade', 'slam', 'rise', 'glitch']) {
-        expect(script).toContain(`${v}: {`);
+      // Une variante déclarée au contrat mais absente de la table retomberait
+      // en `reveal` sans que rien ne le signale.
+      const declarees = [
+        'reveal', 'neon', 'icon', 'pin', 'typewriter', 'tracking', 'cascade',
+        'slam', 'rise', 'glitch', 'blur-out', 'explode', 'focus', 'lines',
+        'lockup', 'decode', 'crossfade', 'scan', 'axis-y', 'axis-z', 'reel',
+        'fade-up', 'strike', 'ticker', 'calm', 'split', 'weight', 'wave',
+        'backdrop', 'drop',
+      ];
+      for (const v of declarees) {
+        const cle = /^[a-z]+$/.test(v) ? `${v}: {` : `"${v}": {`;
+        expect(script, v).toContain(cle);
       }
     });
   });

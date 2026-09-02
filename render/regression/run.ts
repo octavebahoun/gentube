@@ -54,6 +54,9 @@ const FORMATS = [
  */
 const TITRES = [
   'reveal', 'typewriter', 'tracking', 'cascade', 'slam', 'rise', 'glitch',
+  'blur-out', 'explode', 'focus', 'lines', 'lockup', 'decode', 'crossfade',
+  'scan', 'axis-y', 'axis-z', 'reel', 'fade-up', 'strike', 'ticker', 'calm',
+  'split', 'weight', 'wave', 'backdrop', 'drop',
 ].map((variant) => ({
   nom: `titre-${variant}`,
   video: REFERENCE_VIDEO,

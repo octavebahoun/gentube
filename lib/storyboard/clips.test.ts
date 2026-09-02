@@ -268,4 +268,32 @@ describe('submitting the clips', () => {
       'subtle natural motion'
     );
   });
+
+  it('ne soumet pas un compteur, même quand le pipeline force la vidéo', async () => {
+    // La seconde régression de la revue : `generateImages` saute un compteur,
+    // donc il n'a pas d'image fixe, donc `submitClips` levait « Scene N has no
+    // still to animate » et l'étape entière échouait sans retour possible.
+    const tdb = await createTenant('Alpha', { credits: 5_000 });
+    const video = await readyForClips(tdb, ['video', 'video']);
+    const [premier] = await tdb.findMany(shots, eq(shots.videoId, video.id));
+    await tdb.update(
+      shots,
+      {
+        sourceImageUrl: null,
+        assetUrl: null,
+        render: { counter: { value: 42, label: 'unites' } },
+        updatedAt: new Date(),
+      },
+      eq(shots.id, premier.id)
+    );
+
+    const { client, calls } = animator();
+    const result = await submitClips(tdb, video.id, {
+      animator: client,
+      store: store().assets,
+    });
+
+    expect(result.submitted).toBe(1);
+    expect(calls).toHaveLength(1);
+  });
 });

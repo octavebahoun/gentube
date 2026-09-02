@@ -464,4 +464,24 @@ describe('materialising a render directory', () => {
     await prepared.cleanup();
     await expect(readdir(prepared.dir)).rejects.toThrow();
   });
+
+  it('assembles a video whose card draws its own screen', async () => {
+    // La régression trouvée à la revue : l'étape image saute une carte, donc
+    // son `assetUrl` reste nul, donc l'assemblage refusait toute la vidéo — et
+    // relancer ne changeait rien puisque l'étape la saute encore. La vidéo
+    // restait bloquée en `generating`, crédits débités.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const { video, assets } = await readyVideo(tdb);
+    const [premier] = await tdb.findMany(shots, eq(shots.videoId, video.id));
+
+    await tdb.update(
+      shots,
+      { assetUrl: null, render: { card: { text: 'Fin' } }, updatedAt: new Date() },
+      eq(shots.id, premier.id)
+    );
+
+    await expect(
+      startRender(tdb, video.id, { engine: engine().client, store: assets.assets })
+    ).resolves.toBeDefined();
+  });
 });

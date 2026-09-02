@@ -266,6 +266,56 @@ export function composeHtml({
         rise: { de: { opacity: 0, y: "0.5em", filter: "blur(8px)" }, vers: { opacity: 1, y: "0em", filter: "blur(0px)" }, ease: "power2.out" },
         // Une secousse chromatique brève, puis le mot se pose.
         glitch: { de: { opacity: 0, x: -8, skewX: 12 }, vers: { opacity: 1, x: 0, skewX: 0 }, ease: "steps(4)" },
+
+        /*
+         * Vingt variantes de plus, transposées des entrées de typographie du
+         * registre. Certaines en sont l'équivalent visuel plutôt que la copie :
+         * decode, reel et ticker font muter du texte dans le registre, ce
+         * qui demande une suite déterministe pour survivre au saut arrière du
+         * moteur. Elles sont ici rendues par un geste qui en donne la sensation
+         * — un brouillage, un défilement vertical — sans mutation de contenu.
+         */
+
+        // Le mot arrive net et part vers le haut en se floutant.
+        "blur-out": { de: { opacity: 0, y: "0.4em" }, vers: { opacity: 1, y: "0em" }, ease: "power2.out" },
+        // Les lettres tenaient dispersées et se rassemblent.
+        explode: { de: { opacity: 0, x: -26, y: 18, rotation: -14 }, vers: { opacity: 1, x: 0, y: 0, rotation: 0 }, ease: "power3.out" },
+        // Une bascule de mise au point : du flou lourd vers le net.
+        focus: { de: { opacity: 0.2, filter: "blur(14px)", scale: 1.06 }, vers: { opacity: 1, filter: "blur(0px)", scale: 1 }, ease: "power2.out" },
+        // Chaque ligne entre par la gauche.
+        lines: { de: { opacity: 0, x: "-0.8em" }, vers: { opacity: 1, x: "0em" }, ease: "power3.out" },
+        // Le mot se pose vers le centre, comme une signature de marque.
+        lockup: { de: { opacity: 0, y: "0.3em", letterSpacing: "0.24em" }, vers: { opacity: 1, y: "0em", letterSpacing: "0em" }, ease: "power3.out" },
+        // Le brouillage : la lettre tremble avant de se fixer.
+        decode: { de: { opacity: 0, y: -6, skewY: 8 }, vers: { opacity: 1, y: 0, skewY: 0 }, ease: "steps(6)" },
+        // Un fondu doux avec une dérive verticale. Le geste calme.
+        crossfade: { de: { opacity: 0, y: "0.18em" }, vers: { opacity: 1, y: "0em" }, ease: "power1.out" },
+        // Une bande de distorsion passe une fois sur le mot.
+        scan: { de: { opacity: 0, skewX: -22, scaleY: 1.3 }, vers: { opacity: 1, skewX: 0, scaleY: 1 }, ease: "power2.out" },
+        // Bascule verticale : l'ancien sort par le haut, le nouveau entre par le bas.
+        "axis-y": { de: { opacity: 0, y: "0.7em" }, vers: { opacity: 1, y: "0em" }, ease: "power3.out" },
+        // Bascule en profondeur : le mot arrive de loin.
+        "axis-z": { de: { opacity: 0, scale: 0.55 }, vers: { opacity: 1, scale: 1 }, ease: "power3.out" },
+        // Un rouleau vertical qui s'arrête sur le mot.
+        reel: { de: { opacity: 0, y: "-1.2em", scaleY: 1.4 }, vers: { opacity: 1, y: "0em", scaleY: 1 }, ease: "back.out(1.4)" },
+        // Le mot monte et se révèle, décalé après le précédent.
+        "fade-up": { de: { opacity: 0, y: "0.55em" }, vers: { opacity: 1, y: "0em" }, ease: "power2.out" },
+        // Le mot est barré puis remplacé : on garde le trait qui traverse.
+        strike: { de: { opacity: 0, scaleX: 0.2 }, vers: { opacity: 1, scaleX: 1 }, ease: "power4.out" },
+        // Le défilement d'un bandeau d'information, qui se verrouille.
+        ticker: { de: { opacity: 0, x: "1.4em" }, vers: { opacity: 1, x: "0em" }, ease: "power4.out" },
+        // La respiration : rien ne bouge, tout se pose.
+        calm: { de: { opacity: 0 }, vers: { opacity: 1 }, ease: "power1.inOut" },
+        // Le titre s'ouvre en deux autour de ce qui arrive.
+        split: { de: { opacity: 0, scaleY: 0.1 }, vers: { opacity: 1, scaleY: 1 }, ease: "power3.out" },
+        // La graisse se pose, du fin vers le gras.
+        weight: { de: { opacity: 0, scaleX: 1.25 }, vers: { opacity: 1, scaleX: 1 }, ease: "power2.out" },
+        // Une crête d'épaisseur parcourt le titre, mot après mot.
+        wave: { de: { opacity: 0, y: "0.35em", scaleY: 1.35 }, vers: { opacity: 1, y: "0em", scaleY: 1 }, ease: "elastic.out(1, 0.65)" },
+        // Un mot de fond surdimensionné, posé derrière la phrase.
+        backdrop: { de: { opacity: 0, scale: 1.18 }, vers: { opacity: 1, scale: 1 }, ease: "power2.out" },
+        // Le mot tombe et rebondit une fois.
+        drop: { de: { opacity: 0, y: "-1.4em" }, vers: { opacity: 1, y: "0em" }, ease: "bounce.out" },
       };
 
       const MOTS = {

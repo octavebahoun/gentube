@@ -11,7 +11,7 @@ import {
   type AnimationJobPayload,
   type VideoAnimator,
 } from '@/lib/video';
-import { sceneRenderSchema } from './render';
+import { rendersOwnContent, sceneRenderSchema } from './render';
 import { StoryboardError, listShots } from './service';
 import { assertGeneratable } from './images';
 
@@ -103,7 +103,12 @@ export async function submitClips(
   assertGeneratable(video);
 
   const storyboard = await listShots(tdb, videoId);
-  const animated = storyboard.filter((shot) => shot.type === 'video');
+  // Un plan qui dessine son propre écran n'est pas à animer, même si le
+  // pipeline force `video` sur toutes les scènes : il n'a pas d'image fixe à
+  // donner au modèle, et lui en demander une bloquait l'étape entière.
+  const animated = storyboard.filter(
+    (shot) => shot.type === 'video' && !rendersOwnContent(shot.render)
+  );
 
   if (animated.length === 0) {
     return { video, shots: storyboard, submitted: 0, skipped: 0, costUsd: 0 };

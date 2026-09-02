@@ -275,6 +275,16 @@ video.media {
 .kt-word {
   display: inline-block;
   will-change: opacity, transform;
+  /*
+   * La couleur est ici, à la base, et non dans chaque variante.
+   *
+   * Elle n'était posée que sur les quatre premières variantes ; les vingt
+   * suivantes sortaient en bleu sombre sur fond sombre, illisibles. Une
+   * variante qui veut autre chose le déclare — les autres n'ont plus à y
+   * penser, et une variante ajoutée demain sera lisible sans rien faire.
+   */
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
 }
 
 /* `reveal` : blanc franc, ombre portée. La variante par défaut. */
