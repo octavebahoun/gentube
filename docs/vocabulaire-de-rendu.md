@@ -57,9 +57,9 @@ l'étendre soit un déploiement et non une migration (`lib/storyboard/render.ts`
 
 Y entrent naturellement :
 
-- **Les 23 transitions CSS et GSAP** des treize packs `transitions-*` — flou
+- **Les 35 transitions CSS et GSAP** des packs `transitions-*` — flou
   directionnel, volet, balayage d'horloge, chute, poussée élastique, zoom
-  traversant. Elles s'ajoutent à `TRANSITIONS` sans toucher aux shaders, et ne
+  traversant, whip-pan-cut, cut-the-curve, grid-pixelate-wipe, rubber-band-bumper, chromatic-wipe, morph-swap, parallax-zoom, parallax-unzoom, page-slide, halftone-dissolve, type-match-cut, match-cut. Elles s'ajoutent à `TRANSITIONS` sans toucher aux shaders, et ne
   coûtent rien de plus au rendu puisqu'elles ne demandent pas de WebGL.
 - **Les incrustations** : bandeaux `lt-*`, tiers inférieurs, cartouches de
   citation. `overlayText` existe déjà et n'a qu'une variante.
@@ -249,6 +249,24 @@ changent ensemble.
 qui peut casser des storyboards existants.
 
 **Bloqué par** : les lots 1 à 3, et par une décision produit sur ce qu'on vend.
+
+### Lot 5 — Les effets de scène  ·  palier 2  ·  **entamé le 3 septembre 2026**
+
+Trois effets transposés du registre, tween et CSS livrés, schéma demandé au
+palier 3 dans `passation/demandes.md` ( tween lit `scene.*`, la timeline ne
+le porte pas encore ) :
+
+- `lightSweep` ← `shimmer-sweep` + `light-sweep-pass` : une bande de lumière
+  diagonale traverse une fois, calée sur le rythme quand `onBeat` est vrai.
+- `grain` ← `grain-overlay` : un voile de bruit qui scintille en yoyo, sans
+  aucun flou — le filtre SVG n'est évalué qu'au décodage du fond.
+- `beatAccent` ← `beat-accent` : le cadre respire une fois sur le pic le plus
+  proche et retombe ; pulse `#s` (et `#m` si hoisted), jamais `#m` d'une image
+  où l'échelle du Ken Burns vit déjà.
+
+Vérifiés à l'image par `hyperframes snapshot` au milieu du geste : la bande
+est centrée à 1,45 s et partie à 2,5 s, le grain tient toute la scène, le pic
+rend le titre 6 % plus grand puis le repose exactement.
 
 ---
 

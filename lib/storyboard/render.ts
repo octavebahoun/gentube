@@ -104,6 +104,18 @@ export const MOVE_TRANSITIONS = [
   'flip-x',
   'flip-y',
   'spin',
+  'whip-pan-cut',
+  'cut-the-curve',
+  'grid-pixelate-wipe',
+  'rubber-band-bumper',
+  'chromatic-wipe',
+  'morph-swap',
+  'parallax-zoom',
+  'parallax-unzoom',
+  'page-slide',
+  'halftone-dissolve',
+  'type-match-cut',
+  'match-cut',
 ] as const;
 
 export type MoveTransition = (typeof MOVE_TRANSITIONS)[number];
@@ -190,6 +202,49 @@ export const sceneEffectsSchema = z.object({
       startInSeconds: z.number().min(0).optional(),
       durationInSeconds: z.number().positive().optional(),
       color: z.string().optional(),
+    })
+    .optional(),
+  /**
+   * Une bande de lumière traverse le cadre une fois.
+   *
+   * Un dégradé large déplacé par la timeline, pas un filtre : la même
+   * mécanique que le balayage du style `highlight` sur les mots, donc la même
+   * sûreté au rendu logiciel de Lambda.
+   */
+  lightSweep: z
+    .object({
+      startInSeconds: z.number().min(0).optional(),
+      durationInSeconds: z.number().positive().optional(),
+      color: z.string().optional(),
+    })
+    .optional(),
+  /**
+   * Un voile de bruit qui scintille, pour la chaleur d'un rendu argentique.
+   *
+   * L'image de bruit est figée et seule son opacité bouge : le filtre qui la
+   * fabrique n'est évalué qu'une fois, au décodage. Un bruit recalculé à
+   * chaque image serait un flou plein cadre déguisé.
+   */
+  grain: z
+    .object({
+      startInSeconds: z.number().min(0).optional(),
+      durationInSeconds: z.number().positive().optional(),
+      opacity: z.number().min(0).max(1).optional(),
+    })
+    .optional(),
+  /**
+   * Le cadre respire une fois sur un temps fort, et retombe.
+   *
+   * Contrairement au reste, il se cale sur le pic le plus proche **avec ou
+   * sans** `onBeat` : un accent qui ne tombe pas sur la frappe n'est plus un
+   * accent, c'est un sursaut.
+   */
+  beatAccent: z
+    .object({
+      startInSeconds: z.number().min(0).optional(),
+      durationInSeconds: z.number().positive().optional(),
+      /** L'ampleur du souffle. Au-delà de 0,06 ça se voit comme un défaut. */
+      strength: z.number().min(0).max(0.06).optional(),
     })
     .optional(),
 });
@@ -508,6 +563,18 @@ export const TRANSITION_DURATIONS: Record<Transition, number> = {
   'flip-x': 0.6,
   'flip-y': 0.6,
   spin: 0.7,
+  'whip-pan-cut': 0.4,
+  'cut-the-curve': 0.45,
+  'grid-pixelate-wipe': 0.5,
+  'rubber-band-bumper': 0.6,
+  'chromatic-wipe': 0.5,
+  'morph-swap': 0.65,
+  'parallax-zoom': 0.55,
+  'parallax-unzoom': 0.55,
+  'page-slide': 0.5,
+  'halftone-dissolve': 0.6,
+  'type-match-cut': 0.45,
+  'match-cut': 0.5,
   'domain-warp': 0.9,
   'ridged-burn': 0.9,
   'whip-pan': 0.65,

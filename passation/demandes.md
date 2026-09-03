@@ -35,6 +35,12 @@ Enum    : kineticTitle.variant
 Ajouter : 'handwritten', 'marker', 'marquee', 'brand'
 Prompt  : Add kineticTitle variants ('handwritten', 'marker', 'marquee', 'brand') to system prompt.
 
+## palier 1 · 2026-09-03 02:40
+Fichier : lib/storyboard/render.ts
+Enum    : MOVE_TRANSITIONS
+Ajouter : 'whip-pan-cut', 'cut-the-curve', 'grid-pixelate-wipe', 'rubber-band-bumper', 'chromatic-wipe', 'morph-swap', 'parallax-zoom', 'parallax-unzoom', 'page-slide', 'halftone-dissolve', 'type-match-cut', 'match-cut'
+Prompt  : Add new transform transitions ('whip-pan-cut', 'cut-the-curve', 'grid-pixelate-wipe', 'rubber-band-bumper', 'chromatic-wipe', 'morph-swap', 'parallax-zoom', 'parallax-unzoom', 'page-slide', 'halftone-dissolve', 'type-match-cut', 'match-cut') to system prompt transition enum.
+
 ## palier 2 · 2026-09-03 01:19
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.lightSweep

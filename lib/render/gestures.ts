@@ -208,5 +208,19 @@ export const MOVES_JS = [
         "flip-y":         { out: { rotationX: 90, opacity: 0 }, in: { rotationX: -90 }, perspective: 1200 },
         // La rotation pleine, qui arrive en grandissant.
         "spin":           { out: { rotation: 90, scale: 0, opacity: 0 }, in: { rotation: -180, scale: 0 } },
+
+        // Nouveaux mouvements issus du registre HyperFrames (Palier 1).
+        "whip-pan-cut":       { out: { x: "-100%", opacity: 0.5 }, in: { x: "100%" }, ease: "power4.inOut" },
+        "cut-the-curve":      { out: { x: "-100%" }, in: { x: "100%" }, ease: "power4.in" },
+        "grid-pixelate-wipe": { out: {}, in: { clipPath: "inset(0% 0% 0% 0%)" }, ease: "steps(8)" },
+        "rubber-band-bumper": { out: { x: "-100%" }, in: { x: "100%" }, ease: "back.out(2)" },
+        "chromatic-wipe":     { out: { x: "-100%", opacity: 0.8 }, in: { x: "100%" }, ease: "power3.inOut" },
+        "morph-swap":         { out: { scale: 0.3, opacity: 0 }, in: { scale: 1.8, opacity: 0 }, ease: "power2.inOut" },
+        "parallax-zoom":      { out: { scale: 2, opacity: 0 }, in: { scale: 0.5 }, ease: "power2.out" },
+        "parallax-unzoom":    { out: { scale: 0.5, opacity: 0 }, in: { scale: 2 }, ease: "power2.out" },
+        "page-slide":         { out: { x: "-20%", scale: 0.95 }, in: { x: "100%" }, ease: "power2.out" },
+        "halftone-dissolve":  { out: {}, in: { clipPath: "circle(0% at 50% 50%)" }, inTo: { clipPath: "circle(120% at 50% 50%)" }, ease: "power2.inOut" },
+        "type-match-cut":     { out: { scaleY: 0, opacity: 0 }, in: { scaleY: 1.5 }, ease: "power3.inOut" },
+        "match-cut":          { out: { scale: 0.1, opacity: 0 }, in: { scale: 1.2 }, ease: "power3.out" },
       };`,
 ].join('\n');
