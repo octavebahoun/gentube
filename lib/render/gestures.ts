@@ -107,6 +107,8 @@ export const TITRES_JS = `
         "panel-reveal": { de: { opacity: 0, scaleY: 0.2, transformOrigin: "top" }, vers: { opacity: 1, scaleY: 1 }, ease: "power3.out" },
         "tabs-slide-indicator": { de: { opacity: 0, x: "-0.5em" }, vers: { opacity: 1, x: "0em" }, ease: "power2.out" },
         "avatar-group-hover": { de: { opacity: 0, y: "0.4em", scale: 0.85 }, vers: { opacity: 1, y: "0em", scale: 1 }, ease: "back.out(1.6)" },
+        callout: { de: { opacity: 0, scale: 0.9, y: "0.2em" }, vers: { opacity: 1, scale: 1, y: "0em" }, ease: "power2.out" },
+        morphtext: { de: { opacity: 0, filter: "blur(12px)" }, vers: { opacity: 1, filter: "blur(0px)" }, ease: "power3.inOut" },
       };`;
 
 export const MOTS_JS = `
@@ -240,5 +242,6 @@ export const MOVES_JS = [
         "halftone-dissolve":  { out: {}, in: { clipPath: "circle(0% at 50% 50%)" }, inTo: { clipPath: "circle(120% at 50% 50%)" }, ease: "power2.inOut" },
         "type-match-cut":     { out: { scaleY: 0, opacity: 0 }, in: { scaleY: 1.5 }, ease: "power3.inOut" },
         "match-cut":          { out: { scale: 0.1, opacity: 0 }, in: { scale: 1.2 }, ease: "power3.out" },
+        "freeze-cut":         { out: { filter: "brightness(1.5) contrast(1.2)" }, in: { opacity: 0 }, inTo: { opacity: 1 }, ease: "steps(2)" },
       };`,
 ].join('\n');

@@ -28,12 +28,12 @@ que la composition ne sait pas encore dessiner.
 - [x] `perspective-marquee` — A 3D tilted marquee with depth feel as items roll toward the horizon
 - [x] `rubber-band-bumper` — An outgoing panel pulls against increasing resistance, holds at tension, then snaps past an edge with overshoot as the incoming panel settles behind it _(motion-primitive, transition, rubber-band)_
 - [x] `type-match-cut` — A headline splits vertically around an incoming panel, which grows from the negative space and takes the frame as the words exit through opposite edges _(motion-primitive, transition, typography)_
-- `vox-annotate` — The Vox-style annotate gesture: a keyword in a held sentence gets a hand-drawn marker while a thin connector draws up to a mono callout label, all as one choreographed beat on the cue _(motion-primitive, typography, annotation)_
-- `morph-text` — Gooey text morph — cycles through an editable word list using SVG threshold + GSAP-driven blur for a fluid, satisfying transition effect _(text, text-effect, typography)_
-- `beat-freeze-cut` — A beat-driven speed ramp, freeze-frame hit, and hard-cut sequence for music-led promos and montages _(transition, music, beat-driven)_
+- [x] `vox-annotate` — The Vox-style annotate gesture: a keyword in a held sentence gets a hand-drawn marker while a thin connector draws up to a mono callout label, all as one choreographed beat on the cue _(motion-primitive, typography, annotation)_
+- [x] `morph-text` — Gooey text morph — cycles through an editable word list using SVG threshold + GSAP-driven blur for a fluid, satisfying transition effect _(text, text-effect, typography)_
+- [x] `beat-freeze-cut` — A beat-driven speed ramp, freeze-frame hit, and hard-cut sequence for music-led promos and montages _(transition, music, beat-driven)_
 - [x] `cut-the-curve` — A velocity-matched directional hard cut: the outgoing subject accelerates with power4.in, swaps at peak velocity, and the incoming subject continues in the same direction with power4.out _(transition, directional-cut, velocity-match)_
 - [x] `grid-pixelate-wipe` — Transition effect where the screen dissolves into a grid of squares that fade out with staggered timing — use between scenes _(transition, wipe, grid)_
-- `mk-clone-wall-transition` — Overlay transition: a tiled word wall covers the frame, inverts via difference blending, and clears — hard-cut the content beneath while covered _(transition, typography, wipe)_
+- [x] `mk-clone-wall-transition` — Overlay transition: a tiled word wall covers the frame, inverts via difference blending, and clears — hard-cut the content beneath while covered _(transition, typography, wipe)_
 - [x] `morph-swap` — Two slotted siblings stacked at one shared center: A holds, then condenses or reshapes into B on a shared 50% 50% transform origin. Condense shrink-fades A exactly as B scales up; reshape morphs the silhouette on scaleX/scaleY, never width or height tweens. Token card defaults render when a slot is left empty _(transition, morph, swap)_
 - [x] `parallax-unzoom` — Reveal transition — focus card scales down from full frame as siblings parallax in to form a grid (reverse of parallax-zoom) _(transition, reveal, unzoom)_
 - [x] `parallax-zoom` — Center card scales up to fill the frame while siblings parallax outward — inspired by the eBay Playbook hero transition _(transition, zoom, parallax)_
@@ -42,7 +42,7 @@ que la composition ne sait pas encore dessiner.
 - [x] `micro-transitions` — A transitions.dev-inspired pack of badge, dropdown, modal, tabs, tooltip, and success-check micro transitions _(transition-primitive, motion-primitive, transitions-dev-port)_
 - [x] `panel-reveal` — A panel reveal primitive with height expansion and content fade _(transition-primitive, transitions-dev-port, panel)_
 - [x] `tabs-slide-indicator` — A pill indicator transition that slides between active tabs _(transition-primitive, transitions-dev-port, tabs)_
-- `mk-callout-highlight` — A sentence whose word-by-word emphasis is driven by a single scalar — tween it to sync the highlight with a voiceover _(typography, karaoke, captions)_
+- [x] `mk-callout-highlight` — A sentence whose word-by-word emphasis is driven by a single scalar — tween it to sync the highlight with a voiceover _(typography, karaoke, captions)_
 - [x] `mk-emphasis-type` — Oversized low-contrast background word drifting slowly behind the subject — typography as texture _(typography, text-treatment, minimal)_
 - [x] `wordmark-tiles` — A wordmark resolves from deterministic color noise into correctly cropped glyph tiles through a spatially modulated GSAP wave _(typography, wordmark, tiles)_
 - [x] `yt-prism-title` — Display title on a transparent root: blur-focus entrance, red/blue fringe that settles then breathes, perspective bow, slow scale drift _(typography, title-card, creator)_

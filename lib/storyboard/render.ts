@@ -116,6 +116,7 @@ export const MOVE_TRANSITIONS = [
   'halftone-dissolve',
   'type-match-cut',
   'match-cut',
+  'freeze-cut',
 ] as const;
 
 export type MoveTransition = (typeof MOVE_TRANSITIONS)[number];
@@ -429,6 +430,8 @@ export const sceneRenderSchema = z.object({
           'panel-reveal',
           'tabs-slide-indicator',
           'avatar-group-hover',
+          'callout',
+          'morphtext',
         ])
         .optional(),
       icon: z.string().optional(),
@@ -593,6 +596,7 @@ export const TRANSITION_DURATIONS: Record<Transition, number> = {
   'halftone-dissolve': 0.6,
   'type-match-cut': 0.45,
   'match-cut': 0.5,
+  'freeze-cut': 0.45,
   'domain-warp': 0.9,
   'ridged-burn': 0.9,
   'whip-pan': 0.65,

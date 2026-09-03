@@ -321,6 +321,7 @@ describe('the composition HyperFrames renders', () => {
         'badge-pop', 'card-resize', 'icon-swap', 'menu-morph', 'skeleton-reveal',
         'success-check', 'tilt-card', 'input-feedback', 'micro-transitions',
         'panel-reveal', 'tabs-slide-indicator', 'avatar-group-hover',
+        'callout', 'morphtext',
       ];
       for (const v of declarees) {
         const cle = /^[a-z]+$/.test(v) ? `${v}: {` : `"${v}": {`;
@@ -812,5 +813,71 @@ describe('the palier-2 effects', () => {
     // triple : le grain est une image figee, seule son opacite bouge.
     expect(palier2()).not.toContain('blur(');
     expect(palier2()).not.toContain('backdrop-filter');
+  });
+
+  it('declares the second batch, and centers the ring without CSS translate', () => {
+    // Un scale GSAP ecrase un translate CSS : le centrage de l anneau passe
+    // par xPercent/yPercent, poses des deux cotes du tween.
+    for (const champ of ['scene.shockRing', 'scene.featherSpot']) {
+      expect(SCENES_JS, champ).toContain(champ);
+    }
+    expect(SCENES_JS).toContain('"#sr"');
+    expect(SCENES_JS).toContain('"#fs"');
+    expect(SCENES_JS).toContain('xPercent');
+  });
+
+  it('hides the ring and the spot at rest, shows the vignette as is', () => {
+    // La vignette est un etat, pas un geste : aucun tween, aucun repos.
+    expect(SCENES_JS).not.toContain('scene.vignette');
+    expect(palier2()).toContain('.vignette {');
+    expect(palier2()).toMatch(/\.shock-ring \{[^}]*opacity: 0/);
+    expect(palier2()).toMatch(/\.feather-spot \{[^}]*opacity: 0/);
+  });
+
+  describe('through the real pipeline', () => {
+    // Le palier 3 a applique les demandes du premier lot : la timeline et le
+    // balisage portent lightSweep, grain et beatAccent pour de vrai.
+    const effetPage = (effects: Record<string, unknown>) =>
+      composeHtml({
+        storyboard: {
+          ...toHyperframesStoryboard(video, [
+            { ...shot(), render: { effects } } as Shot,
+          ]),
+          musicImpacts: [1.35],
+          musicDurationS: 30,
+        },
+      });
+    const timelineDe = (page: string) =>
+      JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]).scenes[0];
+
+    it('snaps the sweep onto the nearest impact when asked', () => {
+      const scene = timelineDe(
+        effetPage({ onBeat: true, lightSweep: { startInSeconds: 1.2 } })
+      );
+      expect(scene.lightSweep.at).toBe(1.35);
+      expect(scene.lightSweep.duration).toBe(0.9);
+      expect(scene.lightSweep.color).toBe('#ffffff');
+    });
+
+    it('clamps the grain to its scene', () => {
+      const scene = timelineDe(effetPage({ grain: { durationInSeconds: 999 } }));
+      expect(scene.grain.at).toBe(0);
+      expect(scene.grain.duration).toBe(5);
+      expect(scene.grain.opacity).toBe(0.22);
+    });
+
+    it('snaps the accent even without onBeat', () => {
+      // Un accent qui rate la frappe n est plus un accent, c est un sursaut.
+      const scene = timelineDe(effetPage({ beatAccent: { startInSeconds: 1.2 } }));
+      expect(scene.beatAccent.at).toBe(1.35);
+    });
+
+    it('poses both overlays inside the scene, after the media', () => {
+      // Un .media opaque couvre ses petits freres : apres lui, jamais avant.
+      const page = effetPage({ lightSweep: {}, grain: {} });
+      expect(page).toContain('id="ls0"');
+      expect(page).toContain('id="gr0"');
+      expect(page.indexOf('id="m0"')).toBeLessThan(page.indexOf('id="ls0"'));
+    });
   });
 });
