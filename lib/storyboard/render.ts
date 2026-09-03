@@ -321,6 +321,50 @@ export const sceneEffectsSchema = z.object({
       output: z.string().optional(),
     })
     .optional(),
+  gradeSplitReveal: z
+    .object({
+      startInSeconds: z.number().min(0).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  multiplayerCursors: z
+    .object({
+      count: z.number().int().min(2).max(6).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  mkLineGraph: z
+    .object({
+      seriesCount: z.number().int().min(1).max(3).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  badgeMatrix: z
+    .object({
+      rows: z.number().int().min(1).max(4).optional(),
+      cols: z.number().int().min(1).max(4).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  metricCalloutGrid: z
+    .object({
+      cards: z.number().int().min(2).max(6).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  mkProgressStat: z
+    .object({
+      value: z.number().optional(),
+      max: z.number().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  mkSpecsList: z
+    .object({
+      itemsCount: z.number().int().min(1).max(8).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
 });
 
 export const sceneRenderSchema = z.object({

@@ -111,15 +111,15 @@ Prompt  : "- `gridDrift` is optional: a faint technical grid slowly drifts behin
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.cursorClick
 Forme   : { startInSeconds?: number, durationInSeconds?: number, fromX?: number, fromY?: number, x?: number, y?: number }
-Timeline: dans buildTimeline, scene.cursorClick ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.5)), duration: durationInSeconds ?? 0.9, fromX: fromX ?? 12, fromY: fromY ?? 12, x: x ?? 62, y: y ?? 55 } : null. Pas de onBeat : c est un geste montre, pas une frappe. Coords en pourcents du cadre.
-Balisage: <div class="cursor-click" id="cc<index>"><div class="cursor-ring"></div></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
+Timeline: dans buildTimeline, scene.cursorClick ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.5)), duration: durationInSeconds ?? 0.9, fromXpx: arrondi(fromX ?? 12, en px sur storyboard.width), fromYpx, xPx, yPx } : null. En PX, pas en % : la garde refuse les tweens left/top (arrondi au pixel sous le moteur) — le balisage pose left/top en %, le tween n anime que x/y. Coords d entree en pourcents du cadre converties au format exact. Pas de onBeat : c est un geste montre, pas une frappe.
+Balisage: <div class="cursor-click" id="cc<index>" style="left:<fromX>%;top:<fromY>%"><div class="cursor-ring"></div></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
 Prompt  : "- `cursorClick` is optional: a cursor glides to a point and clicks, firing a small ring pulse. Use it when the line says tap, click or open. { x?, y? (target percents, default 62/55), fromX?, fromY? (default 12/12), startInSeconds?, durationInSeconds? }."
 
 ## palier 2 · 2026-09-03 01:51
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.scanGate
 Forme   : { startInSeconds?: number, durationInSeconds?: number, color?: string }
-Timeline: dans buildTimeline, scene.scanGate ? { at: onBeat(scene, beats, scene.startInSeconds + (startInSeconds ?? 0.4)), duration: durationInSeconds ?? 1.2, color: color ?? '#4ad9ff' } : null
+Timeline: dans buildTimeline, scene.scanGate ? { at: onBeat(scene, beats, scene.startInSeconds + (startInSeconds ?? 0.4)), duration: durationInSeconds ?? 1.2, color: color ?? '#4ad9ff', yPx: course en px de la ligne = 0.84 * 0.64 * storyboard.height } : null. En px, pas en % : la garde refuse les tweens top (meme regle que le curseur). Le cadre fait inset 18% 12% et la ligne va de 8% a 92% de sa hauteur.
 Balisage: <div class="scan-gate" id="sg<index>" style="--gate-color:<color>"><div class="scan-line"></div><i class="gate-corner tl"></i><i class="gate-corner tr"></i><i class="gate-corner bl"></i><i class="gate-corner br"></i></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
 Prompt  : "- `scanGate` is optional: a viewfinder moment — corner brackets, one sweep line, a lock pulse. Use it when the line verifies, scans or detects. { color? (default #4ad9ff), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
 
@@ -143,8 +143,8 @@ Prompt  : "- `auroraDrift` is optional: three soft color fields slowly drift beh
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.outlineDraw
 Forme   : { startInSeconds?: number, durationInSeconds?: number, color?: string }
-Timeline: dans buildTimeline, scene.outlineDraw ? { at: onBeat(scene, beats, scene.startInSeconds + (startInSeconds ?? 0.4)), duration: durationInSeconds ?? 1.0, color: color ?? '#ffd9a0' } : null. Le rect SVG porte pathLength 100 : aucune mesure dans la page, le trace va de 100 a 0.
-Balisage: <div class="outline-draw" id="od<index>" style="--trace-color:<color>"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="2" y="2" width="96" height="96" rx="6" pathLength="100" /></svg></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
+Timeline: dans buildTimeline, scene.outlineDraw ? { at: onBeat(scene, beats, scene.startInSeconds + (startInSeconds ?? 0.4)), duration: durationInSeconds ?? 1.0, color: color ?? '#ffd9a0' } : null. Quatre bords en sequence (quart de duree chacun) : le tween divise, rien a precalculer.
+Balisage: <div class="outline-draw" id="od<index>" style="--trace-color:<color>"><i class="od-t"></i><i class="od-r"></i><i class="od-b"></i><i class="od-l"></i></div> dans sceneMarkup, dans le div .scene apres le grain. Des divs, pas de SVG : pathLength est ignore sur les formes et le tiret tombait sur le vrai perimetre (verifie a l image). Aucune piste.
 Prompt  : "- `outlineDraw` is optional: a rounded outline draws itself clockwise around the frame to prove a callout. { color? (default #ffd9a0), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
 
 ## palier 1 · 2026-09-03 02:45
@@ -241,6 +241,63 @@ Forme   : { command?: string, output?: string }
 Timeline: dans buildTimeline, scene.terminalSimulator ? { command: command ?? '', output: output ?? '' } : null
 Balisage: <div class="terminal-simulator" id="tsim<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `terminalSimulator` is optional: retro terminal window streaming typed commands & output. { command?, output? }"
+
+## palier 2 · 2026-09-03 11:13
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.gradeSplitReveal
+Forme   : { startInSeconds?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.gradeSplitReveal ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.5)), duration: durationInSeconds ?? 1.5 } : null
+Balisage: <div class="grade-split-reveal" id="gsr<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `gradeSplitReveal` is optional: split sweep comparison between raw media and color-graded media. { startInSeconds?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:13
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.multiplayerCursors
+Forme   : { count?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.multiplayerCursors ? { count: count ?? 3, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="multiplayer-cursors" id="mpc<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `multiplayerCursors` is optional: labeled collaborator cursors drifting into a shared center zone. { count?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:13
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.mkLineGraph
+Forme   : { seriesCount?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.mkLineGraph ? { seriesCount: seriesCount ?? 2, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="mk-line-graph" id="mklg<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `mkLineGraph` is optional: SVG line series graph draw-on with animated dot markers. { seriesCount?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:13
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.badgeMatrix
+Forme   : { rows?: number, cols?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.badgeMatrix ? { rows: rows ?? 2, cols: cols ?? 3, durationInSeconds: durationInSeconds ?? 1.5 } : null
+Balisage: <div class="badge-matrix" id="bmx<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `badgeMatrix` is optional: grid matrix of status pills (success/warning/neutral). { rows?, cols?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:13
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.metricCalloutGrid
+Forme   : { cards?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.metricCalloutGrid ? { cards: cards ?? 3, durationInSeconds: durationInSeconds ?? 1.8 } : null
+Balisage: <div class="metric-callout-grid" id="mcg<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `metricCalloutGrid` is optional: multi-card KPI display grid with stagger animation. { cards?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:13
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.mkProgressStat
+Forme   : { value?: number, max?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.mkProgressStat ? { value: value ?? 85, max: max ?? 100, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="mk-progress-stat" id="mkps<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `mkProgressStat` is optional: big numeral count-up with progress bar filling to target. { value?, max?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:13
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.mkSpecsList
+Forme   : { itemsCount?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.mkSpecsList ? { itemsCount: itemsCount ?? 4, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="mk-specs-list" id="mksl<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `mkSpecsList` is optional: left-aligned checklist with staggered row slide-ins. { itemsCount?, durationInSeconds? }"
+
 
 
 
