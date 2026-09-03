@@ -117,6 +117,13 @@ export const MOVE_TRANSITIONS = [
   'type-match-cut',
   'match-cut',
   'freeze-cut',
+  'editorial-flash-overlay',
+  'hw-scribble-transition',
+  'vfx-text-cursor',
+  'organic-light-leak-overlay',
+  'ordered-dither-pass',
+  'parallax-device-dive',
+  'halftone-field',
 ] as const;
 
 export type MoveTransition = (typeof MOVE_TRANSITIONS)[number];
@@ -597,6 +604,13 @@ export const TRANSITION_DURATIONS: Record<Transition, number> = {
   'type-match-cut': 0.45,
   'match-cut': 0.5,
   'freeze-cut': 0.45,
+  'editorial-flash-overlay': 0.4,
+  'hw-scribble-transition': 0.55,
+  'vfx-text-cursor': 0.6,
+  'organic-light-leak-overlay': 0.5,
+  'ordered-dither-pass': 0.5,
+  'parallax-device-dive': 0.7,
+  'halftone-field': 0.6,
   'domain-warp': 0.9,
   'ridged-burn': 0.9,
   'whip-pan': 0.65,

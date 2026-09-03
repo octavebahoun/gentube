@@ -12,19 +12,19 @@ que la composition ne sait pas encore dessiner.
 - [ ] `caption-particle-burst` — Keyword words trigger colored particle explosions _(différé : rendu de particules trop lourd sur Lambda)_
 - [x] `caption-texture` — Flowing texture mask over large uppercase text
 - [x] `caption-weight-shift` — Elegant font-weight transition between caption lines
-- `editorial-flash-overlay` — Finite neutral-warm light layers for a seek-safe camera-flash cut or social reveal _(flash, editorial, social)_
+- [x] `editorial-flash-overlay` — Finite neutral-warm light layers for a seek-safe camera-flash cut or social reveal _(flash, editorial, social)_
 - [x] `hw-path-text` — Handwriting flowing along any SVG path
-- `hw-scribble-transition` — Overlay transition: scribble bands accumulate to cover the frame with a solid backstop, the host cuts beneath, and the scribble clears _(handwritten, transition, wipe)_
+- [x] `hw-scribble-transition` — Overlay transition: scribble bands accumulate to cover the frame with a solid backstop, the host cuts beneath, and the scribble clears _(handwritten, transition, wipe)_
 - [x] `hw-title` — Handwritten display text with a scalar-driven word-by-word highlight sweep
 - [x] `hw-write-title` — True glyph write-on: filled Caveat letterforms revealed
-- `vfx-text-cursor` — Dramatic text reveal with cursor glow, chromatic shadow rays, and directional lighting on a black stage. Canvas-based shader post-processing with spectral color edges _(html-in-canvas, text, shader)_
-- `organic-light-leak-overlay` — Finite CSS light-leak overlay for memory beats and motivated transitions _(light-leak, film, memory)_
+- [x] `vfx-text-cursor` — Dramatic text reveal with cursor glow, chromatic shadow rays, and directional lighting on a black stage. Canvas-based shader post-processing with spectral color edges _(html-in-canvas, text, shader)_
+- [x] `organic-light-leak-overlay` — Finite CSS light-leak overlay for memory beats and motivated transitions _(light-leak, film, memory)_
 - [x] `halftone-dissolve` — Scene A dissolves into scene B through a growing halftone dot field: accent ink dots pop onto a fixed grid smallest-first, each opens into a window onto B, until the windows merge and B fully replaces A _(motion-primitive, transition, texture)_
 - [x] `logo-brand-close` — A display-scale wordmark cascades letter by letter into a centered lockup
 - [x] `marker-highlight` — Display text settles in, then one hand-drawn marker stroke draws over word
 - [x] `match-cut` — A circle accelerates into a hard single-frame scene swap, matches the incoming circle exactly, and continues into a smaller resting pose _(motion-primitive, transition, match-cut)_
-- `ordered-dither-pass` — Bayer-matrix ordered dithering quantizes a slotted scene (rasterized once at mount): the image emerges from pure 2-tone noise to clean, or dissolves the reverse. Stateless per frame, never error diffusion _(motion-primitive, experiment, texture)_
-- `parallax-device-dive` — A canonical phone rises into view before the camera pushes through its screen and layered app UI expands to fill the frame _(motion-primitive, camera, device)_
+- [x] `ordered-dither-pass` — Bayer-matrix ordered dithering quantizes a slotted scene (rasterized once at mount): the image emerges from pure 2-tone noise to clean, or dissolves the reverse. Stateless per frame, never error diffusion _(motion-primitive, experiment, texture)_
+- [x] `parallax-device-dive` — A canonical phone rises into view before the camera pushes through its screen and layered app UI expands to fill the frame _(motion-primitive, camera, device)_
 - [x] `perspective-marquee` — A 3D tilted marquee with depth feel as items roll toward the horizon
 - [x] `rubber-band-bumper` — An outgoing panel pulls against increasing resistance, holds at tension, then snaps past an edge with overshoot as the incoming panel settles behind it _(motion-primitive, transition, rubber-band)_
 - [x] `type-match-cut` — A headline splits vertically around an incoming panel, which grows from the negative space and takes the frame as the words exit through opposite edges _(motion-primitive, transition, typography)_
@@ -59,4 +59,4 @@ que la composition ne sait pas encore dessiner.
 - [x] `text-stagger` — A transitions.dev-inspired text stagger primitive with enter, shimmer, and exit-ready words _(video-primitive, transition-primitive, transitions-dev-port)_
 - [x] `text-state-swap` — A text state swap primitive with outgoing blur and incoming lift _(video-primitive, transition-primitive, transitions-dev-port)_
 - [x] `tilt-card` — A transitions.dev-inspired tilt card primitive with depth layers and hover-style parallax _(video-primitive, transition-primitive, transitions-dev-port)_
-- `halftone-field` — A full-bleed halftone light field: a grid of dots whose size and colour track a slow flowing simplex-noise field, so broad bands of light sweep across a mostly-black frame like a giant LED wall showing a plasma. Built to run under type _(webgl, shader, background)_
+- [x] `halftone-field` — A full-bleed halftone light field: a grid of dots whose size and colour track a slow flowing simplex-noise field, so broad bands of light sweep across a mostly-black frame like a giant LED wall showing a plasma. Built to run under type _(webgl, shader, background)_
