@@ -1905,3 +1905,125 @@ video.media {
   font-size: 0.95em;
   padding: 0 0.4em;
 }
+
+/* Palier 2 Nappes & Overlays */
+.mk-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.4), transparent 50%),
+              radial-gradient(circle at 70% 70%, rgba(236, 72, 153, 0.4), transparent 50%),
+              #0f172a;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lcd-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.3)), #064e3b;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mesh-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+              radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%),
+              radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.beat-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(239, 68, 68, 0.3), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.grain-field {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 0);
+  background-size: 8px 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.camcorder-hud {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+}
+.camcorder-hud::before {
+  content: '● REC';
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  color: #ef4444;
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 1.2rem;
+}
+
+.screen-warp {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 60%);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feather-highlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--fh-x, 50%) var(--fh-y, 50%), transparent 0%, transparent var(--fh-size, 35%), rgba(0, 0, 0, 0.7) 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.light-sweep-pass {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gloss-sweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.4) 50%, transparent 55%);
+  background-size: 200% 200%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.inline-highlight {
+  position: absolute;
+  inset: 0;
+  background: var(--hl-color, #ffe066);
+  mix-blend-mode: multiply;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.confetti-burst {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#3b82f6 2px, transparent 0), radial-gradient(#ef4444 2px, transparent 0), radial-gradient(#10b981 2px, transparent 0);
+  background-size: 24px 24px, 32px 32px, 16px 16px;
+  background-position: 0 0, 10px 10px, 5px 15px;
+  opacity: 0;
+  pointer-events: none;
+}
+

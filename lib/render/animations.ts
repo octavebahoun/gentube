@@ -534,6 +534,43 @@ export const SCENES_JS = `
           });
         }
 
+        if (scene.mkBackground) {
+          tl.fromTo("#mb" + scene.index, { opacity: 0 }, { opacity: scene.mkBackground.opacity || 0.9, duration: 0.5, ease: "power1.out" }, scene.mkBackground.at || scene.start);
+        }
+        if (scene.ytLcdBackground) {
+          tl.fromTo("#lb" + scene.index, { opacity: 0 }, { opacity: scene.ytLcdBackground.opacity || 0.85, duration: 0.5, ease: "power1.out" }, scene.ytLcdBackground.at || scene.start);
+        }
+        if (scene.meshGradientBg) {
+          tl.fromTo("#mg" + scene.index, { opacity: 0 }, { opacity: scene.meshGradientBg.opacity || 0.8, duration: 0.5, ease: "power1.out" }, scene.meshGradientBg.at || scene.start);
+        }
+        if (scene.beatPulseBackground) {
+          tl.fromTo("#bp" + scene.index, { opacity: 0 }, { opacity: scene.beatPulseBackground.opacity || 0.7, duration: 0.2, ease: "power2.out", repeat: 1, yoyo: true }, scene.beatPulseBackground.at || scene.start);
+        }
+        if (scene.grainField) {
+          tl.fromTo("#gf" + scene.index, { opacity: 0 }, { opacity: scene.grainField.opacity || 0.5, duration: 0.4, ease: "power1.out" }, scene.grainField.at || scene.start);
+        }
+        if (scene.camcorderHud) {
+          tl.fromTo("#ch" + scene.index, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, scene.camcorderHud.at || scene.start);
+        }
+        if (scene.ytScreenWarp) {
+          tl.fromTo("#sw" + scene.index, { opacity: 0 }, { opacity: scene.ytScreenWarp.opacity || 0.8, duration: 0.4, ease: "power1.out" }, scene.ytScreenWarp.at || scene.start);
+        }
+        if (scene.ytFeatherHighlight) {
+          tl.fromTo("#fh" + scene.index, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, scene.ytFeatherHighlight.at || scene.start);
+        }
+        if (scene.lightSweepPass) {
+          tl.fromTo("#lsp" + scene.index, { backgroundPosition: "100% 0", opacity: 0 }, { backgroundPosition: "0% 0", opacity: 1, duration: scene.lightSweepPass.duration || 1.5, ease: "power2.inOut" }, scene.lightSweepPass.at || scene.start);
+        }
+        if (scene.glossSweep) {
+          tl.fromTo("#gs" + scene.index, { opacity: 0, scaleX: 0.8, scaleY: 0.8 }, { opacity: scene.glossSweep.opacity || 0.6, scaleX: 1.1, scaleY: 1.1, duration: scene.glossSweep.duration || 1.0, ease: "power1.out" }, scene.glossSweep.at || scene.start);
+        }
+        if (scene.inlineHighlight) {
+          tl.fromTo("#ih" + scene.index, { opacity: 0 }, { opacity: 1, duration: scene.inlineHighlight.duration || 0.8, ease: "power2.out" }, scene.inlineHighlight.at || scene.start);
+        }
+        if (scene.confetti) {
+          tl.fromTo("#cf" + scene.index, { opacity: 0, scaleX: 0.5, scaleY: 0.5 }, { opacity: 1, scaleX: 1.2, scaleY: 1.2, duration: scene.confetti.duration || 1.5, ease: "back.out(1.7)" }, scene.confetti.at || scene.start);
+        }
+
         // Les plans dont le contenu est une donnee : compteur, tiers,
         // graphique. Ils vivent dans contenus.ts, pas ici.
         contenus(tl, scene);
