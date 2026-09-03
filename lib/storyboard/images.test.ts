@@ -343,6 +343,16 @@ describe('generating the stills', () => {
       },
     ],
     ['une citation', { quote: { text: 'La terre ne ment pas' } }],
+    ['une liste', { list: { items: [{ text: 'a' }, { text: 'b' }] } }],
+    [
+      'une comparaison',
+      {
+        comparison: {
+          left: { label: 'Avant', items: ['a'] },
+          right: { label: 'Apres', items: ['b'] },
+        },
+      },
+    ],
     [
       'un fil',
       {

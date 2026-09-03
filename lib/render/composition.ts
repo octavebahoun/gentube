@@ -184,7 +184,7 @@ export function composeHtml({
        * de fil doit tenir dans le cadre en 16:9 comme en 9:16, et c est la
        * hauteur qui commande.
        */
-      .quote, .thread { font-size: ${structuredSize}px; }
+      .quote, .thread, .list, .face { font-size: ${structuredSize}px; }
       .veil {
         --veil-start: ${Math.round(100 - subtitleBottom - 36)}%;
         --veil-mid: ${Math.round(100 - subtitleBottom - 3)}%;

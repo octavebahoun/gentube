@@ -599,6 +599,61 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the list and the comparison', () => {
+    const items = [
+      { text: 'Adhesions', value: '412' },
+      { text: 'Sacs', value: '6 000' },
+      { text: 'Villages', value: '17' },
+    ];
+    const withList = (list: Record<string, unknown>) =>
+      html([{ ...shot(), render: { list } } as Shot]);
+    const withFace = (comparison: Record<string, unknown>) =>
+      html([{ ...shot(), render: { comparison } } as Shot]);
+
+    const face = {
+      left: { label: 'Avant', items: ['a', 'b'] },
+      right: { label: 'Apres', items: ['c', 'd', 'e'] },
+    };
+
+    it('keeps the line and its figure in separate columns', () => {
+      const page = withList({ items });
+      expect(page).toContain('<div class="list-text">Adhesions</div>');
+      expect(page).toContain('<div class="list-value">412</div>');
+    });
+
+    it('numbers the lines itself when the order is a ranking', () => {
+      // Le compteur CSS d'un `ol` ne se met pas en forme, et un chiffre
+      // d'accent est la moitié de ce qui rend une liste lisible en vidéo.
+      expect(withList({ items, ordered: true })).toContain(
+        '<div class="list-rank">1</div>'
+      );
+      expect(withList({ items })).toContain('class="list-dot"');
+    });
+
+    it('brings both columns of a comparison in at the same rank', () => {
+      const page = withFace(face);
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      // Un rang par ligne du côté le plus long, et un seul instant par rang.
+      expect(T.scenes[0].comparison.steps).toHaveLength(3);
+      expect(page).toContain('id="cp0-left-0"');
+      expect(page).toContain('id="cp0-right-0"');
+    });
+
+    it('squeezes the step so the last line still lands in the scene', () => {
+      const six = Array.from({ length: 6 }, (_, i) => ({ text: 'x' + i }));
+      const page = withList({ items: six, stepSeconds: 2 });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      const scene = T.scenes[0];
+      expect(scene.list.steps[5].at).toBeLessThan(scene.start + scene.duration);
+    });
+
+    it('leaves the page alone when no scene asks for one', () => {
+      const page = html([shot()]);
+      expect(page).not.toContain('class="list');
+      expect(page).not.toContain('class="face"');
+    });
+  });
+
   describe('the quote', () => {
     const withQuote = (quote: Record<string, unknown>) =>
       html([{ ...shot(), render: { quote } } as Shot]);
@@ -881,8 +936,14 @@ describe('the palier-2 effects', () => {
 
   it('never mixes scale with scaleX on the same target', () => {
     // GSAP traite scale comme un raccourci qui ecrase scaleX : fold, squeeze
-    // et stretch ont rendu une scene immobile a cause de ca.
-    expect(SCENES_JS).not.toContain('scaleX');
+    // et stretch ont rendu une scene immobile a cause de ca. Le cadre fait
+    // exception : chaque bord n anime qu un axe, jamais les deux.
+    const coupe = SCENES_JS.indexOf('if (scene.outlineDraw)');
+    const avant = SCENES_JS.slice(0, coupe);
+    const cadre = SCENES_JS.slice(coupe);
+    expect(avant).not.toContain('scaleX');
+    expect(avant).not.toContain('scaleY');
+    expect(cadre).not.toMatch(/(?<![XY])scale\s*:/);
   });
 
   it('pulses the hoisted clip with its scene, never the still image', () => {
@@ -929,13 +990,15 @@ describe('the palier-2 effects', () => {
   });
 
   it('declares the third batch on their own ids', () => {
-    // gd, cc et sg : aucun ne recouvre un identifiant existant.
+    // gd, cc et sg : aucun ne recouvre un identifiant existant. Trajets en
+    // transformees (x/y), jamais en left/top : la garde les refuse.
     for (const champ of ['scene.gridDrift', 'scene.cursorClick', 'scene.scanGate']) {
       expect(SCENES_JS, champ).toContain(champ);
     }
     expect(SCENES_JS).toContain('"#gd"');
     expect(SCENES_JS).toContain('"#cc"');
     expect(SCENES_JS).toContain('"#sg"');
+    expect(SCENES_JS).toContain('y: porte.yPx');
   });
 
   it('hides the third batch at rest', () => {
@@ -954,11 +1017,14 @@ describe('the palier-2 effects', () => {
     expect(SCENES_JS).toContain('"#od"');
   });
 
-  it('hides the fourth batch at rest, and normalizes the trace', () => {
-    // pathLength 100 : le tiret va de 100 a 0 sans mesure dans la page.
+  it('hides the fourth batch at rest, and draws edges without SVG', () => {
+    // pathLength est ignore sur les formes : le cadre est quatre divs qui
+    // naissent a zero sur leur axe, pas un tiret.
+    expect(SCENES_JS).toContain('clic.xPx - clic.fromXpx');
     expect(palier2()).toMatch(/\.toggle-flip \{[^}]*background: #555b66/);
     expect(palier2()).toMatch(/\.aurora \{[^}]*opacity: 0/);
-    expect(palier2()).toContain('stroke-dasharray: 100;');
+    expect(palier2()).toMatch(/\.od-t \{[^}]*scaleX\(0\)/);
+    expect(palier2()).toMatch(/\.od-l \{[^}]*scaleY\(0\)/);
   });
 
   describe('through the real pipeline', () => {

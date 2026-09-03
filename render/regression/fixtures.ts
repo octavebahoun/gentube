@@ -291,6 +291,26 @@ export function momentDeLaCitation(): Moment {
 }
 
 /**
+ * Le moment où l'avant-dernière ligne vient d'entrer.
+ *
+ * Comme pour le fil : au début il n'y a qu'une ligne, à la fin tout est posé
+ * et immobile. Entre les deux, une ligne monte encore et les autres sont là —
+ * c'est la seule image qui dise si la cascade fonctionne.
+ */
+export function momentDeLaCascade(lignes: number): Moment {
+  const pas = 0.5;
+  return {
+    at: arrondi(
+      scenesMinutees()[4].startInSeconds +
+        DEPART_DU_GRAPHIQUE +
+        (lignes - 2) * pas +
+        0.15
+    ),
+    nom: 'cascade',
+  };
+}
+
+/**
  * L'instant où le tiers inférieur est entièrement posé.
  *
  * Il entre en 0,4 s et sort avant la fin de la scène : capturé au début ou à

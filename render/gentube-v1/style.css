@@ -770,6 +770,157 @@ video.media {
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* --- Liste ---------------------------------------------------------------- */
+
+/*
+ * Une ligne par information, et le chiffre dans sa propre colonne. C'est ce
+ * qui sépare une liste lisible en vidéo d'un paragraphe à puces : l'oeil
+ * descend la colonne de gauche pour le texte et celle de droite pour les
+ * valeurs, sans jamais relire.
+ */
+.list {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.9em;
+  padding: 8% 9% 15%;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  --list-accent: #ce1f20;
+}
+
+.list-title {
+  font-size: 1.35em;
+  font-weight: 900;
+  line-height: 1.15;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+.list-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.list-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55em;
+  will-change: opacity, transform;
+}
+
+/* La puce et le rang occupent la même largeur : les textes s'alignent. */
+.list-dot,
+.list-rank {
+  flex: 0 0 1.4em;
+  text-align: center;
+}
+
+.list-dot {
+  align-self: center;
+  width: 0.42em;
+  height: 0.42em;
+  border-radius: 50%;
+  background: var(--list-accent);
+}
+
+.list-rank {
+  font-size: 1.05em;
+  font-weight: 900;
+  line-height: 1.3;
+  color: var(--list-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.list-text {
+  flex: 1 1 auto;
+  font-size: 1.02em;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.list-value {
+  flex: 0 0 auto;
+  font-size: 1.02em;
+  font-weight: 900;
+  line-height: 1.3;
+  color: var(--list-accent);
+  /* Les valeurs forment une colonne : sans chasse fixe elle ondule. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Comparaison ---------------------------------------------------------- */
+
+/*
+ * Deux colonnes symétriques, pas une table. Une table apparierait les lignes
+ * deux à deux, ce que la comparaison ne promet pas : un côté peut avoir trois
+ * arguments et l'autre un seul.
+ */
+.face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1em;
+  padding: 8% 7% 15%;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  --face-accent: #ce1f20;
+}
+
+.face-title {
+  font-size: 1.25em;
+  font-weight: 900;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+.face-cols {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9em;
+}
+
+.face-col {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 0.42em;
+  padding: 0.7em 0.8em;
+  border-radius: 0.4em;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* Le côté droit porte l'accent : c'est celui qu'on veut qu'on retienne. */
+.face-right {
+  background: rgba(206, 31, 32, 0.16);
+}
+
+.face-label {
+  font-size: 0.78em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.face-right .face-label {
+  color: var(--face-accent);
+}
+
+.face-item {
+  font-size: 0.98em;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  will-change: opacity, transform;
+}
+
 /* --- Compteur ------------------------------------------------------------ */
 
 /*
@@ -1419,29 +1570,39 @@ video.media {
 }
 
 /*
- * Le contour : un SVG plein cadre, un rect au perimetre normalise. Le trait
- * ne s amincit pas a l etirement (non-scaling-stroke), comme la courbe du
- * graphique.
+ * Le cadre : quatre bords qui se tracent, coins carres. Chaque bord nait a
+ * zero sur son axe (repos en CSS, pour ne pas flasher avant son instant) et
+ * part du coin d ou il vient, via transform-origin. Des divs, pas du SVG :
+ * pathLength est ignore sur les formes et le tiret tombait sur le vrai
+ * perimetre (verifie a l image, deux fois).
  */
 .outline-draw {
   position: absolute;
   inset: 6%;
-  opacity: 1;
   pointer-events: none;
 }
 
-.outline-draw svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+.od-t,
+.od-b {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--trace-color, #ffd9a0);
+  will-change: transform;
 }
 
-.outline-draw path {
-  fill: none;
-  stroke: var(--trace-color, #ffd9a0);
-  stroke-width: 4;
-  vector-effect: non-scaling-stroke;
-  stroke-linecap: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
+.od-l,
+.od-r {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--trace-color, #ffd9a0);
+  will-change: transform;
 }
+
+.od-t { top: 0; transform-origin: left center; transform: scaleX(0); }
+.od-r { right: 0; transform-origin: center top; transform: scaleY(0); }
+.od-b { bottom: 0; transform-origin: right center; transform: scaleX(0); }
+.od-l { left: 0; transform-origin: center bottom; transform: scaleY(0); }

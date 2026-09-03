@@ -275,6 +275,34 @@ Vérifié par `--citations`, capturé une fois la signature apparue — avant, o
 photographie une citation anonyme, ce qui ne prouve rien du plan qu'on prétend
 rendre.
 
+**La liste et la comparaison, livrées le 3 septembre 2026.** Deux formes que le
+contenu sans visage utilise plus que toutes les autres — « les cinq chiffres
+de… », « avant et après » — et que le moteur ne savait pas dessiner. Un
+`kineticTitle` ne dit qu'une phrase ; ici chaque ligne est une information, et
+leur ordre est ce que la narration suit.
+
+La liste sépare le texte de sa valeur en deux colonnes : l'œil descend celle de
+gauche pour lire et celle de droite pour comparer, sans jamais relire. La
+numérotation est écrite dans le balisage et non laissée à un `<ol>` — le
+compteur CSS d'une liste ordonnée ne se met pas en forme, et un chiffre
+d'accent est la moitié de ce qui rend une liste lisible en vidéo.
+
+La comparaison est deux colonnes symétriques et non une table : une table
+apparierait les lignes deux à deux, ce que la comparaison ne promet pas. Un
+côté peut avoir trois arguments et l'autre un seul. Les deux se remplissent
+**au même rang** — un côté qui arriverait en premier se lirait comme deux
+listes, et le face-à-face est tout ce que ce plan a à dire.
+
+Les trois cascades — fil, liste, comparaison — partagent maintenant une seule
+fonction, qui resserre le pas plutôt que de laisser la dernière ligne tomber
+hors du plan.
+
+Vérifié par `--cascades`, capturé quand l'avant-dernière ligne vient d'entrer.
+
+Et deux fichiers de plus ont été coupés avant d'y ajouter quoi que ce soit :
+`plans-timeline.ts` prend les instants des plans structurés, ce qui ramène
+`plan.ts` de 689 à 491 lignes.
+
 Au passage, deux fichiers ont été dégonflés avant d'y ajouter quoi que ce soit,
 selon la règle : `structures.ts` prend le balisage des plans structurés
 (`markup.ts` retombe de 516 à 341 lignes) et `plans.ts` leurs schémas

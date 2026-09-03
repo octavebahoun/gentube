@@ -180,3 +180,66 @@ export const quoteSchema = z.object({
   startInSeconds: z.number().min(0).optional(),
   durationInSeconds: z.number().positive().optional(),
 });
+
+/**
+ * Une liste.
+ *
+ * Le format le plus courant du contenu sans visage — « les cinq chiffres
+ * de… », « trois raisons de… » — et pourtant celui qu'on n'avait pas. Un
+ * `kineticTitle` ne sait dire qu'une phrase ; ici chaque ligne est une
+ * information, et leur ordre est ce que la narration suit.
+ *
+ * Deux à six lignes. Une liste de sept ne se lit pas en un plan, et la
+ * septième sort du cadre en 9:16.
+ */
+export const listSchema = z.object({
+  title: z.string().optional(),
+  items: z
+    .array(
+      z.object({
+        /** La ligne. Courte : ce n'est pas une phrase de narration. */
+        text: z.string().max(80),
+        /**
+         * Le chiffre ou le mot fort qu'on pose à droite.
+         *
+         * Une chaîne et non un nombre : c'est une étiquette — « 12 000 »,
+         * « x3 », « 2 h » — et la mettre en forme ici serait deviner.
+         */
+        value: z.string().max(16).optional(),
+      })
+    )
+    .min(2)
+    .max(6),
+  /** Numérotée plutôt que pastillée. Vrai quand l'ordre est un classement. */
+  ordered: z.boolean().optional(),
+  accentColor: z.string().optional(),
+  startInSeconds: z.number().min(0).optional(),
+  /** L'écart entre deux lignes. C'est lui qui cale la liste sur la voix. */
+  stepSeconds: z.number().positive().max(2).optional(),
+});
+
+/**
+ * Une comparaison en deux colonnes.
+ *
+ * Avant et après, nous et eux, l'ancien prix et le nouveau. Le sens ne vient
+ * pas des lignes mais de leur **face-à-face** : les mêmes lignes en une seule
+ * liste ne diraient rien.
+ *
+ * Une à quatre lignes par côté, et les deux côtés se remplissent ensemble —
+ * une comparaison où un côté arriverait en premier se lirait comme deux
+ * listes.
+ */
+export const comparisonSchema = z.object({
+  title: z.string().optional(),
+  left: z.object({
+    label: z.string().max(24),
+    items: z.array(z.string().max(60)).min(1).max(4),
+  }),
+  right: z.object({
+    label: z.string().max(24),
+    items: z.array(z.string().max(60)).min(1).max(4),
+  }),
+  accentColor: z.string().optional(),
+  startInSeconds: z.number().min(0).optional(),
+  stepSeconds: z.number().positive().max(2).optional(),
+});

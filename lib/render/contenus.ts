@@ -208,4 +208,51 @@ export const CONTENUS_JS = `
             scene.quote.sign
           );
         }
+        /*
+         * La liste et la comparaison : une entree par rang, en cascade.
+         *
+         * Meme geste pour les deux, et ce n est pas un raccourci : une ligne
+         * qui arrive doit se lire de la meme facon qu on la compare ou qu on
+         * l enumere. Seules les cibles changent.
+         */
+        function cascader(cibles, steps) {
+          steps.forEach(function (step, i) {
+            cibles(i).forEach(function (cible) {
+              tl.fromTo(
+                cible,
+                { opacity: 0, x: "-0.5em" },
+                {
+                  opacity: 1,
+                  x: "0em",
+                  duration: 0.3,
+                  ease: "power3.out",
+                },
+                step.at
+              );
+            });
+          });
+        }
+
+        if (scene.list) {
+          cascader(function (i) {
+            return ["#li" + scene.index + "-" + i];
+          }, scene.list.steps);
+        }
+
+        /*
+         * Les deux colonnes au meme rang partent ensemble. Un cote qui se
+         * remplirait en premier ferait lire deux listes au lieu d un
+         * face-a-face, et c est tout ce que ce plan a a dire.
+         *
+         * Les cibles peuvent ne pas exister : un cote de trois lignes contre
+         * un de une. GSAP accepte un selecteur sans correspondance.
+         */
+        if (scene.comparison) {
+          cascader(function (i) {
+            return [
+              "#cp" + scene.index + "-left-" + i,
+              "#cp" + scene.index + "-right-" + i,
+            ];
+          }, scene.comparison.steps);
+        }
       }`;

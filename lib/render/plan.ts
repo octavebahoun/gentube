@@ -4,6 +4,7 @@ import type {
   WordTiming,
 } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
+import { structuredPlans } from './plans-timeline';
 import {
   isMoveTransition,
   isShaderTransition,
@@ -214,10 +215,6 @@ export function buildTimeline(
       const sweep = scene.effects?.lightSweep;
       const grain = scene.effects?.grain;
       const accent = scene.effects?.beatAccent;
-      const tiers = scene.lowerThird;
-      const chart = scene.chart;
-      const thread = scene.thread;
-      const quote = scene.quote;
 
       return {
         index,
@@ -301,120 +298,7 @@ export function buildTimeline(
          * bornée par la fin de la scène — un tiers qui survivrait à son plan
          * se retrouverait posé sur le suivant, où il nomme quelqu'un d'autre.
          */
-        lowerThird: tiers
-          ? (() => {
-              const at = scene.startInSeconds + (tiers.startInSeconds ?? 0);
-              const fin = scene.startInSeconds + scene.durationInSeconds;
-              return {
-                at: ms(at),
-                out: ms(Math.min(at + (tiers.holdSeconds ?? 3), fin)),
-                // Un tiers à droite entre par la droite : le geste vient du
-                // bord dont il est le plus proche, sinon il traverse l'image.
-                dx: tiers.side === 'right' ? 40 : -40,
-              };
-            })()
-          : null,
-        counter: scene.counter
-          ? {
-              at: ms(scene.startInSeconds + (scene.counter.startInSeconds ?? 0)),
-              duration: scene.counter.durationInSeconds ?? 1.4,
-              from: scene.counter.from ?? 0,
-              to: scene.counter.value,
-              decimals: scene.counter.decimals ?? 0,
-              prefix: scene.counter.prefix ?? '',
-              suffix: scene.counter.suffix ?? '',
-              ring: scene.counter.variant === 'ring',
-            }
-          : null,
-        /*
-         * Le graphique, réduit à des nombres.
-         *
-         * Toute la géométrie est faite ici : la page ne reçoit que des
-         * fractions et, pour la courbe, la longueur de son propre tracé. Un
-         * calcul fait dans le navigateur dériverait d'un rendu à l'autre, et
-         * `getTotalLength()` sur un SVG étiré ne rend pas la même valeur selon
-         * le format — d'où la longueur mesurée ici, dans le carré de 100.
-         *
-         * Le décalage entre les barres est borné : six barres à 0,12 s
-         * mettraient 0,6 s à démarrer, et la dernière n'aurait plus le temps
-         * de monter avant la fin de la scène.
-         */
-        chart: chart
-          ? (() => {
-              const echelle =
-                chart.max ?? Math.max(...chart.points.map((p) => p.value));
-              const at = scene.startInSeconds + (chart.startInSeconds ?? 0);
-              const duree = chart.durationInSeconds ?? 0.9;
-              const stagger = Math.min(0.12, 0.5 / chart.points.length);
-
-              const projete = chartPoints(chart.points, echelle);
-
-              return {
-                at: ms(at),
-                duration: duree,
-                stagger,
-                prefix: chart.prefix ?? '',
-                suffix: chart.suffix ?? '',
-                decimals: chart.decimals ?? 0,
-                bars: chart.points.map((point) => ({
-                  value: point.value,
-                  part: echelle > 0 ? point.value / echelle : 0,
-                })),
-                line:
-                  (chart.kind ?? 'bar') === 'line'
-                    ? {
-                        length: longueurDuTrace(projete),
-                        // Chaque pastille s'allume quand le trait l'atteint :
-                        // la courbe se dessine, les points la ponctuent.
-                        dots: projete.map((_, i) => ({
-                          at: ms((i / (projete.length - 1)) * duree * 1.6),
-                        })),
-                      }
-                    : null,
-              };
-            })()
-          : null,
-        /*
-         * Le fil : un instant par message, en cascade.
-         *
-         * Le pas est borné par ce qui reste de la scène. Cinq messages à une
-         * seconde d'écart tiennent cinq secondes ; sur un plan de trois, les
-         * deux derniers n'apparaîtraient jamais et le storyboard mentirait sur
-         * ce qu'il montre.
-         */
-        thread: thread
-          ? (() => {
-              const debut =
-                scene.startInSeconds + (thread.startInSeconds ?? 0);
-              const reste = Math.max(
-                0.3,
-                scene.startInSeconds + scene.durationInSeconds - debut - 0.4
-              );
-              const pas = Math.min(
-                thread.stepSeconds ?? 0.7,
-                reste / Math.max(1, thread.messages.length - 1)
-              );
-              return {
-                at: ms(debut),
-                messages: thread.messages.map((_, i) => ({
-                  at: ms(debut + i * pas),
-                })),
-              };
-            })()
-          : null,
-        /*
-         * La citation : la phrase d'abord, la signature après.
-         *
-         * Le nom arrive une fois la phrase lisible. L'ordre est le sens même
-         * du plan — on cite, puis on dit qui.
-         */
-        quote: quote
-          ? (() => {
-              const at = scene.startInSeconds + (quote.startInSeconds ?? 0);
-              const duree = quote.durationInSeconds ?? 0.6;
-              return { at: ms(at), duration: duree, sign: ms(at + duree * 0.8) };
-            })()
-          : null,
+        ...structuredPlans(scene),
         kinetic: title
           ? {
               at: ms(scene.startInSeconds + (title.startInSeconds ?? 0)),
@@ -586,45 +470,6 @@ function onBeat(
  */
 export const TITRE_PAR_LETTRE = new Set(['typewriter', 'tracking', 'cascade']);
 
-/**
- * Où tombe chaque point, en pourcentage du cadre du tracé.
- *
- * Exportée parce que le balisage et la timeline ont besoin des **mêmes**
- * coordonnées : le SVG dessine la ligne, les pastilles sont des éléments HTML
- * posés dessus. Deux projections séparées dériveraient l'une de l'autre au
- * premier changement d'échelle.
- *
- * La série n'occupe que 10 à 90 % de la hauteur. Sans cette marge, la valeur
- * la plus haute touche le bord du cadre et la courbe paraît coupée.
- */
-export function chartPoints(
-  points: { value: number }[],
-  echelle: number
-): { x: number; y: number }[] {
-  return points.map((point, i) => ({
-    x: (i / Math.max(1, points.length - 1)) * 100,
-    y: 90 - (echelle > 0 ? (point.value / echelle) * 80 : 0),
-  }));
-}
-
-/**
- * La longueur d'une polyligne, pour que le trait se dessine.
- *
- * `strokeDasharray` et `strokeDashoffset` demandent cette longueur ; la
- * mesurer dans la page avec `getTotalLength()` donnerait un résultat qui
- * dépend de l'étirement du SVG, donc du format de la vidéo. Calculée ici, dans
- * le carré de 100 sur 100 du tracé, elle est la même partout.
- */
-function longueurDuTrace(points: { x: number; y: number }[]): number {
-  let total = 0;
-  for (let i = 1; i < points.length; i += 1) {
-    const dx = points[i].x - points[i - 1].x;
-    const dy = points[i].y - points[i - 1].y;
-    total += Math.sqrt(dx * dx + dy * dy);
-  }
-  return Math.round(total * 100) / 100;
-}
-
 export function titleTargets(
   title: { text: string; variant?: string },
   index: number
@@ -637,3 +482,10 @@ export function titleTargets(
     [...mot].map((_, j) => `k${index}-${i}-${j}`)
   );
 }
+
+/**
+ * Réexport de compatibilité : la géométrie du graphique vit dans
+ * `plans-timeline.ts` depuis le 3 septembre 2026, `structures.ts` l'importe
+ * encore d'ici.
+ */
+export { chartPoints } from './plans-timeline';

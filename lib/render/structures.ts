@@ -290,3 +290,105 @@ export function quoteMarkup(
     '</div>'
   );
 }
+
+/**
+ * La liste : une ligne par information, et le chiffre à part.
+ *
+ * Trois éléments par ligne — la puce, le texte, la valeur — parce que les
+ * trois se règlent différemment : la puce prend l'accent, le texte la lecture,
+ * la valeur la chasse fixe pour que les chiffres s'alignent en colonne.
+ *
+ * La numérotation est écrite ici et non laissée à un `<ol>` : le compteur CSS
+ * d'une liste ordonnée ne se met pas en forme, et un chiffre d'accent est la
+ * moitié de ce qui rend une liste lisible en vidéo.
+ */
+export function listMarkup(scene: HyperframesScene, index: number): string {
+  const list = scene.list;
+  if (!list) return '';
+
+  const style = list.accentColor
+    ? ` style="--list-accent:${escapeHtml(list.accentColor)}"`
+    : '';
+
+  const titre = list.title
+    ? `<div class="list-title">${escapeHtml(list.title)}</div>`
+    : '';
+
+  const lignes = list.items
+    .map((item, i) => {
+      const puce = list.ordered
+        ? `<div class="list-rank">${i + 1}</div>`
+        : '<div class="list-dot" aria-hidden="true"></div>';
+      const valeur = item.value
+        ? `<div class="list-value">${escapeHtml(item.value)}</div>`
+        : '';
+      return (
+        `<div class="list-row" id="li${index}-${i}">` +
+        puce +
+        `<div class="list-text">${escapeHtml(item.text)}</div>` +
+        valeur +
+        '</div>'
+      );
+    })
+    .join('');
+
+  return (
+    `<div class="list${list.ordered ? ' list-ordered' : ''}"${style}>` +
+    titre +
+    `<div class="list-rows">${lignes}</div>` +
+    '</div>'
+  );
+}
+
+/**
+ * La comparaison : deux colonnes, et le face-à-face au milieu.
+ *
+ * Les deux côtés sont deux blocs symétriques et non une table : une table
+ * apparierait les lignes deux à deux, ce que la comparaison ne promet pas —
+ * un côté peut avoir trois arguments et l'autre un seul.
+ *
+ * Les lignes des deux colonnes partagent un même identifiant de rang, `cp`,
+ * pour que la timeline les fasse arriver ensemble. Une comparaison dont un
+ * côté se remplirait en premier se lirait comme deux listes.
+ */
+export function comparisonMarkup(
+  scene: HyperframesScene,
+  index: number
+): string {
+  const face = scene.comparison;
+  if (!face) return '';
+
+  const style = face.accentColor
+    ? ` style="--face-accent:${escapeHtml(face.accentColor)}"`
+    : '';
+
+  const titre = face.title
+    ? `<div class="face-title">${escapeHtml(face.title)}</div>`
+    : '';
+
+  const colonne = (
+    cote: { label: string; items: string[] },
+    nom: 'left' | 'right'
+  ) =>
+    `<div class="face-col face-${nom}">` +
+    `<div class="face-label">${escapeHtml(cote.label)}</div>` +
+    cote.items
+      .map(
+        (item, i) =>
+          `<div class="face-item" id="cp${index}-${nom}-${i}">` +
+          escapeHtml(item) +
+          '</div>'
+      )
+      .join('') +
+    '</div>';
+
+  return (
+    `<div class="face"${style}>` +
+    titre +
+    '<div class="face-cols">' +
+    colonne(face.left, 'left') +
+    colonne(face.right, 'right') +
+    '</div>' +
+    '</div>'
+  );
+}

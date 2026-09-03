@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import {
   chartSchema,
+  comparisonSchema,
+  listSchema,
   lowerThirdSchema,
   quoteSchema,
   sceneCounterSchema,
@@ -431,6 +433,10 @@ export const sceneRenderSchema = z.object({
   thread: threadSchema.optional(),
   /** Une citation. La scène se dessine seule, elle aussi. */
   quote: quoteSchema.optional(),
+  /** Une liste. Elle se dessine seule. */
+  list: listSchema.optional(),
+  /** Une comparaison en deux colonnes. Elle se dessine seule. */
+  comparison: comparisonSchema.optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
   card: z
     .object({
@@ -488,7 +494,9 @@ export function rendersOwnContent(render: unknown): boolean {
       parsed.data.counter ||
       parsed.data.chart ||
       parsed.data.thread ||
-      parsed.data.quote
+      parsed.data.quote ||
+      parsed.data.list ||
+      parsed.data.comparison
   );
 }
 
@@ -837,6 +845,8 @@ export function toHyperframesStoryboard(
  */
 export {
   chartSchema,
+  comparisonSchema,
+  listSchema,
   lowerThirdSchema,
   quoteSchema,
   sceneCounterSchema,

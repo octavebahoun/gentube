@@ -25,6 +25,8 @@ import {
 import {
   TRANSITIONS,
   chartSchema,
+  comparisonSchema,
+  listSchema,
   lowerThirdSchema,
   quoteSchema,
   sceneCounterSchema,
@@ -160,6 +162,17 @@ const SYSTEM_PROMPT = [
   '  never fold the name into the sentence. Use it when the narration quotes',
   '  someone worth naming. Like the others above, such a scene needs NO',
   '  `prompt`.',
+  '- `list` is optional and puts the points on screen one by one:',
+  '  { items: [{text, value?}] (2 to 6), title?, ordered?, stepSeconds? }.',
+  '  `value` is the figure or short label pinned to the right of a line.',
+  '  Set `ordered` when the order is a ranking. Keep each `text` to a few',
+  '  words — the voice reads the sentence, the screen carries the point.',
+  '- `comparison` is optional and faces two sides off:',
+  '  { left: {label, items}, right: {label, items}, title?, stepSeconds? }.',
+  '  One to four lines each; the right side carries the accent, so put there',
+  '  what the viewer should leave with. Use it for before/after, us/them,',
+  '  old price/new price.',
+  '  Both of these draw themselves, so such a scene needs NO `prompt`.',
   '- `lowerThird` is optional and names who or what is on screen:',
   '  { name, role?, variant: bar|stack|boxed, side?: left|right, holdSeconds? }.',
   '  `name` is the strong line, `role` the smaller one under it — a job, a',
@@ -247,12 +260,21 @@ const llmSceneSchema = z.object({
   chart: chartSchema.optional(),
   thread: threadSchema.optional(),
   quote: quoteSchema.optional(),
+  list: listSchema.optional(),
+  comparison: comparisonSchema.optional(),
   lowerThird: lowerThirdSchema.optional(),
   sounds: z.array(sceneSoundSchema.partial({ src: true })).optional(),
 })
   .refine(
     (scene) =>
-      Boolean(scene.counter || scene.chart || scene.thread || scene.quote) ||
+      Boolean(
+        scene.counter ||
+          scene.chart ||
+          scene.thread ||
+          scene.quote ||
+          scene.list ||
+          scene.comparison
+      ) ||
       (scene.prompt ?? '').length >= 10,
     {
       path: ['prompt'],
@@ -303,6 +325,8 @@ export function normalizeStoryboard(
     if (scene.chart) render.chart = scene.chart;
     if (scene.thread) render.thread = scene.thread;
     if (scene.quote) render.quote = scene.quote;
+    if (scene.list) render.list = scene.list;
+    if (scene.comparison) render.comparison = scene.comparison;
     if (scene.lowerThird) render.lowerThird = scene.lowerThird;
     if (sounds.length > 0) render.sounds = sounds;
 

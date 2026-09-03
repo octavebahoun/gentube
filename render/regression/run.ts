@@ -9,6 +9,7 @@ import {
   MOMENTS,
   momentDeLaCoupe,
   DEPART_DU_GRAPHIQUE,
+  momentDeLaCascade,
   momentDeLaCitation,
   momentDuFil,
   momentDuGraphique,
@@ -94,6 +95,8 @@ type Jeu = {
   thread?: boolean;
   /** Pose une citation à la place du compteur, cinquième scène. */
   quote?: boolean;
+  /** Pose une liste ou une comparaison, cinquième scène. */
+  cascade?: 'list' | 'comparison';
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -165,10 +168,31 @@ const CITATIONS: Jeu[] = [
   },
 ];
 
+/**
+ * La liste et la comparaison, activées par --cascades.
+ *
+ * Quatre lignes chacune : assez pour que le décalage se voie, assez peu pour
+ * qu'elles tiennent dans un plan de trois secondes.
+ */
+const CASCADES: Jeu[] = (['list', 'comparison'] as const).map((quoi) => ({
+  nom: quoi === 'list' ? 'liste' : 'comparaison',
+  video: REFERENCE_VIDEO,
+  cascade: quoi,
+  moments: [momentDeLaCascade(4)],
+}));
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(jeu: Jeu): string {
-  const { video, variant, transition, lowerThird, chart, thread, quote } =
-    jeu;
+  const {
+    video,
+    variant,
+    transition,
+    lowerThird,
+    chart,
+    thread,
+    quote,
+    cascade,
+  } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
     cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
@@ -239,6 +263,37 @@ function projet(jeu: Jeu): string {
     };
   }
 
+  if (cascade) {
+    const render = shots[4].render as Record<string, unknown>;
+    delete render.counter;
+    if (cascade === 'list') {
+      render.list = {
+        title: 'Quatre chiffres du mois',
+        ordered: true,
+        startInSeconds: DEPART_DU_GRAPHIQUE,
+        items: [
+          { text: 'Adhesions nouvelles', value: '412' },
+          { text: 'Sacs collectes', value: '6 000' },
+          { text: 'Villages couverts', value: '17' },
+          { text: 'Delai moyen', value: '2 j' },
+        ],
+      };
+    } else {
+      render.comparison = {
+        title: 'Avant et apres la cooperative',
+        startInSeconds: DEPART_DU_GRAPHIQUE,
+        left: {
+          label: 'Avant',
+          items: ['Vente au bord de route', 'Prix subi', 'Aucun stock'],
+        },
+        right: {
+          label: 'Apres',
+          items: ['Vente groupee', 'Prix negocie', 'Magasin commun', 'Avance'],
+        },
+      };
+    }
+  }
+
   const storyboard = toHyperframesStoryboard(video, shots);
   writeFileSync(join(dir, 'index.html'), composeHtml({ storyboard, watermark: true }));
   return dir;
@@ -292,6 +347,7 @@ function main() {
   if (process.argv.includes('--graphiques')) jeux = [...jeux, ...GRAPHIQUES];
   if (process.argv.includes('--fils')) jeux = [...jeux, ...FILS];
   if (process.argv.includes('--citations')) jeux = [...jeux, ...CITATIONS];
+  if (process.argv.includes('--cascades')) jeux = [...jeux, ...CASCADES];
 
   for (const jeu of jeux) {
     console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);
