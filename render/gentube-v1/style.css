@@ -239,6 +239,89 @@ video.media {
   will-change: opacity, transform;
 }
 
+/* --- Tiers inférieur ----------------------------------------------------- */
+
+/*
+ * Deux lignes de rangs différents, et c'est tout le sujet : le nom est gros et
+ * plein, la fonction petite et en retrait. Le champ porte les deux séparément
+ * précisément pour que ce contraste existe — une seule chaîne les rendrait de
+ * la même façon.
+ *
+ * Placé bas, à 14 % du bas plutôt qu'au ras : les sous-titres occupent le bord
+ * inférieur, et les deux se chevaucheraient.
+ */
+.lower-third {
+  position: absolute;
+  bottom: 14%;
+  max-width: 60%;
+  padding: 0.5em 0.9em;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  --lt-accent: #ff5a36;
+  will-change: opacity, transform;
+}
+
+.lower-third.lt-left {
+  left: 6%;
+  text-align: left;
+}
+
+.lower-third.lt-right {
+  right: 6%;
+  text-align: right;
+}
+
+.lt-name {
+  font-size: 1.7em;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.lt-role {
+  margin-top: 0.15em;
+  font-size: 0.95em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+/* Le filet : la barre d'accent tient le bloc du côté où il est posé. */
+.lt-bar {
+  border-left: 5px solid var(--lt-accent);
+}
+
+.lt-bar.lt-right {
+  border-left: 0;
+  border-right: 5px solid var(--lt-accent);
+}
+
+/* Empilé : aucun décor, le contraste des deux lignes fait tout le travail. */
+.lt-stack {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.lt-stack .lt-name {
+  font-size: 2em;
+}
+
+/*
+ * Le cartouche. Le fond est opaque et non flouté : un `backdrop-filter` sur un
+ * bandeau coûte une passe de rastérisation logicielle par image sur Lambda,
+ * pour un gain que personne ne voit à cette taille.
+ */
+.lt-boxed {
+  background: rgba(12, 12, 14, 0.82);
+  border-radius: 0.35em;
+}
+
+.lt-boxed .lt-name {
+  color: var(--lt-accent);
+}
+
 /* --- Titre cinétique ----------------------------------------------------- */
 
 /*

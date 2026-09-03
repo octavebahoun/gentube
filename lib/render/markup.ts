@@ -87,6 +87,7 @@ export function sceneMarkup(
   // comme pour le karaoké.
   const kinetic = kineticMarkup(scene, index);
   const counter = counterMarkup(scene, index);
+  const tiers = lowerThirdMarkup(scene, index);
 
   // Un éclair est une nappe de couleur pleine trame. Elle est dans la scène
   // pour disparaître avec elle, jamais au-dessus du reste de la vidéo.
@@ -107,6 +108,7 @@ export function sceneMarkup(
     captions ? '<div class="veil"></div>' : '',
     captions,
     overlay,
+    tiers,
     kinetic,
     counter,
     flash,
@@ -207,6 +209,42 @@ export function soundsMarkup(
       );
     })
     .join('\n      ');
+}
+
+/**
+ * Le tiers inférieur : deux lignes, deux rangs.
+ *
+ * Le nom et la fonction sont deux éléments distincts et non une chaîne
+ * assemblée ici, parce que c'est la feuille de style qui décide de leur
+ * hiérarchie — taille, graisse, couleur. Les coller en un seul texte
+ * rendrait ce choix impossible, et c'est toute la raison d'être du champ.
+ *
+ * `--lt-accent` plutôt qu'une couleur écrite dans chaque règle : les trois
+ * variantes s'en servent à trois endroits différents — le filet, le cartouche,
+ * le nom — et une seule variable les sert toutes.
+ */
+export function lowerThirdMarkup(
+  scene: HyperframesScene,
+  index: number
+): string {
+  const tiers = scene.lowerThird;
+  if (!tiers) return '';
+
+  const role = tiers.role
+    ? `<div class="lt-role">${escapeHtml(tiers.role)}</div>`
+    : '';
+
+  const style = tiers.accentColor
+    ? ` style="--lt-accent:${escapeHtml(tiers.accentColor)}"`
+    : '';
+
+  return (
+    `<div class="lower-third lt-${escapeHtml(tiers.variant ?? 'bar')} ` +
+    `lt-${escapeHtml(tiers.side ?? 'left')}" id="t${index}"${style}>` +
+    `<div class="lt-name">${escapeHtml(tiers.name)}</div>` +
+    role +
+    '</div>'
+  );
 }
 
 /**

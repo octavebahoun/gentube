@@ -87,6 +87,28 @@ export const SCENES_JS = `
           );
         }
 
+        /*
+         * Le tiers inferieur entre par son bord, puis repart.
+         *
+         * Deux fromTo et non un aller-retour : sous la recherche d'image, un
+         * tween qui reviendrait sur lui-meme n'aurait pas d'instant absolu ou
+         * s'accrocher. Chacun pose ses deux extremes a une seconde connue.
+         */
+        if (scene.lowerThird) {
+          const cible = "#t" + scene.index;
+          tl.fromTo(
+            cible,
+            { opacity: 0, x: scene.lowerThird.dx },
+            { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" },
+            scene.lowerThird.at
+          );
+          tl.fromTo(
+            cible,
+            { opacity: 1, x: 0 },
+            { opacity: 0, x: scene.lowerThird.dx, duration: 0.3, ease: "power2.in" },
+            scene.lowerThird.out
+          );
+        }
 
         // Le titre cinétique : chaque mot entre à son tour. Le décalage est
         // une donnée, calculée hors de la page.

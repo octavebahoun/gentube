@@ -5,17 +5,20 @@ pnpm test:visual              # compare aux références
 npx tsx render/regression/run.ts --update   # les réécrit
 ```
 
-Trois passes s'ajoutent à la demande, hors du jeu par défaut pour qu'il reste
+Quatre passes s'ajoutent à la demande, hors du jeu par défaut pour qu'il reste
 lançable à chaque changement :
 
 ```bash
 npx tsx render/regression/run.ts --styles       # un rendu par style de sous-titre
 npx tsx render/regression/run.ts --titres       # un rendu par variante de titre
 npx tsx render/regression/run.ts --transitions  # un rendu par transition par déplacement
+npx tsx render/regression/run.ts --tiers        # un rendu par variante de tiers inférieur
 ```
 
 `--transitions` ne capture qu'un instant par transition, au milieu de la
 troisième coupe : c'est le seul moment où un geste de transition existe.
+`--tiers` capture une seconde après l'entrée du bandeau, quand il est au repos
+— avant, on photographie un bloc à moitié translaté.
 
 Ces passes ne sont pas décoratives. Le 3 septembre 2026, `--transitions` a
 montré que trois gestes sur vingt-trois — `fold`, `squeeze` et `stretch` —

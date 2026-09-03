@@ -211,6 +211,7 @@ export function buildTimeline(
     scenes: scenes.map((scene, index) => {
       const title = scene.kineticTitle;
       const flash = scene.effects?.flash;
+      const tiers = scene.lowerThird;
 
       return {
         index,
@@ -241,7 +242,27 @@ export function buildTimeline(
         overlay: scene.overlayText
           ? { at: ms(scene.startInSeconds + (scene.overlayText.startInSeconds ?? 0)) }
           : null,
-
+        /*
+         * Le tiers inférieur, avec son instant de sortie.
+         *
+         * Il est le seul incrusté à partir : le bandeau et le compteur
+         * restent jusqu'au bout de la scène. La sortie est donc calculée ici,
+         * bornée par la fin de la scène — un tiers qui survivrait à son plan
+         * se retrouverait posé sur le suivant, où il nomme quelqu'un d'autre.
+         */
+        lowerThird: tiers
+          ? (() => {
+              const at = scene.startInSeconds + (tiers.startInSeconds ?? 0);
+              const fin = scene.startInSeconds + scene.durationInSeconds;
+              return {
+                at: ms(at),
+                out: ms(Math.min(at + (tiers.holdSeconds ?? 3), fin)),
+                // Un tiers à droite entre par la droite : le geste vient du
+                // bord dont il est le plus proche, sinon il traverse l'image.
+                dx: tiers.side === 'right' ? 40 : -40,
+              };
+            })()
+          : null,
         counter: scene.counter
           ? {
               at: ms(scene.startInSeconds + (scene.counter.startInSeconds ?? 0)),

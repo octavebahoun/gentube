@@ -156,7 +156,7 @@ système pour que le LLM sache la demander.
 **Bloqué par** : le lot 1, qui aura montré comment on transpose un extrait du
 registre sans le recopier bêtement.
 
-### Lot 3 — Les incrustations et les compteurs  ·  palier 3, pas 2
+### Lot 3 — Les incrustations et les compteurs  ·  palier 3, pas 2  ·  **entamé le 3 septembre 2026**
 
 **Reclassé le 2 septembre 2026, après examen des blocs.** Je les croyais
 présentationnels ; ils ne le sont pas.
@@ -174,6 +174,29 @@ l'emphase de la ligne existante.
 `count-up` ne coûte que sa voix off. Aucun appel à Flux ni à Replicate. Sur une
 minute facturée 400 FCFA de fournisseur, un plan de ce type en coûte dix. C'est
 la marge la plus haute du catalogue, et elle justifie le travail de contenu.
+
+**Livré le 3 septembre 2026 : le tiers inférieur.** C'est le premier champ du
+contrat dont le contenu est *structuré* et non rédigé — `name` et `role`, deux
+lignes de rangs différents. `overlayText` n'en porte qu'une, et c'est
+exactement ce qui manquait : une seule chaîne obligerait la page à redécouper
+« Kofi Mensah, agronome » pour deviner laquelle grossir, et elle devinerait mal
+dès la première virgule dans un titre.
+
+Trois variantes — `bar` (filet d'accent), `stack` (sans décor), `boxed`
+(cartouche) — un côté, et une sortie : c'est le seul incrusté qui *part* avant
+la fin de la scène, borné par elle pour qu'il ne nomme jamais quelqu'un sur le
+plan suivant. Aucun `backdrop-filter` : une passe de flou par image coûte trop
+cher en rastérisation logicielle pour un bandeau de cette taille.
+
+**Le compteur, lui, existait déjà entièrement** — schéma, balisage, anneau,
+timeline, référence visuelle. Ce qui manquait était ailleurs : ni `counter` ni
+`lowerThird` n'existaient dans le schéma qui relit la réponse du modèle. Le
+prompt système les décrivait, le modèle pouvait les écrire, et `parse` les
+jetait en silence. Une scène chiffrée rendait donc une image ordinaire, et
+rien ne le disait.
+
+Reste du lot : la position et l'emphase de `overlayText`, et les blocs `lt-*`
+qui portent plus que deux lignes.
 
 **Bloqué par** : une décision produit sur ce que le storyboard doit savoir
 décrire.

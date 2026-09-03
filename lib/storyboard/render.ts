@@ -194,6 +194,54 @@ export const sceneEffectsSchema = z.object({
     .optional(),
 });
 
+export const sceneCounterSchema = z.object({
+  /** La valeur d'arrivée. C'est elle que le spectateur retient. */
+  value: z.number(),
+  /** Le départ. Zéro sauf si la progression elle-même veut dire quelque chose. */
+  from: z.number().optional(),
+  /** Ce que le chiffre compte. Sans lui, un nombre nu ne dit rien. */
+  label: z.string().optional(),
+  prefix: z.string().optional(),
+  suffix: z.string().optional(),
+  decimals: z.number().int().min(0).max(3).optional(),
+  /** `count` monte en chiffres, `ring` remplit un anneau autour d'eux. */
+  variant: z.enum(['count', 'ring']).optional(),
+  startInSeconds: z.number().min(0).optional(),
+  durationInSeconds: z.number().positive().optional(),
+});
+
+/**
+ * Le tiers inférieur : qui parle, et à quel titre.
+ *
+ * `overlayText` ne porte qu'une chaîne, et c'est précisément ce qui lui
+ * manque ici. Un tiers inférieur porte **deux** informations de rangs
+ * différents — un nom et une fonction — et le rendu doit savoir laquelle
+ * grossir. Passer « Kofi Mensah, agronome » dans un seul champ oblige la
+ * page à redécouper la chaîne pour deviner la hiérarchie ; elle devinerait
+ * mal dès la première virgule dans un titre.
+ *
+ * Premier champ du contrat dont le contenu est structuré plutôt que rédigé.
+ */
+export const lowerThirdSchema = z.object({
+  /** La ligne forte. Un nom de personne, de lieu, de source. */
+  name: z.string(),
+  /** La ligne faible : fonction, date, provenance. */
+  role: z.string().optional(),
+  /** `bar` souligne, `stack` empile sans filet, `boxed` pose un cartouche. */
+  variant: z.enum(['bar', 'stack', 'boxed']).optional(),
+  side: z.enum(['left', 'right']).optional(),
+  accentColor: z.string().optional(),
+  startInSeconds: z.number().min(0).optional(),
+  /**
+   * Combien de temps il reste à l'écran.
+   *
+   * Un tiers inférieur sort, contrairement au bandeau : il annonce
+   * quelqu'un, il n'accompagne pas le plan. Sans valeur, il tient trois
+   * secondes — ou jusqu'à la fin de la scène si elle est plus courte.
+   */
+  holdSeconds: z.number().positive().optional(),
+});
+
 export const sceneRenderSchema = z.object({
   effects: sceneEffectsSchema.optional(),
   overlayText: z
@@ -269,23 +317,8 @@ export const sceneRenderSchema = z.object({
    * un plan illustré (`docs/tarifs.md`). C'est ce qui rend viable le genre
    * « les cinq chiffres de… », très courant en contenu sans visage.
    */
-  counter: z
-    .object({
-    /** La valeur d'arrivée. C'est elle que le spectateur retient. */
-    value: z.number(),
-    /** Le départ. Zéro sauf si la progression elle-même veut dire quelque chose. */
-    from: z.number().optional(),
-    /** Ce que le chiffre compte. Sans lui, un nombre nu ne dit rien. */
-    label: z.string().optional(),
-    prefix: z.string().optional(),
-    suffix: z.string().optional(),
-    decimals: z.number().int().min(0).max(3).optional(),
-    /** `count` monte en chiffres, `ring` remplit un anneau autour d'eux. */
-    variant: z.enum(['count', 'ring']).optional(),
-    startInSeconds: z.number().min(0).optional(),
-    durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
+  counter: sceneCounterSchema.optional(),
+  lowerThird: lowerThirdSchema.optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
   card: z
     .object({

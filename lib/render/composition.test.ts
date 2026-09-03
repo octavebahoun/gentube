@@ -529,6 +529,50 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the lower third', () => {
+    const withTiers = (lowerThird: Record<string, unknown>) =>
+      html([{ ...shot(), render: { lowerThird } } as Shot]);
+
+    it('keeps the name and the role as two elements, never one string', () => {
+      // C'est toute la raison d'être du champ : le CSS ne peut hiérarchiser
+      // que ce qui lui arrive séparé.
+      const page = withTiers({ name: 'Kofi Mensah', role: 'agronome' });
+      expect(page).toContain('<div class="lt-name">Kofi Mensah</div>');
+      expect(page).toContain('<div class="lt-role">agronome</div>');
+    });
+
+    it('omits the second line when the scene gives no role', () => {
+      expect(withTiers({ name: 'Cotonou' })).not.toContain('lt-role');
+    });
+
+    it('poses the variant and the side as classes', () => {
+      const page = withTiers({ name: 'X', variant: 'boxed', side: 'right' });
+      expect(page).toContain('lower-third lt-boxed lt-right');
+    });
+
+    it('enters from the edge it sits against', () => {
+      const T = (page: string) =>
+        JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T(withTiers({ name: 'X', side: 'right' })).scenes[0].lowerThird.dx)
+        .toBe(40);
+      expect(T(withTiers({ name: 'X' })).scenes[0].lowerThird.dx).toBe(-40);
+    });
+
+    it('leaves before the scene does, and never after it', () => {
+      // Un tiers qui survit à son plan nomme quelqu'un d'autre sur le suivant.
+      const page = withTiers({ name: 'X', holdSeconds: 999 });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      const scene = T.scenes[0];
+      expect(scene.lowerThird.out).toBeLessThanOrEqual(
+        scene.start + scene.duration
+      );
+    });
+
+    it('leaves the page alone when no scene asks for one', () => {
+      expect(html([shot()])).not.toContain('lower-third');
+    });
+  });
+
   describe('the three subtitle styles', () => {
     const styled = (subtitleStyle: string) =>
       html([shot()], { video: { ...video, subtitleStyle } as Video });

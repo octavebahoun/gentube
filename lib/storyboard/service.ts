@@ -22,7 +22,13 @@ import {
   type ChatMessage,
   type JsonCompleter,
 } from '@/lib/llm/deepseek';
-import { TRANSITIONS, sceneEffectsSchema, sceneSoundSchema } from './render';
+import {
+  TRANSITIONS,
+  lowerThirdSchema,
+  sceneCounterSchema,
+  sceneEffectsSchema,
+  sceneSoundSchema,
+} from './render';
 
 /**
  * Storyboard — le plan éditable d'une vidéo.
@@ -122,6 +128,13 @@ const SYSTEM_PROMPT = [
   '  { value, label, from?, prefix?, suffix?, decimals?, variant: count|ring }.',
   '  Such a scene needs NO `prompt` — it draws itself, so it costs nothing to',
   '  illustrate. Use it whenever the narration states a figure worth holding.',
+  '- `lowerThird` is optional and names who or what is on screen:',
+  '  { name, role?, variant: bar|stack|boxed, side?: left|right, holdSeconds? }.',
+  '  `name` is the strong line, `role` the smaller one under it — a job, a',
+  '  date, a source. Keep them apart; never fold them into one string. Use it',
+  '  when the narration introduces someone or cites where a fact comes from,',
+  '  at most twice in a video. It sits ON the shot, so the scene keeps its',
+  '  `prompt`.',
   '- `sounds` is optional and may ONLY contain `src` values copied verbatim',
   '  from the sound library given below. Never invent a path.',
   `- Never return more than ${MAX_SHOTS} scenes.`,
@@ -180,6 +193,15 @@ const llmSceneSchema = z.object({
     z.string().min(10).max(1_000)
   ),
   effects: sceneEffectsSchema.optional(),
+  /*
+   * Le contenu structuré que le modèle a le droit d'écrire.
+   *
+   * Le prompt système les décrit depuis longtemps ; sans eux ici, un compteur
+   * demandé au modèle était accepté puis jeté silencieusement par `parse` —
+   * la scène rendait une image ordinaire et personne ne voyait l'écart.
+   */
+  counter: sceneCounterSchema.optional(),
+  lowerThird: lowerThirdSchema.optional(),
   sounds: z.array(sceneSoundSchema.partial({ src: true })).optional(),
 });
 
@@ -222,6 +244,8 @@ export function normalizeStoryboard(
     const sounds = keepKnownSounds(scene.sounds, library);
     const render: Record<string, unknown> = {};
     if (scene.effects) render.effects = scene.effects;
+    if (scene.counter) render.counter = scene.counter;
+    if (scene.lowerThird) render.lowerThird = scene.lowerThird;
     if (sounds.length > 0) render.sounds = sounds;
 
     return {

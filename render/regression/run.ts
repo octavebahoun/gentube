@@ -8,6 +8,7 @@ import { SUBTITLE_STYLES } from '@/lib/videos';
 import {
   MOMENTS,
   momentDeLaCoupe,
+  momentDuTiers,
   momentDuTitre,
   REFERENCE_VIDEO,
   REFERENCE_VIDEO_VERTICALE,
@@ -81,6 +82,8 @@ type Jeu = {
   video: typeof REFERENCE_VIDEO;
   variant?: string;
   transition?: string;
+  /** Variante de tiers inférieur posée sur la deuxième scène. */
+  lowerThird?: string;
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -100,9 +103,23 @@ const COUPES: Jeu[] = MOVE_TRANSITIONS.map((kind) => ({
   moments: [momentDeLaCoupe(kind)],
 }));
 
+/**
+ * Un jeu par variante de tiers inférieur, activé par --tiers.
+ *
+ * Posé sur la deuxième scène, celle qui a une image et rien d'autre : un
+ * bandeau se juge sur ce qu'il recouvre. Une seule capture chacun — les six
+ * autres instants ne montreraient que ce que les formats disent déjà.
+ */
+const TIERS: Jeu[] = ['bar', 'stack', 'boxed'].map((variant) => ({
+  nom: `tiers-${variant}`,
+  video: REFERENCE_VIDEO,
+  lowerThird: variant,
+  moments: [momentDuTiers()],
+}));
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(jeu: Jeu): string {
-  const { video, variant, transition } = jeu;
+  const { video, variant, transition, lowerThird } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
     cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
@@ -121,7 +138,15 @@ function projet(jeu: Jeu): string {
     const effects = (shots[2].render as { effects?: { transition?: string } }).effects;
     if (effects) effects.transition = transition;
   }
-
+  if (lowerThird) {
+    // La deuxième scène : une image, et rien qui dispute la place au bandeau.
+    (shots[1].render as Record<string, unknown>).lowerThird = {
+      name: 'Kofi Mensah',
+      role: 'agronome, Cotonou',
+      variant: lowerThird,
+      side: lowerThird === 'boxed' ? 'right' : 'left',
+    };
+  }
   const storyboard = toHyperframesStoryboard(video, shots);
   writeFileSync(join(dir, 'index.html'), composeHtml({ storyboard, watermark: true }));
   return dir;
@@ -171,6 +196,7 @@ function main() {
   if (process.argv.includes('--styles')) jeux = [...jeux, ...STYLES];
   if (process.argv.includes('--titres')) jeux = [...jeux, ...TITRES];
   if (process.argv.includes('--transitions')) jeux = [...jeux, ...COUPES];
+  if (process.argv.includes('--tiers')) jeux = [...jeux, ...TIERS];
 
   for (const jeu of jeux) {
     console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);

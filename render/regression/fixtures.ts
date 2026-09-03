@@ -225,6 +225,18 @@ export function momentDuTitre(variant: string): Moment {
   };
 }
 
+/**
+ * L'instant où le tiers inférieur est entièrement posé.
+ *
+ * Il entre en 0,4 s et sort avant la fin de la scène : capturé au début ou à
+ * la fin, on photographierait un bloc à moitié translaté. Une seconde après
+ * son entrée le laisse au repos, quelle que soit la variante.
+ */
+export function momentDuTiers(): Moment {
+  const scenes = scenesMinutees();
+  return { at: arrondi(scenes[1].startInSeconds + 1), nom: 'tiers' };
+}
+
 export function momentDeLaCoupe(transition: string): Moment {
   const scenes = scenesMinutees(transition);
   return {
