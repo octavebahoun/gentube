@@ -584,6 +584,25 @@ describe('the composition HyperFrames renders', () => {
       expect(courbe).toContain('inset(0 100% 0 0)');
     });
 
+    it('sets each point above its own label, not on the frame edge', () => {
+      // L'axe range ses libellés en colonnes égales : un point au centre de la
+      // colonne i tombe à (i + 0,5) / n. Étalés de 0 à 100 %, le premier et le
+      // dernier point sortaient de sous leur nom — visible au rendu seulement.
+      const page = withChart({ kind: 'line', points: barres });
+      const abscisses = [...page.matchAll(/class="chart-dot"[^>]*left:([\d.]+)%/g)]
+        .map((m) => Number(m[1]));
+      expect(abscisses).toEqual([16.67, 50, 83.33]);
+    });
+
+    it('draws the line at a constant speed so the dots land on it', () => {
+      // Les pastilles s'allument à des instants régulièrement répartis. Une
+      // courbe qui accélère les laisse s'allumer dans le vide.
+      const page = withChart({ kind: 'line', points: barres });
+      const script = page.slice(page.lastIndexOf('<script>'));
+      const courbe = script.slice(script.indexOf('"#ln" + scene.index'));
+      expect(courbe.slice(0, 300)).toContain('ease: "none"');
+    });
+
     it('leaves no line data when the chart is bars', () => {
       const page = withChart({ points: barres });
       const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);

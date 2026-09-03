@@ -272,13 +272,20 @@ function cascade(
  *
  * La série n'occupe que 10 à 90 % de la hauteur. Sans cette marge, la valeur
  * la plus haute touche le bord du cadre et la courbe paraît coupée.
+ *
+ * En largeur, un point tombe au **centre de sa colonne** — `(i + 0,5) / n` —
+ * et non aux deux bords du cadre. L'axe range ses libellés en colonnes égales
+ * (`flex: 1 1 0`) : étaler la série de 0 à 100 % mettait le premier point au
+ * bord gauche du tracé pendant que son libellé restait au sixième, et aucun
+ * point ne surplombait son nom. Le premier rendu complet du 3 septembre 2026
+ * l'a montré ; la garde ne pouvait pas, elle ne compare qu'à elle-même.
  */
 export function chartPoints(
   points: { value: number }[],
   echelle: number
 ): { x: number; y: number }[] {
   return points.map((point, i) => ({
-    x: (i / Math.max(1, points.length - 1)) * 100,
+    x: ((i + 0.5) / Math.max(1, points.length)) * 100,
     y: 90 - (echelle > 0 ? (point.value / echelle) * 80 : 0),
   }));
 }

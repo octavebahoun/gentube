@@ -167,6 +167,14 @@ export const CONTENUS_JS = `
              *
              * Un clip-path ne depend d aucune longueur : il decouvre de gauche
              * a droite, et le format n y change rien.
+             *
+             * A vitesse constante, et c est une contrainte et non un gout : les
+             * pastilles s allument a des instants repartis regulierement, et
+             * elles doivent s allumer quand le trait les atteint. Avec un
+             * power2.inOut le volet part lentement puis rattrape — la pastille
+             * du milieu s allumait avant que le trait n arrive dessus des que
+             * la serie passait quatre points. Un trait qui se dessine a vitesse
+             * constante est de toute facon ce que fait une main.
              */
             tl.fromTo(
               "#ln" + scene.index,
@@ -174,7 +182,7 @@ export const CONTENUS_JS = `
               {
                 clipPath: "inset(0 0% 0 0)",
                 duration: scene.chart.duration * 1.6,
-                ease: "power2.inOut",
+                ease: "none",
               },
               scene.chart.at
             );

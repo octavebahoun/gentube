@@ -616,15 +616,22 @@ video.media {
   box-shadow: 0 0 0 3px var(--chart-accent);
 }
 
+/*
+ * Les libellés sont des colonnes égales, et la respiration entre eux est une
+ * marge *intérieure*, pas un `gap`. La courbe pose ses points au centre de la
+ * colonne i — `(i + 0,5) / n` — et un `gap` décalerait ces centres d'une
+ * fraction dépendant de la taille du texte : le point ne serait plus au-dessus
+ * de son nom, et l'écart grandirait avec le nombre de points.
+ */
 .chart-axis {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  gap: 0.5em;
 }
 
 .chart-axis .chart-label {
   flex: 1 1 0;
+  padding: 0 0.25em;
 }
 
 /* --- Fil de discussion ---------------------------------------------------- */
