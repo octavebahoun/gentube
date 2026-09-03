@@ -99,6 +99,30 @@ Timeline: dans buildTimeline, scene.featherSpot ? { at: ms(scene.startInSeconds 
 Balisage: <div class="feather-spot" id="fs<index>" style="--spot-x:<x>%;--spot-y:<y>%;--spot-size:<size>%"> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
 Prompt  : "- `featherSpot` is optional: the frame dims except a soft elliptical hole that spotlights one area. { x?, y?, size? (percents, default 50/42/40), startInSeconds?, durationInSeconds? }. Covers the whole scene by default."
 
+## palier 2 · 2026-09-03 01:51
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.gridDrift
+Forme   : { startInSeconds?: number, durationInSeconds?: number, opacity?: number }
+Timeline: dans buildTimeline, scene.gridDrift ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0)), duration: min(durationInSeconds ?? (fin - at), fin - at), opacity: opacity ?? 0.5 } : null. Pas de onBeat : c est un fond, pas une frappe. Le mouvement est une boucle exacte (une tuile traverse en 6 s, repeat deterministe depuis at).
+Balisage: <div class="grid-drift" id="gd<index>"> dans sceneMarkup, dans le div .scene en premier (sous le media : c est un fond, le media le recouvre quand il y en a un — sur un plan sans image il se voit). Aucune piste.
+Prompt  : "- `gridDrift` is optional: a faint technical grid slowly drifts behind the scene, for SaaS/code/data lines. { opacity? (default 0.5), startInSeconds?, durationInSeconds? }. Best on imageless plans; an image covers it."
+
+## palier 2 · 2026-09-03 01:51
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.cursorClick
+Forme   : { startInSeconds?: number, durationInSeconds?: number, fromX?: number, fromY?: number, x?: number, y?: number }
+Timeline: dans buildTimeline, scene.cursorClick ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.5)), duration: durationInSeconds ?? 0.9, fromX: fromX ?? 12, fromY: fromY ?? 12, x: x ?? 62, y: y ?? 55 } : null. Pas de onBeat : c est un geste montre, pas une frappe. Coords en pourcents du cadre.
+Balisage: <div class="cursor-click" id="cc<index>"><div class="cursor-ring"></div></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
+Prompt  : "- `cursorClick` is optional: a cursor glides to a point and clicks, firing a small ring pulse. Use it when the line says tap, click or open. { x?, y? (target percents, default 62/55), fromX?, fromY? (default 12/12), startInSeconds?, durationInSeconds? }."
+
+## palier 2 · 2026-09-03 01:51
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.scanGate
+Forme   : { startInSeconds?: number, durationInSeconds?: number, color?: string }
+Timeline: dans buildTimeline, scene.scanGate ? { at: onBeat(scene, beats, scene.startInSeconds + (startInSeconds ?? 0.4)), duration: durationInSeconds ?? 1.2, color: color ?? '#4ad9ff' } : null
+Balisage: <div class="scan-gate" id="sg<index>" style="--gate-color:<color>"><div class="scan-line"></div><i class="gate-corner tl"></i><i class="gate-corner tr"></i><i class="gate-corner bl"></i><i class="gate-corner br"></i></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
+Prompt  : "- `scanGate` is optional: a viewfinder moment — corner brackets, one sweep line, a lock pulse. Use it when the line verifies, scans or detects. { color? (default #4ad9ff), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
+
 ## palier 1 · 2026-09-03 02:45
 Fichier : lib/storyboard/render.ts
 Enum    : kineticTitle.variant
@@ -110,5 +134,50 @@ Fichier : lib/storyboard/render.ts
 Enum    : MOVE_TRANSITIONS
 Ajouter : 'freeze-cut', 'editorial-flash-overlay', 'hw-scribble-transition', 'vfx-text-cursor', 'organic-light-leak-overlay', 'ordered-dither-pass', 'parallax-device-dive', 'halftone-field'
 Prompt  : Add new transition and overlay primitives ('freeze-cut', 'editorial-flash-overlay', 'hw-scribble-transition', 'vfx-text-cursor', 'organic-light-leak-overlay', 'ordered-dither-pass', 'parallax-device-dive', 'halftone-field') to system prompt transition enum.
+
+## palier 2 · 2026-09-03 02:57
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.mkBackground
+Forme   : { startInSeconds?: number, frostedGlass?: boolean }
+Timeline: dans buildTimeline, scene.mkBackground ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0)), frostedGlass: frostedGlass ?? true } : null
+Balisage: <div class="mk-background" id="mkbg<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `mkBackground` is optional: procedural soft-blob gradient backdrop. { frostedGlass?, startInSeconds? }"
+
+## palier 2 · 2026-09-03 02:57
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.ytLcdBackground
+Forme   : { scanlines?: boolean, grain?: boolean }
+Timeline: dans buildTimeline, scene.ytLcdBackground ? { scanlines: scanlines ?? true, grain: grain ?? true } : null
+Balisage: <div class="yt-lcd-background" id="ytlcd<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `ytLcdBackground` is optional: textured paper scanlines drift backdrop. { scanlines?, grain? }"
+
+## palier 2 · 2026-09-03 02:57
+Fichier : lib/storyboard/render.ts
+Enum    : kineticTitle.variant
+Ajouter : 'logo-outro'
+Prompt  : Add kineticTitle variant 'logo-outro' to system prompt.
+
+## palier 2 · 2026-09-03 02:57
+Fichier : lib/storyboard/render.ts
+Enum    : lowerThirdSchema.variant
+Ajouter : 'bild'
+Prompt  : Add lowerThird variant 'bild' (news-style tight fit red/white boxes) to system prompt.
+
+## palier 2 · 2026-09-03 02:57
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.camcorderHud
+Forme   : { showBattery?: boolean, showRec?: boolean, dateText?: string }
+Timeline: dans buildTimeline, scene.camcorderHud ? { showBattery: showBattery ?? true, showRec: showRec ?? true, dateText: dateText ?? 'REC 00:00:00' } : null
+Balisage: <div class="camcorder-hud" id="chud<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `camcorderHud` is optional: retro camcorder overlay with REC badge, battery, date/counter. { showBattery?, showRec?, dateText? }"
+
+## palier 2 · 2026-09-03 02:57
+Fichier : lib/storyboard/render.ts
+Enum    : MOVE_TRANSITIONS & sceneEffectsSchema.cameraDollyZoom
+Ajouter : 'camera-dolly-zoom'
+Forme   : { direction?: 'in' | 'out', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.cameraDollyZoom ? { direction: direction ?? 'in', durationInSeconds: durationInSeconds ?? 0.75 } : null
+Prompt  : Add transition 'camera-dolly-zoom' and effect `cameraDollyZoom` to system prompt.
+
 
 

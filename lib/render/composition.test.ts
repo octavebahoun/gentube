@@ -321,7 +321,7 @@ describe('the composition HyperFrames renders', () => {
         'badge-pop', 'card-resize', 'icon-swap', 'menu-morph', 'skeleton-reveal',
         'success-check', 'tilt-card', 'input-feedback', 'micro-transitions',
         'panel-reveal', 'tabs-slide-indicator', 'avatar-group-hover',
-        'callout', 'morphtext',
+        'callout', 'morphtext', 'logo-outro',
       ];
       for (const v of declarees) {
         const cle = /^[a-z]+$/.test(v) ? `${v}: {` : `"${v}": {`;
@@ -832,6 +832,22 @@ describe('the palier-2 effects', () => {
     expect(palier2()).toContain('.vignette {');
     expect(palier2()).toMatch(/\.shock-ring \{[^}]*opacity: 0/);
     expect(palier2()).toMatch(/\.feather-spot \{[^}]*opacity: 0/);
+  });
+
+  it('declares the third batch on their own ids', () => {
+    // gd, cc et sg : aucun ne recouvre un identifiant existant.
+    for (const champ of ['scene.gridDrift', 'scene.cursorClick', 'scene.scanGate']) {
+      expect(SCENES_JS, champ).toContain(champ);
+    }
+    expect(SCENES_JS).toContain('"#gd"');
+    expect(SCENES_JS).toContain('"#cc"');
+    expect(SCENES_JS).toContain('"#sg"');
+  });
+
+  it('hides the third batch at rest', () => {
+    expect(palier2()).toMatch(/\.grid-drift \{[^}]*opacity: 0/);
+    expect(palier2()).toMatch(/\.cursor-click \{[^}]*opacity: 0/);
+    expect(palier2()).toMatch(/\.scan-gate \{[^}]*opacity: 0/);
   });
 
   describe('through the real pipeline', () => {

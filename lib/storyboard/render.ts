@@ -124,6 +124,7 @@ export const MOVE_TRANSITIONS = [
   'ordered-dither-pass',
   'parallax-device-dive',
   'halftone-field',
+  'camera-dolly-zoom',
 ] as const;
 
 export type MoveTransition = (typeof MOVE_TRANSITIONS)[number];
@@ -255,6 +256,31 @@ export const sceneEffectsSchema = z.object({
       strength: z.number().min(0).max(0.06).optional(),
     })
     .optional(),
+  mkBackground: z
+    .object({
+      startInSeconds: z.number().min(0).optional(),
+      frostedGlass: z.boolean().optional(),
+    })
+    .optional(),
+  ytLcdBackground: z
+    .object({
+      scanlines: z.boolean().optional(),
+      grain: z.boolean().optional(),
+    })
+    .optional(),
+  camcorderHud: z
+    .object({
+      showBattery: z.boolean().optional(),
+      showRec: z.boolean().optional(),
+      dateText: z.string().optional(),
+    })
+    .optional(),
+  cameraDollyZoom: z
+    .object({
+      direction: z.enum(['in', 'out']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
 });
 
 export const sceneCounterSchema = z.object({
@@ -291,7 +317,7 @@ export const lowerThirdSchema = z.object({
   /** La ligne faible : fonction, date, provenance. */
   role: z.string().optional(),
   /** `bar` souligne, `stack` empile sans filet, `boxed` pose un cartouche. */
-  variant: z.enum(['bar', 'stack', 'boxed']).optional(),
+  variant: z.enum(['bar', 'stack', 'boxed', 'bild']).optional(),
   side: z.enum(['left', 'right']).optional(),
   accentColor: z.string().optional(),
   startInSeconds: z.number().min(0).optional(),
@@ -439,6 +465,7 @@ export const sceneRenderSchema = z.object({
           'avatar-group-hover',
           'callout',
           'morphtext',
+          'logo-outro',
         ])
         .optional(),
       icon: z.string().optional(),
@@ -611,6 +638,7 @@ export const TRANSITION_DURATIONS: Record<Transition, number> = {
   'ordered-dither-pass': 0.5,
   'parallax-device-dive': 0.7,
   'halftone-field': 0.6,
+  'camera-dolly-zoom': 0.75,
   'domain-warp': 0.9,
   'ridged-burn': 0.9,
   'whip-pan': 0.65,

@@ -109,6 +109,7 @@ export const TITRES_JS = `
         "avatar-group-hover": { de: { opacity: 0, y: "0.4em", scale: 0.85 }, vers: { opacity: 1, y: "0em", scale: 1 }, ease: "back.out(1.6)" },
         callout: { de: { opacity: 0, scale: 0.9, y: "0.2em" }, vers: { opacity: 1, scale: 1, y: "0em" }, ease: "power2.out" },
         morphtext: { de: { opacity: 0, filter: "blur(12px)" }, vers: { opacity: 1, filter: "blur(0px)" }, ease: "power3.inOut" },
+        "logo-outro": { de: { opacity: 0, scale: 0.7 }, vers: { opacity: 1, scale: 1 }, ease: "back.out(1.8)" },
       };`;
 
 export const MOTS_JS = `
@@ -250,5 +251,6 @@ export const MOVES_JS = [
         "ordered-dither-pass":        { out: { filter: "contrast(2)" }, in: { opacity: 0 }, inTo: { opacity: 1 }, ease: "steps(4)" },
         "parallax-device-dive":       { out: { scale: 3, opacity: 0 }, in: { scale: 0.3 }, inTo: { scale: 1 }, ease: "power3.inOut" },
         "halftone-field":             { out: { opacity: 0 }, in: { opacity: 0, scale: 1.2 }, inTo: { opacity: 1, scale: 1 }, ease: "power2.out" },
+        "camera-dolly-zoom":          { out: { scale: 1.5, opacity: 0 }, in: { scale: 0.6 }, inTo: { scale: 1 }, ease: "power3.inOut" },
       };`,
 ].join('\n');
