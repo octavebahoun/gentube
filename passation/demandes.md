@@ -123,6 +123,30 @@ Timeline: dans buildTimeline, scene.scanGate ? { at: onBeat(scene, beats, scene.
 Balisage: <div class="scan-gate" id="sg<index>" style="--gate-color:<color>"><div class="scan-line"></div><i class="gate-corner tl"></i><i class="gate-corner tr"></i><i class="gate-corner bl"></i><i class="gate-corner br"></i></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
 Prompt  : "- `scanGate` is optional: a viewfinder moment — corner brackets, one sweep line, a lock pulse. Use it when the line verifies, scans or detects. { color? (default #4ad9ff), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
 
+## palier 2 · 2026-09-03 02:01
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.toggleFlip
+Forme   : { startInSeconds?: number, durationInSeconds?: number, on?: boolean }
+Timeline: dans buildTimeline, scene.toggleFlip ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.5)), duration: durationInSeconds ?? 0.7, on: on ?? true } : null. Pas de onBeat : c est un geste montre. Le tween lit on pour le sens (finit ON ou OFF).
+Balisage: <div class="toggle-flip" id="tf<index>"><div class="toggle-thumb"></div></div> dans sceneMarkup, dans le div .scene apres le grain. L etat visuel de depart suit on (classe on si on est vrai). Aucune piste.
+Prompt  : "- `toggleFlip` is optional: an oversized UI toggle that flips with a physical overshoot. Use it when the line says enable, switch or turn on. { on? (default true), startInSeconds?, durationInSeconds? }."
+
+## palier 2 · 2026-09-03 02:01
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.auroraDrift
+Forme   : { startInSeconds?: number, durationInSeconds?: number, opacity?: number }
+Timeline: dans buildTimeline, scene.auroraDrift ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0)), duration: min(durationInSeconds ?? (fin - at), fin - at), opacity: opacity ?? 0.8 } : null. Pas de onBeat : c est un fond. Les trois nappes derivent a 9/13/17 s en boucle exacte depuis at.
+Balisage: <div class="aurora" id="au<index>"><div class="blob-a"></div><div class="blob-b"></div><div class="blob-c"></div></div> dans sceneMarkup, dans le div .scene en premier (fond, sous le media). Aucune piste.
+Prompt  : "- `auroraDrift` is optional: three soft color fields slowly drift behind the scene, for calm premium lines. { opacity? (default 0.8), startInSeconds?, durationInSeconds? }. Best on imageless plans; an image covers it."
+
+## palier 2 · 2026-09-03 02:01
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.outlineDraw
+Forme   : { startInSeconds?: number, durationInSeconds?: number, color?: string }
+Timeline: dans buildTimeline, scene.outlineDraw ? { at: onBeat(scene, beats, scene.startInSeconds + (startInSeconds ?? 0.4)), duration: durationInSeconds ?? 1.0, color: color ?? '#ffd9a0' } : null. Le rect SVG porte pathLength 100 : aucune mesure dans la page, le trace va de 100 a 0.
+Balisage: <div class="outline-draw" id="od<index>" style="--trace-color:<color>"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="2" y="2" width="96" height="96" rx="6" pathLength="100" /></svg></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
+Prompt  : "- `outlineDraw` is optional: a rounded outline draws itself clockwise around the frame to prove a callout. { color? (default #ffd9a0), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
+
 ## palier 1 · 2026-09-03 02:45
 Fichier : lib/storyboard/render.ts
 Enum    : kineticTitle.variant
@@ -178,6 +202,46 @@ Ajouter : 'camera-dolly-zoom'
 Forme   : { direction?: 'in' | 'out', durationInSeconds?: number }
 Timeline: dans buildTimeline, scene.cameraDollyZoom ? { direction: direction ?? 'in', durationInSeconds: durationInSeconds ?? 0.75 } : null
 Prompt  : Add transition 'camera-dolly-zoom' and effect `cameraDollyZoom` to system prompt.
+
+## palier 2 · 2026-09-03 03:10
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.cameraShake
+Forme   : { profile?: string, intensity?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.cameraShake ? { profile: profile ?? 'handheld', intensity: intensity ?? 0.5, durationInSeconds: durationInSeconds ?? 1.0 } : null
+Balisage: appliqué via transform shake sur .scene
+Prompt  : "- `cameraShake` is optional: procedural handheld/lens camera shake. { profile?, intensity?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 03:10
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.panStations
+Forme   : { stops?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.panStations ? { stops: stops ?? 3, durationInSeconds: durationInSeconds ?? 2.5 } : null
+Balisage: appliqué via keyframed pan sur .scene
+Prompt  : "- `panStations` is optional: lateral camera move across continuous station stops. { stops?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 03:10
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.scrollCameraStory
+Forme   : { sections?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.scrollCameraStory ? { sections: sections ?? 3, durationInSeconds: durationInSeconds ?? 3.0 } : null
+Balisage: appliqué via vertical parallax scroll sur .scene
+Prompt  : "- `scrollCameraStory` is optional: vertical scroll camera pass with parallax layers. { sections?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 03:10
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.ytCameraMove
+Forme   : { mode?: 'zoom' | 'slide' | 'tilt', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.ytCameraMove ? { mode: mode ?? 'zoom', durationInSeconds: durationInSeconds ?? 1.5 } : null
+Prompt  : "- `ytCameraMove` is optional: dynamic camera zoom/slide/tilt helper with defocus pulse. { mode?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 03:10
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.terminalSimulator
+Forme   : { command?: string, output?: string }
+Timeline: dans buildTimeline, scene.terminalSimulator ? { command: command ?? '', output: output ?? '' } : null
+Balisage: <div class="terminal-simulator" id="tsim<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `terminalSimulator` is optional: retro terminal window streaming typed commands & output. { command?, output? }"
+
 
 
 

@@ -287,6 +287,37 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
+  cameraShake: z
+    .object({
+      profile: z.string().optional(),
+      intensity: z.number().min(0).max(1).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  panStations: z
+    .object({
+      stops: z.number().int().min(2).max(8).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  scrollCameraStory: z
+    .object({
+      sections: z.number().int().min(2).max(10).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ytCameraMove: z
+    .object({
+      mode: z.enum(['zoom', 'slide', 'tilt']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  terminalSimulator: z
+    .object({
+      command: z.string().optional(),
+      output: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const sceneRenderSchema = z.object({
