@@ -104,10 +104,20 @@ export function structuredPlans(scene: HyperframesScene) {
           prefix: chart.prefix ?? '',
           suffix: chart.suffix ?? '',
           decimals: chart.decimals ?? 0,
-          bars: chart.points.map((point) => ({
-            value: point.value,
-            part: echelle > 0 ? point.value / echelle : 0,
-          })),
+          /*
+           * Aucune barre pour une courbe.
+           *
+           * Les émettre quand même visait des `#b<n>` qui n'existent pas, et
+           * GSAP le signalait à chaque rendu. Une garde qui crie pour rien
+           * finit par ne plus être lue.
+           */
+          bars:
+            (chart.kind ?? 'bar') === 'bar'
+              ? chart.points.map((point) => ({
+                  value: point.value,
+                  part: echelle > 0 ? point.value / echelle : 0,
+                }))
+              : [],
           line:
             (chart.kind ?? 'bar') === 'line'
               ? {

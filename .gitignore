@@ -56,6 +56,8 @@ render/gentube-v1/voice/
 # Rendus de demonstration. Regenerables, et un binaire entre dans l'historique
 # git pour toujours.
 render/*.mp4
+render/demo/*.mp4
+render/demo/palier-3/
 
 # Captures gardées par la régression visuelle quand un instant a changé.
 render/regression/echec-*.png
