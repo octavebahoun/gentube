@@ -52,8 +52,35 @@ export const lowerThirdSchema = z.object({
   name: z.string(),
   /** La ligne faible : fonction, date, provenance. */
   role: z.string().optional(),
-  /** `bar` souligne, `stack` empile sans filet, `boxed` pose un cartouche. */
-  variant: z.enum(['bar', 'stack', 'boxed', 'bild']).optional(),
+  /**
+   * L'apparence.
+   *
+   * `bar` souligne, `stack` empile sans filet, `boxed` pose un cartouche.
+   *
+   * Les neuf suivantes viennent du palier 2, qui les demandait comme neuf
+   * champs séparés — `ltCleanBar`, `ltSoftPill`, `ltNeonBorder`… Ce sont des
+   * apparences du même objet : deux lignes de rangs différents, posées bas à
+   * gauche ou à droite. Neuf champs auraient voulu dire neuf balisages, neuf
+   * schémas et neuf entrées de prompt pour un contenu identique — et le
+   * modèle aurait eu à choisir entre neuf noms plutôt qu'entre neuf allures.
+   */
+  variant: z
+    .enum([
+      'bar',
+      'stack',
+      'boxed',
+      'bild',
+      'clean-bar',
+      'soft-pill',
+      'color-block',
+      'bold-block',
+      'accent-underline',
+      'kicker-name',
+      'mask-reveal',
+      'neon-border',
+      'stack-bars',
+    ])
+    .optional(),
   side: z.enum(['left', 'right']).optional(),
   accentColor: z.string().optional(),
   startInSeconds: z.number().min(0).optional(),

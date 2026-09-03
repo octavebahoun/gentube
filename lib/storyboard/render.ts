@@ -562,69 +562,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  ltAccentUnderline: z
-    .object({
-      name: z.string().min(1).max(100),
-      role: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ltBoldBlock: z
-    .object({
-      name: z.string().min(1).max(100),
-      tag: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ltCleanBar: z
-    .object({
-      name: z.string().min(1).max(100),
-      role: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ltColorBlock: z
-    .object({
-      name: z.string().min(1).max(100),
-      role: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ltKickerName: z
-    .object({
-      name: z.string().min(1).max(100),
-      kicker: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ltMaskReveal: z
-    .object({
-      name: z.string().min(1).max(100),
-      role: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ltNeonBorder: z
-    .object({
-      name: z.string().min(1).max(100),
-      role: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ltSoftPill: z
-    .object({
-      name: z.string().min(1).max(100),
-      role: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ltStackBars: z
-    .object({
-      name: z.string().min(1).max(100),
-      role: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   newsTicker: z
     .object({
       headline: z.string().min(1).max(200),
@@ -645,12 +582,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  auroraDrift: z
-    .object({
-      intensity: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   beatPulseBackground: z
     .object({
       frequency: z.number().positive().optional(),
@@ -660,13 +591,6 @@ export const sceneEffectsSchema = z.object({
   bottomUpLetters: z
     .object({
       text: z.string(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  chartStory: z
-    .object({
-      title: z.string().optional(),
-      kind: z.enum(['bar', 'line', 'donut']).optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -765,11 +689,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  lightSweepPass: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   lineSwap: z
     .object({
       lineA: z.string().optional(),
@@ -805,11 +724,6 @@ export const sceneEffectsSchema = z.object({
   multiDeviceSplay: z
     .object({
       devices: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  outlineDraw: z
-    .object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -919,14 +833,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  testimonialProofCard: z
-    .object({
-      quote: z.string().optional(),
-      author: z.string().optional(),
-      role: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   textShimmer: z
     .object({
       text: z.string().optional(),
@@ -991,16 +897,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  cameraScanGate: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  comparisonSplit: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   deviceFrameStage: z
     .object({
       durationInSeconds: z.number().positive().optional(),
@@ -1009,19 +905,6 @@ export const sceneEffectsSchema = z.object({
   storeBadgeLockup: z
     .object({
       headline: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  testimonialCard: z
-    .object({
-      quote: z.string().optional(),
-      author: z.string().optional(),
-      handle: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  toggleFlip: z
-    .object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -1054,11 +937,6 @@ export const sceneEffectsSchema = z.object({
     .object({
       track: z.string().optional(),
       artist: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  threadMessageStack: z
-    .object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -1118,12 +996,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  grainOverlay: z
-    .object({
-      intensity: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   onboardingStepperFlow: z
     .object({
       durationInSeconds: z.number().positive().optional(),
@@ -1150,19 +1022,9 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  dynamicGrid: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   separator: z
     .object({
       orientation: z.enum(["horizontal", "vertical"]).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  simulatedCursor: z
-    .object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -1179,12 +1041,6 @@ export const sceneEffectsSchema = z.object({
     .optional(),
   threeOrbitingCards: z
     .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  vignette: z
-    .object({
-      intensity: z.number().positive().optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -1215,21 +1071,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  lowerThirdBild: z
-    .object({
-      headline: z.string().optional(),
-      subline: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  /*
-   * Les nappes déclarées dans `effets.ts`.
-   *
-   * Elles entrent par une table plutôt qu'une par une : trente demandes en une
-   * journée, toutes de la même forme — un champ, un div, deux variables CSS,
-   * un instant. Le balisage et la timeline lisent la même table, donc ajouter
-   * un effet est une ligne et non quatre éditions dans quatre fichiers.
-   */
   ...EFFETS_SCHEMA,
   ...MANUSCRIT_SCHEMA,
 });

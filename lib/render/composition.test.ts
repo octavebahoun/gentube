@@ -15,6 +15,8 @@ import {
   wordsOrFallback,
 } from './composition';
 import { SCENES_JS } from './animations';
+import { lowerThirdSchema } from '@/lib/storyboard/plans';
+import { EFFETS } from '@/lib/storyboard/effets';
 
 function shot(overrides: Partial<Shot> = {}): Shot {
   return {
@@ -1068,6 +1070,28 @@ describe('subtitles without an alignment', () => {
     expect(
       wordsOrFallback({ narration: '   ', narrationSeconds: 3 } as never)
     ).toEqual([]);
+  });
+});
+
+describe('every declared appearance has a rule', () => {
+  // La garde qui manquait. Un champ ou une variante peut traverser le schéma,
+  // le balisage et le prompt sans qu'une seule règle ne le dessine : la page
+  // sort alors identique à l'octet près, aucun test ne s'en plaint, et la
+  // vidéo est facturée quand même. C'est ce qui est arrivé à `lt-bild`, et
+  // aux cent soixante champs du palier 2.
+  const css = readFileSync('render/gentube-v1/style.css', 'utf8');
+
+  it('draws every lower-third variant it offers', () => {
+    const variantes = lowerThirdSchema.shape.variant.unwrap().options;
+    const sans = variantes.filter((v: string) => !css.includes(`.lt-${v}`));
+    expect(sans, 'variantes sans règle CSS').toEqual([]);
+  });
+
+  it('draws every effect the table declares', () => {
+    const sans = Object.values(EFFETS)
+      .map((e) => e.classe)
+      .filter((c) => !css.includes(`.${c}`));
+    expect(sans, 'nappes sans règle CSS').toEqual([]);
   });
 });
 

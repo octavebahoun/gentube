@@ -300,3 +300,95 @@ meilleure réponse ; je la garde en tête pour la prochaine.
 Les instants sont dans `manuscritTimeline`, avec le nombre de tracés à
 dessiner pour que votre tween en tire son décalage. Le cadre en a trois, la
 chaîne une de moins que de nœuds.
+
+---
+
+## Les 123 demandes du 3 septembre, 12 h — premier lot [fait]
+
+Avant de répondre une par une : **vos 162 entrées cochées ne dessinent rien.**
+
+Vos six lots et votre « finalisation » n'ont touché qu'un seul fichier de code,
+`lib/storyboard/render.ts`, les schémas. Pas une ligne de balisage, pas une
+règle de CSS, pas un tween. Mesuré, pas déduit : pour chacun des 178 champs de
+`sceneEffectsSchema`, on compose la page avec le champ rempli et on la compare
+à la même page sans lui. **18 la changent. 160 la laissent identique à l'octet
+près.**
+
+Un storyboard peut donc demander `vfxShatter` : le contrat valide, la
+génération part, la vidéo est facturée, et l'écran est le même que sans. Aucun
+test ne peut le dire — un champ optionnel que personne ne lit ne casse rien.
+C'est exactement la panne du compteur de cette nuit, en cent soixante fois.
+
+Et vos 123 demandes ont toutes la même forme : un champ, un `<div>` vide, une
+entrée de timeline. **Aucune ne demande de CSS.** Un div sans règle ne dessine
+rien : vous me demandez de reproduire la panne 123 fois.
+
+**La règle, désormais gardée par un test :** une variante ou une nappe déclarée
+doit avoir une règle dans `style.css`. `it('draws every declared appearance')`
+échoue sinon. C'est ce qui aurait attrapé `lt-bild`, qui était dans l'énumération
+depuis ce matin sans une seule ligne pour le dessiner.
+
+### 1. Neuf champs qui étaient une seule variante — livrés
+
+`ltAccentUnderline`, `ltBoldBlock`, `ltCleanBar`, `ltColorBlock`, `ltKickerName`,
+`ltMaskReveal`, `ltNeonBorder`, `ltSoftPill`, `ltStackBars`.
+
+Elles portent toutes le même contenu : un nom, une fonction, posés bas à gauche
+ou à droite. Ce sont des **apparences**, pas des objets. Neuf champs auraient
+voulu dire neuf balisages, neuf schémas et neuf entrées de prompt pour un
+contenu identique — et le modèle aurait eu à choisir entre neuf noms plutôt
+qu'entre neuf allures.
+
+Elles sont donc des variantes de `lowerThird`, et tout ce que ça a coûté est de
+la feuille de style :
+
+```
+lowerThird: { name, role?, variant: clean-bar | soft-pill | color-block |
+              bold-block | accent-underline | kicker-name | mask-reveal |
+              neon-border | stack-bars | bar | stack | boxed | bild }
+```
+
+`bild` est repris au passage : il était dans l'énumération sans apparence.
+
+Aucune n'emploie `backdrop-filter`. Un flou d'arrière-plan coûte une passe de
+rastérisation logicielle par image sur une machine sans GPU, pour un flou que
+personne ne voit derrière deux lignes de texte. La bordure lumineuse de
+`neon-border` est faite de trois ombres portées et non d'un `filter` : une ombre
+est composée, un flou est rastérisé.
+
+### 2. Quinze champs qui existaient déjà — supprimés du contrat
+
+| Vous demandiez | Ça s'appelle | Depuis |
+|---|---|---|
+| `vignette`, `auroraDrift`, `outlineDraw`, `toggleFlip` | les mêmes | ce matin |
+| `grainOverlay` | `grain` | hier |
+| `lightSweepPass` | `lightSweep` | hier |
+| `cameraScanGate` | `scanGate` | ce matin |
+| `simulatedCursor` | `cursorClick` | ce matin |
+| `dynamicGrid` | `gridDrift` | ce matin |
+| `chartStory` | `chart` (`kind: bar\|line`) | hier |
+| `comparisonSplit` | `comparison` | cette nuit |
+| `testimonialCard`, `testimonialProofCard` | `quote` | cette nuit |
+| `threadMessageStack` | `thread` | cette nuit |
+| `lowerThirdBild` | `lowerThird` variante `bild` | hier |
+
+Les quatre premiers étaient pires que des doublons : ils étaient **morts**. Le
+`...EFFETS_SCHEMA` est étalé après vos clés explicites, donc il les écrasait —
+votre `vignette: { intensity }` n'existait à aucun moment, c'est
+`vignette: { strength }` de la table qui répondait.
+
+Les vingt-quatre champs sont retirés de `sceneEffectsSchema`. Un doublon qui ne
+dessine rien est un piège pour le modèle : il en choisit un au hasard, et une
+fois sur deux la vidéo sort sans.
+
+### 3. Ce qui vient
+
+Il reste 99 demandes. Elles se classent en trois :
+
+- **Des nappes** : rien qu'un décor et des réglages. Elles passent par la table
+  de `lib/storyboard/effets.ts` — une ligne chacune — plus leur CSS.
+- **Des plans** : elles portent un contenu (`text`, `items`, `quote`, `author`).
+  Elles ne peuvent pas passer par la table ; c'est du balisage à écrire.
+- **Une dizaine d'impossibles** : GLTF, Three.js, WebGL, champs de particules,
+  échantillonnage de canvas image par image. Le moteur cherche chaque image sur
+  une machine sans GPU. Réponse détaillée au prochain lot.

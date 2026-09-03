@@ -341,6 +341,247 @@ video.media {
   color: var(--lt-accent);
 }
 
+/*
+ * Les dix apparences suivantes.
+ *
+ * Le palier 2 les demandait comme dix champs séparés — `ltCleanBar`,
+ * `ltSoftPill`, `ltNeonBorder`… Elles portent toutes le même contenu : un nom,
+ * une fonction. Ce sont donc des variantes, et tout ce qui suit est de la
+ * feuille de style : ni balisage, ni schéma, ni entrée de prompt en plus.
+ *
+ * Aucune n'emploie `backdrop-filter`, pour la raison notée au-dessus du
+ * cartouche : une passe de rastérisation logicielle par image sur une machine
+ * sans GPU, pour un flou que personne ne voit derrière deux lignes de texte.
+ */
+
+/*
+ * Les blocs des variantes en boîte se serrent au texte.
+ *
+ * `width: fit-content` et non `display: inline-block` : deux pavés
+ * `inline-block` sont des éléments de ligne, donc ils se posent **côte à
+ * côte**. Le nom et la fonction se retrouvaient sur la même ligne, l'un à la
+ * suite de l'autre, au lieu d'être empilés — visible à la planche-contact du
+ * 3 septembre, invisible pour la garde, qui n'avait pas encore de référence.
+ */
+.lt-clean-bar .lt-name,
+.lt-clean-bar .lt-role,
+.lt-soft-pill .lt-name,
+.lt-soft-pill .lt-role,
+.lt-color-block .lt-name,
+.lt-bold-block .lt-name,
+.lt-bold-block .lt-role,
+.lt-kicker-name .lt-role,
+.lt-mask-reveal .lt-name,
+.lt-bild .lt-name,
+.lt-bild .lt-role,
+.lt-stack-bars .lt-name,
+.lt-stack-bars .lt-role {
+  display: block;
+  width: fit-content;
+  text-shadow: none;
+}
+
+/* Posé à droite, un bloc serré au texte doit être poussé, pas seulement aligné. */
+.lower-third.lt-right .lt-name,
+.lower-third.lt-right .lt-role {
+  margin-left: auto;
+}
+
+/* Tabloïd : deux pavés serrés l'un sur l'autre, sans rien entre eux. */
+.lt-bild {
+  padding: 0;
+}
+
+.lt-bild .lt-name {
+  padding: 0.12em 0.4em;
+  background: var(--lt-accent);
+  color: #fff;
+}
+
+.lt-bild .lt-role {
+  margin-top: 0;
+  padding: 0.2em 0.45em;
+  background: #0c0c0e;
+  color: #fff;
+}
+
+/* Carte blanche, filet d'accent sous le nom. */
+.lt-clean-bar {
+  padding: 0;
+}
+
+.lt-clean-bar .lt-name {
+  padding: 0.14em 0.5em 0.1em;
+  background: #fff;
+  color: #14100f;
+  border-bottom: 0.14em solid var(--lt-accent);
+}
+
+.lt-clean-bar .lt-role {
+  margin-top: 0;
+  padding: 0.18em 0.5em;
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(20, 16, 15, 0.66);
+}
+
+/* Pastille arrondie. Le nom perd une taille : la forme porte déjà l'emphase. */
+.lt-soft-pill {
+  padding: 0;
+}
+
+.lt-soft-pill .lt-name {
+  padding: 0.16em 0.7em;
+  border-radius: 999px;
+  background: #fff;
+  color: #14100f;
+  font-size: 1.45em;
+}
+
+.lt-soft-pill .lt-role {
+  margin-top: 0.2em;
+  padding: 0.1em 0.7em;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Aplat d'accent, texte blanc. La plus sonore des dix. */
+.lt-color-block {
+  padding: 0;
+}
+
+.lt-color-block .lt-name {
+  padding: 0.14em 0.55em;
+  background: var(--lt-accent);
+  color: #fff;
+}
+
+.lt-color-block .lt-role {
+  margin-top: 0.18em;
+  color: #fff;
+}
+
+/* Pavé noir, nom en capitales, fonction sur l'accent. */
+.lt-bold-block {
+  padding: 0;
+}
+
+.lt-bold-block .lt-name {
+  padding: 0.12em 0.5em;
+  background: #0c0c0e;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.lt-bold-block .lt-role {
+  margin-top: 0;
+  padding: 0.16em 0.5em;
+  background: var(--lt-accent);
+  color: #fff;
+}
+
+/* Sans carte : un filet d'accent sous le nom, et rien d'autre. */
+.lt-accent-underline {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.lt-accent-underline .lt-name {
+  display: inline-block;
+  padding-bottom: 0.1em;
+  border-bottom: 0.12em solid var(--lt-accent);
+}
+
+/*
+ * La fonction passe au-dessus du nom, en étiquette.
+ *
+ * `column-reverse` plutôt qu'un second balisage : le nom reste la première
+ * ligne du HTML, donc la première lue par un lecteur d'écran, et seule la
+ * mise en page les échange.
+ */
+.lt-kicker-name {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.lt-kicker-name.lt-right {
+  align-items: flex-end;
+}
+
+.lt-kicker-name .lt-role {
+  margin: 0 0 0.25em;
+  padding: 0.08em 0.4em;
+  background: var(--lt-accent);
+  color: #fff;
+  font-size: 0.8em;
+}
+
+.lt-kicker-name .lt-name {
+  font-size: 2em;
+}
+
+/* Le nom sur un aplat, prêt à être découvert par un volet. */
+.lt-mask-reveal {
+  padding: 0;
+}
+
+.lt-mask-reveal .lt-name {
+  padding: 0.14em 0.6em;
+  background: var(--lt-accent);
+  color: #fff;
+}
+
+.lt-mask-reveal .lt-role {
+  margin-top: 0.2em;
+}
+
+/*
+ * Bordure lumineuse. Trois ombres portées et non un `filter` : une ombre est
+ * composée, un flou plein élément est rastérisé — et sur Lambda, sans GPU,
+ * c'est la différence entre rien et une passe par image.
+ */
+.lt-neon-border {
+  border: 0.09em solid var(--lt-accent);
+  border-radius: 0.3em;
+  background: rgba(10, 10, 12, 0.72);
+  box-shadow:
+    0 0 0.4em var(--lt-accent),
+    0 0 1.2em rgba(255, 90, 54, 0.45),
+    inset 0 0 0.8em rgba(255, 90, 54, 0.25);
+}
+
+/* Deux barres empilées, chacune son fond, décalées l'une de l'autre. */
+.lt-stack-bars {
+  padding: 0;
+}
+
+.lt-stack-bars .lt-name {
+  padding: 0.12em 0.5em;
+  background: #0c0c0e;
+  color: #fff;
+  border-left: 0.18em solid var(--lt-accent);
+}
+
+.lt-stack-bars.lt-right .lt-name {
+  border-left: 0;
+  border-right: 0.18em solid var(--lt-accent);
+}
+
+.lt-stack-bars .lt-role {
+  margin-top: 0.12em;
+  margin-left: 0.6em;
+  padding: 0.14em 0.5em;
+  background: rgba(12, 12, 14, 0.86);
+}
+
+.lt-stack-bars.lt-right .lt-role {
+  margin-right: 0.6em;
+}
+
 /* --- Titre cinétique ----------------------------------------------------- */
 
 /*

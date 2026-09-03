@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { MOVE_TRANSITIONS, toHyperframesStoryboard } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
 import { SUBTITLE_STYLES } from '@/lib/videos';
+import { lowerThirdSchema } from '@/lib/storyboard/plans';
 import {
   MOMENTS,
   momentDeLaCoupe,
@@ -126,12 +127,17 @@ const COUPES: Jeu[] = MOVE_TRANSITIONS.map((kind) => ({
  * bandeau se juge sur ce qu'il recouvre. Une seule capture chacun — les six
  * autres instants ne montreraient que ce que les formats disent déjà.
  */
-const TIERS: Jeu[] = ['bar', 'stack', 'boxed'].map((variant) => ({
-  nom: `tiers-${variant}`,
-  video: REFERENCE_VIDEO,
-  lowerThird: variant,
-  moments: [momentDuTiers()],
-}));
+/* Les variantes posées à droite, pour que les deux côtés soient couverts. */
+const SIDE_DROIT = new Set(['boxed', 'soft-pill', 'kicker-name', 'stack-bars']);
+
+const TIERS: Jeu[] = lowerThirdSchema.shape.variant
+  .unwrap()
+  .options.map((variant) => ({
+    nom: `tiers-${variant}`,
+    video: REFERENCE_VIDEO,
+    lowerThird: variant,
+    moments: [momentDuTiers()],
+  }));
 
 /**
  * Un jeu par type de graphique, activé par --graphiques.
@@ -238,7 +244,7 @@ function projet(jeu: Jeu): string {
       name: 'Kofi Mensah',
       role: 'agronome, Cotonou',
       variant: lowerThird,
-      side: lowerThird === 'boxed' ? 'right' : 'left',
+      side: SIDE_DROIT.has(lowerThird) ? 'right' : 'left',
     };
   }
   if (chart) {

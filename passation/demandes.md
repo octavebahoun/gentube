@@ -593,7 +593,7 @@ Timeline: dans buildTimeline, scene.ytLogoIntro ? { title, kicker: kicker ?? '',
 Balisage: <div class="yt-logo-intro" id="yli<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ytLogoIntro` is optional: logo stamp with kicker line and accent arrow chip. { title, kicker?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:14
+## [fait] palier 2 · 2026-09-03 12:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltAccentUnderline
 Forme   : { name: string, role?: string, durationInSeconds?: number }
@@ -601,7 +601,7 @@ Timeline: dans buildTimeline, scene.ltAccentUnderline ? { name, role: role ?? ''
 Balisage: <div class="lt-accent-underline" id="lau<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltAccentUnderline` is optional: cardless lower third with accent rule and rising name. { name, role?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:14
+## [fait] palier 2 · 2026-09-03 12:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltBoldBlock
 Forme   : { name: string, tag?: string, durationInSeconds?: number }
@@ -609,7 +609,7 @@ Timeline: dans buildTimeline, scene.ltBoldBlock ? { name, tag: tag ?? '', durati
 Balisage: <div class="lt-bold-block" id="lbb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltBoldBlock` is optional: high-energy lower third with solid block wipe and uppercase name slam. { name, tag?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:14
+## [fait] palier 2 · 2026-09-03 12:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltCleanBar
 Forme   : { name: string, role?: string, durationInSeconds?: number }
@@ -617,7 +617,7 @@ Timeline: dans buildTimeline, scene.ltCleanBar ? { name, role: role ?? '', durat
 Balisage: <div class="lt-clean-bar" id="lcb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltCleanBar` is optional: minimal white card lower third with clip wipe entrance. { name, role?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [fait] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltColorBlock
 Forme   : { name: string, role?: string, durationInSeconds?: number }
@@ -625,7 +625,7 @@ Timeline: dans buildTimeline, scene.ltColorBlock ? { name, role: role ?? '', dur
 Balisage: <div class="lt-color-block" id="lcolb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltColorBlock` is optional: high-energy lower third with accent color block slide. { name, role?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [fait] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltKickerName
 Forme   : { name: string, kicker?: string, durationInSeconds?: number }
@@ -633,7 +633,7 @@ Timeline: dans buildTimeline, scene.ltKickerName ? { name, kicker: kicker ?? '',
 Balisage: <div class="lt-kicker-name" id="lkn<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltKickerName` is optional: cardless lower third with accent kicker tag and heavy name. { name, kicker?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [fait] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltMaskReveal
 Forme   : { name: string, role?: string, durationInSeconds?: number }
@@ -641,7 +641,7 @@ Timeline: dans buildTimeline, scene.ltMaskReveal ? { name, role: role ?? '', dur
 Balisage: <div class="lt-mask-reveal" id="lmr<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltMaskReveal` is optional: cardless lower third with accent clip-path reveal. { name, role?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [fait] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltNeonBorder
 Forme   : { name: string, role?: string, durationInSeconds?: number }
@@ -649,7 +649,7 @@ Timeline: dans buildTimeline, scene.ltNeonBorder ? { name, role: role ?? '', dur
 Balisage: <div class="lt-neon-border" id="lnb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltNeonBorder` is optional: lower third with light arcs and three-layer bloom. { name, role?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [fait] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltSoftPill
 Forme   : { name: string, role?: string, durationInSeconds?: number }
@@ -657,7 +657,7 @@ Timeline: dans buildTimeline, scene.ltSoftPill ? { name, role: role ?? '', durat
 Balisage: <div class="lt-soft-pill" id="lsp<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltSoftPill` is optional: rounded white pill lower third with scale-pop entrance. { name, role?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [fait] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ltStackBars
 Forme   : { name: string, role?: string, durationInSeconds?: number }
@@ -689,7 +689,7 @@ Timeline: dans buildTimeline, scene.asciiTrailReveal ? { label: label ?? '', dur
 Balisage: <div class="ascii-trail-reveal" id="atr<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `asciiTrailReveal` is optional: S-curve sweep revealing panel through ASCII grid. { label?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [fait] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.auroraDrift
 Forme   : { intensity?: number, durationInSeconds?: number }
@@ -721,7 +721,7 @@ Timeline: dans buildTimeline, scene.bottomUpLetters ? { text, durationInSeconds:
 Balisage: <div class="bottom-up-letters" id="bul<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `bottomUpLetters` is optional: splits text into letters and reveals each glyph from below. { text, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:16
+## [fait] palier 2 · 2026-09-03 12:16
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.chartStory
 Forme   : { title?: string, kind?: 'bar' | 'line' | 'donut', durationInSeconds?: number }
@@ -849,7 +849,7 @@ Timeline: dans buildTimeline, scene.kineticTypeSwap ? { sentence: sentence ?? ''
 Balisage: <div class="kinetic-type-swap" id="kts<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `kineticTypeSwap` is optional: held sentence with masked word slot rolling through options. { sentence?, options?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:17
+## [fait] palier 2 · 2026-09-03 12:17
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.lightSweepPass
 Forme   : { durationInSeconds?: number }
@@ -905,7 +905,7 @@ Timeline: dans buildTimeline, scene.multiDeviceSplay ? { devices: devices ?? [],
 Balisage: <div class="multi-device-splay" id="mds<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `multiDeviceSplay` is optional: phone/tablet/desktop mockups fanning from stack into splay. { devices?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:20
+## [fait] palier 2 · 2026-09-03 12:20
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.outlineDraw
 Forme   : { durationInSeconds?: number }
@@ -1057,7 +1057,7 @@ Timeline: dans buildTimeline, scene.swipeRail ? { cards: cards ?? [], durationIn
 Balisage: <div class="swipe-rail" id="srl<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `swipeRail` is optional: gesture leading horizontal card rail through drag and snap. { cards?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.testimonialProofCard
 Forme   : { quote?: string, author?: string, role?: string, durationInSeconds?: number }
@@ -1161,7 +1161,7 @@ Timeline: dans buildTimeline, scene.beforeAfterWipe ? { durationInSeconds: durat
 Balisage: <div class="before-after-wipe" id="baw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `beforeAfterWipe` is optional: comparison divider wiping after layer over before layer. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.cameraScanGate
 Forme   : { durationInSeconds?: number }
@@ -1169,7 +1169,7 @@ Timeline: dans buildTimeline, scene.cameraScanGate ? { durationInSeconds: durati
 Balisage: <div class="camera-scan-gate" id="csg<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `cameraScanGate` is optional: camera viewfinder sweep with QR lock. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.comparisonSplit
 Forme   : { durationInSeconds?: number }
@@ -1193,7 +1193,7 @@ Timeline: dans buildTimeline, scene.storeBadgeLockup ? { headline: headline ?? '
 Balisage: <div class="store-badge-lockup" id="sbl<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `storeBadgeLockup` is optional: headline above App Store and Play Store badges. { headline?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.testimonialCard
 Forme   : { quote?: string, author?: string, handle?: string, durationInSeconds?: number }
@@ -1201,7 +1201,7 @@ Timeline: dans buildTimeline, scene.testimonialCard ? { quote: quote ?? '', auth
 Balisage: <div class="testimonial-card" id="tcd<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `testimonialCard` is optional: customer quote with avatar, author, and handle. { quote?, author?, handle?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.toggleFlip
 Forme   : { durationInSeconds?: number }
@@ -1249,7 +1249,7 @@ Timeline: dans buildTimeline, scene.spotifyCard ? { track: track ?? '', artist: 
 Balisage: <div class="spotify-card" id="spf<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `spotifyCard` is optional: Spotify now playing card. { track?, artist?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.threadMessageStack
 Forme   : { durationInSeconds?: number }
@@ -1329,7 +1329,7 @@ Timeline: dans buildTimeline, scene.textureMaskText ? { text: text ?? '', durati
 Balisage: <div class="texture-mask-text" id="tmt<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `textureMaskText` is optional: PBR texture mask cut through glyphs. { text?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.grainOverlay
 Forme   : { intensity?: number, durationInSeconds?: number }
@@ -1377,7 +1377,7 @@ Timeline: dans buildTimeline, scene.blurIn ? { text: text ?? '', durationInSecon
 Balisage: <div class="blur-in" id="bli<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `blurIn` is optional: word-level text blur reveal. { text?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.dynamicGrid
 Forme   : { durationInSeconds?: number }
@@ -1393,7 +1393,7 @@ Timeline: dans buildTimeline, scene.separator ? { orientation: orientation ?? 'h
 Balisage: <div class="separator" id="sep<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `separator` is optional: one-pixel structural separator. { orientation?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.simulatedCursor
 Forme   : { durationInSeconds?: number }
@@ -1425,7 +1425,7 @@ Timeline: dans buildTimeline, scene.threeOrbitingCards ? { durationInSeconds: du
 Balisage: <div class="three-orbiting-cards" id="toc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `threeOrbitingCards` is optional: Three.js-powered orbit scene. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vignette
 Forme   : { intensity?: number, durationInSeconds?: number }
@@ -1473,7 +1473,7 @@ Timeline: dans buildTimeline, scene.logoOutro ? { logoUrl: logoUrl ?? '', taglin
 Balisage: <div class="logo-outro" id="lgo<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `logoOutro` is optional: cinematic logo reveal with tagline. { logoUrl?, tagline?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:36
+## [fait] palier 2 · 2026-09-03 12:36
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.lowerThirdBild
 Forme   : { headline?: string, subline?: string, durationInSeconds?: number }
