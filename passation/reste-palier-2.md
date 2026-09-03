@@ -28,11 +28,11 @@ que la composition ne sait pas encore dessiner.
 - [x] `flowchart-vertical` — Portrait animated decision tree with SVG connectors, sticky-note nodes, cursor interaction, and typing correction _(diagram, flowchart, interactive)_
 - [x] `confetti` — A deterministic celebration burst with seeded particles and gravity _(effect)_
 - [x] `focus-swap` — Moves attention between two side-by-side cards as one recedes with scale, blur, and dimming while the other advances to full focus _(effect, ui-props, focus)_
-- `mesh-gradient-bg` — A render-safe mesh gradient using animated radial layers _(effect)_
-- `motion-blur` — Velocity-driven motion blur — samples element position each frame and applies a one-sided SVG feGaussianBlur ghost trail proportional to speed _(effect, motion-blur, velocity)_
-- `spotlight-card` — A card with a scripted cursor spotlight and lit border _(effect)_
-- `svg-mask-reveal` — A soft token-colored sweep reveals media only through an editable SVG wordmark mask _(effect, svg, mask)_
-- `yt-screen-warp` — Grid, scanline, vignette, and sheen overlay plus a 3D-warp wrapper class that makes footage read as if playing on a physical display _(effect, overlay, texture)_
+- [x] `mesh-gradient-bg` — A render-safe mesh gradient using animated radial layers _(effect)_
+- [x] `motion-blur` — Velocity-driven motion blur — samples element position each frame and applies a one-sided SVG feGaussianBlur ghost trail proportional to speed _(effect, motion-blur, velocity)_
+- [x] `spotlight-card` — A card with a scripted cursor spotlight and lit border _(effect)_
+- [x] `svg-mask-reveal` — A soft token-colored sweep reveals media only through an editable SVG wordmark mask _(effect, svg, mask)_
+- [x] `yt-screen-warp` — Grid, scanline, vignette, and sheen overlay plus a 3D-warp wrapper class that makes footage read as if playing on a physical display _(effect, overlay, texture)_
 - `avatar-cloud` — Lettermark avatars populate a loose elliptical cloud while fine SVG links draw between the community and its central proof label _(effects, avatars, community)_
 - `overwhelm-surround` — Tasks, tabs, pings, and notification bubbles accelerate inward around a calm central subject, turning overload into visible spatial pressure _(effects, agitate, overwhelm)_
 - `stagger-cascade` — A responsive grid of tile cards that fades and travels into place with an evenly spaced per-item GSAP stagger. The ordered cascade is the only visual mechanic _(effects, grid, stagger)_

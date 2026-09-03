@@ -338,6 +338,47 @@ Timeline: dans buildTimeline, scene.focusSwap ? { targetCard: targetCard ?? 'lef
 Balisage: <div class="focus-swap" id="fsw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `focusSwap` is optional: card focus swap with blur and scale depth transitions. { targetCard?, durationInSeconds? }"
 
+## palier 2 · 2026-09-03 11:15
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.meshGradientBg
+Forme   : { durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.meshGradientBg ? { durationInSeconds: durationInSeconds ?? 3.0 } : null
+Balisage: <div class="mesh-gradient-bg" id="mgb<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `meshGradientBg` is optional: render-safe animated radial mesh gradient background. { durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:15
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.motionBlur
+Forme   : { intensity?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.motionBlur ? { intensity: intensity ?? 3, durationInSeconds: durationInSeconds ?? 1.5 } : null
+Balisage: <div class="motion-blur" id="mb<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `motionBlur` is optional: velocity-driven SVG directional motion blur trail. { intensity?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:15
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.spotlightCard
+Forme   : { durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.spotlightCard ? { durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="spotlight-card" id="sc<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `spotlightCard` is optional: card container with scripted cursor spotlight and lit border. { durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:15
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.svgMaskReveal
+Forme   : { durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.svgMaskReveal ? { durationInSeconds: durationInSeconds ?? 1.8 } : null
+Balisage: <div class="svg-mask-reveal" id="smr<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `svgMaskReveal` is optional: soft token sweep revealing media through an SVG wordmark mask. { durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:15
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.ytScreenWarp
+Forme   : { durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.ytScreenWarp ? { durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="yt-screen-warp" id="ysw<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `ytScreenWarp` is optional: CRT display grid, scanline, vignette, and 3D screen warp wrapper. { durationInSeconds? }"
+
+
 
 
 

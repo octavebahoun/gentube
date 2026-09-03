@@ -395,6 +395,32 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
+  meshGradientBg: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  motionBlur: z
+    .object({
+      intensity: z.number().min(0).max(10).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  spotlightCard: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  svgMaskReveal: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ytScreenWarp: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
 });
 
 export const sceneRenderSchema = z.object({
