@@ -37,7 +37,7 @@ function projet(
   divs: string,
   patch: (t: { scenes: Record<string, unknown>[] }) => void,
   instants: number[],
-  opts: { texte?: boolean } = {}
+  opts: { texte?: boolean; karaoke?: boolean } = {}
 ): string {
   const dir = mkdtempSync(join(tmpdir(), `gentube-p2-${nom}-`));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
@@ -48,7 +48,7 @@ function projet(
 
   let page = composeHtml({
     storyboard: toHyperframesStoryboard(
-      opts.texte ? ({ ...REFERENCE_VIDEO, subtitles: true } as typeof REFERENCE_VIDEO) : VIDEO,
+      opts.texte ? ({ ...REFERENCE_VIDEO, subtitles: opts.karaoke ?? true } as typeof REFERENCE_VIDEO) : VIDEO,
       [opts.texte
         ? ({ ...shot(), render: { effects: { transition: 'none', zoom: 'in' }, kineticTitle: { text: 'TITRE PULSE', variant: 'reveal', position: 'center' } } } as unknown as Shot)
         : shot()]
@@ -110,7 +110,7 @@ if (cible === 'all' || cible === 'beat') {
     '',
     (t) => { t.scenes[0].beatAccent = { at: 1.0, duration: 0.4, strength: 0.06 }; },
     [1.2, 2.0],
-    { texte: true }
+    { texte: true, karaoke: false }
   );
 }
 // Silence l'import sinon inutilise en mode cible unique.
