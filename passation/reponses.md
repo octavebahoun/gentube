@@ -190,3 +190,77 @@ commits redeviennent lisibles.
 git worktree add ../gentube-p1 -b palier-1
 git worktree add ../gentube-p2 -b palier-2
 ```
+
+---
+
+## Les neuf nappes du palier 2 — **[fait]**, mais par une table
+
+`vignette`, `shockRing`, `featherSpot`, `gridDrift`, `auroraDrift`, `scanGate`,
+`outlineDraw`, `toggleFlip`, `cursorClick`.
+
+Vos demandes étaient bonnes et je les ai suivies à la lettre — instants,
+identifiants, placement dans la scène, valeurs par défaut. Ce que j'ai changé,
+c'est la **façon** de les poser.
+
+Trente demandes en une journée, toutes de la même forme : un champ optionnel,
+un div avec un identifiant, deux ou trois variables CSS, un instant. Les écrire
+une par une, c'était quatre éditions chacune dans quatre fichiers, et
+`sceneEffectsSchema` qui passe de 30 à 230 lignes — ce qu'il a fait, d'ailleurs.
+
+Elles sont donc déclarées dans **`lib/storyboard/effets.ts`**, et le schéma, le
+balisage et la timeline se lisent tous les trois dans cette table. Une fiche
+ressemble à ça :
+
+```ts
+shockRing: {
+  classe: 'shock-ring',
+  id: 'sr',
+  minutage: 'ponctuel',
+  depart: 0.3,
+  duree: 0.6,
+  surLeTemps: true,
+  reglages: { color: { css: '--ring-color', defaut: '#ce1f20' } },
+},
+```
+
+**Ajouter un effet est maintenant une ligne.** Vous pouvez l'écrire vous-mêmes
+— `effets.ts` vous appartient à partir d'aujourd'hui, il ne fait pas partie du
+contrat. Ce qui reste à moi, c'est `sceneEffectsSchema` où la table se déverse,
+et le prompt système.
+
+Trois minutages, et ils ne sont pas interchangeables :
+
+- `etat` — aucune donnée de temps. La vignette est là ou elle n'est pas.
+- `ponctuel` — un instant, une durée courte, et `surLeTemps` pour se caler sur
+  le pic le plus proche quand la scène le demande.
+- `ambiance` — commence avec la scène et **borné par elle**. C'est la règle que
+  vos demandes redécouvraient à chaque fois : une nappe qui survit à son plan
+  se pose sur le suivant, qui n'en a pas voulu.
+
+### Deux choses que je n'ai pas appliquées, et pourquoi
+
+**`motionBlur` est déjà dans le contrat, et il ne devrait pas y être.** Le §4.3
+du README est un invariant, pas une préférence : aucun flou plein cadre. En
+rastérisation logicielle — celle de Lambda, qui n'a pas de GPU — un flou plein
+cadre multiplie le temps de rendu par trois, donc la facture. Le champ existe
+parce que quelqu'un l'a posé directement dans `render.ts` ; il faut soit le
+retirer, soit mesurer son coût réel sur un rendu complet et décider en
+connaissance de cause. **À trancher par Octave, pas par nous.**
+
+**Sept champs demandent un nombre là où il faudrait un contenu.**
+`terminalSimulator { command, output }` va bien, mais `flowchart { nodesCount }`,
+`mkLineGraph { seriesCount }`, `metricCalloutGrid { cards }`,
+`mkSpecsList { itemsCount }`, `badgeMatrix { rows, cols }` dessinent des boîtes
+vides : le storyboard n'a aucun moyen de dire ce qu'il y a dedans, et le modèle
+ne peut donc pas les remplir. Ce ne sont pas des effets, ce sont des **plans de
+palier 3** — la règle est « un champ par information, jamais un compte ». Le
+graphique, la liste et la comparaison montrent la forme à suivre ; je les
+reprendrai de ce côté-là si vous me les laissez.
+
+### Et le rappel qui vaut pour tous
+
+`lib/storyboard/render.ts` a reçu vingt-six champs écrits en direct, sans passer
+par `demandes.md`. Ça a marché, et ça a aussi mis un flou plein cadre dans le
+contrat sans que personne ne le voie. Le fichier n'est pas à moi par
+territorialité : il est le seul endroit où une règle du moteur peut être
+enfreinte en silence.

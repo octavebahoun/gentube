@@ -4,6 +4,7 @@ import type {
   WordTiming,
 } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
+import { effetsTimeline } from './effets';
 import { structuredPlans } from './plans-timeline';
 import {
   isMoveTransition,
@@ -299,6 +300,8 @@ export function buildTimeline(
          * se retrouverait posé sur le suivant, où il nomme quelqu'un d'autre.
          */
         ...structuredPlans(scene),
+        // Les nappes, lues dans la même table que leur balisage.
+        ...effetsTimeline(scene, (instant) => onBeat(scene, beats, instant)),
         kinetic: title
           ? {
               at: ms(scene.startInSeconds + (title.startInSeconds ?? 0)),

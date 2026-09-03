@@ -1,6 +1,7 @@
 import type { HyperframesScene, WordTiming } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
 import { isVideoPath, kenBurns, ms, wordsOrFallback } from './plan';
+import { effetsMarkup } from './effets';
 import {
   chartMarkup,
   comparisonMarkup,
@@ -113,6 +114,11 @@ export function sceneMarkup(
    * `gr` et non `g` pour le grain : `g<index>` est déjà l'anneau du compteur,
    * et deux éléments sous le même identifiant se volent le tween.
    */
+  // Les nappes déclarées dans `effets.ts` : les décors sous le média, le
+  // reste au-dessus. Deux appels, une seule table.
+  const decors = effetsMarkup(scene, index, true);
+  const nappes = effetsMarkup(scene, index, false);
+
   const sweep = scene.effects?.lightSweep
     ? `<div class="light-sweep" id="ls${index}" style="--sweep-color:${escapeHtml(
         scene.effects.lightSweep.color ?? '#ffffff'
@@ -137,6 +143,7 @@ export function sceneMarkup(
   return [
     `<div class="scene clip" id="s${index}" data-start="${scene.startInSeconds}" ` +
       `data-duration="${scene.durationInSeconds}" data-track-index="${trackIndex}">`,
+    decors,
     media,
     card,
     captions ? '<div class="veil"></div>' : '',
@@ -150,6 +157,7 @@ export function sceneMarkup(
     quote,
     list,
     face,
+    nappes,
     sweep,
     grain,
     flash,

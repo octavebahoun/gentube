@@ -39,13 +39,13 @@ Enum    : kineticTitle.variant
 Ajouter : 'handwritten', 'marker', 'marquee', 'brand'
 Prompt  : Add kineticTitle variants ('handwritten', 'marker', 'marquee', 'brand') to system prompt.
 
-## palier 1 · 2026-09-03 02:40
+## [fait] palier 1 · 2026-09-03 02:40
 Fichier : lib/storyboard/render.ts
 Enum    : MOVE_TRANSITIONS
 Ajouter : 'whip-pan-cut', 'cut-the-curve', 'grid-pixelate-wipe', 'rubber-band-bumper', 'chromatic-wipe', 'morph-swap', 'parallax-zoom', 'parallax-unzoom', 'page-slide', 'halftone-dissolve', 'type-match-cut', 'match-cut'
 Prompt  : Add new transform transitions ('whip-pan-cut', 'cut-the-curve', 'grid-pixelate-wipe', 'rubber-band-bumper', 'chromatic-wipe', 'morph-swap', 'parallax-zoom', 'parallax-unzoom', 'page-slide', 'halftone-dissolve', 'type-match-cut', 'match-cut') to system prompt transition enum.
 
-## palier 1 · 2026-09-03 02:42
+## [fait] palier 1 · 2026-09-03 02:42
 Fichier : lib/storyboard/render.ts
 Enum    : kineticTitle.variant
 Ajouter : 'stagger', 'stateswap', 'prism', 'tiles', 'emphasis', 'popin', 'badge-pop', 'card-resize', 'icon-swap', 'menu-morph', 'skeleton-reveal', 'success-check', 'tilt-card', 'input-feedback', 'micro-transitions', 'panel-reveal', 'tabs-slide-indicator', 'avatar-group-hover'
@@ -75,7 +75,7 @@ Timeline: dans buildTimeline, scene.beatAccent ? { at: onBeat(scene, beats, scen
 Balisage: aucun. Le tween pulse #s<index> (et #m<index> en plus si scene.hoisted, car le clip est hors du div) : pulse sur la scene, jamais sur #m d une image, pour ne pas se battre avec l echelle du Ken Burns. Aucune piste.
 Prompt  : "- `beatAccent` is optional: a single music-hit sting, the frame micro-pulses and decays immediately. Use it on a word that lands hard. { strength? (default 0.035), startInSeconds?, durationInSeconds? }."
 
-## palier 2 · 2026-09-03 01:41
+## [fait] palier 2 · 2026-09-03 01:41
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vignette
 Forme   : { strength?: number }
@@ -83,7 +83,7 @@ Timeline: rien. C est un etat, pas un geste : aucune donnee de temps a calculer.
 Balisage: <div class="vignette" id="vg<index>" style="--vg-strength:<strength>"> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste : div non minute, il vit et meurt avec sa scene.
 Prompt  : "- `vignette` is optional: a soft radial darkening that pulls focus toward the center. { strength? (default 0.55) }."
 
-## palier 2 · 2026-09-03 01:41
+## [fait] palier 2 · 2026-09-03 01:41
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.shockRing
 Forme   : { startInSeconds?: number, durationInSeconds?: number, color?: string }
@@ -91,7 +91,7 @@ Timeline: dans buildTimeline, scene.shockRing ? { at: onBeat(scene, beats, scene
 Balisage: <div class="shock-ring" id="sr<index>" style="--ring-color:<color>"> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste, meme raison que lightSweep.
 Prompt  : "- `shockRing` is optional: one accent ring expands from the center and fades, like a logo sting. Use it when a name or number lands. { color? (default #ce1f20), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
 
-## palier 2 · 2026-09-03 01:41
+## [fait] palier 2 · 2026-09-03 01:41
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.featherSpot
 Forme   : { startInSeconds?: number, durationInSeconds?: number, x?: number, y?: number, size?: number }
@@ -99,7 +99,7 @@ Timeline: dans buildTimeline, scene.featherSpot ? { at: ms(scene.startInSeconds 
 Balisage: <div class="feather-spot" id="fs<index>" style="--spot-x:<x>%;--spot-y:<y>%;--spot-size:<size>%"> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
 Prompt  : "- `featherSpot` is optional: the frame dims except a soft elliptical hole that spotlights one area. { x?, y?, size? (percents, default 50/42/40), startInSeconds?, durationInSeconds? }. Covers the whole scene by default."
 
-## palier 2 · 2026-09-03 01:51
+## [fait] palier 2 · 2026-09-03 01:51
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.gridDrift
 Forme   : { startInSeconds?: number, durationInSeconds?: number, opacity?: number }
@@ -107,7 +107,7 @@ Timeline: dans buildTimeline, scene.gridDrift ? { at: ms(scene.startInSeconds + 
 Balisage: <div class="grid-drift" id="gd<index>"> dans sceneMarkup, dans le div .scene en premier (sous le media : c est un fond, le media le recouvre quand il y en a un — sur un plan sans image il se voit). Aucune piste.
 Prompt  : "- `gridDrift` is optional: a faint technical grid slowly drifts behind the scene, for SaaS/code/data lines. { opacity? (default 0.5), startInSeconds?, durationInSeconds? }. Best on imageless plans; an image covers it."
 
-## palier 2 · 2026-09-03 01:51
+## [fait] palier 2 · 2026-09-03 01:51
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.cursorClick
 Forme   : { startInSeconds?: number, durationInSeconds?: number, fromX?: number, fromY?: number, x?: number, y?: number }
@@ -115,7 +115,7 @@ Timeline: dans buildTimeline, scene.cursorClick ? { at: ms(scene.startInSeconds 
 Balisage: <div class="cursor-click" id="cc<index>" style="left:<fromX>%;top:<fromY>%"><div class="cursor-ring"></div></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
 Prompt  : "- `cursorClick` is optional: a cursor glides to a point and clicks, firing a small ring pulse. Use it when the line says tap, click or open. { x?, y? (target percents, default 62/55), fromX?, fromY? (default 12/12), startInSeconds?, durationInSeconds? }."
 
-## palier 2 · 2026-09-03 01:51
+## [fait] palier 2 · 2026-09-03 01:51
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.scanGate
 Forme   : { startInSeconds?: number, durationInSeconds?: number, color?: string }
@@ -123,7 +123,7 @@ Timeline: dans buildTimeline, scene.scanGate ? { at: onBeat(scene, beats, scene.
 Balisage: <div class="scan-gate" id="sg<index>" style="--gate-color:<color>"><div class="scan-line"></div><i class="gate-corner tl"></i><i class="gate-corner tr"></i><i class="gate-corner bl"></i><i class="gate-corner br"></i></div> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
 Prompt  : "- `scanGate` is optional: a viewfinder moment — corner brackets, one sweep line, a lock pulse. Use it when the line verifies, scans or detects. { color? (default #4ad9ff), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
 
-## palier 2 · 2026-09-03 02:01
+## [fait] palier 2 · 2026-09-03 02:01
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.toggleFlip
 Forme   : { startInSeconds?: number, durationInSeconds?: number, on?: boolean }
@@ -131,7 +131,7 @@ Timeline: dans buildTimeline, scene.toggleFlip ? { at: ms(scene.startInSeconds +
 Balisage: <div class="toggle-flip" id="tf<index>"><div class="toggle-thumb"></div></div> dans sceneMarkup, dans le div .scene apres le grain. L etat visuel de depart suit on (classe on si on est vrai). Aucune piste.
 Prompt  : "- `toggleFlip` is optional: an oversized UI toggle that flips with a physical overshoot. Use it when the line says enable, switch or turn on. { on? (default true), startInSeconds?, durationInSeconds? }."
 
-## palier 2 · 2026-09-03 02:01
+## [fait] palier 2 · 2026-09-03 02:01
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.auroraDrift
 Forme   : { startInSeconds?: number, durationInSeconds?: number, opacity?: number }
@@ -139,7 +139,7 @@ Timeline: dans buildTimeline, scene.auroraDrift ? { at: ms(scene.startInSeconds 
 Balisage: <div class="aurora" id="au<index>"><div class="blob-a"></div><div class="blob-b"></div><div class="blob-c"></div></div> dans sceneMarkup, dans le div .scene en premier (fond, sous le media). Aucune piste.
 Prompt  : "- `auroraDrift` is optional: three soft color fields slowly drift behind the scene, for calm premium lines. { opacity? (default 0.8), startInSeconds?, durationInSeconds? }. Best on imageless plans; an image covers it."
 
-## palier 2 · 2026-09-03 02:01
+## [fait] palier 2 · 2026-09-03 02:01
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.outlineDraw
 Forme   : { startInSeconds?: number, durationInSeconds?: number, color?: string }
@@ -147,13 +147,13 @@ Timeline: dans buildTimeline, scene.outlineDraw ? { at: onBeat(scene, beats, sce
 Balisage: <div class="outline-draw" id="od<index>" style="--trace-color:<color>"><i class="od-t"></i><i class="od-r"></i><i class="od-b"></i><i class="od-l"></i></div> dans sceneMarkup, dans le div .scene apres le grain. Des divs, pas de SVG : pathLength est ignore sur les formes et le tiret tombait sur le vrai perimetre (verifie a l image). Aucune piste.
 Prompt  : "- `outlineDraw` is optional: a rounded outline draws itself clockwise around the frame to prove a callout. { color? (default #ffd9a0), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
 
-## palier 1 · 2026-09-03 02:45
+## [fait] palier 1 · 2026-09-03 02:45
 Fichier : lib/storyboard/render.ts
 Enum    : kineticTitle.variant
 Ajouter : 'callout', 'morphtext'
 Prompt  : Add kineticTitle variants ('callout', 'morphtext') to system prompt.
 
-## palier 1 · 2026-09-03 02:46
+## [fait] palier 1 · 2026-09-03 02:46
 Fichier : lib/storyboard/render.ts
 Enum    : MOVE_TRANSITIONS
 Ajouter : 'freeze-cut', 'editorial-flash-overlay', 'hw-scribble-transition', 'vfx-text-cursor', 'organic-light-leak-overlay', 'ordered-dither-pass', 'parallax-device-dive', 'halftone-field'

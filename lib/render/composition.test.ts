@@ -569,12 +569,19 @@ describe('the composition HyperFrames renders', () => {
       expect(T.scenes[0].chart.bars[0].part).toBe(0.4);
     });
 
-    it('measures the line outside the page, where the format cannot skew it', () => {
+    it('reveals the line with a clip, never with a dash pattern', () => {
+      // Avec `non-scaling-stroke`, les tirets se calculent en pixels écran :
+      // aucune longueur mesurée hors de la page ne peut coller, et le motif
+      // se répétait en morceaux détachés.
       const page = withChart({ kind: 'line', points: barres });
-      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
-      expect(T.scenes[0].chart.line.length).toBeGreaterThan(100);
       expect(page).toContain('viewBox="0 0 100 100"');
       expect(page).toContain('preserveAspectRatio="none"');
+      // Sur le tween de la courbe, pas sur la page : d'autres gestes du
+      // registre se dessinent bien par tirets, et c'est légitime chez eux.
+      const script = page.slice(page.lastIndexOf('<script>'));
+      const courbe = script.slice(script.indexOf('"#ln" + scene.index'));
+      expect(courbe.slice(0, 400)).not.toContain('strokeDasharray');
+      expect(courbe).toContain('inset(0 100% 0 0)');
     });
 
     it('leaves no line data when the chart is bars', () => {
@@ -706,6 +713,51 @@ describe('the composition HyperFrames renders', () => {
       const page = html([shot()]);
       expect(page).not.toContain('class="list');
       expect(page).not.toContain('class="face"');
+    });
+  });
+
+  describe('the overlay effects declared in the table', () => {
+    const withEffets = (effets: Record<string, unknown>) =>
+      html([
+        { ...shot(), render: { effects: effets } } as Shot,
+      ]);
+
+    it('gives every declared effect a div and an id', () => {
+      const page = withEffets({ vignette: {}, shockRing: {}, scanGate: {} });
+      expect(page).toContain('class="vignette" id="vg0"');
+      expect(page).toContain('class="shock-ring" id="sr0"');
+      expect(page).toContain('class="scan-gate" id="sg0"');
+    });
+
+    it('puts backdrops under the media and the rest above it', () => {
+      // Une grille posée par-dessus une photo ne serait plus un fond.
+      const page = withEffets({ gridDrift: {}, vignette: {} });
+      expect(page.indexOf('grid-drift')).toBeLessThan(page.indexOf('class="media"'));
+      expect(page.indexOf('vignette')).toBeGreaterThan(page.indexOf('class="media"'));
+    });
+
+    it('gives a state no timeline data, because it has nothing to time', () => {
+      const page = withEffets({ vignette: { strength: 0.7 } });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].vignette).toBeUndefined();
+      expect(page).toContain('--vg-strength:0.7');
+    });
+
+    it('bounds an ambience by the end of its scene', () => {
+      // Une nappe qui survivrait à son plan se poserait sur le suivant.
+      const page = withEffets({ gridDrift: { durationInSeconds: 999 } });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      const scene = T.scenes[0];
+      expect(scene.gridDrift.at + scene.gridDrift.duration).toBeLessThanOrEqual(
+        scene.start + scene.duration
+      );
+    });
+
+    it('falls back to the declared defaults', () => {
+      const page = withEffets({ shockRing: {} });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].shockRing.color).toBe('#ce1f20');
+      expect(T.scenes[0].shockRing.duration).toBe(0.6);
     });
   });
 

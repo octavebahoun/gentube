@@ -121,7 +121,6 @@ export function structuredPlans(scene: HyperframesScene) {
           line:
             (chart.kind ?? 'bar') === 'line'
               ? {
-                  length: longueurDuTrace(projete),
                   // Chaque pastille s'allume quand le trait l'atteint :
                   // la courbe se dessine, les points la ponctuent.
                   dots: projete.map((_, i) => ({
@@ -245,21 +244,4 @@ export function chartPoints(
   }));
 }
 
-/**
- * La longueur d'une polyligne, pour que le trait se dessine.
- *
- * `strokeDasharray` et `strokeDashoffset` demandent cette longueur ; la
- * mesurer dans la page avec `getTotalLength()` donnerait un résultat qui
- * dépend de l'étirement du SVG, donc du format de la vidéo. Calculée ici, dans
- * le carré de 100 sur 100 du tracé, elle est la même partout.
- */
-function longueurDuTrace(points: { x: number; y: number }[]): number {
-  let total = 0;
-  for (let i = 1; i < points.length; i += 1) {
-    const dx = points[i].x - points[i - 1].x;
-    const dy = points[i].y - points[i - 1].y;
-    total += Math.sqrt(dx * dx + dy * dy);
-  }
-  return Math.round(total * 100) / 100;
-}
 

@@ -155,11 +155,24 @@ export const CONTENUS_JS = `
            * anime la moindre geometrie.
            */
           if (scene.chart.line) {
+            /*
+             * La courbe se decouvre par un volet, pas par des tirets.
+             *
+             * strokeDasharray semblait le bon outil, et il ne l est pas ici :
+             * avec vector-effect non-scaling-stroke, les tirets se calculent
+             * en pixels ecran, apres l etirement du SVG. Aucune longueur
+             * mesuree dans le repere du trace ne peut donc coller — le motif
+             * se repetait et un second morceau de courbe apparaissait,
+             * detache, la ou le trait n etait pas encore passe.
+             *
+             * Un clip-path ne depend d aucune longueur : il decouvre de gauche
+             * a droite, et le format n y change rien.
+             */
             tl.fromTo(
               "#ln" + scene.index,
-              { strokeDashoffset: scene.chart.line.length },
+              { clipPath: "inset(0 100% 0 0)" },
               {
-                strokeDashoffset: 0,
+                clipPath: "inset(0 0% 0 0)",
                 duration: scene.chart.duration * 1.6,
                 ease: "power2.inOut",
               },

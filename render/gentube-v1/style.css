@@ -584,15 +584,22 @@ video.media {
 .chart-line {
   fill: none;
   stroke: var(--chart-accent);
-  stroke-width: 3;
+  /*
+   * Six pixels, pas trois. Le trait était juste sur une capture isolée et
+   * disparaissait dans une vidéo entière : à cette échelle, un trait de trois
+   * pixels sur un aplat noir se lit comme une rayure. Le premier rendu complet
+   * du 3 septembre 2026 est ce qui l'a montré — aucun instant de la garde ne
+   * pouvait le dire.
+   */
+  stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
   /*
-   * Le trait se dessine par `stroke-dashoffset`, que la timeline ramène à
-   * zéro. La longueur vient de `plan.ts` : mesurée dans la page, elle
-   * dépendrait de l'étirement du SVG.
+   * Le trait se découvre par un `clip-path` posé par la timeline, pas par un
+   * `stroke-dasharray`. Avec `non-scaling-stroke`, les tirets se calculent en
+   * pixels écran après l'étirement du SVG : aucune longueur mesurée dans le
+   * repère du tracé ne peut coller, et le motif se répétait.
    */
-  stroke-dasharray: 400;
 }
 
 /*
@@ -601,12 +608,12 @@ video.media {
  */
 .chart-dot {
   position: absolute;
-  width: 0.7em;
-  height: 0.7em;
-  margin: -0.35em 0 0 -0.35em;
+  width: 0.95em;
+  height: 0.95em;
+  margin: -0.475em 0 0 -0.475em;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 0 2px var(--chart-accent);
+  box-shadow: 0 0 0 3px var(--chart-accent);
 }
 
 .chart-axis {
