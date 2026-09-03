@@ -317,6 +317,10 @@ describe('the composition HyperFrames renders', () => {
         'lockup', 'decode', 'crossfade', 'scan', 'axis-y', 'axis-z', 'reel',
         'fade-up', 'strike', 'ticker', 'calm', 'split', 'weight', 'wave',
         'backdrop', 'drop', 'handwritten', 'marker', 'marquee', 'brand',
+        'stagger', 'stateswap', 'prism', 'tiles', 'emphasis', 'popin',
+        'badge-pop', 'card-resize', 'icon-swap', 'menu-morph', 'skeleton-reveal',
+        'success-check', 'tilt-card', 'input-feedback', 'micro-transitions',
+        'panel-reveal', 'tabs-slide-indicator', 'avatar-group-hover',
       ];
       for (const v of declarees) {
         const cle = /^[a-z]+$/.test(v) ? `${v}: {` : `"${v}": {`;

@@ -89,6 +89,24 @@ export const TITRES_JS = `
         marquee: { de: { opacity: 0, x: "100%", rotationY: -15 }, vers: { opacity: 1, x: "0%", rotationY: 0 }, ease: "power2.out" },
         // Lockup de marque : resserrement d'interlettrage et calage.
         brand: { de: { opacity: 0, scale: 0.8, letterSpacing: "0.3em" }, vers: { opacity: 1, scale: 1, letterSpacing: "0.02em" }, ease: "back.out(1.6)" },
+        stagger: { de: { opacity: 0, y: "0.4em", filter: "blur(4px)" }, vers: { opacity: 1, y: "0em", filter: "blur(0px)" }, ease: "power2.out" },
+        stateswap: { de: { opacity: 0, y: "-0.3em", filter: "blur(6px)" }, vers: { opacity: 1, y: "0em", filter: "blur(0px)" }, ease: "power3.out" },
+        prism: { de: { opacity: 0, scale: 1.15, filter: "blur(10px)" }, vers: { opacity: 1, scale: 1, filter: "blur(0px)" }, ease: "power2.out" },
+        tiles: { de: { opacity: 0, scale: 0.7, rotation: -6 }, vers: { opacity: 1, scale: 1, rotation: 0 }, ease: "back.out(1.5)" },
+        emphasis: { de: { opacity: 0, scale: 1.3 }, vers: { opacity: 0.15, scale: 1 }, ease: "power2.out" },
+        popin: { de: { opacity: 0, y: "0.5em", scale: 0.6, filter: "blur(4px)" }, vers: { opacity: 1, y: "0em", scale: 1, filter: "blur(0px)" }, ease: "back.out(1.8)" },
+        "badge-pop": { de: { opacity: 0, scale: 0.3 }, vers: { opacity: 1, scale: 1 }, ease: "elastic.out(1, 0.5)" },
+        "card-resize": { de: { opacity: 0, scaleX: 0.8, scaleY: 0.6 }, vers: { opacity: 1, scaleX: 1, scaleY: 1 }, ease: "power3.out" },
+        "icon-swap": { de: { opacity: 0, scale: 0.5, filter: "blur(6px)" }, vers: { opacity: 1, scale: 1, filter: "blur(0px)" }, ease: "power2.out" },
+        "menu-morph": { de: { opacity: 0, rotation: -90, scale: 0.7 }, vers: { opacity: 1, rotation: 0, scale: 1 }, ease: "back.out(1.7)" },
+        "skeleton-reveal": { de: { opacity: 0.3, filter: "blur(8px)" }, vers: { opacity: 1, filter: "blur(0px)" }, ease: "power2.inOut" },
+        "success-check": { de: { opacity: 0, scale: 0.5, rotation: -20 }, vers: { opacity: 1, scale: 1, rotation: 0 }, ease: "back.out(2)" },
+        "tilt-card": { de: { opacity: 0, rotationX: 25, y: "0.6em" }, vers: { opacity: 1, rotationX: 0, y: "0em" }, ease: "power3.out" },
+        "input-feedback": { de: { opacity: 0, x: -12 }, vers: { opacity: 1, x: 0 }, ease: "elastic.out(1.2, 0.4)" },
+        "micro-transitions": { de: { opacity: 0, y: "0.2em", scale: 0.95 }, vers: { opacity: 1, y: "0em", scale: 1 }, ease: "power2.out" },
+        "panel-reveal": { de: { opacity: 0, scaleY: 0.2, transformOrigin: "top" }, vers: { opacity: 1, scaleY: 1 }, ease: "power3.out" },
+        "tabs-slide-indicator": { de: { opacity: 0, x: "-0.5em" }, vers: { opacity: 1, x: "0em" }, ease: "power2.out" },
+        "avatar-group-hover": { de: { opacity: 0, y: "0.4em", scale: 0.85 }, vers: { opacity: 1, y: "0em", scale: 1 }, ease: "back.out(1.6)" },
       };`;
 
 export const MOTS_JS = `

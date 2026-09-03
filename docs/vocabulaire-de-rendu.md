@@ -44,7 +44,7 @@ actuel en est la version la plus sobre.
 
 Les styles de sous-titres intégrés dans GenTube : `karaoke`, `fondant`, `cinematic`, `glitch-rgb`, `editorial-emphasis`, `kinetic-slam`, `matrix-decode`, `parallax-layers`, `texture`, `weight-shift`, `camera-follow`.
 
-Les variantes de titres animés (`TITRES`) supportées : `reveal`, `neon`, `icon`, `pin`, `typewriter`, `tracking`, `cascade`, `slam`, `rise`, `glitch`, `blur-out`, `explode`, `focus`, `lines`, `lockup`, `decode`, `crossfade`, `scan`, `axis-y`, `axis-z`, `reel`, `fade-up`, `strike`, `ticker`, `calm`, `split`, `weight`, `wave`, `backdrop`, `drop`, `handwritten`, `marker`, `marquee`, `brand`.
+Les variantes de titres animés (`TITRES`) supportées : `reveal`, `neon`, `icon`, `pin`, `typewriter`, `tracking`, `cascade`, `slam`, `rise`, `glitch`, `blur-out`, `explode`, `focus`, `lines`, `lockup`, `decode`, `crossfade`, `scan`, `axis-y`, `axis-z`, `reel`, `fade-up`, `strike`, `ticker`, `calm`, `split`, `weight`, `wave`, `backdrop`, `drop`, `handwritten`, `marker`, `marquee`, `brand`, `stagger`, `stateswap`, `prism`, `tiles`, `emphasis`, `popin`, `badge-pop`, `card-resize`, `icon-swap`, `menu-morph`, `skeleton-reveal`, `success-check`, `tilt-card`, `input-feedback`, `micro-transitions`, `panel-reveal`, `tabs-slide-indicator`, `avatar-group-hover`.
 
 **Le travail** : lire `storyboard.subtitleStyle` dans `sceneMarkup()` et
 brancher une classe CSS par valeur. Aucune migration, aucun champ nouveau, et

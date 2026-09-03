@@ -38,25 +38,25 @@ que la composition ne sait pas encore dessiner.
 - [x] `parallax-unzoom` — Reveal transition — focus card scales down from full frame as siblings parallax in to form a grid (reverse of parallax-zoom) _(transition, reveal, unzoom)_
 - [x] `parallax-zoom` — Center card scales up to fill the frame while siblings parallax outward — inspired by the eBay Playbook hero transition _(transition, zoom, parallax)_
 - [x] `whip-pan-cut` — A full-frame whip pan: scene A whips off laterally with capped directional motion blur while scene B enters in the same direction at matched velocity, on a speed-ramp profile with a decelerating catch. Both scenes ride one strip, so seam velocity is exact by construction. Callers fill the named before/after slot panels; token-styled defaults render when a slot is left empty _(transition, whip-pan, motion-blur)_
-- `input-feedback` — A transitions.dev-inspired input feedback primitive with shake, clear affordance, and success state _(transition-primitive, transitions-dev-port, input)_
-- `micro-transitions` — A transitions.dev-inspired pack of badge, dropdown, modal, tabs, tooltip, and success-check micro transitions _(transition-primitive, motion-primitive, transitions-dev-port)_
-- `panel-reveal` — A panel reveal primitive with height expansion and content fade _(transition-primitive, transitions-dev-port, panel)_
-- `tabs-slide-indicator` — A pill indicator transition that slides between active tabs _(transition-primitive, transitions-dev-port, tabs)_
+- [x] `input-feedback` — A transitions.dev-inspired input feedback primitive with shake, clear affordance, and success state _(transition-primitive, transitions-dev-port, input)_
+- [x] `micro-transitions` — A transitions.dev-inspired pack of badge, dropdown, modal, tabs, tooltip, and success-check micro transitions _(transition-primitive, motion-primitive, transitions-dev-port)_
+- [x] `panel-reveal` — A panel reveal primitive with height expansion and content fade _(transition-primitive, transitions-dev-port, panel)_
+- [x] `tabs-slide-indicator` — A pill indicator transition that slides between active tabs _(transition-primitive, transitions-dev-port, tabs)_
 - `mk-callout-highlight` — A sentence whose word-by-word emphasis is driven by a single scalar — tween it to sync the highlight with a voiceover _(typography, karaoke, captions)_
-- `mk-emphasis-type` — Oversized low-contrast background word drifting slowly behind the subject — typography as texture _(typography, text-treatment, minimal)_
-- `wordmark-tiles` — A wordmark resolves from deterministic color noise into correctly cropped glyph tiles through a spatially modulated GSAP wave _(typography, wordmark, tiles)_
-- `yt-prism-title` — Display title on a transparent root: blur-focus entrance, red/blue fringe that settles then breathes, perspective bow, slow scale drift _(typography, title-card, creator)_
-- `avatar-group-hover` — A distance-falloff avatar group lift with bouncy hover return _(video-primitive, transition-primitive, transitions-dev-port)_
-- `badge-pop` — A transitions.dev-inspired notification badge pop with elastic scale and count reveal _(video-primitive, transition-primitive, transitions-dev-port)_
-- `card-resize` — A transitions.dev-inspired card resize primitive that expands a compact card into a detail panel _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `mk-emphasis-type` — Oversized low-contrast background word drifting slowly behind the subject — typography as texture _(typography, text-treatment, minimal)_
+- [x] `wordmark-tiles` — A wordmark resolves from deterministic color noise into correctly cropped glyph tiles through a spatially modulated GSAP wave _(typography, wordmark, tiles)_
+- [x] `yt-prism-title` — Display title on a transparent root: blur-focus entrance, red/blue fringe that settles then breathes, perspective bow, slow scale drift _(typography, title-card, creator)_
+- [x] `avatar-group-hover` — A distance-falloff avatar group lift with bouncy hover return _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `badge-pop` — A transitions.dev-inspired notification badge pop with elastic scale and count reveal _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `card-resize` — A transitions.dev-inspired card resize primitive that expands a compact card into a detail panel _(video-primitive, transition-primitive, transitions-dev-port)_
 - [x] `chromatic-aberration-wipe` — A fast slide wipe with RGB channel split on peak frames _(video-primitive, transition-primitive)_
-- `icon-swap` — A scale-and-blur icon swap primitive for toolbar and action state changes _(video-primitive, transition-primitive, transitions-dev-port)_
-- `menu-morph` — A transitions.dev-inspired hamburger and plus-menu morph primitive for compact action menus _(video-primitive, transition-primitive, transitions-dev-port)_
-- `number-pop-in` — A transitions.dev-inspired digit pop-in with blur, lift, and staggered value reveal _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `icon-swap` — A scale-and-blur icon swap primitive for toolbar and action state changes _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `menu-morph` — A transitions.dev-inspired hamburger and plus-menu morph primitive for compact action menus _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `number-pop-in` — A transitions.dev-inspired digit pop-in with blur, lift, and staggered value reveal _(video-primitive, transition-primitive, transitions-dev-port)_
 - [x] `page-slide` — A transitions.dev-inspired page slide primitive with outgoing and incoming panels _(video-primitive, transition-primitive, transitions-dev-port)_
-- `skeleton-reveal` — A skeleton loader transition that pulses, then cross-fades into content _(video-primitive, transition-primitive, transitions-dev-port)_
-- `success-check` — A success check primitive with ring pop, path draw, and subtle rotate blur _(video-primitive, transition-primitive, transitions-dev-port)_
-- `text-stagger` — A transitions.dev-inspired text stagger primitive with enter, shimmer, and exit-ready words _(video-primitive, transition-primitive, transitions-dev-port)_
-- `text-state-swap` — A text state swap primitive with outgoing blur and incoming lift _(video-primitive, transition-primitive, transitions-dev-port)_
-- `tilt-card` — A transitions.dev-inspired tilt card primitive with depth layers and hover-style parallax _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `skeleton-reveal` — A skeleton loader transition that pulses, then cross-fades into content _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `success-check` — A success check primitive with ring pop, path draw, and subtle rotate blur _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `text-stagger` — A transitions.dev-inspired text stagger primitive with enter, shimmer, and exit-ready words _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `text-state-swap` — A text state swap primitive with outgoing blur and incoming lift _(video-primitive, transition-primitive, transitions-dev-port)_
+- [x] `tilt-card` — A transitions.dev-inspired tilt card primitive with depth layers and hover-style parallax _(video-primitive, transition-primitive, transitions-dev-port)_
 - `halftone-field` — A full-bleed halftone light field: a grid of dots whose size and colour track a slow flowing simplex-noise field, so broad bands of light sweep across a mostly-black frame like a giant LED wall showing a plasma. Built to run under type _(webgl, shader, background)_
