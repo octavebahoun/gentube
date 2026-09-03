@@ -2,6 +2,11 @@
  * La boucle qui anime chaque scene : fondu, zoom, tremblement, eclair,
  * titre cinetique, sous-titres.
  *
+ * Ce qui n est PAS ici : les plans dont le contenu est une donnee. Ils sont
+ * dans contenus.ts, appeles par cette boucle. La separation n est pas
+ * esthetique — elle dit qui possede quoi quand plusieurs mains travaillent le
+ * meme moteur.
+ *
  * Comme gestures.ts, c est du JavaScript de navigateur transporte en chaine.
  * Il lit les tables TITRES et MOTS, posees juste avant lui dans la page.
  *
@@ -87,27 +92,77 @@ export const SCENES_JS = `
           );
         }
 
-        /*
-         * Le tiers inferieur entre par son bord, puis repart.
-         *
-         * Deux fromTo et non un aller-retour : sous la recherche d'image, un
-         * tween qui reviendrait sur lui-meme n'aurait pas d'instant absolu ou
-         * s'accrocher. Chacun pose ses deux extremes a une seconde connue.
-         */
-        if (scene.lowerThird) {
-          const cible = "#t" + scene.index;
+        // Le balayage de lumiere : une bande diagonale traverse une fois.
+        // La position du fond fait le trajet, l opacite fait l enveloppe :
+        // naitre et mourir invisibles demande deux tweens separes, comme le
+        // tiers. La mecanique est celle du highlight des mots, qui anime
+        // deja backgroundPosition de 100% vers 0%.
+        if (scene.lightSweep) {
+          const bord = Math.min(0.15, scene.lightSweep.duration / 3);
           tl.fromTo(
-            cible,
-            { opacity: 0, x: scene.lowerThird.dx },
-            { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" },
-            scene.lowerThird.at
+            "#ls" + scene.index,
+            { backgroundPosition: "100% 0" },
+            {
+              backgroundPosition: "0% 0",
+              duration: scene.lightSweep.duration,
+              ease: "none",
+            },
+            scene.lightSweep.at
           );
           tl.fromTo(
-            cible,
-            { opacity: 1, x: 0 },
-            { opacity: 0, x: scene.lowerThird.dx, duration: 0.3, ease: "power2.in" },
-            scene.lowerThird.out
+            "#ls" + scene.index,
+            { opacity: 0 },
+            { opacity: 1, duration: bord, ease: "power1.out" },
+            scene.lightSweep.at
           );
+          tl.fromTo(
+            "#ls" + scene.index,
+            { opacity: 1 },
+            { opacity: 0, duration: bord, ease: "power1.in" },
+            scene.lightSweep.at + scene.lightSweep.duration - bord
+          );
+        }
+
+        // Le grain : un voile qui scintille, jamais fige. Un seul fromTo en
+        // yoyo, comme l eclair : sous la recherche d image, c est l instant
+        // qui donne l opacite, pas l historique des scintillements.
+        if (scene.grain) {
+          tl.fromTo(
+            "#gr" + scene.index,
+            { opacity: scene.grain.opacity * 0.55 },
+            {
+              opacity: scene.grain.opacity,
+              duration: 0.12,
+              ease: "none",
+              repeat: Math.max(1, Math.round(scene.grain.duration / 0.12)),
+              yoyo: true,
+            },
+            scene.grain.at
+          );
+        }
+
+        // L accent sur le temps : le cadre respire une fois et retombe.
+        // Pulse sur la scene, pas sur son image : l echelle du Ken Burns y
+        // vit deja, et deux echelles sur la meme cible se battraient. Le
+        // clip hisse est hors du div, lui, donc on l emmene aussi — une
+        // video n a pas de zoom, son echelle est libre.
+        if (scene.beatAccent) {
+          const cibles = ["#s" + scene.index];
+          if (scene.hoisted) cibles.push("#m" + scene.index);
+          cibles.forEach(function (cible) {
+            tl.fromTo(
+              cible,
+              { scale: 1 },
+              {
+                scale: 1 + scene.beatAccent.strength,
+                duration: scene.beatAccent.duration / 2,
+                ease: "power2.out",
+                repeat: 1,
+                yoyo: true,
+              },
+              scene.beatAccent.at
+            );
+          });
         }
 
         // Le titre cinétique : chaque mot entre à son tour. Le décalage est
@@ -127,46 +182,9 @@ export const SCENES_JS = `
           });
         }
 
-        /*
-         * Le compteur.
-         *
-         * On anime un objet nu et on écrit le texte à chaque image. C'est la
-         * seule forme qui survive au saut arrière : le moteur cherche l'image,
-         * GSAP recalcule la valeur depuis le temps absolu, et le texte suit.
-         * Incrémenter un compteur à chaque appel donnerait une vidéo
-         * différente à chaque rendu.
-         */
-        if (scene.counter) {
-          const state = { v: scene.counter.from };
-          const box = document.getElementById("n" + scene.index);
-          const ring = scene.counter.ring
-            ? document.getElementById("g" + scene.index)
-            : null;
-          const spread = scene.counter.to - scene.counter.from || 1;
-
-          tl.fromTo(
-            state,
-            { v: scene.counter.from },
-            {
-              v: scene.counter.to,
-              duration: scene.counter.duration,
-              ease: "power2.out",
-              onUpdate: function () {
-                if (box) {
-                  box.textContent =
-                    scene.counter.prefix +
-                    state.v.toFixed(scene.counter.decimals) +
-                    scene.counter.suffix;
-                }
-                if (ring) {
-                  const part = (state.v - scene.counter.from) / spread;
-                  ring.style.setProperty("--fill", (part * 360).toFixed(1) + "deg");
-                }
-              },
-            },
-            scene.counter.at
-          );
-        }
+        // Les plans dont le contenu est une donnee : compteur, tiers,
+        // graphique. Ils vivent dans contenus.ts, pas ici.
+        contenus(tl, scene);
 
         /*
          * Le style de sous-titre, en une table plutôt qu'en chaîne de tests.

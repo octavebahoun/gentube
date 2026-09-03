@@ -8,6 +8,8 @@ import { SUBTITLE_STYLES } from '@/lib/videos';
 import {
   MOMENTS,
   momentDeLaCoupe,
+  DEPART_DU_GRAPHIQUE,
+  momentDuGraphique,
   momentDuTiers,
   momentDuTitre,
   REFERENCE_VIDEO,
@@ -84,6 +86,8 @@ type Jeu = {
   transition?: string;
   /** Variante de tiers inférieur posée sur la deuxième scène. */
   lowerThird?: string;
+  /** Type de graphique posé à la place du compteur, cinquième scène. */
+  chart?: string;
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -117,9 +121,23 @@ const TIERS: Jeu[] = ['bar', 'stack', 'boxed'].map((variant) => ({
   moments: [momentDuTiers()],
 }));
 
+/**
+ * Un jeu par type de graphique, activé par --graphiques.
+ *
+ * Posé sur la cinquième scène, celle qui n'a pas d'image : un plan chiffré se
+ * dessine seul, et le graphique y remplace le compteur plutôt que de se
+ * superposer à lui.
+ */
+const GRAPHIQUES: Jeu[] = ['bar', 'line'].map((kind) => ({
+  nom: `graphique-${kind}`,
+  video: REFERENCE_VIDEO,
+  chart: kind,
+  moments: [momentDuGraphique(kind)],
+}));
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(jeu: Jeu): string {
-  const { video, variant, transition, lowerThird } = jeu;
+  const { video, variant, transition, lowerThird, chart } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
     cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
@@ -147,6 +165,24 @@ function projet(jeu: Jeu): string {
       side: lowerThird === 'boxed' ? 'right' : 'left',
     };
   }
+  if (chart) {
+    // La cinquième scène porte le compteur : on la reprend pour le graphique,
+    // parce qu'elle est déjà sans image et sans voix à illustrer.
+    const render = shots[4].render as Record<string, unknown>;
+    delete render.counter;
+    render.chart = {
+      kind: chart,
+      title: 'Trois villes, trois volumes',
+      points: [
+        { label: 'Cotonou', value: 40 },
+        { label: 'Porto-Novo', value: 25 },
+        { label: 'Parakou', value: 10 },
+      ],
+      suffix: ' %',
+      startInSeconds: DEPART_DU_GRAPHIQUE,
+    };
+  }
+
   const storyboard = toHyperframesStoryboard(video, shots);
   writeFileSync(join(dir, 'index.html'), composeHtml({ storyboard, watermark: true }));
   return dir;
@@ -197,6 +233,7 @@ function main() {
   if (process.argv.includes('--titres')) jeux = [...jeux, ...TITRES];
   if (process.argv.includes('--transitions')) jeux = [...jeux, ...COUPES];
   if (process.argv.includes('--tiers')) jeux = [...jeux, ...TIERS];
+  if (process.argv.includes('--graphiques')) jeux = [...jeux, ...GRAPHIQUES];
 
   for (const jeu of jeux) {
     console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);

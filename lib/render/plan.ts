@@ -212,6 +212,7 @@ export function buildTimeline(
       const title = scene.kineticTitle;
       const flash = scene.effects?.flash;
       const tiers = scene.lowerThird;
+      const chart = scene.chart;
 
       return {
         index,
@@ -274,6 +275,54 @@ export function buildTimeline(
               suffix: scene.counter.suffix ?? '',
               ring: scene.counter.variant === 'ring',
             }
+          : null,
+        /*
+         * Le graphique, réduit à des nombres.
+         *
+         * Toute la géométrie est faite ici : la page ne reçoit que des
+         * fractions et, pour la courbe, la longueur de son propre tracé. Un
+         * calcul fait dans le navigateur dériverait d'un rendu à l'autre, et
+         * `getTotalLength()` sur un SVG étiré ne rend pas la même valeur selon
+         * le format — d'où la longueur mesurée ici, dans le carré de 100.
+         *
+         * Le décalage entre les barres est borné : six barres à 0,12 s
+         * mettraient 0,6 s à démarrer, et la dernière n'aurait plus le temps
+         * de monter avant la fin de la scène.
+         */
+        chart: chart
+          ? (() => {
+              const echelle =
+                chart.max ?? Math.max(...chart.points.map((p) => p.value));
+              const at = scene.startInSeconds + (chart.startInSeconds ?? 0);
+              const duree = chart.durationInSeconds ?? 0.9;
+              const stagger = Math.min(0.12, 0.5 / chart.points.length);
+
+              const projete = chartPoints(chart.points, echelle);
+
+              return {
+                at: ms(at),
+                duration: duree,
+                stagger,
+                prefix: chart.prefix ?? '',
+                suffix: chart.suffix ?? '',
+                decimals: chart.decimals ?? 0,
+                bars: chart.points.map((point) => ({
+                  value: point.value,
+                  part: echelle > 0 ? point.value / echelle : 0,
+                })),
+                line:
+                  (chart.kind ?? 'bar') === 'line'
+                    ? {
+                        length: longueurDuTrace(projete),
+                        // Chaque pastille s'allume quand le trait l'atteint :
+                        // la courbe se dessine, les points la ponctuent.
+                        dots: projete.map((_, i) => ({
+                          at: ms((i / (projete.length - 1)) * duree * 1.6),
+                        })),
+                      }
+                    : null,
+              };
+            })()
           : null,
         kinetic: title
           ? {
@@ -445,6 +494,45 @@ function onBeat(
  * navigateur dériverait d'un rendu à l'autre.
  */
 export const TITRE_PAR_LETTRE = new Set(['typewriter', 'tracking', 'cascade']);
+
+/**
+ * Où tombe chaque point, en pourcentage du cadre du tracé.
+ *
+ * Exportée parce que le balisage et la timeline ont besoin des **mêmes**
+ * coordonnées : le SVG dessine la ligne, les pastilles sont des éléments HTML
+ * posés dessus. Deux projections séparées dériveraient l'une de l'autre au
+ * premier changement d'échelle.
+ *
+ * La série n'occupe que 10 à 90 % de la hauteur. Sans cette marge, la valeur
+ * la plus haute touche le bord du cadre et la courbe paraît coupée.
+ */
+export function chartPoints(
+  points: { value: number }[],
+  echelle: number
+): { x: number; y: number }[] {
+  return points.map((point, i) => ({
+    x: (i / Math.max(1, points.length - 1)) * 100,
+    y: 90 - (echelle > 0 ? (point.value / echelle) * 80 : 0),
+  }));
+}
+
+/**
+ * La longueur d'une polyligne, pour que le trait se dessine.
+ *
+ * `strokeDasharray` et `strokeDashoffset` demandent cette longueur ; la
+ * mesurer dans la page avec `getTotalLength()` donnerait un résultat qui
+ * dépend de l'étirement du SVG, donc du format de la vidéo. Calculée ici, dans
+ * le carré de 100 sur 100 du tracé, elle est la même partout.
+ */
+function longueurDuTrace(points: { x: number; y: number }[]): number {
+  let total = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    const dx = points[i].x - points[i - 1].x;
+    const dy = points[i].y - points[i - 1].y;
+    total += Math.sqrt(dx * dx + dy * dy);
+  }
+  return Math.round(total * 100) / 100;
+}
 
 export function titleTargets(
   title: { text: string; variant?: string },

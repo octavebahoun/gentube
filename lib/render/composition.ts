@@ -1,5 +1,6 @@
 import type { HyperframesStoryboard } from '@/lib/storyboard/render';
 import { SCENES_JS } from './animations';
+import { CONTENUS_JS } from './contenus';
 import { MOTS_JS, MOVES_JS, TITRES_JS } from './gestures';
 import {
   MAX_SOUNDS_PER_SCENE,
@@ -249,6 +250,7 @@ ${TITRES_JS}
 
 ${MOTS_JS}
 
+${CONTENUS_JS}
 ${SCENES_JS}
 
       /*

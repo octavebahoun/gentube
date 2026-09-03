@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type { Shot, Video } from '@/lib/db/schema';
 import {
   MOVE_TRANSITIONS,
@@ -13,6 +14,7 @@ import {
   subtitleStyleOf,
   wordsOrFallback,
 } from './composition';
+import { SCENES_JS } from './animations';
 
 function shot(overrides: Partial<Shot> = {}): Shot {
   return {
@@ -314,7 +316,7 @@ describe('the composition HyperFrames renders', () => {
         'slam', 'rise', 'glitch', 'blur-out', 'explode', 'focus', 'lines',
         'lockup', 'decode', 'crossfade', 'scan', 'axis-y', 'axis-z', 'reel',
         'fade-up', 'strike', 'ticker', 'calm', 'split', 'weight', 'wave',
-        'backdrop', 'drop',
+        'backdrop', 'drop', 'handwritten', 'marker', 'marquee', 'brand',
       ];
       for (const v of declarees) {
         const cle = /^[a-z]+$/.test(v) ? `${v}: {` : `"${v}": {`;
@@ -529,6 +531,69 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the chart', () => {
+    const withChart = (chart: Record<string, unknown>) =>
+      html([{ ...shot(), render: { chart } } as Shot]);
+
+    const barres = [
+      { label: 'Cotonou', value: 40 },
+      { label: 'Porto-Novo', value: 25 },
+      { label: 'Parakou', value: 10 },
+    ];
+
+    it('shows the values it lands on, not the ones it starts from', () => {
+      // Même règle que le compteur : une timeline qui ne jouerait pas
+      // laisserait les bons chiffres à l'écran, immobiles.
+      const page = withChart({ points: barres });
+      expect(page).toContain('>40</div>');
+      expect(page).toContain('Porto-Novo');
+    });
+
+    it('reduces each bar to a fraction of the scale, never to a pixel', () => {
+      const page = withChart({ points: barres });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].chart.bars.map((b: { part: number }) => b.part))
+        .toEqual([1, 0.625, 0.25]);
+    });
+
+    it('scales against `max` when the scale itself carries meaning', () => {
+      // Sans lui, la plus haute barre paraît pleine — trompeur pour un
+      // pourcentage qui n'atteint jamais cent.
+      const page = withChart({ points: barres, max: 100 });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].chart.bars[0].part).toBe(0.4);
+    });
+
+    it('measures the line outside the page, where the format cannot skew it', () => {
+      const page = withChart({ kind: 'line', points: barres });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].chart.line.length).toBeGreaterThan(100);
+      expect(page).toContain('viewBox="0 0 100 100"');
+      expect(page).toContain('preserveAspectRatio="none"');
+    });
+
+    it('leaves no line data when the chart is bars', () => {
+      const page = withChart({ points: barres });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      expect(T.scenes[0].chart.line).toBeNull();
+    });
+
+    it('holds the stagger short enough for the last bar to rise', () => {
+      const six = Array.from({ length: 6 }, (_, i) => ({
+        label: 'x' + i,
+        value: i + 1,
+      }));
+      const page = withChart({ points: six });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      const chart = T.scenes[0].chart;
+      expect(chart.stagger * six.length).toBeLessThanOrEqual(0.6);
+    });
+
+    it('leaves the page alone when no scene asks for one', () => {
+      expect(html([shot()])).not.toContain('class="chart');
+    });
+  });
+
   describe('the lower third', () => {
     const withTiers = (lowerThird: Record<string, unknown>) =>
       html([{ ...shot(), render: { lowerThird } } as Shot]);
@@ -581,6 +646,14 @@ describe('the composition HyperFrames renders', () => {
       expect(styled('karaoke')).toContain('captions captions-karaoke');
       expect(styled('fondant')).toContain('captions captions-fondant');
       expect(styled('cinematic')).toContain('captions captions-cinematic');
+      expect(styled('glitch-rgb')).toContain('captions captions-glitch-rgb');
+      expect(styled('editorial-emphasis')).toContain('captions captions-editorial-emphasis');
+      expect(styled('kinetic-slam')).toContain('captions captions-kinetic-slam');
+      expect(styled('matrix-decode')).toContain('captions captions-matrix-decode');
+      expect(styled('parallax-layers')).toContain('captions captions-parallax-layers');
+      expect(styled('texture')).toContain('captions captions-texture');
+      expect(styled('weight-shift')).toContain('captions captions-weight-shift');
+      expect(styled('camera-follow')).toContain('captions captions-camera-follow');
     });
 
     it('lights one word at a time for karaoke and fondant', () => {
@@ -680,5 +753,60 @@ describe('subtitles without an alignment', () => {
     expect(
       wordsOrFallback({ narration: '   ', narrationSeconds: 3 } as never)
     ).toEqual([]);
+  });
+});
+
+describe('the palier-2 effects', () => {
+  // Tant que le palier 3 n'a pas applique passation/demandes.md, la timeline
+  // ne porte pas encore ces champs : on verifie ici ce qui est a nous — le
+  // tween declare et la regle CSS — pas ce que le palier 3 n'a pas livre.
+  const css = () => readFileSync('render/gentube-v1/style.css', 'utf8');
+  const palier2 = () => css().slice(css().indexOf('Effets palier 2'));
+
+  it('declares one tween per effect, driven from an absolute instant', () => {
+    for (const champ of ['scene.lightSweep', 'scene.grain', 'scene.beatAccent']) {
+      expect(SCENES_JS, champ).toContain(champ);
+    }
+    expect(SCENES_JS).toContain('tl.fromTo(');
+  });
+
+  it('never accumulates time in the page', () => {
+    // Le moteur cherche chaque image : seul fromTo survit au saut arriere.
+    expect(SCENES_JS).not.toMatch(/\btl\.to\(/);
+  });
+
+  it('never closes the template literal that carries it', () => {
+    // Un seul accent grave refermerait le gabarit de composition.ts.
+    expect(SCENES_JS).not.toContain('`');
+  });
+
+  it('never mixes scale with scaleX on the same target', () => {
+    // GSAP traite scale comme un raccourci qui ecrase scaleX : fold, squeeze
+    // et stretch ont rendu une scene immobile a cause de ca.
+    expect(SCENES_JS).not.toContain('scaleX');
+  });
+
+  it('pulses the hoisted clip with its scene, never the still image', () => {
+    // L echelle du Ken Burns vit sur #m d une image ; l accent pulse #s, et
+    // n emmene #m que quand le clip est hors du div (hoisted, sans zoom).
+    expect(SCENES_JS).toContain('if (scene.hoisted) cibles.push("#m"');
+  });
+
+  it('aims the sweep and the grain at their own ids', () => {
+    // g<index> est deja la pastille du compteur : le grain vise gr<index>.
+    expect(SCENES_JS).toContain('"#ls"');
+    expect(SCENES_JS).toContain('"#gr"');
+  });
+
+  it('hides both overlays at rest, or they flash before their instant', () => {
+    expect(palier2()).toMatch(/\.light-sweep \{[^}]*opacity: 0/);
+    expect(palier2()).toMatch(/\.grain \{[^}]*opacity: 0/);
+  });
+
+  it('keeps full-frame blur out of its own section', () => {
+    // La rasterisation logicielle de Lambda paie le flou plein cadre au
+    // triple : le grain est une image figee, seule son opacite bouge.
+    expect(palier2()).not.toContain('blur(');
+    expect(palier2()).not.toContain('backdrop-filter');
   });
 });

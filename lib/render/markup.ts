@@ -1,6 +1,6 @@
 import type { HyperframesScene, WordTiming } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
-import { isVideoPath, kenBurns, ms, wordsOrFallback } from './plan';
+import { chartPoints, isVideoPath, kenBurns, ms, wordsOrFallback } from './plan';
 import { TITRE_PAR_LETTRE as PAR_LETTRE } from './plan';
 
 /**
@@ -88,6 +88,7 @@ export function sceneMarkup(
   const kinetic = kineticMarkup(scene, index);
   const counter = counterMarkup(scene, index);
   const tiers = lowerThirdMarkup(scene, index);
+  const chart = chartMarkup(scene, index);
 
   // Un éclair est une nappe de couleur pleine trame. Elle est dans la scène
   // pour disparaître avec elle, jamais au-dessus du reste de la vidéo.
@@ -111,6 +112,7 @@ export function sceneMarkup(
     tiers,
     kinetic,
     counter,
+    chart,
     flash,
     '</div>',
   ]
@@ -244,6 +246,119 @@ export function lowerThirdMarkup(
     `<div class="lt-name">${escapeHtml(tiers.name)}</div>` +
     role +
     '</div>'
+  );
+}
+
+/**
+ * Le graphique : des barres, ou une courbe.
+ *
+ * Aucune géométrie n'est calculée ici ni dans la page. `plan.ts` a déjà réduit
+ * chaque valeur à une fraction de l'échelle et, pour la courbe, projeté les
+ * points dans un carré de 100 sur 100 — le SVG s'étire ensuite avec son
+ * conteneur. Une largeur en pixels calculée au rendu dépendrait de la police
+ * chargée, donc du réseau, donc du jour.
+ *
+ * La barre est pilotée par `--part`, que la timeline fait monter de 0 à sa
+ * fraction. Animer une variable CSS plutôt qu'une hauteur évite de faire
+ * recalculer la mise en page à chaque image.
+ *
+ * Le chiffre affiché est celui d'arrivée : un rendu qui échouerait à jouer la
+ * timeline montrerait les bonnes valeurs, immobiles.
+ *
+ * `chart-column` et non `chart-bar` pour une colonne : le conteneur porte déjà
+ * `chart-<type>` comme modificateur, et sous le même nom il héritait de la
+ * largeur d'une barre — le graphique entier se serrait dans un dixième du
+ * cadre. Exactement la panne que l'anneau du compteur avait eue avant lui.
+ */
+export function chartMarkup(scene: HyperframesScene, index: number): string {
+  const chart = scene.chart;
+  if (!chart) return '';
+
+  const decimals = chart.decimals ?? 0;
+  const echelle = chart.max ?? Math.max(...chart.points.map((p) => p.value));
+  const kind = chart.kind ?? 'bar';
+
+  const titre = chart.title
+    ? `<div class="chart-title">${escapeHtml(chart.title)}</div>`
+    : '';
+
+  const valeur = (v: number) =>
+    escapeHtml(chart.prefix ?? '') +
+    v.toFixed(decimals) +
+    escapeHtml(chart.suffix ?? '');
+
+  const style = chart.accentColor
+    ? ` style="--chart-accent:${escapeHtml(chart.accentColor)}"`
+    : '';
+
+  const corps =
+    kind === 'line'
+      ? lineMarkup(chart, index, echelle)
+      : `<div class="chart-bars">` +
+        chart.points
+          .map(
+            (point, i) =>
+              `<div class="chart-column">` +
+              `<div class="chart-value" id="bv${index}-${i}">${valeur(point.value)}</div>` +
+              // La piste porte la hauteur ; la barre n'en prend qu'une
+              // fraction. Sans elle, le chiffre et l'étiquette mangeaient la
+              // place et deux valeurs très différentes rendaient deux barres
+              // presque égales.
+              `<div class="chart-track">` +
+              `<div class="chart-fill" id="b${index}-${i}"></div>` +
+              '</div>' +
+              `<div class="chart-label">${escapeHtml(point.label)}</div>` +
+              '</div>'
+          )
+          .join('') +
+        '</div>';
+
+  return `<div class="chart chart-${escapeHtml(kind)}"${style}>${titre}${corps}</div>`;
+}
+
+/**
+ * La courbe : le trait en SVG, les pastilles en HTML.
+ *
+ * Le SVG s'étire au cadre — `preserveAspectRatio="none"` — donc le même tracé
+ * tient en 16:9 et en 9:16 sans qu'aucun calcul dépende du format. C'est
+ * exactement ce qui interdit d'y mettre les pastilles : un `<circle>` étiré
+ * devient une ellipse, et la première rendait une tache blanche large de trois
+ * centimètres. Elles sont donc des éléments HTML posés en pourcentage, où
+ * l'étirement du SVG ne les atteint pas.
+ *
+ * `vector-effect="non-scaling-stroke"` sur le trait, pour la même raison en
+ * sens inverse : sans lui l'étirement déformerait son épaisseur.
+ */
+function lineMarkup(
+  chart: NonNullable<HyperframesScene['chart']>,
+  index: number,
+  echelle: number
+): string {
+  const points = chartPoints(chart.points, echelle);
+
+  const trace = points.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
+
+  const pastilles = points
+    .map(
+      (p, i) =>
+        `<span class="chart-dot" id="ld${index}-${i}" ` +
+        `style="left:${p.x.toFixed(2)}%;top:${p.y.toFixed(2)}%"></span>`
+    )
+    .join('');
+
+  const etiquettes = chart.points
+    .map((point) => `<div class="chart-label">${escapeHtml(point.label)}</div>`)
+    .join('');
+
+  return (
+    '<div class="chart-plot">' +
+    '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' +
+    `<polyline id="ln${index}" class="chart-line" points="${trace}" ` +
+    'vector-effect="non-scaling-stroke" />' +
+    '</svg>' +
+    pastilles +
+    '</div>' +
+    `<div class="chart-axis">${etiquettes}</div>`
   );
 }
 

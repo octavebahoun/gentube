@@ -226,6 +226,36 @@ export function momentDuTitre(variant: string): Moment {
 }
 
 /**
+ * Le milieu de la montée du graphique.
+ *
+ * Les barres partent en décalé : la dernière commence quand les autres sont
+ * déjà en route. L'animation entière court donc du premier départ à la fin de
+ * la dernière barre, et c'est cette durée-là qu'on coupe en deux. Capturé
+ * après, les deux types rendraient la même image finie et la garde ne dirait
+ * plus rien.
+ */
+export const DEPART_DU_GRAPHIQUE = 0.8;
+
+export function momentDuGraphique(kind: string): Moment {
+  const scenes = scenesMinutees();
+  const points = 3;
+  const duree = 0.9;
+  const totale =
+    kind === 'line'
+      ? duree * 1.6
+      : Math.min(0.12, 0.5 / points) * (points - 1) + duree;
+  return {
+    // Le départ décalé n'est pas un réglage de goût : la cinquième scène entre
+    // par un fondu au noir, et un graphique qui monterait pendant le rideau ne
+    // se verrait pas du tout.
+    at: arrondi(
+      scenes[4].startInSeconds + DEPART_DU_GRAPHIQUE + totale / 2
+    ),
+    nom: 'graphique',
+  };
+}
+
+/**
  * L'instant où le tiers inférieur est entièrement posé.
  *
  * Il entre en 0,4 s et sort avant la fin de la scène : capturé au début ou à

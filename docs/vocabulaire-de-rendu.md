@@ -39,8 +39,12 @@ composition n'en lit **aucun** : `composition.ts` ne mentionne jamais ce champ,
 et toute vidéo sort en karaoké. Trois valeurs promises, une seule rendue.
 
 Le registre offre dix-sept composants `caption-*` — pastille, néon, glitch,
-décodage matriciel, particules, dégradé, changement de graisse. Notre `.word`
+décodage matriciel, particules, dégradé, changement de graisse, etc. Notre `.word`
 actuel en est la version la plus sobre.
+
+Les styles de sous-titres intégrés dans GenTube : `karaoke`, `fondant`, `cinematic`, `glitch-rgb`, `editorial-emphasis`, `kinetic-slam`, `matrix-decode`, `parallax-layers`, `texture`, `weight-shift`, `camera-follow`.
+
+Les variantes de titres animés (`TITRES`) supportées : `reveal`, `neon`, `icon`, `pin`, `typewriter`, `tracking`, `cascade`, `slam`, `rise`, `glitch`, `blur-out`, `explode`, `focus`, `lines`, `lockup`, `decode`, `crossfade`, `scan`, `axis-y`, `axis-z`, `reel`, `fade-up`, `strike`, `ticker`, `calm`, `split`, `weight`, `wave`, `backdrop`, `drop`, `handwritten`, `marker`, `marquee`, `brand`.
 
 **Le travail** : lire `storyboard.subtitleStyle` dans `sceneMarkup()` et
 brancher une classe CSS par valeur. Aucune migration, aucun champ nouveau, et
@@ -200,6 +204,35 @@ qui portent plus que deux lignes.
 
 **Bloqué par** : une décision produit sur ce que le storyboard doit savoir
 décrire.
+
+**Le graphique, livré le 3 septembre 2026.** Premier plan dont le contenu est
+une **série** : des couples étiquette/valeur, dans l'ordre où l'œil les lit.
+Deux formes — `bar` compare des quantités, `line` montre une évolution — et
+trois à six points. En dessous, un compteur dit la même chose plus fort ;
+au-delà, les étiquettes ne tiennent plus dans un cadre vertical.
+
+Toute la géométrie est calculée hors de la page : les barres arrivent avec leur
+fraction de l'échelle, la courbe avec ses points projetés et la longueur de son
+tracé. `getTotalLength()` sur un SVG étiré ne rend pas la même valeur selon le
+format — ce genre de calcul dans le navigateur dériverait d'un rendu à l'autre.
+
+Deux pannes trouvées à l'image, invisibles pour les tests :
+
+- le conteneur portait `chart-bar` comme modificateur de type, et chaque
+  colonne aussi. Le graphique entier héritait de la largeur d'une barre et se
+  serrait dans un dixième du cadre. Exactement la panne que l'anneau du
+  compteur avait eue avant lui ;
+- les pastilles de la courbe étaient des `<circle>` dans un SVG étiré au cadre.
+  Étirées avec lui, elles rendaient des taches. Ce sont maintenant des éléments
+  HTML posés en pourcentage.
+
+Et un troisième, celui-là dans le contrat : `llmSceneSchema` exigeait un
+`prompt` d'au moins dix caractères, alors que le prompt système dit depuis
+toujours qu'une scène qui se dessine seule n'en a pas besoin. Le modèle
+obéissait, et la génération entière échouait sur la scène qui coûtait le moins
+cher. La contrainte est devenue conditionnelle.
+
+Vérifié par `--graphiques`, une capture au milieu de la montée.
 
 ### Lot 4 — Les plans structurés  ·  palier 3
 

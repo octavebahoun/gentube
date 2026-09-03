@@ -1,0 +1,167 @@
+# Palier 2 — les 162 entrées restantes
+
+Relevé du registre au 3 septembre 2026. Une entrée sans coche est une entrée
+que la composition ne sait pas encore dessiner.
+
+- `camera-rig-depth-stack` — A 3D camera-rig-style card stack with depth, parallax, and focus shift _(advanced-motion, hyperframes-native)_
+- `keyframe-scrub-stack` — A keyframe-sequenced stack of cards with offset timing and easing presets _(advanced-motion, anime-inspired, hyperframes-native)_
+- `stagger-lattice` — A staggered grid reveal inspired by Anime.js v4 stagger utilities, implemented with GSAP for HyperFrames _(advanced-motion, anime-inspired, hyperframes-native)_
+- `yt-circle-pointer` — Draw-on annotation ellipse around a target plus a countdown chip that pulses each tick _(annotation, countdown, overlay)_
+- `mk-background` — Procedural soft-blob gradient backdrop in a minimalist presentation style: two radial blobs drifting over a base color, with an animatable rounded-card bar mask and optional frosted-glass mode _(background, gradient, minimal)_
+- `yt-lcd-background` — Textured paper board: scanlines with slow drift, optional pixel grid, static grain, and display text with a blur-focus entrance and chromatic-fringe title _(background, texture, creator)_
+- `logo-outro` — Cinematic logo reveal with piece-by-piece assembly, glow bloom, tagline fade-in, and URL pill _(branding, outro, logo)_
+- `lower-third-bild` — News-style lower third with tight-fit text boxes: white headline bar with red drop-shadow, red sub-line with white drop-shadow _(broadcast, lower-third, news)_
+- `camcorder-hud` — Responsive REC, battery, editable date placeholder, and timeline-driven counter overlay for creator-camera and camcorder treatments _(camcorder, camera, recording)_
+- `camera-dolly-zoom` — Camera tracks toward or away from the subject while the field of view changes the opposite way, so the subject holds its frame size while the background collapses behind it or rushes in. Focal length is solved from dolly distance every frame against d * tan(FOV/2) = const, not keyframed beside it. Requires depth: the subject sits on the z = 0 plane and the content behind it must be layered or genuinely 3D (translateZ at two or more distinct depths) -- a flat element gains nothing from this move _(camera, depth, 3d)_
+- `camera-shake` — Procedural handheld, telephoto and rig camera shake for any wrapper: nine measured profiles with per-lens projection, closed-form and seek-safe _(camera, shake, handheld)_
+- `pan-stations` — A lateral camera move across a continuous row of labeled feature stations, with a steady dwell at each stop before the next pan _(camera, pan, stations)_
+- `scroll-camera-story` — A compressed forced-scroll cinematic pass: a tall scene of slotted sections travels past the camera top to bottom, depth layers parallax at different rates, each section rises as the camera reaches it, and the pass decelerates into a held final section _(camera, scroll, parallax)_
+- `yt-camera-move` — Dynamic zoom, slide, and 3D tilt-pan helpers for any wrapper (video, include, card) with cubic-easing defaults and an edge-defocus pulse overlay _(camera, zoom, effect)_
+- `terminal-simulator` — A terminal window types commands and streams log output _(code-animation)_
+- `grade-split-reveal` — The same picture twice, one flat and one finished, with a hard edge sweeping between them. It stops in the middle long enough to compare, then commits and the graded look takes the frame. Both looks are real HyperFrames color grading run through the WebGL shader, so the preview and the render match _(color-grading, media, compare)_
+- `multiplayer-cursors` — Labeled collaborator cursors with token-derived colors and soft glows drift from spread positions into a shared center zone, proving live multiplayer presence _(cursor, pointer, multiplayer)_
+- `mk-line-graph` — One or two SVG series draw on with dots popping and value labels riding the draw front; dim baseline axis, x-labels, color-dot legend _(data-viz, chart, graph)_
+- `mk-progress-stat` — Big-numeral statistic with count-up, label, thin progress track filling to value/max, and caption; light and dark schemes _(data-viz, stat, minimal)_
+- `mk-specs-list` — Left-aligned specs/traits checklist over footage or a board: rows slide in staggered with an accent underline sweep; light and dark schemes _(data-viz, list, minimal)_
+- `mk-usage-arc` — Thin circular gauge that draws on while its percentage counts up; one helper call drives both _(data-viz, gauge, minimal)_
+- `flowchart` — Animated decision tree with SVG connectors, sticky-note nodes, cursor interaction, and typing correction _(diagram, flowchart, interactive)_
+- `flowchart-vertical` — Portrait animated decision tree with SVG connectors, sticky-note nodes, cursor interaction, and typing correction _(diagram, flowchart, interactive)_
+- `confetti` — A deterministic celebration burst with seeded particles and gravity _(effect)_
+- `focus-swap` — Moves attention between two side-by-side cards as one recedes with scale, blur, and dimming while the other advances to full focus _(effect, ui-props, focus)_
+- `mesh-gradient-bg` — A render-safe mesh gradient using animated radial layers _(effect)_
+- `motion-blur` — Velocity-driven motion blur — samples element position each frame and applies a one-sided SVG feGaussianBlur ghost trail proportional to speed _(effect, motion-blur, velocity)_
+- `spotlight-card` — A card with a scripted cursor spotlight and lit border _(effect)_
+- `svg-mask-reveal` — A soft token-colored sweep reveals media only through an editable SVG wordmark mask _(effect, svg, mask)_
+- `yt-screen-warp` — Grid, scanline, vignette, and sheen overlay plus a 3D-warp wrapper class that makes footage read as if playing on a physical display _(effect, overlay, texture)_
+- `avatar-cloud` — Lettermark avatars populate a loose elliptical cloud while fine SVG links draw between the community and its central proof label _(effects, avatars, community)_
+- `overwhelm-surround` — Tasks, tabs, pings, and notification bubbles accelerate inward around a calm central subject, turning overload into visible spatial pressure _(effects, agitate, overwhelm)_
+- `stagger-cascade` — A responsive grid of tile cards that fades and travels into place with an evenly spaced per-item GSAP stagger. The ordered cascade is the only visual mechanic _(effects, grid, stagger)_
+- `freeze-frame-dressing` — Timeline-driven paper, tape, and flash dressing for a freeze-frame or background-removed subject _(freeze-frame, cutout, scrapbook)_
+- `hw-arrow` — Wobbled draw-on arrow with straight, gentle, and swoop curve poses, a four-way stroke texture matrix (plain/soft/sharp/spray), and a travel-aligned head-arrival stretch pulse with spring recovery; boils while on screen _(handwritten, annotation, arrow)_
+- `hw-boil` — Hand-drawn jitter that re-poses every N frames, as seek-safe helpers: pose derives from quantized timeline time through a seeded hash; includes the shared onUpdate dispatcher, a wobbled-ellipse path generator, the boil pose control (off/calm/lively over the family-locked frameDrop), a curvature-adaptive pen-velocity ease, and the completed stroke matrix (plain/soft/sharp/spray — spray is index-seeded deterministic dots, no turbulence) with texture-safe draw-on _(handwritten, effect, annotation)_
+- `hw-box-label` — Wobbled rounded rectangle draws on — across the authored stroke matrix (plain/soft/sharp/spray) — or drops in and lands with a volume-true contact squash and bouncy spring recovery, with a handwritten label above or centered; boils _(handwritten, annotation, overlay)_
+- `hw-callout-circle` — Wobbled ellipse draws around a target with optional scribble fill and curved connector; the handwritten label pops in WITH momentum and the drawn shapes absorb the arrival with a volume-preserving contact squash; outline and connector take the family stroke matrix (plain/soft/sharp/spray); boils _(handwritten, annotation, callout)_
+- `hw-frame` — Media in a hand-drawn border with corner doodles and a handwritten caption; the unit tilts slightly and boils (images inside the block; keep live footage in the host) _(handwritten, frame, media)_
+- `hw-pipeline` — Wobbled boxes with handwritten labels joined by curved connectors, drawing on in sequence from a node list _(handwritten, diagram, data-viz)_
+- `hw-text-cloud` — Hand-drawn speech bubble with a positionable tail: outline draws on, paper fill fades in, handwritten text types per character; boils _(handwritten, speech-bubble, overlay)_
+- `hw-underline` — Hand-drawn squiggle underline, double-pass strikethrough, and bracket marks that draw on _(handwritten, annotation, text-treatment)_
+- `spiral-galaxy` — A spiral galaxy seen from outside, turning with real differential rotation: inner stars orbit faster than outer ones, so the arms wind up over the shot instead of spinning rigidly. 20,000 additive GPU sprites, seeded once and solved directly from time, so any frame can be rendered on its own _(hero, space, particles)_
+- `yt-feather-highlight` — Dims the frame except a feathered ellipse; the hole's position and size are CSS variables, so helpers glide the spotlight between targets _(highlight, spotlight, effect)_
+- `liquid-glass-context-menu` — Frosted glass context menu panel drifting over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
+- `liquid-glass-media-controls` — Frosted glass media control panels spreading over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
+- `liquid-glass-notification` — Frosted glass notification cards floating over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
+- `liquid-glass-widgets` — Frosted glass stat cards, showcase panel and pill chips over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
+- `macos-tahoe-liquid-glass` — 3D MacBook with a macOS Tahoe-style desktop, glass menu bar, Finder window, dock, and cinematic device camera move _(html-in-canvas, 3d, macos)_
+- `vfx-iphone-device` — Real GLTF iPhone 15 Pro Max and MacBook Pro models with live HTML-in-Canvas screen content, morphing glass lens, product review camera choreography, and 360° turntable _(html-in-canvas, 3d, device)_
+- `vfx-liquid-background` — Organic liquid simulation with vertex displacement on a subdivided plane. HTML content floats above rippling fluid surface with real-time wave dynamics _(html-in-canvas, liquid, webgl)_
+- `vfx-liquid-glass` — VFX composition block _(html-in-canvas, webgl)_
+- `vfx-magnetic` — VFX composition block _(html-in-canvas, webgl)_
+- `vfx-portal` — VFX composition block _(html-in-canvas, webgl)_
+- `vfx-shatter` — VFX composition block _(html-in-canvas, webgl)_
+- `ios26-liquid-glass` — 3D iPhone with a normal iOS 26 home screen, liquid glass app icons, shader wallpaper, dock, and fluid glass notifications that drop from the status area onto a GLTF device model _(liquid-glass-html-in-canvas, webgpu, 3d)_
+- `yt-logo-intro` — Logo stamp pops on a lined board, a kicker line gives way to the title with an accent arrow chip; seeded line distortion _(logo, intro, creator)_
+- `lt-accent-underline` — Cardless lower third for footage overlay: name rises, an accent rule draws left-to-right, role fades in; text-shadowed for legibility _(lower-third, overlay, podcast)_
+- `lt-bold-block` — High-energy podcast lower third: solid dark block wipes in, uppercase name slams up, accent tag pops _(lower-third, overlay, podcast)_
+- `lt-clean-bar` — Minimal white-card lower third for podcasts/interviews: accent tab, name + role, clip-wipe entrance _(lower-third, overlay, podcast)_
+- `lt-color-block` — High-energy lower third: bold accent-color block slides in with overshoot, condensed name + mono role _(lower-third, overlay, podcast)_
+- `lt-kicker-name` — Cardless lower third with an accent eyebrow/kicker tag, heavy name, and a drawn baseline; for footage _(lower-third, overlay, podcast)_
+- `lt-mask-reveal` — Cardless lower third: an accent sweep crosses and clip-path-reveals a heavy name, role fades up; for footage _(lower-third, overlay, podcast)_
+- `lt-neon-border` — Two arcs of light travel the edge of a rounded panel and snap corner to corner, trailing a soft three-layer bloom. A lower third for a name and role _(lower-third, glow, loop)_
+- `lt-soft-pill` — Rounded white pill lower third for podcasts/interviews: status dot, name + role, scale-pop entrance _(lower-third, overlay, podcast)_
+- `lt-stack-bars` — Two stacked bars: a dark name bar wipes from the left, an accent role bar wipes from the right _(lower-third, overlay, podcast)_
+- `news-ticker` — Premium broadcast-style lower-third ticker with live label, headline ribbon, and scrolling news crawl _(lower-third, overlay, news)_
+- `ascii-render-pass` — A slotted scene renders as live ASCII: a canvas samples the source's luminance grid (rasterized once at mount) and draws glyphs from a density ramp charset; resolution steps coarse to fine as the piece resolves, then holds legible-fine _(motion-primitive, experiment, texture)_
+- `ascii-trail-reveal` — An authored S-curve sweeps through a deterministic ASCII grid, flipping cells away to reveal a labeled panel _(motion-primitive, intro, reveal)_
+- `aurora-drift` — Three soft accent-derived aurora fields drift in an exact ambient loop over a deep base and faint vignette _(motion-primitive, background, aurora)_
+- `beat-accent` — A single music-hit sting: impact flash, micro scale-pulse on the subject, immediate decay _(motion-primitive, effects, burst)_
+- `beat-pulse-background` — An accent-derived backdrop pulses its glow intensity and saturation on a deterministic, supplied beat grid _(motion-primitive, background, beat)_
+- `bottom-up-letters` — Splits text into letters and reveals each glyph from below with deterministic staggered timing _(motion-primitive, text, letters)_
+- `chart-story` — One chart builds from data in reading order and lands the exact supplied values: staggered bars, a left-to-right line with area fill, a sweeping donut, or filling progress bars, with an accented value callout on the emphasized datum _(motion-primitive, proof, stats)_
+- `constellation-hub` — Feature nodes brighten in narration order as real-length SVG connectors draw outward from a fixed central hub, then settle into one lockup _(motion-primitive, feature-tour, hub)_
+- `cta-close` — A display-scale action line lands per word and fills the frame with air, one generous CTA capsule pops beneath it with a single overshoot, and the finished close holds completely still _(motion-primitive, ui-props, cta)_
+- `cta-lockup` — A canonical closing lockup that reveals an action line, pops in an accent CTA capsule, settles supporting microcopy, and holds with confidence _(motion-primitive, ui-props, cta)_
+- `cursor-glyph-trail` — An actor travels an authored path depositing small dithered glyphs at its past positions, each popping in and decaying in place, stamp rate scaling with the actor's velocity _(motion-primitive, demonstrate, trail)_
+- `drift-hold` — A centered content card stays subtly alive through loop-exact rotation, scale breathing, and a slow light sweep _(motion-primitive, camera, ambient)_
+- `echo-trail` — A moving element renders with N ghosted copies of itself at t minus i times delta, opacity stepped down per ghost; one traversal, echoes collapsing into the settled element at rest _(motion-primitive, demonstrate, trail)_
+- `facet-morph` — A faceted low-poly mass of 36 triangles continuously reshapes between three authored silhouettes (blob, mark, badge) with per-facet flat shading that recomputes as the vertices move. Light reads from the upper left; lit facets lift toward a pale accent-tinted tone while turned-away facets fall toward near-black. One calm continuous morph, then a settled hold _(motion-primitive, intro, morph)_
+- `focus-rack` — Focus shifts once between two cards at different apparent depths through synchronized blur, dimming, scale, and parallax _(motion-primitive, camera, focus)_
+- `gesture-tap` — A contact circle taps a mobile pill button, releases it into a new labeled accent state, and lifts away _(motion-primitive, gesture, tap)_
+- `gloss-sweep` — A card lands with a restrained slam, catches one diagonal specular gloss, and holds perfectly still _(motion-primitive, celebration, gloss)_
+- `grain-field` — A clearly visible accent-tinted dot field drifts over a subtle luminance gradient in an exact ambient loop _(motion-primitive, background, grain)_
+- `grid-card-assemble` — N capability cards (thin-line icon that draws on, mono label, optional muted body) stagger-assemble into a grid or vertical list with a fade plus short slide into slot, then hold perfectly still _(motion-primitive, layout, grid)_
+- `ink-bleed-reveal` — Liquid ink blooms through paper under a gooey blur-plus-threshold filter, merges, then contracts as a crisp slotted mark resolves beneath it, with static seeded paper grain riding the result _(motion-primitive, texture, reveal)_
+- `inline-highlight` — A clean marker-style inline highlight that animates behind text using a CSS scale variable _(motion-primitive, text, highlight)_
+- `kinetic-type-swap` — A held sentence keeps its fixed text in place while one widest-word masked slot rolls through alternatives and settles on the final option _(motion-primitive, text-effects, kinetic-type)_
+- `light-sweep-pass` — A traveling key light re-shades a slotted scene: a soft diagonal gradient band crosses the frame once while every per-element highlight and shadow shifts in lockstep (all driven by one --light-x property), then the light settles into a resting key. Quiet, expensive-feeling; the scene itself never moves. Callers fill the named scene slot; a token hero-and-cards default renders when it is left empty _(motion-primitive, overlay, light)_
+- `line-swap` — A masked full-line beat replacement: line A holds center then exits up through an overflow-hidden mask as line B enters bottom-up on the same beat, with an optional accent underline drawing beneath one word of line B _(motion-primitive, text-effects, swap)_
+- `locked-nucleus-orbit` — A fixed center nucleus anchors deterministic satellite orbits that settle into a composed lockup _(motion-primitive, intro, reveal)_
+- `logo-sting` — A wordmark slams into its final scale, fires one accent ring and one white impact frame, then holds completely still _(motion-primitive, brand, logo)_
+- `marker-checklist-card` — A hand-lettered paper card: marker headline with an underline and a drawn ellipse around one word, then three checklist rows whose checks draw themselves on - typewriter labels, marker values. The paper-and-marker sibling of mk-specs-list's clean professional rows _(motion-primitive, handwritten, checklist)_
+- `modal-morph` — A small card expands into a full panel, shared-element style: both layouts measured once at mount, the container morphs by transform only (never width/height tweens) while keyed children counter-scale and re-flow onto their own measured targets as pure functions of time _(motion-primitive, structure, flip)_
+- `multi-device-splay` — Phone, tablet, and desktop product mockups fan from a centered stack into a proud splayed arrangement with a subtle idle float _(motion-primitive, device, phone)_
+- `outline-draw` — A rounded outline that proves a callout by drawing clockwise as a hollow conic-gradient border with a clean closure _(motion-primitive, effects, outline)_
+- `oversized-cursor` — A deliberately oversized macOS-style pointer that enters off-screen, travels to a target, clicks to ignite a visible response, then exits _(motion-primitive, actor, cursor)_
+- `particle-image-reveal` — A seeded deterministic particle field converges and settles while a slotted image reveals beneath it, the trail thinning until the image holds clean _(motion-primitive, intros-reveals, particles)_
+- `particle-text-dissolve` — Text assembles from a seeded particle cloud (or dissolves into it): per-particle targets sampled once from the rendered text bitmap at mount, table-driven particles, zero per-particle tweens, one onUpdate painter _(motion-primitive, text-effects, particles)_
+- `physical-exit` — A card exits with physical momentum in toss, drop, or slide mode, carrying acceleration and rotation through the final offscreen pose without fading _(motion-primitive, exit, momentum)_
+- `pull-back-reveal` — A tight stat detail holds, then one decelerating camera pull-back reveals the headline and supporting cards that recontextualize it _(motion-primitive, camera, pull-back)_
+- `push-in` — A centered headline gains focus through one slow, continuous camera push and a gentle fade out _(motion-primitive, camera, push-in)_
+- `radial-surround` — Labeled hairline chips assemble around a centered subject on an elliptical ring, then optionally converge inward with a subtle edge dim. The center never moves: surrounded, not zoomed _(motion-primitive, problem-setup, radial)_
+- `scramble-reveal` — A deterministic hacker-style text reveal that cycles fixed glyph rows and locks the target string from left to right _(motion-primitive, text-effects, scramble)_
+- `scroll-feed` — A loop-friendly column of varied skeleton post cards scrolls upward with subtle motion trails and an agitated pace _(motion-primitive, effects, scroll)_
+- `slit-scan-reveal` — The frame's rows sample an authored subject at offset times: a canvas painter draws row slices of one pure position function evaluated at t minus offset(row), smearing arrival through time until the offsets collapse to zero and the mark holds coherent _(motion-primitive, time, slit-scan)_
+- `social-proof-card` — The app-store close as one mountable scene: wordmark, five stars, a proof line, three feature icons and a CTA capsule build in a quiet stagger and hold - measured from reference ad footage. For an animated star sweep use star-rating-fill; for a quote card use testimonial-proof-card; for a bare lockup use cta-lockup _(motion-primitive, social-proof, end-card)_
+- `soft-blur-in` — A soft opacity, blur, and lift reveal for headlines, captions, and product UI callouts _(motion-primitive, text, reveal)_
+- `split-tilt-cards` — Two equal-weight cards arrive from opposite wings with mirrored rotateY book-open tilts under one shared perspective, pill badges spring-pop at each inner edge, and the pair holds with a barely-there phase-opposed idle float. Card bodies are content slots with token skeleton defaults _(motion-primitive, layout, compare)_
+- `spring-pop` — A badge pops in from a visible near-rest scale, overshoots full size once, and settles cleanly _(motion-primitive, effects, spring)_
+- `stitched-text-draw` — Text drawn as thread stitches: a single-stroke display alphabet draws via attribute-driven dashoffset with stitch-tuned dash patterns, seeded angle jitter, needle-hole dots, a leading needle, and a thread-tail overshoot per letter _(motion-primitive, experiment, type)_
+- `stop-motion-cadence` — The stepped-time law as a demo primitive: one driver quantizes timeline time to floor(t * fps) / fps and feeds ALL motion; four token paper-cut shapes throw-and-land with squash on hits, 2-frame boil jitter seeded per step, and sparkle accents living exactly 2 to 3 frames _(motion-primitive, time-law, stop-motion)_
+- `svg-stroke-trace` — An authored SVG path draws from its measured length, holds with subtle drift, and optionally fills when the path is closed _(motion-primitive, intro, reveal)_
+- `swipe-rail` — A contact circle leads a horizontal card rail through a fast drag, momentum carry, and settled snap to the next card _(motion-primitive, interaction, gesture)_
+- `testimonial-proof-card` — A quote card whose testimonial reveals per-line through a soft mask, with an avatar disc (initials default, image slot), mono name and role, an optional company text mark, and one emphasis substring underlined in accent ink after the quote lands _(motion-primitive, proof, testimonial)_
+- `text-shimmer` — A static headline receives one clean specular gradient sweep through its glyphs, then returns to its ordinary text color _(motion-primitive, text-effects, shimmer)_
+- `touch-indicator` — A translucent contact-circle gesture actor for mobile UI scenes: it touches the glass, causes a same-frame response, and lifts. Tap or swipe, picked by variable _(motion-primitive, mobile, gesture)_
+- `trust-strip` — A monochrome trust row of wide-tracked mono wordmarks that fade in with an opacity-only left-to-right stagger, then hold dead still _(motion-primitive, proof, trust)_
+- `variable-font-flex` — A word lands while its variable-font weight and width axes flex from hairline-condensed to black-wide with per-character stagger; font-size eases inversely so the letterforms gain mass while the box holds _(motion-primitive, experiment, type)_
+- `velocity-throw-snap` — A five-shot rail whips past on a fast decaying curve, then overshoots and snaps the selected hero shot exactly to center _(motion-primitive, feature-tour, rail)_
+- `whiteboard-ink` — A whiteboard sketch draws one measured stroke at a time while a pen nib follows the active tip. Preset sketches (bulb, flow, rocket) or your own multi-stroke SVG paths via the strokes slot; a path marked data-ink=accent rides the accent token _(motion-primitive, intro, reveal)_
+- `notification-pileup` — Mobile notification cards arrive faster and faster, each new alert pushing the existing stack downward into a dense, anxious tower _(notification, mobile, ui-props)_
+- `beat-timeline` — A paused master-timeline orchestration spine that pins titled beat rows to evenly spaced named labels. Each row enters on its label, holds with the sequence, then exits with the group _(orchestration, transitions, sequencing)_
+- `mk-placeholder-grid` — N-up rounded-corner media grid (2-up, 3-up, 4-up, 3x2, hero plus two): per-cell inside-scale framing, staggered box-in entrance, slow settle _(placeholder, media, grid)_
+- `yt-vertical-fill` — Portrait media filling a widescreen frame via blurred-scale, mirror, or copy side fills; grid texture and foreground contrast lift (images inside the block; keep live footage in the host) _(placeholder, vertical, media)_
+- `pull-to-refresh` — A mobile list pulls through nonlinear rubber-band resistance, arms at a threshold, commits to a bounded loading indicator, then snaps exactly back to rest _(pointer, pointers, mobile)_
+- `before-after-wipe` — Two full-bleed content slots compare before and after states as a persistent divider wipes the after layer over the before layer and rests at a configurable split. Callers fill the named before/after slot panels; token-styled defaults render when a slot is left empty _(prop, ui-props, compare)_
+- `camera-scan-gate` — A camera and QR recognition moment with a viewfinder sweep, bracket lock, confirmation pulse, and verified next beat _(prop, ui-props, camera)_
+- `comparison-split` — Two full-bleed panels compare before and after states as a persistent divider wipes the vivid after layer over the muted before layer and rests at a configurable split _(prop, ui-props, compare)_
+- `device-frame-stage` — A phone or tablet mockup staged as a physical scene prop with a screen slot for arbitrary reconstructed UI, rising onto the stage, settling, and holding an idle float _(prop, device, mobile)_
+- `store-badge-lockup` — Settles a short headline above equal-size App Store and Google Play badges as a token-driven mobile end-card call to action _(prop, ui-props, mobile)_
+- `testimonial-card` — Reveals a customer quote at reading pace, then settles its avatar, author name, and handle beneath as a clean proof beat _(prop, ui-props, testimonial)_
+- `toggle-flip` — An oversized UI toggle switch that flips with real physicality: thumb overshoot, track color crossfade, and a soft press-compress before release. The reference prop of the ui-props family _(prop, ui-props, toggle)_
+- `vector-editor-rig` — A dark design-tool app chrome with a live vector pen path, sequential anchor points, bezier handles, a selection frame, and theme-driven blue accents _(prop, ui-props, demonstrate)_
+- `instagram-follow` — Animated Instagram follow overlay with profile card and follow button _(social, overlay, instagram)_
+- `macos-notification` — Animated macOS-style notification banner with app icon and message _(social, overlay, notification)_
+- `reddit-post` — Animated Reddit post card overlay with upvotes and comments _(social, overlay, reddit)_
+- `spotify-card` — Animated Spotify now-playing card with album art and progress bar _(social, overlay, spotify)_
+- `thread-message-stack` — A source-owned editable conversation stack with arbitrary incoming and outgoing messages _(social, conversation, messages)_
+- `tiktok-follow` — Animated TikTok follow overlay with profile card and follow button _(social, overlay, tiktok)_
+- `x-post` — Animated X/Twitter post card overlay with engagement metrics _(social, overlay, twitter)_
+- `yt-comment-card` — Social comments typing on over footage: avatar pop, username and time, per-character typewriter, likes row; image avatars or initials chips _(social, comments, creator)_
+- `yt-lower-third` — Animated YouTube subscribe lower third with avatar and channel info _(social, overlay, youtube)_
+- `x-follow-card` — A social follow card with avatar, handle, and follower motion _(social-overlay)_
+- `caption-blend-difference` — Auto-inverting text using mix-blend-mode: difference — flips between white and black per-pixel against the background _(text, text-effect, effect)_
+- `shimmer-sweep` — Animated light sweep across text or elements using a CSS gradient mask — ideal for AI accents and premium reveals _(text, shimmer, highlight)_
+- `split-flap-board` — Solari-style departure board: every cell walks its drum forward through the intervening characters of a fixed alphabet until it lands on its target, so the text resolves as a mechanical cascade instead of a fade _(text, kinetic, mechanical)_
+- `texture-mask-text` — CSS luminance masks that cut holes through letterforms - 66 pre-built texture masks from ambientCG PBR color maps _(text, text-effect, effect)_
+- `grain-overlay` — Animated film grain texture overlay using CSS keyframes — adds warmth and analog character to any composition _(texture, grain, overlay)_
+- `onboarding-stepper-flow` — A composed onboarding flow with milestone rail, active step card, and next-action button _(ui-flow, onboarding, stepper)_
+- `settings-toggle-flow` — A composed settings flow with preference rows, toggle switches, and active-state feedback _(ui-flow, settings, toggle)_
+- `signup-flow` — A composed signup flow with social action, email field, password field, and submit button _(ui-flow, signup, form)_
+- `arc-motion-path` — A GSAP MotionPath primitive that flies a callout along a curved arc with autorotation _(video-primitive, motionpath, gsap-plugin)_
+- `blur-in` — An Operator Black word-level content reveal that resolves its own text from controlled blur _(video-primitive, blur-in, text-effect)_
+- `dynamic-grid` — A responsive animated grid background driven by CSS variables for SaaS, code, and data scenes _(video-primitive, motion-primitive, background)_
+- `separator` — A one-pixel structural separator with horizontal and vertical variants plus a seek-safe progress reveal _(video-primitive, separator, layout)_
+- `simulated-cursor` — A lightweight cursor pointer and click pulse for product walkthroughs and agent UI demos _(video-primitive, motion-primitive, cursor)_
+- `streaming-text` — Words arrive the way an AI answer streams - in uneven bursts on a measured token rhythm, each word landing grey and inking to full colour - rather than the even tick of a typewriter _(video-primitive, text-effect, ai)_
+- `svg-line-draw-loader` — An Anime.js-style path drawing loader implemented as a seekable GSAP stroke timeline _(video-primitive, advanced-motion, anime-inspired)_
+- `three-orbiting-cards` — A Three.js-powered orbit scene driven by a paused GSAP timeline for deterministic renders _(video-primitive, three-js, webgl)_
+- `vignette` — Cinematic radial vignette overlay using a pure-CSS gradient — darkens the edges to pull focus toward the center _(vignette, overlay, cinematic)_

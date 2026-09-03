@@ -242,6 +242,56 @@ export const lowerThirdSchema = z.object({
   holdSeconds: z.number().positive().optional(),
 });
 
+/**
+ * Un graphique.
+ *
+ * Le premier plan du catalogue dont le contenu est une **série** et non une
+ * valeur. Le compteur porte un nombre, le tiers inférieur deux lignes ; ici il
+ * faut des couples étiquette/valeur, et leur ordre compte — c'est lui que
+ * l'œil lit.
+ *
+ * Trois à six entrées. En dessous, un compteur dit la même chose plus fort ;
+ * au-delà, les étiquettes ne tiennent plus dans un cadre vertical, où la
+ * moitié de nos vidéos sont vues.
+ *
+ * Comme le compteur, il ne coûte que sa voix off : rien n'est généré.
+ */
+export const chartSchema = z.object({
+  /** `bar` compare des quantités, `line` montre une évolution. */
+  kind: z.enum(['bar', 'line']).optional(),
+  /** Ce que le graphique dit, en une ligne. Sans lui, des chiffres nus. */
+  title: z.string().optional(),
+  /**
+   * Les points, dans l'ordre où ils doivent être lus.
+   *
+   * `label` est court : c'est une étiquette d'axe, pas une phrase. En 9:16
+   * elle a la largeur d'un doigt.
+   */
+  points: z
+    .array(
+      z.object({
+        label: z.string(),
+        value: z.number(),
+      })
+    )
+    .min(2)
+    .max(6),
+  /**
+   * La valeur haute de l'échelle.
+   *
+   * Omise, c'est la plus grande valeur de la série. On la pose quand l'échelle
+   * elle-même veut dire quelque chose — un pourcentage va jusqu'à 100 même si
+   * aucune barre ne l'atteint, sinon la plus haute paraît pleine.
+   */
+  max: z.number().positive().optional(),
+  prefix: z.string().optional(),
+  suffix: z.string().optional(),
+  decimals: z.number().int().min(0).max(3).optional(),
+  accentColor: z.string().optional(),
+  startInSeconds: z.number().min(0).optional(),
+  durationInSeconds: z.number().positive().optional(),
+});
+
 export const sceneRenderSchema = z.object({
   effects: sceneEffectsSchema.optional(),
   overlayText: z
@@ -302,6 +352,10 @@ export const sceneRenderSchema = z.object({
           'wave',
           'backdrop',
           'drop',
+          'handwritten',
+          'marker',
+          'marquee',
+          'brand',
         ])
         .optional(),
       icon: z.string().optional(),
@@ -319,6 +373,10 @@ export const sceneRenderSchema = z.object({
    */
   counter: sceneCounterSchema.optional(),
   lowerThird: lowerThirdSchema.optional(),
+  /**
+   * Un graphique. Comme le compteur, la scène se dessine seule.
+   */
+  chart: chartSchema.optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
   card: z
     .object({
@@ -371,7 +429,7 @@ export const sceneRenderSchema = z.object({
 export function rendersOwnContent(render: unknown): boolean {
   const parsed = sceneRenderSchema.safeParse(render ?? {});
   if (!parsed.success) return false;
-  return Boolean(parsed.data.card || parsed.data.counter);
+  return Boolean(parsed.data.card || parsed.data.counter || parsed.data.chart);
 }
 
 export type WordTiming = z.infer<typeof wordTimingSchema>;

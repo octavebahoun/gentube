@@ -81,6 +81,14 @@ export const TITRES_JS = `
         backdrop: { de: { opacity: 0, scale: 1.18 }, vers: { opacity: 1, scale: 1 }, ease: "power2.out" },
         // Le mot tombe et rebondit une fois.
         drop: { de: { opacity: 0, y: "-1.4em" }, vers: { opacity: 1, y: "0em" }, ease: "bounce.out" },
+        // Écriture manuscrite : tracé souple avec légère inclinaison.
+        handwritten: { de: { opacity: 0, scale: 0.92, skewX: -8 }, vers: { opacity: 1, scale: 1, skewX: 0 }, ease: "power2.out" },
+        // Surlignage au feutre : le mot monte avec une brillance accentuée.
+        marker: { de: { opacity: 0, y: "0.2em", filter: "brightness(1.5)" }, vers: { opacity: 1, y: "0em", filter: "brightness(1)" }, ease: "power3.out" },
+        // Défilement 3D en perspective.
+        marquee: { de: { opacity: 0, x: "100%", rotationY: -15 }, vers: { opacity: 1, x: "0%", rotationY: 0 }, ease: "power2.out" },
+        // Lockup de marque : resserrement d'interlettrage et calage.
+        brand: { de: { opacity: 0, scale: 0.8, letterSpacing: "0.3em" }, vers: { opacity: 1, scale: 1, letterSpacing: "0.02em" }, ease: "back.out(1.6)" },
       };`;
 
 export const MOTS_JS = `

@@ -24,6 +24,7 @@ import {
 } from '@/lib/llm/deepseek';
 import {
   TRANSITIONS,
+  chartSchema,
   lowerThirdSchema,
   sceneCounterSchema,
   sceneEffectsSchema,
@@ -128,6 +129,14 @@ const SYSTEM_PROMPT = [
   '  { value, label, from?, prefix?, suffix?, decimals?, variant: count|ring }.',
   '  Such a scene needs NO `prompt` — it draws itself, so it costs nothing to',
   '  illustrate. Use it whenever the narration states a figure worth holding.',
+  '- `chart` is optional and turns the scene into a small graph:',
+  '  { kind: bar|line, points: [{label, value}] (2 to 6), title?, max?,',
+  '  prefix?, suffix?, decimals? }. `bar` compares quantities, `line` shows a',
+  '  change over time, and `points` are read in the order you write them —',
+  '  chronological for a line. Keep each `label` to one or two words: it is an',
+  '  axis tick, and half our videos are vertical. Like `counter`, such a scene',
+  '  needs NO `prompt`: it draws itself and costs nothing to illustrate. Use it',
+  '  when the narration compares figures instead of stating one.',
   '- `lowerThird` is optional and names who or what is on screen:',
   '  { name, role?, variant: bar|stack|boxed, side?: left|right, holdSeconds? }.',
   '  `name` is the strong line, `role` the smaller one under it — a job, a',
@@ -188,10 +197,21 @@ const llmSceneSchema = z.object({
     z.string().min(2).max(2_000)
   ),
   type: z.enum(['image', 'video']),
-  prompt: z.preprocess(
-    (value) => (typeof value === 'string' ? value.trim() : value),
-    z.string().min(10).max(1_000)
-  ),
+  /*
+   * Optionnel ici, exigé plus bas.
+   *
+   * Le prompt système dit depuis toujours qu'une scène qui se dessine elle-même
+   * n'a pas besoin de `prompt` — et `min(10)` refusait alors le storyboard
+   * entier. Le modèle obéissait, et toute la génération échouait sur la scène
+   * qui coûtait le moins cher. La contrainte est donc conditionnelle, juste
+   * après.
+   */
+  prompt: z
+    .preprocess(
+      (value) => (typeof value === 'string' ? value.trim() : value),
+      z.string().max(1_000)
+    )
+    .optional(),
   effects: sceneEffectsSchema.optional(),
   /*
    * Le contenu structuré que le modèle a le droit d'écrire.
@@ -201,9 +221,18 @@ const llmSceneSchema = z.object({
    * la scène rendait une image ordinaire et personne ne voyait l'écart.
    */
   counter: sceneCounterSchema.optional(),
+  chart: chartSchema.optional(),
   lowerThird: lowerThirdSchema.optional(),
   sounds: z.array(sceneSoundSchema.partial({ src: true })).optional(),
-});
+})
+  .refine(
+    (scene) =>
+      Boolean(scene.counter || scene.chart) || (scene.prompt ?? '').length >= 10,
+    {
+      path: ['prompt'],
+      message: 'a scene that has no structured content needs a visual prompt',
+    }
+  );
 
 export const llmStoryboardSchema = z.object({
   scenes: z.array(llmSceneSchema).min(1),
@@ -245,13 +274,16 @@ export function normalizeStoryboard(
     const render: Record<string, unknown> = {};
     if (scene.effects) render.effects = scene.effects;
     if (scene.counter) render.counter = scene.counter;
+    if (scene.chart) render.chart = scene.chart;
     if (scene.lowerThird) render.lowerThird = scene.lowerThird;
     if (sounds.length > 0) render.sounds = sounds;
 
     return {
       order: index + 1,
       type: pipeline === 'mixed' ? scene.type : pipeline,
-      prompt: scene.prompt,
+      // Une scène qui se dessine seule n'a pas de visuel à décrire, et la
+      // colonne est `notNull` : la chaîne vide dit « rien à illustrer ».
+      prompt: scene.prompt ?? '',
       narration: scene.narration,
       durationS: estimateNarrationSeconds(scene.narration),
       render,

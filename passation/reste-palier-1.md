@@ -1,0 +1,62 @@
+# Palier 1 — les 57 entrées restantes
+
+Relevé du registre au 3 septembre 2026. Une entrée sans coche est une entrée
+que la composition ne sait pas encore dessiner.
+
+- [x] `caption-camera-follow` — One sentence written across a world far larger than the frame.
+- [x] `caption-editorial-emphasis` — Dual-font system with dramatic size contrast for emphasis words
+- [x] `caption-glitch-rgb` — RGB chromatic aberration with CRT scanline overlay
+- [x] `caption-kinetic-slam` — Full-screen single-word display with alternating entrance directions
+- [x] `caption-matrix-decode` — Character scramble animation before text reveal
+- [x] `caption-parallax-layers` — Behind-subject 3D text layering with vertical stretch effect
+- [ ] `caption-particle-burst` — Keyword words trigger colored particle explosions _(différé : rendu de particules trop lourd sur Lambda)_
+- [x] `caption-texture` — Flowing texture mask over large uppercase text
+- [x] `caption-weight-shift` — Elegant font-weight transition between caption lines
+- `editorial-flash-overlay` — Finite neutral-warm light layers for a seek-safe camera-flash cut or social reveal _(flash, editorial, social)_
+- [x] `hw-path-text` — Handwriting flowing along any SVG path
+- `hw-scribble-transition` — Overlay transition: scribble bands accumulate to cover the frame with a solid backstop, the host cuts beneath, and the scribble clears _(handwritten, transition, wipe)_
+- [x] `hw-title` — Handwritten display text with a scalar-driven word-by-word highlight sweep
+- [x] `hw-write-title` — True glyph write-on: filled Caveat letterforms revealed
+- `vfx-text-cursor` — Dramatic text reveal with cursor glow, chromatic shadow rays, and directional lighting on a black stage. Canvas-based shader post-processing with spectral color edges _(html-in-canvas, text, shader)_
+- `organic-light-leak-overlay` — Finite CSS light-leak overlay for memory beats and motivated transitions _(light-leak, film, memory)_
+- `halftone-dissolve` — Scene A dissolves into scene B through a growing halftone dot field: accent ink dots pop onto a fixed grid smallest-first, each opens into a window onto B, until the windows merge and B fully replaces A _(motion-primitive, transition, texture)_
+- [x] `logo-brand-close` — A display-scale wordmark cascades letter by letter into a centered lockup
+- [x] `marker-highlight` — Display text settles in, then one hand-drawn marker stroke draws over word
+- `match-cut` — A circle accelerates into a hard single-frame scene swap, matches the incoming circle exactly, and continues into a smaller resting pose _(motion-primitive, transition, match-cut)_
+- `ordered-dither-pass` — Bayer-matrix ordered dithering quantizes a slotted scene (rasterized once at mount): the image emerges from pure 2-tone noise to clean, or dissolves the reverse. Stateless per frame, never error diffusion _(motion-primitive, experiment, texture)_
+- `parallax-device-dive` — A canonical phone rises into view before the camera pushes through its screen and layered app UI expands to fill the frame _(motion-primitive, camera, device)_
+- [x] `perspective-marquee` — A 3D tilted marquee with depth feel as items roll toward the horizon
+- `rubber-band-bumper` — An outgoing panel pulls against increasing resistance, holds at tension, then snaps past an edge with overshoot as the incoming panel settles behind it _(motion-primitive, transition, rubber-band)_
+- `type-match-cut` — A headline splits vertically around an incoming panel, which grows from the negative space and takes the frame as the words exit through opposite edges _(motion-primitive, transition, typography)_
+- `vox-annotate` — The Vox-style annotate gesture: a keyword in a held sentence gets a hand-drawn marker while a thin connector draws up to a mono callout label, all as one choreographed beat on the cue _(motion-primitive, typography, annotation)_
+- `morph-text` — Gooey text morph — cycles through an editable word list using SVG threshold + GSAP-driven blur for a fluid, satisfying transition effect _(text, text-effect, typography)_
+- `beat-freeze-cut` — A beat-driven speed ramp, freeze-frame hit, and hard-cut sequence for music-led promos and montages _(transition, music, beat-driven)_
+- `cut-the-curve` — A velocity-matched directional hard cut: the outgoing subject accelerates with power4.in, swaps at peak velocity, and the incoming subject continues in the same direction with power4.out _(transition, directional-cut, velocity-match)_
+- `grid-pixelate-wipe` — Transition effect where the screen dissolves into a grid of squares that fade out with staggered timing — use between scenes _(transition, wipe, grid)_
+- `mk-clone-wall-transition` — Overlay transition: a tiled word wall covers the frame, inverts via difference blending, and clears — hard-cut the content beneath while covered _(transition, typography, wipe)_
+- `morph-swap` — Two slotted siblings stacked at one shared center: A holds, then condenses or reshapes into B on a shared 50% 50% transform origin. Condense shrink-fades A exactly as B scales up; reshape morphs the silhouette on scaleX/scaleY, never width or height tweens. Token card defaults render when a slot is left empty _(transition, morph, swap)_
+- `parallax-unzoom` — Reveal transition — focus card scales down from full frame as siblings parallax in to form a grid (reverse of parallax-zoom) _(transition, reveal, unzoom)_
+- `parallax-zoom` — Center card scales up to fill the frame while siblings parallax outward — inspired by the eBay Playbook hero transition _(transition, zoom, parallax)_
+- `whip-pan-cut` — A full-frame whip pan: scene A whips off laterally with capped directional motion blur while scene B enters in the same direction at matched velocity, on a speed-ramp profile with a decelerating catch. Both scenes ride one strip, so seam velocity is exact by construction. Callers fill the named before/after slot panels; token-styled defaults render when a slot is left empty _(transition, whip-pan, motion-blur)_
+- `input-feedback` — A transitions.dev-inspired input feedback primitive with shake, clear affordance, and success state _(transition-primitive, transitions-dev-port, input)_
+- `micro-transitions` — A transitions.dev-inspired pack of badge, dropdown, modal, tabs, tooltip, and success-check micro transitions _(transition-primitive, motion-primitive, transitions-dev-port)_
+- `panel-reveal` — A panel reveal primitive with height expansion and content fade _(transition-primitive, transitions-dev-port, panel)_
+- `tabs-slide-indicator` — A pill indicator transition that slides between active tabs _(transition-primitive, transitions-dev-port, tabs)_
+- `mk-callout-highlight` — A sentence whose word-by-word emphasis is driven by a single scalar — tween it to sync the highlight with a voiceover _(typography, karaoke, captions)_
+- `mk-emphasis-type` — Oversized low-contrast background word drifting slowly behind the subject — typography as texture _(typography, text-treatment, minimal)_
+- `wordmark-tiles` — A wordmark resolves from deterministic color noise into correctly cropped glyph tiles through a spatially modulated GSAP wave _(typography, wordmark, tiles)_
+- `yt-prism-title` — Display title on a transparent root: blur-focus entrance, red/blue fringe that settles then breathes, perspective bow, slow scale drift _(typography, title-card, creator)_
+- `avatar-group-hover` — A distance-falloff avatar group lift with bouncy hover return _(video-primitive, transition-primitive, transitions-dev-port)_
+- `badge-pop` — A transitions.dev-inspired notification badge pop with elastic scale and count reveal _(video-primitive, transition-primitive, transitions-dev-port)_
+- `card-resize` — A transitions.dev-inspired card resize primitive that expands a compact card into a detail panel _(video-primitive, transition-primitive, transitions-dev-port)_
+- `chromatic-aberration-wipe` — A fast slide wipe with RGB channel split on peak frames _(video-primitive, transition-primitive)_
+- `icon-swap` — A scale-and-blur icon swap primitive for toolbar and action state changes _(video-primitive, transition-primitive, transitions-dev-port)_
+- `menu-morph` — A transitions.dev-inspired hamburger and plus-menu morph primitive for compact action menus _(video-primitive, transition-primitive, transitions-dev-port)_
+- `number-pop-in` — A transitions.dev-inspired digit pop-in with blur, lift, and staggered value reveal _(video-primitive, transition-primitive, transitions-dev-port)_
+- `page-slide` — A transitions.dev-inspired page slide primitive with outgoing and incoming panels _(video-primitive, transition-primitive, transitions-dev-port)_
+- `skeleton-reveal` — A skeleton loader transition that pulses, then cross-fades into content _(video-primitive, transition-primitive, transitions-dev-port)_
+- `success-check` — A success check primitive with ring pop, path draw, and subtle rotate blur _(video-primitive, transition-primitive, transitions-dev-port)_
+- `text-stagger` — A transitions.dev-inspired text stagger primitive with enter, shimmer, and exit-ready words _(video-primitive, transition-primitive, transitions-dev-port)_
+- `text-state-swap` — A text state swap primitive with outgoing blur and incoming lift _(video-primitive, transition-primitive, transitions-dev-port)_
+- `tilt-card` — A transitions.dev-inspired tilt card primitive with depth layers and hover-style parallax _(video-primitive, transition-primitive, transitions-dev-port)_
+- `halftone-field` — A full-bleed halftone light field: a grid of dots whose size and colour track a slow flowing simplex-noise field, so broad bands of light sweep across a mostly-black frame like a giant LED wall showing a plasma. Built to run under type _(webgl, shader, background)_

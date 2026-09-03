@@ -437,6 +437,170 @@ video.media {
   will-change: opacity;
 }
 
+/* --- Graphique ------------------------------------------------------------ */
+
+/*
+ * Un plan chiffré n'a pas d'image derrière lui, comme le compteur : le fond
+ * noir de `#bg` sert de scène et tout le poids visuel est dans la donnée.
+ *
+ * Les barres sont pilotées par `--part`, une fraction de 0 à 1 que la timeline
+ * fait monter. C'est `height` qui la lit, mais posée sur une variable : GSAP
+ * anime le nombre, le navigateur ne recalcule que la barre.
+ */
+.chart {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9em;
+  /*
+   * Le bas est plus généreux que le haut : les sous-titres y vivent, et en
+   * 9:16 l'interface de la plateforme mange encore la bande sous eux.
+   */
+  padding: 6% 7% 13%;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  --chart-accent: #ce1f20;
+}
+
+.chart-title {
+  font-size: 1.3em;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  max-width: 24ch;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.7em;
+  width: 100%;
+  height: 68%;
+}
+
+.chart-column {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  height: 100%;
+  max-width: 9em;
+}
+
+/*
+ * La piste prend toute la hauteur qui reste une fois le chiffre et
+ * l'étiquette posés, et c'est elle que la barre remplit. Sans elle, la
+ * fraction se comptait sur la colonne entière : le chiffre et l'étiquette
+ * rognaient la place, et 40 contre 25 rendait deux barres presque égales.
+ */
+.chart-track {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-end;
+  width: 100%;
+  min-height: 0;
+}
+
+/*
+ * `--part` vaut 0 au départ et la fraction de la valeur à l'arrivée. Le
+ * `min-height` empêche une valeur nulle de disparaître complètement : une
+ * barre absente et une barre à zéro ne disent pas la même chose.
+ */
+.chart-fill {
+  width: 100%;
+  height: calc(var(--part, 0) * 100%);
+  min-height: 3px;
+  border-radius: 0.12em 0.12em 0 0;
+  background: linear-gradient(
+    180deg,
+    var(--chart-accent) 0%,
+    rgba(206, 31, 32, 0.55) 100%
+  );
+}
+
+.chart-value {
+  font-size: 1.05em;
+  font-weight: 800;
+  color: #fff;
+  /* Les chiffres changent à chaque image : sans chasse fixe, ils dansent. */
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+}
+
+.chart-label {
+  flex: 1 1 0;
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/*
+ * La courbe. Le SVG s'étire au cadre — `preserveAspectRatio="none"` — donc le
+ * même tracé tient en 16:9 et en 9:16 sans qu'aucun calcul dépende du format.
+ * `non-scaling-stroke` sur les traits, sinon l'étirement déformerait
+ * l'épaisseur.
+ */
+/* Les pastilles sont posées en pourcentage dessus : le cadre est le repère. */
+.chart-plot {
+  position: relative;
+  width: 100%;
+  height: 68%;
+}
+
+.chart-plot svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--chart-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /*
+   * Le trait se dessine par `stroke-dashoffset`, que la timeline ramène à
+   * zéro. La longueur vient de `plan.ts` : mesurée dans la page, elle
+   * dépendrait de l'étirement du SVG.
+   */
+  stroke-dasharray: 400;
+}
+
+/*
+ * Une pastille HTML, pas un `<circle>`. Le SVG est étiré au cadre — un cercle
+ * dedans devient une ellipse, et la première rendait une tache blanche.
+ */
+.chart-dot {
+  position: absolute;
+  width: 0.7em;
+  height: 0.7em;
+  margin: -0.35em 0 0 -0.35em;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--chart-accent);
+}
+
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5em;
+}
+
+.chart-axis .chart-label {
+  flex: 1 1 0;
+}
+
 /* --- Compteur ------------------------------------------------------------ */
 
 /*
@@ -628,6 +792,136 @@ video.media {
   color: #ff9d3d;
 }
 
+/* `glitch-rgb` : aberration chromatique RVB et lueur CRT. */
+.captions-glitch-rgb .word {
+  color: #fff;
+  text-shadow:
+    2px 0 #ff0055,
+    -2px 0 #00e5ff,
+    0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.captions-glitch-rgb .word.fort {
+  text-shadow:
+    3px 0 #ff0055,
+    -3px 0 #00e5ff,
+    0 0 14px rgba(255, 0, 85, 0.8);
+}
+
+/* `editorial-emphasis` : contraste de style et de taille sur les mots mis en avant. */
+.captions-editorial-emphasis .word {
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.04em;
+}
+
+.captions-editorial-emphasis .word.fort {
+  color: #ffaa40;
+  font-style: italic;
+  font-size: 1.22em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
+}
+
+/* `kinetic-slam` : style majuscule imposant avec ombre portée lourde. */
+.captions-kinetic-slam {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.captions-kinetic-slam .word {
+  color: #fff;
+  text-shadow:
+    0 4px 0 #000,
+    0 8px 24px rgba(0, 0, 0, 0.9);
+}
+
+.captions-kinetic-slam .word.fort {
+  color: #ce1f20;
+  text-shadow:
+    0 4px 0 #000,
+    0 0 18px rgba(206, 31, 32, 0.7);
+}
+
+/* `matrix-decode` : vert néon monospacé au look terminal digital. */
+.captions-matrix-decode {
+  font-family: "Courier New", monospace;
+  letter-spacing: 0.08em;
+}
+
+.captions-matrix-decode .word {
+  color: #00ff66;
+  text-shadow:
+    0 0 8px rgba(0, 255, 102, 0.6),
+    0 2px 10px rgba(0, 0, 0, 0.9);
+}
+
+.captions-matrix-decode .word.fort {
+  color: #ffffff;
+  text-shadow:
+    0 0 12px #00ff66,
+    0 0 24px #00ff66;
+}
+
+/* `parallax-layers` : empilement 3D d'ombres donnant un effet de relief. */
+.captions-parallax-layers .word {
+  color: #fff;
+  text-shadow:
+    0 2px 0 #333,
+    0 4px 0 #222,
+    0 6px 0 #111,
+    0 10px 20px rgba(0, 0, 0, 0.8);
+}
+
+.captions-parallax-layers .word.fort {
+  color: #ffd24c;
+  text-shadow:
+    0 2px 0 #b38600,
+    0 4px 0 #806000,
+    0 6px 0 #4d3900,
+    0 10px 20px rgba(0, 0, 0, 0.9);
+}
+
+/* `texture` : texte masque dégradé doré/rouge texturé. */
+.captions-texture .word {
+  background: linear-gradient(135deg, #ffffff 0%, #ffd7a0 50%, #ce1f20 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9));
+}
+
+.captions-texture .word.fort {
+  background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* `weight-shift` : contraste élégant entre graisse légère et ultra-grasse. */
+.captions-weight-shift .word {
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.captions-weight-shift .word.fort {
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.9);
+}
+
+/* `camera-follow` : emphase lumineuse centrée sur le mot courant. */
+.captions-camera-follow .word {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.captions-camera-follow .word.on {
+  color: #fff;
+  text-shadow:
+    0 0 16px rgba(255, 255, 255, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
 /* L'emoji, quand la scène en pose un. Jamais plus d'un. */
 .word-emoji {
   display: inline-block;
@@ -698,4 +992,54 @@ video.media {
     0.04em 0 0 rgba(255, 0, 64, 0.85),
     -0.04em 0 0 rgba(0, 220, 255, 0.85),
     0 4px 18px rgba(0, 0, 0, 0.7);
+}
+
+/* --- Effets palier 2 ------------------------------------------------------ */
+
+/*
+ * Trois effets transposés du registre : `shimmer-sweep` et `light-sweep-pass`
+ * (le balayage), `grain-overlay` (le grain), `beat-accent` (l'accent).
+ *
+ * Tous vivent dans le div .scene : ils meurent avec elle, comme l'éclair.
+ * Aucun n'est un filtre plein cadre — voir l'en-tête du fichier. Le grain
+ * est une image de bruit figée dont seule l'opacité bouge : le filtre SVG
+ * n'est évalué qu'une fois, au décodage du fond.
+ */
+
+/* L'accent pulse la scène en échelle : on prévient le navigateur. */
+.scene {
+  will-change: opacity, transform;
+}
+
+/*
+ * Le balayage : un dégradé trois fois plus large que le cadre, dont la
+ * timeline déplace la fenêtre. Même mécanique que le highlight des mots —
+ * backgroundPosition de 100% vers 0% — donc même sûreté au rendu.
+ */
+.light-sweep {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, background-position;
+  background-image: linear-gradient(
+    105deg,
+    transparent 46%,
+    var(--sweep-color, #ffffff) 50%,
+    transparent 54%
+  );
+  background-size: 280% 100%;
+  background-position: 100% 0;
+  background-repeat: no-repeat;
+}
+
+/* Le grain : une tuile de bruit, que la timeline fait scintiller. */
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
 }
