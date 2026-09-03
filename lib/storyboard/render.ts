@@ -87,6 +87,23 @@ export const MOVE_TRANSITIONS = [
   'zoom-through',
   'zoom-out',
   'squeeze',
+  'push-down',
+  'slide-diagonal',
+  'elastic-push',
+  'fold',
+  'stretch',
+  'wipe-left',
+  'wipe-right',
+  'wipe-up',
+  'wipe-down',
+  'iris-in',
+  'box-iris',
+  'barn-doors',
+  'curtain',
+  'clock-wipe',
+  'flip-x',
+  'flip-y',
+  'spin',
 ] as const;
 
 export type MoveTransition = (typeof MOVE_TRANSITIONS)[number];
@@ -254,19 +271,19 @@ export const sceneRenderSchema = z.object({
    */
   counter: z
     .object({
-      /** La valeur d'arrivée. C'est elle que le spectateur retient. */
-      value: z.number(),
-      /** Le départ. Zéro sauf si la progression elle-même veut dire quelque chose. */
-      from: z.number().optional(),
-      /** Ce que le chiffre compte. Sans lui, un nombre nu ne dit rien. */
-      label: z.string().optional(),
-      prefix: z.string().optional(),
-      suffix: z.string().optional(),
-      decimals: z.number().int().min(0).max(3).optional(),
-      /** `count` monte en chiffres, `ring` remplit un anneau autour d'eux. */
-      variant: z.enum(['count', 'ring']).optional(),
-      startInSeconds: z.number().min(0).optional(),
-      durationInSeconds: z.number().positive().optional(),
+    /** La valeur d'arrivée. C'est elle que le spectateur retient. */
+    value: z.number(),
+    /** Le départ. Zéro sauf si la progression elle-même veut dire quelque chose. */
+    from: z.number().optional(),
+    /** Ce que le chiffre compte. Sans lui, un nombre nu ne dit rien. */
+    label: z.string().optional(),
+    prefix: z.string().optional(),
+    suffix: z.string().optional(),
+    decimals: z.number().int().min(0).max(3).optional(),
+    /** `count` monte en chiffres, `ring` remplit un anneau autour d'eux. */
+    variant: z.enum(['count', 'ring']).optional(),
+    startInSeconds: z.number().min(0).optional(),
+    durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
@@ -381,6 +398,25 @@ export const TRANSITION_DURATIONS: Record<Transition, number> = {
   'zoom-through': 0.55,
   'zoom-out': 0.55,
   squeeze: 0.45,
+  // Les volets et les bascules durent un peu plus que les poussees : la
+  // decoupe ou la rotation ne se lisent pas si elles passent trop vite.
+  'push-down': 0.5,
+  'slide-diagonal': 0.55,
+  'elastic-push': 0.7,
+  fold: 0.45,
+  stretch: 0.5,
+  'wipe-left': 0.55,
+  'wipe-right': 0.55,
+  'wipe-up': 0.55,
+  'wipe-down': 0.55,
+  'iris-in': 0.6,
+  'box-iris': 0.55,
+  'barn-doors': 0.55,
+  curtain: 0.55,
+  'clock-wipe': 0.7,
+  'flip-x': 0.6,
+  'flip-y': 0.6,
+  spin: 0.7,
   'domain-warp': 0.9,
   'ridged-burn': 0.9,
   'whip-pan': 0.65,

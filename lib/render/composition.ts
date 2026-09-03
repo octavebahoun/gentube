@@ -1,4 +1,6 @@
 import type { HyperframesStoryboard } from '@/lib/storyboard/render';
+import { SCENES_JS } from './animations';
+import { MOTS_JS, MOVES_JS, TITRES_JS } from './gestures';
 import {
   MAX_SOUNDS_PER_SCENE,
   buildTimeline,
@@ -243,287 +245,11 @@ export function composeHtml({
        * Ce que chaque variante de titre fait de sa cible — un mot ou une
        * lettre selon la variante, décidé hors de la page.
        */
-      const TITRES = {
-        // L'entrée d'origine : le mot monte et grossit en rebondissant.
-        reveal: { de: { opacity: 0, y: 26, scale: 0.92 }, vers: { opacity: 1, y: 0, scale: 1 }, ease: "back.out(1.7)" },
-        neon: { de: { opacity: 0, y: 26, scale: 0.92 }, vers: { opacity: 1, y: 0, scale: 1 }, ease: "back.out(1.7)" },
-        icon: { de: { opacity: 0, y: 26, scale: 0.92 }, vers: { opacity: 1, y: 0, scale: 1 }, ease: "back.out(1.7)" },
-        pin: { de: { opacity: 0, y: 26, scale: 0.92 }, vers: { opacity: 1, y: 0, scale: 1 }, ease: "back.out(1.7)" },
-        // La lettre apparaît, sans transition : une machine à écrire ne fond pas.
-        typewriter: { de: { opacity: 0 }, vers: { opacity: 1 }, ease: "none" },
-        // L'interlettrage se resserre. Le geste des titres de marque.
-        tracking: { de: { opacity: 0, letterSpacing: "0.5em" }, vers: { opacity: 1, letterSpacing: "0em" }, ease: "power3.out" },
-        // Les lettres tombent d'en haut, l'une après l'autre.
-        cascade: { de: { opacity: 0, y: "-0.9em" }, vers: { opacity: 1, y: "0em" }, ease: "power2.out" },
-        // Le mot arrive trop grand et se pose. Le titre de bande-annonce.
-        slam: { de: { opacity: 0, scale: 2.4 }, vers: { opacity: 1, scale: 1 }, ease: "power4.out" },
-        // Le mot monte du flou vers le net. Le flou est sur un mot, pas plein cadre.
-        rise: { de: { opacity: 0, y: "0.5em", filter: "blur(8px)" }, vers: { opacity: 1, y: "0em", filter: "blur(0px)" }, ease: "power2.out" },
-        // Une secousse chromatique brève, puis le mot se pose.
-        glitch: { de: { opacity: 0, x: -8, skewX: 12 }, vers: { opacity: 1, x: 0, skewX: 0 }, ease: "steps(4)" },
+${TITRES_JS}
 
-        /*
-         * Vingt variantes de plus, transposées des entrées de typographie du
-         * registre. Certaines en sont l'équivalent visuel plutôt que la copie :
-         * decode, reel et ticker font muter du texte dans le registre, ce
-         * qui demande une suite déterministe pour survivre au saut arrière du
-         * moteur. Elles sont ici rendues par un geste qui en donne la sensation
-         * — un brouillage, un défilement vertical — sans mutation de contenu.
-         */
+${MOTS_JS}
 
-        // Le mot arrive net et part vers le haut en se floutant.
-        "blur-out": { de: { opacity: 0, y: "0.4em" }, vers: { opacity: 1, y: "0em" }, ease: "power2.out" },
-        // Les lettres tenaient dispersées et se rassemblent.
-        explode: { de: { opacity: 0, x: -26, y: 18, rotation: -14 }, vers: { opacity: 1, x: 0, y: 0, rotation: 0 }, ease: "power3.out" },
-        // Une bascule de mise au point : du flou lourd vers le net.
-        focus: { de: { opacity: 0.2, filter: "blur(14px)", scale: 1.06 }, vers: { opacity: 1, filter: "blur(0px)", scale: 1 }, ease: "power2.out" },
-        // Chaque ligne entre par la gauche.
-        lines: { de: { opacity: 0, x: "-0.8em" }, vers: { opacity: 1, x: "0em" }, ease: "power3.out" },
-        // Le mot se pose vers le centre, comme une signature de marque.
-        lockup: { de: { opacity: 0, y: "0.3em", letterSpacing: "0.24em" }, vers: { opacity: 1, y: "0em", letterSpacing: "0em" }, ease: "power3.out" },
-        // Le brouillage : la lettre tremble avant de se fixer.
-        decode: { de: { opacity: 0, y: -6, skewY: 8 }, vers: { opacity: 1, y: 0, skewY: 0 }, ease: "steps(6)" },
-        // Un fondu doux avec une dérive verticale. Le geste calme.
-        crossfade: { de: { opacity: 0, y: "0.18em" }, vers: { opacity: 1, y: "0em" }, ease: "power1.out" },
-        // Une bande de distorsion passe une fois sur le mot.
-        scan: { de: { opacity: 0, skewX: -22, scaleY: 1.3 }, vers: { opacity: 1, skewX: 0, scaleY: 1 }, ease: "power2.out" },
-        // Bascule verticale : l'ancien sort par le haut, le nouveau entre par le bas.
-        "axis-y": { de: { opacity: 0, y: "0.7em" }, vers: { opacity: 1, y: "0em" }, ease: "power3.out" },
-        // Bascule en profondeur : le mot arrive de loin.
-        "axis-z": { de: { opacity: 0, scale: 0.55 }, vers: { opacity: 1, scale: 1 }, ease: "power3.out" },
-        // Un rouleau vertical qui s'arrête sur le mot.
-        reel: { de: { opacity: 0, y: "-1.2em", scaleY: 1.4 }, vers: { opacity: 1, y: "0em", scaleY: 1 }, ease: "back.out(1.4)" },
-        // Le mot monte et se révèle, décalé après le précédent.
-        "fade-up": { de: { opacity: 0, y: "0.55em" }, vers: { opacity: 1, y: "0em" }, ease: "power2.out" },
-        // Le mot est barré puis remplacé : on garde le trait qui traverse.
-        strike: { de: { opacity: 0, scaleX: 0.2 }, vers: { opacity: 1, scaleX: 1 }, ease: "power4.out" },
-        // Le défilement d'un bandeau d'information, qui se verrouille.
-        ticker: { de: { opacity: 0, x: "1.4em" }, vers: { opacity: 1, x: "0em" }, ease: "power4.out" },
-        // La respiration : rien ne bouge, tout se pose.
-        calm: { de: { opacity: 0 }, vers: { opacity: 1 }, ease: "power1.inOut" },
-        // Le titre s'ouvre en deux autour de ce qui arrive.
-        split: { de: { opacity: 0, scaleY: 0.1 }, vers: { opacity: 1, scaleY: 1 }, ease: "power3.out" },
-        // La graisse se pose, du fin vers le gras.
-        weight: { de: { opacity: 0, scaleX: 1.25 }, vers: { opacity: 1, scaleX: 1 }, ease: "power2.out" },
-        // Une crête d'épaisseur parcourt le titre, mot après mot.
-        wave: { de: { opacity: 0, y: "0.35em", scaleY: 1.35 }, vers: { opacity: 1, y: "0em", scaleY: 1 }, ease: "elastic.out(1, 0.65)" },
-        // Un mot de fond surdimensionné, posé derrière la phrase.
-        backdrop: { de: { opacity: 0, scale: 1.18 }, vers: { opacity: 1, scale: 1 }, ease: "power2.out" },
-        // Le mot tombe et rebondit une fois.
-        drop: { de: { opacity: 0, y: "-1.4em" }, vers: { opacity: 1, y: "0em" }, ease: "bounce.out" },
-      };
-
-      const MOTS = {
-        // Le mot s'allume et le reste. La lecture karaoké.
-        karaoke: {
-          de: { color: "rgba(255,255,255,0.42)" },
-          vers: { color: "#ffffff", duration: 0.001, ease: "none" },
-        },
-        // Le mot monte et se révèle, sans changer de couleur.
-        fondant: {
-          de: { opacity: 0.25, y: "0.22em", filter: "blur(3px)" },
-          vers: { opacity: 1, y: "0em", filter: "blur(0px)", duration: 0.28, ease: "power2.out" },
-        },
-        // Un bandeau de couleur balaie le mot actif. C'est le style des shorts.
-        highlight: {
-          de: { backgroundPosition: "100% 0", color: "rgba(255,255,255,0.55)" },
-          vers: { backgroundPosition: "0% 0", color: "#ffffff", duration: 0.16, ease: "power1.out" },
-        },
-        // Chaque mot dans sa pastille, qui gonfle à son tour.
-        pill: {
-          de: { scale: 0.72, opacity: 0.4 },
-          vers: { scale: 1, opacity: 1, duration: 0.22, ease: "back.out(2.2)" },
-        },
-        // Le mot se découvre de gauche à droite, sans bouger.
-        wipe: {
-          de: { clipPath: "inset(0 100% 0 0)", opacity: 1 },
-          vers: { clipPath: "inset(0 0% 0 0)", duration: 0.24, ease: "power2.out" },
-        },
-        // La lueur monte avec le mot. Les mots porteurs gardent leur accent.
-        neon: {
-          de: { opacity: 0.25, scale: 0.94 },
-          vers: { opacity: 1, scale: 1, duration: 0.2, ease: "power2.out" },
-        },
-        // Le dégradé apparaît en rebondissant.
-        gradient: {
-          de: { opacity: 0, scale: 0.88 },
-          vers: { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(1.8)" },
-        },
-        // Le texte s'inverse sur ce qu'il couvre : rien à animer que sa venue.
-        blend: {
-          de: { opacity: 0 },
-          vers: { opacity: 1, duration: 0.12, ease: "none" },
-        },
-      };
-
-      for (const scene of T.scenes) {
-        if (scene.fade > 0) {
-          tl.fromTo(
-            "#s" + scene.index,
-            { opacity: 0 },
-            { opacity: 1, duration: scene.fade, ease: "power2.inOut" },
-            scene.start
-          );
-
-          if (scene.hoisted) {
-            tl.fromTo(
-              "#m" + scene.index,
-              { opacity: 0 },
-              { opacity: 1, duration: scene.fade, ease: "power2.inOut" },
-              scene.start
-            );
-          }
-        }
-
-        if (scene.hasMedia && scene.zoom) {
-          tl.fromTo(
-            "#m" + scene.index,
-            { scale: scene.zoom.from },
-            { scale: scene.zoom.to, duration: scene.duration, ease: "none" },
-            scene.start
-          );
-        }
-
-        // Un clip lu à une autre vitesse que la sienne : posé sur
-        // l'élément, pas sur la timeline, le moteur cherche chaque image.
-        if (scene.rate && scene.rate !== 1) {
-          const clip = document.getElementById("m" + scene.index);
-          if (clip) clip.playbackRate = scene.rate;
-        }
-
-        // Le tremblement : une secousse courte et répétée, jamais une dérive.
-        // Le yoyo revient toujours à zéro, donc un saut arrière retombe juste.
-        if (scene.shake) {
-          tl.fromTo(
-            "#m" + scene.index,
-            { x: -6, y: 3 },
-            {
-              x: 6,
-              y: -3,
-              duration: 0.06,
-              ease: "none",
-              repeat: Math.round(scene.duration / 0.06),
-              yoyo: true,
-            },
-            scene.shakeAt ?? scene.start
-          );
-        }
-
-        // L'éclair : une nappe pleine trame qui monte vite et retombe.
-        if (scene.flash) {
-          tl.fromTo(
-            "#f" + scene.index,
-            { opacity: 0 },
-            {
-              opacity: 0.9,
-              duration: scene.flash.duration / 2,
-              ease: "power2.out",
-              repeat: 1,
-              yoyo: true,
-            },
-            scene.flash.at
-          );
-        }
-
-        if (scene.overlay) {
-          tl.fromTo(
-            "#o" + scene.index,
-            { opacity: 0, y: 18 },
-            { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" },
-            scene.overlay.at
-          );
-        }
-
-        // Le titre cinétique : chaque mot entre à son tour. Le décalage est
-        // une donnée, calculée hors de la page.
-        if (scene.kinetic) {
-          const geste = TITRES[scene.kinetic.variant] || TITRES.reveal;
-          scene.kinetic.cibles.forEach(function (cible, w) {
-            tl.fromTo(
-              "#" + cible,
-              Object.assign({}, geste.de),
-              Object.assign(
-                { duration: scene.kinetic.duration, ease: geste.ease },
-                geste.vers
-              ),
-              scene.kinetic.at + w * scene.kinetic.stagger
-            );
-          });
-        }
-
-        /*
-         * Le compteur.
-         *
-         * On anime un objet nu et on écrit le texte à chaque image. C'est la
-         * seule forme qui survive au saut arrière : le moteur cherche l'image,
-         * GSAP recalcule la valeur depuis le temps absolu, et le texte suit.
-         * Incrémenter un compteur à chaque appel donnerait une vidéo
-         * différente à chaque rendu.
-         */
-        if (scene.counter) {
-          const state = { v: scene.counter.from };
-          const box = document.getElementById("n" + scene.index);
-          const ring = scene.counter.ring
-            ? document.getElementById("g" + scene.index)
-            : null;
-          const spread = scene.counter.to - scene.counter.from || 1;
-
-          tl.fromTo(
-            state,
-            { v: scene.counter.from },
-            {
-              v: scene.counter.to,
-              duration: scene.counter.duration,
-              ease: "power2.out",
-              onUpdate: function () {
-                if (box) {
-                  box.textContent =
-                    scene.counter.prefix +
-                    state.v.toFixed(scene.counter.decimals) +
-                    scene.counter.suffix;
-                }
-                if (ring) {
-                  const part = (state.v - scene.counter.from) / spread;
-                  ring.style.setProperty("--fill", (part * 360).toFixed(1) + "deg");
-                }
-              },
-            },
-            scene.counter.at
-          );
-        }
-
-        /*
-         * Le style de sous-titre, en une table plutôt qu'en chaîne de tests.
-         *
-         * Tous ces styles font la même chose — révéler un mot à son instant —
-         * et ne diffèrent que par la propriété animée. Une entrée par style
-         * garde la boucle unique et rend l'ajout d'un style suivant sans
-         * risque pour les précédents.
-         *
-         * 'cinematic' est à part : il ne révèle pas les mots un par un mais la
-         * phrase entière avec la scène, comme un sous-titre de film.
-         */
-        if (T.subtitleStyle === "cinematic") {
-          if (scene.words.length > 0) {
-            tl.fromTo(
-              "#c" + scene.index,
-              { opacity: 0 },
-              { opacity: 1, duration: 0.3, ease: "power2.out" },
-              scene.start
-            );
-          }
-        } else {
-          const geste = MOTS[T.subtitleStyle] || MOTS.karaoke;
-          scene.words.forEach(function (word, i) {
-            tl.fromTo(
-              "#w" + scene.index + "-" + i,
-              Object.assign({}, geste.de),
-              Object.assign({}, geste.vers),
-              word.at
-            );
-          });
-        }
-      }
+${SCENES_JS}
 
       /*
        * Les fondus des sons, posés sur la propriété volume de l'élément.
@@ -625,21 +351,57 @@ export function composeHtml({
        * du fichier : le moteur cherche chaque image, un to ne survivrait pas au
        * saut arriere.
        */
-      const MOVES = {
-        "push-left":    { out: { x: "-100%" }, in: { x: "100%" } },
-        "push-right":   { out: { x: "100%" },  in: { x: "-100%" } },
-        "push-up":      { out: { y: "-100%" }, in: { y: "100%" } },
-        "zoom-through": { out: { scale: 1.6, opacity: 0 }, in: { scale: 0.72 } },
-        "zoom-out":     { out: { scale: 0.62, opacity: 0 }, in: { scale: 1.45 } },
-        "squeeze":      { out: { scaleX: 0, opacity: 0 },   in: { scaleX: 0 } },
+${MOVES_JS}
+
+      /*
+       * Le repos de chaque propriete que les gestes touchent.
+       *
+       * On ne pose sur la scene que les proprietes du geste en cours : une
+       * rotation neutre de plus suffit a faire basculer le rendu en matrice
+       * 3D, et le rendu logiciel de Lambda n y trace pas les memes pixels.
+       */
+      const NEUTRE = {
+        x: "0%",
+        y: "0%",
+        scale: 1,
+        scaleX: 1,
+        scaleY: 1,
+        rotation: 0,
+        rotationX: 0,
+        rotationY: 0,
+        opacity: 1,
+        clipPath: "inset(0% 0% 0% 0%)",
+        maskImage: "none",
+        webkitMaskImage: "none",
+        "--balayage": 360,
       };
 
       for (const move of T.moves) {
         const shape = MOVES[move.kind];
         if (!shape) continue;
 
-        const rest = { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1 };
-        const ease = move.kind === "squeeze" ? "power2.inOut" : "power3.inOut";
+        /*
+         * Le socle : le repos historique, plus le repos des seules
+         * proprietes que ce geste-ci fait bouger.
+         *
+         * Ni scale ni scaleX en dur. GSAP traite scale comme un raccourci qui
+         * ecrit scaleX ET scaleY : pose a cote d un scaleX a zero, il
+         * l ecrasait a 1 et le geste ne bougeait plus. fold, squeeze et
+         * stretch rendaient une scene entiere et immobile, et la garde
+         * visuelle ne pouvait pas le dire — elle n avait pas encore de
+         * reference a comparer. La boucle ci-dessous ne pose que ce que la
+         * forme touche, et aucune forme ne melange les deux.
+         */
+        const socle = { x: "0%", y: "0%", opacity: 1, visibility: "visible" };
+        for (const forme of [shape.out, shape.in, shape.fromOut, shape.inTo]) {
+          for (const cle in forme) {
+            if (cle in NEUTRE && !(cle in socle)) socle[cle] = NEUTRE[cle];
+          }
+        }
+        if (shape.origin) socle.transformOrigin = shape.origin;
+        if (shape.perspective) socle.transformPerspective = shape.perspective;
+
+        const tempo = { duration: move.duration, ease: shape.ease || "power3.inOut" };
 
         /*
          * Les deux scènes ET leurs clips.
@@ -663,8 +425,8 @@ export function composeHtml({
         for (const cible of partants) {
           tl.fromTo(
             cible,
-            { x: "0%", y: "0%", scale: 1, scaleX: 1, opacity: 1, visibility: "visible" },
-            Object.assign({ duration: move.duration, ease: ease, visibility: "visible" }, shape.out),
+            Object.assign({}, socle, shape.fromOut),
+            Object.assign({}, socle, shape.out, tempo),
             move.at
           );
         }
@@ -673,8 +435,8 @@ export function composeHtml({
         for (const cible of entrants) {
           tl.fromTo(
             cible,
-            Object.assign({ opacity: 1, visibility: "visible" }, shape.in),
-            Object.assign({ duration: move.duration, ease: ease, visibility: "visible" }, rest),
+            Object.assign({}, socle, shape.in),
+            Object.assign({}, socle, shape.inTo, tempo),
             move.at
           );
         }

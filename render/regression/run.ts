@@ -2,11 +2,13 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { toHyperframesStoryboard } from '@/lib/storyboard/render';
+import { MOVE_TRANSITIONS, toHyperframesStoryboard } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
 import { SUBTITLE_STYLES } from '@/lib/videos';
 import {
   MOMENTS,
+  momentDeLaCoupe,
+  momentDuTitre,
   REFERENCE_VIDEO,
   REFERENCE_VIDEO_VERTICALE,
   referenceShots,
@@ -34,6 +36,8 @@ const REFERENCES = join(HERE, 'references');
 const ECART_TOLERE = 0.995; // SSIM ; en dessous, l'image a visiblement changé.
 
 const update = process.argv.includes('--update');
+/** Garde les projets rendus au lieu de les effacer : pour inspecter la page. */
+const garder = process.argv.includes('--garder');
 
 /**
  * Les deux formats vendus. Le vertical n'a longtemps existé que dans l'enum ;
@@ -61,6 +65,10 @@ const TITRES = [
   nom: `titre-${variant}`,
   video: REFERENCE_VIDEO,
   variant,
+  // Une seule capture, au milieu de l'animation. Les six autres instants ne
+  // diraient que ce que les formats disent déjà — et le septième, pris après
+  // la fin du geste, rendait les vingt-sept variantes identiques.
+  moments: [momentDuTitre(variant)],
 }));
 
 const STYLES = SUBTITLE_STYLES.map((style) => ({
@@ -68,8 +76,33 @@ const STYLES = SUBTITLE_STYLES.map((style) => ({
   video: { ...REFERENCE_VIDEO, subtitleStyle: style } as typeof REFERENCE_VIDEO,
 }));
 
+type Jeu = {
+  nom: string;
+  video: typeof REFERENCE_VIDEO;
+  variant?: string;
+  transition?: string;
+  /** Restreint la capture : par défaut, tous les instants. */
+  moments?: typeof MOMENTS;
+};
+
+/**
+ * Un jeu par transition par déplacement, activé par --transitions.
+ *
+ * Une seule capture chacun, au milieu de sa coupe — et l'instant se recalcule
+ * pour chaque geste, puisque sa durée décale le début de la scène qui arrive.
+ * Les six autres instants ne diraient que ce que les formats disent déjà, pour
+ * vingt-trois rendus de plus.
+ */
+const COUPES: Jeu[] = MOVE_TRANSITIONS.map((kind) => ({
+  nom: `coupe-${kind}`,
+  video: REFERENCE_VIDEO,
+  transition: kind,
+  moments: [momentDeLaCoupe(kind)],
+}));
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
-function projet(video: typeof REFERENCE_VIDEO, variant?: string): string {
+function projet(jeu: Jeu): string {
+  const { video, variant, transition } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
     cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
@@ -83,18 +116,24 @@ function projet(video: typeof REFERENCE_VIDEO, variant?: string): string {
     const render = shots[0].render as { kineticTitle?: { variant?: string } };
     if (render.kineticTitle) render.kineticTitle.variant = variant;
   }
+  if (transition) {
+    // La troisième scène est celle dont la coupe est capturée.
+    const effects = (shots[2].render as { effects?: { transition?: string } }).effects;
+    if (effects) effects.transition = transition;
+  }
+
   const storyboard = toHyperframesStoryboard(video, shots);
   writeFileSync(join(dir, 'index.html'), composeHtml({ storyboard, watermark: true }));
   return dir;
 }
 
-function capture(dir: string): string {
+function capture(dir: string, moments: typeof MOMENTS): string {
   const sortie = join(dir, 'captures');
   execFileSync(
     'npx',
     [
       'hyperframes', 'snapshot', dir,
-      '--at', MOMENTS.map((m) => m.at).join(','),
+      '--at', moments.map((m) => m.at).join(','),
       '--no-end', '--describe', 'false', '--no-browser-gpu',
       '-o', sortie,
     ],
@@ -128,14 +167,14 @@ function similarite(a: string, b: string): number {
 function main() {
   let echecs = 0;
 
-  let jeux: readonly { nom: string; video: typeof REFERENCE_VIDEO; variant?: string }[] =
-    FORMATS;
+  let jeux: Jeu[] = [...FORMATS];
   if (process.argv.includes('--styles')) jeux = [...jeux, ...STYLES];
   if (process.argv.includes('--titres')) jeux = [...jeux, ...TITRES];
+  if (process.argv.includes('--transitions')) jeux = [...jeux, ...COUPES];
 
-  for (const format of jeux) {
-    console.log(`\n${format.nom} · ${format.video.resolution}`);
-    echecs += passer(format.nom, format.video, format.variant);
+  for (const jeu of jeux) {
+    console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);
+    echecs += passer(jeu);
   }
 
   if (echecs > 0) {
@@ -145,33 +184,32 @@ function main() {
     );
     process.exit(1);
   }
-  console.log(`\n${MOMENTS.length * jeux.length} instants conformes.`);
+  const total = jeux.reduce((n, jeu) => n + (jeu.moments ?? MOMENTS).length, 0);
+  console.log(`\n${total} instants conformes.`);
 }
 
 /** Un format : on assemble, on capture, on compare, on nettoie. */
-function passer(
-  nom: string,
-  video: typeof REFERENCE_VIDEO,
-  variant?: string
-): number {
-  const dir = projet(video, variant);
+function passer(jeu: Jeu): number {
+  const nom = jeu.nom;
+  const moments = jeu.moments ?? MOMENTS;
+  const dir = projet(jeu);
   let echecs = 0;
 
   try {
-    const captures = capture(dir);
+    const captures = capture(dir, moments);
     const fichiers = readdirSync(captures)
       .filter((f) => f.endsWith('.png'))
       .sort();
 
-    if (fichiers.length !== MOMENTS.length) {
+    if (fichiers.length !== moments.length) {
       throw new Error(
-        `${fichiers.length} captures pour ${MOMENTS.length} instants attendus.`
+        `${fichiers.length} captures pour ${moments.length} instants attendus.`
       );
     }
 
     mkdirSync(REFERENCES, { recursive: true });
 
-    for (const [index, moment] of MOMENTS.entries()) {
+    for (const [index, moment] of moments.entries()) {
       const prise = join(captures, fichiers[index]);
       const etiquette = `${nom}-${moment.nom}`;
       const reference = join(REFERENCES, `${etiquette}.png`);
@@ -195,7 +233,8 @@ function passer(
       }
     }
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    if (garder) console.log(`  projet gardé      ${dir}`);
+    else rmSync(dir, { recursive: true, force: true });
   }
 
   return echecs;

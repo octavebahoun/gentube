@@ -106,9 +106,42 @@ plus simple, avant qu'on l'emprunte avec des enjeux.
 
 **Bloque** : rien. **Bloqué par** : rien.
 
-### Lot 2 — Les transitions sans WebGL  ·  palier 2
+### Lot 2 — Les transitions sans WebGL  ·  palier 2  ·  **fait le 2 septembre 2026**
 
 **Ce qui sort** : 23 transitions de plus dans `TRANSITIONS`, en CSS et GSAP.
+
+**Livré** : dix-sept gestes de plus, qui portent la famille par déplacement de
+six à vingt-trois. Trois sous-familles, et elles ne se lisent pas de la même
+façon :
+
+| Famille | Gestes | Ce qui bouge |
+|---|---|---|
+| Déplacements | `push-down`, `slide-diagonal`, `elastic-push` | les deux scènes |
+| Échelles | `fold`, `stretch` | les deux scènes |
+| Volets | `wipe-left/right/up/down`, `iris-in`, `box-iris`, `barn-doors`, `curtain`, `clock-wipe` | la découpe de l'entrante seule |
+| Bascules | `flip-x`, `flip-y`, `spin` | la rotation de l'entrante |
+
+La contrainte qui a décidé de la moitié des formes : **la scène entrante est
+toujours au-dessus dans le document**. Un geste où seule la sortante bougerait
+ne se verrait pas, l'entrante la couvrant déjà. C'est pourquoi les volets
+découpent l'entrante au lieu d'effacer la sortante, et pourquoi un `iris-out`
+— la sortante qui se referme en rond — n'existe pas.
+
+`clock-wipe` est le seul à sortir des transformations : un dégradé conique lit
+une variable CSS que GSAP fait tourner de 0 à 360. À 360 le masque est plein,
+donc la scène reste entière une fois la coupe passée.
+
+Aucun flou plein cadre : la rastérisation logicielle de Lambda le paie trop
+cher. Le flou reste réservé aux mots des titres.
+
+Vérifié par `--transitions`, une capture au milieu de chaque coupe — et cette
+vérification a servi. Trois gestes sur vingt-trois ne bougeaient pas du tout :
+`fold`, `squeeze` et `stretch` rendaient une scène entière et immobile. Le
+socle du tween posait `scale: 1` à côté du `scaleX: 0` de la forme, et GSAP
+traite `scale` comme un raccourci qui écrit scaleX **et** scaleY : il écrasait
+le geste. Corrigé le 3 septembre 2026 en ne posant au repos que les propriétés
+que la forme touche réellement. Les suites unitaires étaient vertes tout du
+long — elles voyaient le tween déclaré, pas le pixel.
 
 Elles s'ajoutent à côté des quatorze shaders, pas à leur place. Deux raisons de
 les vouloir malgré les shaders : elles ne demandent aucun WebGL, donc elles

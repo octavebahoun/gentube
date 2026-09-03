@@ -5,6 +5,24 @@ pnpm test:visual              # compare aux références
 npx tsx render/regression/run.ts --update   # les réécrit
 ```
 
+Trois passes s'ajoutent à la demande, hors du jeu par défaut pour qu'il reste
+lançable à chaque changement :
+
+```bash
+npx tsx render/regression/run.ts --styles       # un rendu par style de sous-titre
+npx tsx render/regression/run.ts --titres       # un rendu par variante de titre
+npx tsx render/regression/run.ts --transitions  # un rendu par transition par déplacement
+```
+
+`--transitions` ne capture qu'un instant par transition, au milieu de la
+troisième coupe : c'est le seul moment où un geste de transition existe.
+
+Ces passes ne sont pas décoratives. Le 3 septembre 2026, `--transitions` a
+montré que trois gestes sur vingt-trois — `fold`, `squeeze` et `stretch` —
+ne bougeaient pas du tout : le socle du tween posait `scale: 1` à côté du
+`scaleX: 0` de la forme, et GSAP écrase l'un par l'autre. Les 496 tests
+unitaires étaient verts.
+
 ## Pourquoi
 
 Les tests unitaires vérifient qu'un tween est déclaré au bon instant. Ils ne

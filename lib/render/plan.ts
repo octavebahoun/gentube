@@ -241,6 +241,7 @@ export function buildTimeline(
         overlay: scene.overlayText
           ? { at: ms(scene.startInSeconds + (scene.overlayText.startInSeconds ?? 0)) }
           : null,
+
         counter: scene.counter
           ? {
               at: ms(scene.startInSeconds + (scene.counter.startInSeconds ?? 0)),

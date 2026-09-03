@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { Shot, Video } from '@/lib/db/schema';
-import { toHyperframesStoryboard } from '@/lib/storyboard/render';
+import {
+  MOVE_TRANSITIONS,
+  TRANSITION_DURATIONS,
+  toHyperframesStoryboard,
+} from '@/lib/storyboard/render';
 import {
   composeHtml,
   fadeInSeconds,
@@ -198,6 +202,22 @@ describe('the composition HyperFrames renders', () => {
       expect(script).toContain('"#s" + move.from');
       expect(script).toContain('"#s" + move.to');
       expect(script).toContain('"push-left"');
+    });
+
+    /*
+     * Le silence est le danger de cette table : la boucle passe son chemin sur
+     * un geste qu'elle ne connaît pas. Un nom offert au modèle sans forme
+     * derrière rendrait une coupe sèche, sans rien casser ni rien dire.
+     */
+    it('gives every declared movement a shape and a duration', () => {
+      const page = withTransition('push-left');
+      const script = page.slice(page.lastIndexOf('<script>'));
+      const table = script.slice(script.indexOf('const MOVES = {'));
+
+      for (const kind of MOVE_TRANSITIONS) {
+        expect(table).toContain(`"${kind}":`);
+        expect(TRANSITION_DURATIONS[kind]).toBeGreaterThan(0);
+      }
     });
 
     const asScene = (transition: string) =>

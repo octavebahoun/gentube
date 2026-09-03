@@ -1,5 +1,10 @@
 import type { Shot, Video } from '@/lib/db/schema';
 import type { SceneRender } from '@/lib/storyboard/render';
+import { titleTargets } from '@/lib/render/plan';
+import {
+  toHyperframesStoryboard,
+  transitionDurationSeconds,
+} from '@/lib/storyboard/render';
 
 /**
  * Le storyboard de référence.
@@ -19,6 +24,15 @@ import type { SceneRender } from '@/lib/storyboard/render';
 
 type Fixture = { seconds: number; media: number | null; render: SceneRender };
 
+/**
+ * Le titre de la scène d'ouverture, et les réglages que la timeline lui
+ * applique par défaut. Repris ici pour que `momentDuTitre` puisse calculer
+ * quand l'animation finit sans rendre la page d'abord.
+ */
+const TITRE_DE_REFERENCE = 'TITRE CINETIQUE';
+const DUREE_PAR_DEFAUT = 0.5;
+const STAGGER_PAR_DEFAUT = 0.08;
+
 const FIXTURES: Fixture[] = [
   // 1. L'ouverture : aucune transition, un zoom avant, un titre cinétique.
   {
@@ -26,7 +40,7 @@ const FIXTURES: Fixture[] = [
     media: 1,
     render: {
       effects: { transition: 'none', zoom: 'in' },
-      kineticTitle: { text: 'TITRE CINETIQUE', variant: 'reveal', position: 'center' },
+      kineticTitle: { text: TITRE_DE_REFERENCE, variant: 'reveal', position: 'center' },
       // Deux mots porteurs, pour que les styles qui accentuent aient de quoi.
       emphasis: ['trois', 'six'],
     },
@@ -91,7 +105,16 @@ export function referenceShots(): Shot[] {
             start: Math.round(i * each * 1000) / 1000,
             duration: Math.round(each * 1000) / 1000,
           })),
-      render: fixture.render,
+      /*
+       * Une copie, jamais la fixture elle-même.
+       *
+       * Les passes imposent une variante de titre ou une transition en
+       * écrivant dans `render` du plan rendu. Partagé, cet objet emportait la
+       * dernière écriture dans tous les rendus suivants : le 2 septembre 2026,
+       * les quatorze références de base ont été écrites avec la transition
+       * `spin` parce qu'une passe l'avait posée là en calculant ses instants.
+       */
+      render: structuredClone(fixture.render),
     } as unknown as Shot;
   });
 }
@@ -123,18 +146,91 @@ export const REFERENCE_VIDEO_VERTICALE = {
   ratio: '9:16',
 } as unknown as Video;
 
+export type Moment = { at: number; nom: string };
+
+/** Deux décimales : la capture est à la milliseconde près, pas au-delà. */
+const arrondi = (secondes: number) => Math.round(secondes * 100) / 100;
+
+/** Les scènes minutées, une transition de la troisième pouvant être imposée. */
+function scenesMinutees(transition?: string) {
+  const shots = referenceShots();
+  if (transition) {
+    const effects = (shots[2].render as { effects?: { transition?: string } }).effects;
+    if (effects) effects.transition = transition;
+  }
+  return toHyperframesStoryboard(REFERENCE_VIDEO, shots).scenes;
+}
+
 /**
  * Les instants capturés, et ce que chacun surveille.
  *
- * Pris au milieu des gestes plutôt qu'à leur début : une transition ne dit rien
- * à son premier pour cent. Les noms servent de messages d'échec.
+ * **Calculés, plus écrits à la main.** Les sept étaient des nombres fixes
+ * jusqu'au 2 septembre 2026, et six d'entre eux avaient dérivé : la durée des
+ * scènes a changé sous eux, et l'instant nommé « poussée » tombait une seconde
+ * avant le début de la poussée. La garde comparait des images stables qui ne
+ * contenaient pas ce que leur nom promettait — verte, et aveugle.
+ *
+ * Un instant de coupe se prend au milieu du geste : une transition ne dit rien
+ * à son premier pour cent. Un instant de contenu se prend une fois la coupe
+ * finie, pour que le plan soit seul à l'écran.
  */
-export const MOMENTS: { at: number; nom: string }[] = [
-  { at: 1.2, nom: 'titre-cinetique' },
-  { at: 2.9, nom: 'fondu-enchaine' },
-  { at: 5.9, nom: 'poussee-gauche' },
-  { at: 8.9, nom: 'shader-glitch' },
-  { at: 10.5, nom: 'bandeau' },
-  { at: 12.4, nom: 'compteur' },
-  { at: 15.2, nom: 'carte-de-fin' },
-];
+export function momentsDeReference(): Moment[] {
+  const scenes = scenesMinutees();
+  const auMilieuDeLaCoupe = (index: number) =>
+    arrondi(
+      scenes[index].startInSeconds +
+        transitionDurationSeconds(FIXTURES[index].render.effects?.transition) / 2
+    );
+  const dansLaScene = (index: number, apres: number) =>
+    arrondi(scenes[index].startInSeconds + apres);
+
+  return [
+    { at: dansLaScene(0, 1.2), nom: 'titre-cinetique' },
+    { at: auMilieuDeLaCoupe(1), nom: 'fondu-enchaine' },
+    { at: auMilieuDeLaCoupe(2), nom: 'poussee-gauche' },
+    { at: auMilieuDeLaCoupe(3), nom: 'shader-glitch' },
+    { at: dansLaScene(3, 2), nom: 'bandeau' },
+    { at: dansLaScene(4, 1.5), nom: 'compteur' },
+    { at: dansLaScene(5, 1.2), nom: 'carte-de-fin' },
+  ];
+}
+
+/**
+ * Le milieu de la troisième coupe, pour une transition imposée.
+ *
+ * Chaque transition a sa durée, et la durée d'une coupe décale le début de la
+ * scène qui arrive : l'instant se recalcule pour chacune, il ne se partage pas.
+ */
+/**
+ * Le milieu de l'animation du titre, variante par variante.
+ *
+ * Un instant unique ne pouvait pas convenir aux deux familles : les variantes
+ * qui animent le **mot** ont deux cibles et ont fini en 0,58 s, celles qui
+ * animent la **lettre** en ont quatorze et courent jusqu'à 1,62 s. L'ancien
+ * instant partagé — 1,2 s — tombait après la fin des premières : les vingt-sept
+ * références montraient le même titre au repos, et une variante qui aurait
+ * cessé de s'animer serait passée pour conforme.
+ *
+ * La durée totale est celle du dernier décalage plus un tween, et on la coupe
+ * en deux : la moitié des cibles a bougé, l'autre pas.
+ */
+export function momentDuTitre(variant: string): Moment {
+  const titre = { text: TITRE_DE_REFERENCE, variant };
+  const cibles = titleTargets(titre, 0).length;
+  const totale = (cibles - 1) * STAGGER_PAR_DEFAUT + DUREE_PAR_DEFAUT;
+  const scenes = scenesMinutees();
+  return {
+    at: arrondi(scenes[0].startInSeconds + totale / 2),
+    nom: 'titre',
+  };
+}
+
+export function momentDeLaCoupe(transition: string): Moment {
+  const scenes = scenesMinutees(transition);
+  return {
+    at: arrondi(scenes[2].startInSeconds + transitionDurationSeconds(transition) / 2),
+    nom: 'coupe',
+  };
+}
+
+export const MOMENTS: Moment[] = momentsDeReference();
