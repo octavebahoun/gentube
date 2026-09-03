@@ -176,11 +176,12 @@ famille partent dans leur propre fichier, comme `plans.ts`.
 
 ## 6. Ce qui reste
 
-**Tous paliers confondus : 278 entrées sur 373.** 82 rendues, 13 partielles.
+**Tous paliers confondus : 223 entrées sur 373.** 137 rendues, 13 partielles.
+Relevé après la vérification du §8, pas d'après les coches des paliers.
 
 | Palier | Reste | Sur | Rendues | Partielles |
 |---|---|---|---|---|
-| 1 | 57 | 105 | 46 | 2 |
+| 1 | 2 | 105 | 101 | 2 |
 | 2 | 138 | 165 | 20 | 7 |
 | **3** | **83** | **103** | **16** | **4** |
 
@@ -234,3 +235,59 @@ se sont retrouvées dans des commits d'un autre palier qui ne les mentionne pas
 — et l'épaississement de la courbe est parti dans « Neuf nappes du palier 2 »,
 qui ne parle pas de graphique. Rien n'est perdu, mais l'historique ment par
 endroits.
+
+---
+
+## 8. Vérification des paliers 1 et 2
+
+**3 septembre 2026, 13 h.** Les deux paliers ont coché leurs listes. Vérifié
+dans le code, pas dans les coches.
+
+### Palier 1 — fini
+
+| Vocabulaire | Déclaré | Avec un geste |
+|---|---|---|
+| `MOVE_TRANSITIONS` | 44 | 44 |
+| `SHADER_TRANSITIONS` | 14 | 14 (connus du `vendor/shader-transitions.min.js`) |
+| variantes de `kineticTitle` | 55 | 55 dans `TITRES` |
+| styles de sous-titres | 9 | 8 dans `MOTS` + `cinematic`, court-circuité avant |
+
+56 entrées cochées sur 57. `caption-particle-burst` est **différé** — rendu de
+particules trop lourd sur Lambda, et c'est la bonne décision. Une seule coche
+ne tient pas : **`vox-annotate` n'existe nulle part** dans le dépôt, sous aucun
+nom. Elle reste au reste dans le catalogue.
+
+### Palier 2 — pas fini
+
+162 entrées cochées, et **le rendu n'en dessine aucune.**
+
+Les six lots et la « finalisation » n'ont touché qu'un seul fichier de code :
+`lib/storyboard/render.ts`, les schémas. Pas une ligne de balisage, pas une
+règle de CSS, pas un tween. Le dernier commit à lui seul ajoute 703 lignes de
+contrat et rien d'autre.
+
+Mesuré, pas déduit. Pour chacun des **178 champs** de `sceneEffectsSchema`, on
+compose la page avec le champ rempli et on la compare à la même page sans lui :
+
+- **18 changent la page.** `shake`, `flash`, `lightSweep`, `grain`,
+  `beatAccent`, les neuf de la table des nappes, les quatre `hw*`.
+- **160 rendent une page identique à l'octet près.**
+
+Un storyboard peut donc demander `vfxShatter`, `ltCleanBar` ou `ytLogoIntro` :
+le contrat valide, la génération part, la vidéo est facturée, et l'écran est le
+même que sans. C'est exactement la panne du compteur au §2, en cent soixante
+fois.
+
+Les tests ne le voient pas et ne le verront pas : un champ optionnel que
+personne ne lit ne casse rien. **La seule garde qui l'aurait vu est la
+comparaison à l'image** — ou ce script de trois lignes.
+
+Ce qu'il reste à faire pour ces 162 est donc l'essentiel du travail : le
+balisage, le CSS, le tween et une passe de garde, pour chacune. La table de
+`lib/storyboard/effets.ts` est là pour ça — une nappe y est une ligne, et le
+schéma, le balisage et la timeline s'en déduisent tous les trois.
+
+Et pour les champs en forme de compte — `flowchart { nodesCount }`,
+`metricCalloutGrid { cards }`, `vfxShatter { piecesCount }` — la remarque du §4
+tient toujours : ils dessineront des boîtes vides. `hwPipeline`, qui reçoit les
+**noms**, est la forme à reprendre.
