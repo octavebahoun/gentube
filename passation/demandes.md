@@ -75,3 +75,40 @@ Timeline: dans buildTimeline, scene.beatAccent ? { at: onBeat(scene, beats, scen
 Balisage: aucun. Le tween pulse #s<index> (et #m<index> en plus si scene.hoisted, car le clip est hors du div) : pulse sur la scene, jamais sur #m d une image, pour ne pas se battre avec l echelle du Ken Burns. Aucune piste.
 Prompt  : "- `beatAccent` is optional: a single music-hit sting, the frame micro-pulses and decays immediately. Use it on a word that lands hard. { strength? (default 0.035), startInSeconds?, durationInSeconds? }."
 
+## palier 2 · 2026-09-03 01:41
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.vignette
+Forme   : { strength?: number }
+Timeline: rien. C est un etat, pas un geste : aucune donnee de temps a calculer.
+Balisage: <div class="vignette" id="vg<index>" style="--vg-strength:<strength>"> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste : div non minute, il vit et meurt avec sa scene.
+Prompt  : "- `vignette` is optional: a soft radial darkening that pulls focus toward the center. { strength? (default 0.55) }."
+
+## palier 2 · 2026-09-03 01:41
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.shockRing
+Forme   : { startInSeconds?: number, durationInSeconds?: number, color?: string }
+Timeline: dans buildTimeline, scene.shockRing ? { at: onBeat(scene, beats, scene.startInSeconds + (startInSeconds ?? 0.3)), duration: durationInSeconds ?? 0.6, color: color ?? '#ce1f20' } : null
+Balisage: <div class="shock-ring" id="sr<index>" style="--ring-color:<color>"> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste, meme raison que lightSweep.
+Prompt  : "- `shockRing` is optional: one accent ring expands from the center and fades, like a logo sting. Use it when a name or number lands. { color? (default #ce1f20), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
+
+## palier 2 · 2026-09-03 01:41
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.featherSpot
+Forme   : { startInSeconds?: number, durationInSeconds?: number, x?: number, y?: number, size?: number }
+Timeline: dans buildTimeline, scene.featherSpot ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0)), duration: min(durationInSeconds ?? (fin - at), fin - at), x: x ?? 50, y: y ?? 42, size: size ?? 40 } : null. Pas de onBeat : c est un placement, pas une frappe. x, y, size en pourcents du cadre.
+Balisage: <div class="feather-spot" id="fs<index>" style="--spot-x:<x>%;--spot-y:<y>%;--spot-size:<size>%"> dans sceneMarkup, dans le div .scene apres le grain. Aucune piste.
+Prompt  : "- `featherSpot` is optional: the frame dims except a soft elliptical hole that spotlights one area. { x?, y?, size? (percents, default 50/42/40), startInSeconds?, durationInSeconds? }. Covers the whole scene by default."
+
+## palier 1 · 2026-09-03 02:45
+Fichier : lib/storyboard/render.ts
+Enum    : kineticTitle.variant
+Ajouter : 'callout', 'morphtext'
+Prompt  : Add kineticTitle variants ('callout', 'morphtext') to system prompt.
+
+## palier 1 · 2026-09-03 02:46
+Fichier : lib/storyboard/render.ts
+Enum    : MOVE_TRANSITIONS
+Ajouter : 'freeze-cut', 'editorial-flash-overlay', 'hw-scribble-transition', 'vfx-text-cursor', 'organic-light-leak-overlay', 'ordered-dither-pass', 'parallax-device-dive', 'halftone-field'
+Prompt  : Add new transition and overlay primitives ('freeze-cut', 'editorial-flash-overlay', 'hw-scribble-transition', 'vfx-text-cursor', 'organic-light-leak-overlay', 'ordered-dither-pass', 'parallax-device-dive', 'halftone-field') to system prompt transition enum.
+
+
