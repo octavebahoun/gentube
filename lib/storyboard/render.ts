@@ -519,6 +519,709 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
+  vfxLiquidBackground: z
+    .object({
+      speed: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  vfxLiquidGlass: z
+    .object({
+      blur: z.number().min(0).max(20).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  vfxMagnetic: z
+    .object({
+      strength: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  vfxPortal: z
+    .object({
+      scale: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  vfxShatter: z
+    .object({
+      piecesCount: z.number().int().min(5).max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ios26LiquidGlass: z
+    .object({
+      wallpaper: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ytLogoIntro: z
+    .object({
+      title: z.string().min(1).max(100),
+      kicker: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltAccentUnderline: z
+    .object({
+      name: z.string().min(1).max(100),
+      role: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltBoldBlock: z
+    .object({
+      name: z.string().min(1).max(100),
+      tag: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltCleanBar: z
+    .object({
+      name: z.string().min(1).max(100),
+      role: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltColorBlock: z
+    .object({
+      name: z.string().min(1).max(100),
+      role: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltKickerName: z
+    .object({
+      name: z.string().min(1).max(100),
+      kicker: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltMaskReveal: z
+    .object({
+      name: z.string().min(1).max(100),
+      role: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltNeonBorder: z
+    .object({
+      name: z.string().min(1).max(100),
+      role: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltSoftPill: z
+    .object({
+      name: z.string().min(1).max(100),
+      role: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ltStackBars: z
+    .object({
+      name: z.string().min(1).max(100),
+      role: z.string().max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  newsTicker: z
+    .object({
+      headline: z.string().min(1).max(200),
+      label: z.string().max(50).optional(),
+      items: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  asciiRenderPass: z
+    .object({
+      charset: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  asciiTrailReveal: z
+    .object({
+      label: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  auroraDrift: z
+    .object({
+      intensity: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  beatPulseBackground: z
+    .object({
+      frequency: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  bottomUpLetters: z
+    .object({
+      text: z.string(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  chartStory: z
+    .object({
+      title: z.string().optional(),
+      kind: z.enum(['bar', 'line', 'donut']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  constellationHub: z
+    .object({
+      title: z.string().optional(),
+      nodes: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ctaClose: z
+    .object({
+      headline: z.string(),
+      buttonText: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ctaLockup: z
+    .object({
+      headline: z.string(),
+      buttonText: z.string().optional(),
+      subtext: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  cursorGlyphTrail: z
+    .object({
+      speed: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  driftHold: z
+    .object({
+      speed: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  echoTrail: z
+    .object({
+      count: z.number().int().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  facetMorph: z
+    .object({
+      silhouettes: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  focusRack: z
+    .object({
+      blurAmount: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  gestureTap: z
+    .object({
+      label: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  glossSweep: z
+    .object({
+      angle: z.number().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  grainField: z
+    .object({
+      density: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  gridCardAssemble: z
+    .object({
+      count: z.number().int().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  inkBleedReveal: z
+    .object({
+      label: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  inlineHighlight: z
+    .object({
+      color: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  kineticTypeSwap: z
+    .object({
+      sentence: z.string().optional(),
+      options: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  lightSweepPass: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  lineSwap: z
+    .object({
+      lineA: z.string().optional(),
+      lineB: z.string().optional(),
+      accentWord: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  lockedNucleusOrbit: z
+    .object({
+      satellites: z.number().int().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  logoSting: z
+    .object({
+      label: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  markerChecklistCard: z
+    .object({
+      headline: z.string().optional(),
+      items: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  modalMorph: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  multiDeviceSplay: z
+    .object({
+      devices: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  outlineDraw: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  oversizedCursor: z
+    .object({
+      targetId: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  particleImageReveal: z
+    .object({
+      particleCount: z.number().int().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  particleTextDissolve: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  physicalExit: z
+    .object({
+      mode: z.enum(["toss", "drop", "slide"]).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  pullBackReveal: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  pushIn: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  radialSurround: z
+    .object({
+      chips: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  scrambleReveal: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  scrollFeed: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  slitScanReveal: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  socialProofCard: z
+    .object({
+      headline: z.string().optional(),
+      rating: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  softBlurIn: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  splitTiltCards: z
+    .object({
+      cardA: z.string().optional(),
+      cardB: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  springPop: z
+    .object({
+      label: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  stitchedTextDraw: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  stopMotionCadence: z
+    .object({
+      fps: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  svgStrokeTrace: z
+    .object({
+      pathData: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  swipeRail: z
+    .object({
+      cards: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  testimonialProofCard: z
+    .object({
+      quote: z.string().optional(),
+      author: z.string().optional(),
+      role: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  textShimmer: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  touchIndicator: z
+    .object({
+      mode: z.enum(["tap", "swipe"]).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  trustStrip: z
+    .object({
+      logos: z.array(z.string()).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  variableFontFlex: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  velocityThrowSnap: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  whiteboardInk: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  notificationPileup: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  beatTimeline: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  mkPlaceholderGrid: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ytVerticalFill: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  pullToRefresh: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  beforeAfterWipe: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  cameraScanGate: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  comparisonSplit: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  deviceFrameStage: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  storeBadgeLockup: z
+    .object({
+      headline: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  testimonialCard: z
+    .object({
+      quote: z.string().optional(),
+      author: z.string().optional(),
+      handle: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  toggleFlip: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  vectorEditorRig: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  instagramFollow: z
+    .object({
+      username: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  macosNotification: z
+    .object({
+      title: z.string().optional(),
+      message: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  redditPost: z
+    .object({
+      title: z.string().optional(),
+      author: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  spotifyCard: z
+    .object({
+      track: z.string().optional(),
+      artist: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  threadMessageStack: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  tiktokFollow: z
+    .object({
+      username: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  xPost: z
+    .object({
+      text: z.string().optional(),
+      handle: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ytCommentCard: z
+    .object({
+      text: z.string().optional(),
+      author: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ytLowerThird: z
+    .object({
+      channelName: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  xFollowCard: z
+    .object({
+      handle: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  captionBlendDifference: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  shimmerSweep: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  splitFlapBoard: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  textureMaskText: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  grainOverlay: z
+    .object({
+      intensity: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  onboardingStepperFlow: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  settingsToggleFlow: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  signupFlow: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  arcMotionPath: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  blurIn: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  dynamicGrid: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  separator: z
+    .object({
+      orientation: z.enum(["horizontal", "vertical"]).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  simulatedCursor: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  streamingText: z
+    .object({
+      text: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  svgLineDrawLoader: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  threeOrbitingCards: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  vignette: z
+    .object({
+      intensity: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  cameraRigDepthStack: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  keyframeScrubStack: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  staggerLattice: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ytCirclePointer: z
+    .object({
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  logoOutro: z
+    .object({
+      logoUrl: z.string().optional(),
+      tagline: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  lowerThirdBild: z
+    .object({
+      headline: z.string().optional(),
+      subline: z.string().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
   /*
    * Les nappes déclarées dans `effets.ts`.
    *
