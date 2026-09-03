@@ -147,6 +147,45 @@ Timeline: dans buildTimeline, scene.outlineDraw ? { at: onBeat(scene, beats, sce
 Balisage: <div class="outline-draw" id="od<index>" style="--trace-color:<color>"><i class="od-t"></i><i class="od-r"></i><i class="od-b"></i><i class="od-l"></i></div> dans sceneMarkup, dans le div .scene apres le grain. Des divs, pas de SVG : pathLength est ignore sur les formes et le tiret tombait sur le vrai perimetre (verifie a l image). Aucune piste.
 Prompt  : "- `outlineDraw` is optional: a rounded outline draws itself clockwise around the frame to prove a callout. { color? (default #ffd9a0), startInSeconds?, durationInSeconds? }. Snaps to the beat when `onBeat` is true."
 
+## [fait] palier 2 · 2026-09-03 11:01
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.hwBoil
+Forme   : { amount?: number, startInSeconds?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.hwBoil ? { amount: amount ?? 1, at: ms(scene.startInSeconds + (startInSeconds ?? 0)), duration: min(durationInSeconds ?? (fin - at), fin - at) } : null. 0 = fige, 1 = calme (+-1px), 2 = vif (+-2.2px). Pas de balisage : c est le bouton commun que chaque noeud hw lit (boil propre ?? hwBoil.amount ?? 1). Aucune piste.
+Prompt  : "- `hwBoil` is optional: hand-drawn strokes re-pose with a lively jitter while on screen. { amount? (0 still, 1 calm, 2 lively, default 1) }. Applies to every handwritten overlay of the scene."
+
+## [fait] palier 2 · 2026-09-03 11:01
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.hwBoxLabel
+Forme   : { label?: string, startInSeconds?: number, durationInSeconds?: number, boil?: number, color?: string }
+Timeline: dans buildTimeline, scene.hwBoxLabel ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.4)), duration: durationInSeconds ?? 1.2, label: label ?? null, color: color ?? '#ffffff', boil: boil ?? scene.hwBoil?.amount ?? 1 } : null. Le tween dessine le trait sur la premiere moitie, fait claquer le label a mi-chemin, boue ensuite.
+Balisage: <div class="hw-box" id="hb<index>" style="--hw-ink:<color>"><svg viewBox="0 0 100 62" preserveAspectRatio="none"><path id="hb<index>-0" d="<rectangle arrondi wobble>" pathLength="100" /></svg> + label ? <div class="hw-label" id="hb<index>-l">label</div> : ''. Un path, pas un rect : Chrome ignore pathLength sur les formes. Aucune piste.
+Prompt  : "- `hwBoxLabel` is optional: a wobbled hand-drawn rounded box draws on with a handwritten label. { label?, startInSeconds?, durationInSeconds?, boil?, color? }."
+
+## [fait] palier 2 · 2026-09-03 11:01
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.hwCalloutCircle
+Forme   : { label?: string, x?: number, y?: number, size?: number, startInSeconds?: number, durationInSeconds?: number, boil?: number, color?: string }
+Timeline: dans buildTimeline, scene.hwCalloutCircle ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.4)), duration: durationInSeconds ?? 1.2, x: x ?? 50, y: y ?? 45, size: size ?? 30, label: label ?? null, color: color ?? '#ffffff', boil: boil ?? scene.hwBoil?.amount ?? 1 } : null. x, y, size en pourcents.
+Balisage: <div class="hw-callout" id="hc<index>" style="--hw-ink:<color>;left:<x-size/2>%;top:<y-size/2>%;width:<size>%"><svg viewBox="0 0 100 100"><path id="hc<index>-0" d="<ellipse wobble>" pathLength="100" /></svg> + label ? <div class="hw-label" id="hc<index>-l">label</div> : ''. Aucune piste.
+Prompt  : "- `hwCalloutCircle` is optional: a wobbled hand-drawn ellipse circles a target with a handwritten label. { label?, x?, y?, size? (percents, default 50/45/30), startInSeconds?, durationInSeconds?, boil?, color? }."
+
+## [fait] palier 2 · 2026-09-03 11:01
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.hwFrame
+Forme   : { caption?: string, startInSeconds?: number, durationInSeconds?: number, boil?: number, color?: string }
+Timeline: dans buildTimeline, scene.hwFrame ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.2)), duration: durationInSeconds ?? 1.4, caption: caption ?? null, color: color ?? '#ffffff', boil: boil ?? scene.hwBoil?.amount ?? 1 } : null. Bordure puis griffonnages en sequence sur duration.
+Balisage: <div class="hw-frame" id="hf<index>" style="--hw-ink:<color>"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path id="hf<index>-0" d="<bordure>" pathLength="100" /><path id="hf<index>-1" d="<doodle1>" pathLength="100" /><path id="hf<index>-2" d="<doodle2>" pathLength="100" /></svg> + caption ? <div class="hw-caption" id="hf<index>-l">caption</div> : ''. Images dedans (le media reste), jamais de clip hisse : un plan anime garde son element video hors du div. Aucune piste.
+Prompt  : "- `hwFrame` is optional: the still image sits in a hand-drawn border with corner doodles and a handwritten caption. { caption?, startInSeconds?, durationInSeconds?, boil?, color? }. Stills only, never a video clip."
+
+## [fait] palier 2 · 2026-09-03 11:01
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.hwPipeline
+Forme   : { nodes: string[], startInSeconds?: number, durationInSeconds?: number, boil?: number, color?: string }
+Timeline: dans buildTimeline, scene.hwPipeline ? { at: ms(scene.startInSeconds + (startInSeconds ?? 0.3)), duration: durationInSeconds ?? Math.min(2.4, 0.6 * nodes.length), color: color ?? '#ffffff', boil: boil ?? scene.hwBoil?.amount ?? 1, boxes: N instants (un par boite), traits: N-1 {at, duree} en sequence, labels: N instants colles aux boites } : null. La sequence tient dans duration, en boite-liaison-boite.
+Balisage: <div class="hw-pipe" id="hp<index>" style="--hw-ink:<color>"> + par noeud <div class="hw-node" id="hp<index>-n<k>"><div class="hw-label" id="hp<index>-l<k>">noeud</div></div> + entre noeuds <svg><path id="hp<index>-c<k>" d="<liaison courbe wobble>" pathLength="100" /></svg>. Boites en flex, liaisons en absolu entre elles. Aucune piste.
+Prompt  : "- `hwPipeline` is optional: wobbled boxes with handwritten labels join in sequence from a node list. { nodes: string[] (2 to 4), startInSeconds?, durationInSeconds?, boil?, color? }."
+
 ## [fait] palier 1 · 2026-09-03 02:45
 Fichier : lib/storyboard/render.ts
 Enum    : kineticTitle.variant
@@ -159,7 +198,7 @@ Enum    : MOVE_TRANSITIONS
 Ajouter : 'freeze-cut', 'editorial-flash-overlay', 'hw-scribble-transition', 'vfx-text-cursor', 'organic-light-leak-overlay', 'ordered-dither-pass', 'parallax-device-dive', 'halftone-field'
 Prompt  : Add new transition and overlay primitives ('freeze-cut', 'editorial-flash-overlay', 'hw-scribble-transition', 'vfx-text-cursor', 'organic-light-leak-overlay', 'ordered-dither-pass', 'parallax-device-dive', 'halftone-field') to system prompt transition enum.
 
-## palier 2 · 2026-09-03 02:57
+## [fait] palier 2 · 2026-09-03 02:57
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.mkBackground
 Forme   : { startInSeconds?: number, frostedGlass?: boolean }
@@ -167,7 +206,7 @@ Timeline: dans buildTimeline, scene.mkBackground ? { at: ms(scene.startInSeconds
 Balisage: <div class="mk-background" id="mkbg<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `mkBackground` is optional: procedural soft-blob gradient backdrop. { frostedGlass?, startInSeconds? }"
 
-## palier 2 · 2026-09-03 02:57
+## [fait] palier 2 · 2026-09-03 02:57
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ytLcdBackground
 Forme   : { scanlines?: boolean, grain?: boolean }
@@ -175,19 +214,19 @@ Timeline: dans buildTimeline, scene.ytLcdBackground ? { scanlines: scanlines ?? 
 Balisage: <div class="yt-lcd-background" id="ytlcd<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ytLcdBackground` is optional: textured paper scanlines drift backdrop. { scanlines?, grain? }"
 
-## palier 2 · 2026-09-03 02:57
+## [fait] palier 2 · 2026-09-03 02:57
 Fichier : lib/storyboard/render.ts
 Enum    : kineticTitle.variant
 Ajouter : 'logo-outro'
 Prompt  : Add kineticTitle variant 'logo-outro' to system prompt.
 
-## palier 2 · 2026-09-03 02:57
+## [fait] palier 2 · 2026-09-03 02:57
 Fichier : lib/storyboard/render.ts
 Enum    : lowerThirdSchema.variant
 Ajouter : 'bild'
 Prompt  : Add lowerThird variant 'bild' (news-style tight fit red/white boxes) to system prompt.
 
-## palier 2 · 2026-09-03 02:57
+## [fait] palier 2 · 2026-09-03 02:57
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.camcorderHud
 Forme   : { showBattery?: boolean, showRec?: boolean, dateText?: string }
@@ -195,7 +234,7 @@ Timeline: dans buildTimeline, scene.camcorderHud ? { showBattery: showBattery ??
 Balisage: <div class="camcorder-hud" id="chud<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `camcorderHud` is optional: retro camcorder overlay with REC badge, battery, date/counter. { showBattery?, showRec?, dateText? }"
 
-## palier 2 · 2026-09-03 02:57
+## [fait] palier 2 · 2026-09-03 02:57
 Fichier : lib/storyboard/render.ts
 Enum    : MOVE_TRANSITIONS & sceneEffectsSchema.cameraDollyZoom
 Ajouter : 'camera-dolly-zoom'
@@ -203,7 +242,7 @@ Forme   : { direction?: 'in' | 'out', durationInSeconds?: number }
 Timeline: dans buildTimeline, scene.cameraDollyZoom ? { direction: direction ?? 'in', durationInSeconds: durationInSeconds ?? 0.75 } : null
 Prompt  : Add transition 'camera-dolly-zoom' and effect `cameraDollyZoom` to system prompt.
 
-## palier 2 · 2026-09-03 03:10
+## [fait] palier 2 · 2026-09-03 03:10
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.cameraShake
 Forme   : { profile?: string, intensity?: number, durationInSeconds?: number }
@@ -211,7 +250,7 @@ Timeline: dans buildTimeline, scene.cameraShake ? { profile: profile ?? 'handhel
 Balisage: appliqué via transform shake sur .scene
 Prompt  : "- `cameraShake` is optional: procedural handheld/lens camera shake. { profile?, intensity?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 03:10
+## [fait] palier 2 · 2026-09-03 03:10
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.panStations
 Forme   : { stops?: number, durationInSeconds?: number }
@@ -219,7 +258,7 @@ Timeline: dans buildTimeline, scene.panStations ? { stops: stops ?? 3, durationI
 Balisage: appliqué via keyframed pan sur .scene
 Prompt  : "- `panStations` is optional: lateral camera move across continuous station stops. { stops?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 03:10
+## [fait] palier 2 · 2026-09-03 03:10
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.scrollCameraStory
 Forme   : { sections?: number, durationInSeconds?: number }
@@ -227,14 +266,14 @@ Timeline: dans buildTimeline, scene.scrollCameraStory ? { sections: sections ?? 
 Balisage: appliqué via vertical parallax scroll sur .scene
 Prompt  : "- `scrollCameraStory` is optional: vertical scroll camera pass with parallax layers. { sections?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 03:10
+## [fait] palier 2 · 2026-09-03 03:10
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ytCameraMove
 Forme   : { mode?: 'zoom' | 'slide' | 'tilt', durationInSeconds?: number }
 Timeline: dans buildTimeline, scene.ytCameraMove ? { mode: mode ?? 'zoom', durationInSeconds: durationInSeconds ?? 1.5 } : null
 Prompt  : "- `ytCameraMove` is optional: dynamic camera zoom/slide/tilt helper with defocus pulse. { mode?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 03:10
+## [fait] palier 2 · 2026-09-03 03:10
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.terminalSimulator
 Forme   : { command?: string, output?: string }
@@ -242,7 +281,7 @@ Timeline: dans buildTimeline, scene.terminalSimulator ? { command: command ?? ''
 Balisage: <div class="terminal-simulator" id="tsim<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `terminalSimulator` is optional: retro terminal window streaming typed commands & output. { command?, output? }"
 
-## palier 2 · 2026-09-03 11:13
+## [fait] palier 2 · 2026-09-03 11:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.gradeSplitReveal
 Forme   : { startInSeconds?: number, durationInSeconds?: number }
@@ -250,7 +289,7 @@ Timeline: dans buildTimeline, scene.gradeSplitReveal ? { at: ms(scene.startInSec
 Balisage: <div class="grade-split-reveal" id="gsr<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `gradeSplitReveal` is optional: split sweep comparison between raw media and color-graded media. { startInSeconds?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:13
+## [fait] palier 2 · 2026-09-03 11:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.multiplayerCursors
 Forme   : { count?: number, durationInSeconds?: number }
@@ -258,7 +297,7 @@ Timeline: dans buildTimeline, scene.multiplayerCursors ? { count: count ?? 3, du
 Balisage: <div class="multiplayer-cursors" id="mpc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `multiplayerCursors` is optional: labeled collaborator cursors drifting into a shared center zone. { count?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:13
+## [fait] palier 2 · 2026-09-03 11:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.mkLineGraph
 Forme   : { seriesCount?: number, durationInSeconds?: number }
@@ -266,7 +305,7 @@ Timeline: dans buildTimeline, scene.mkLineGraph ? { seriesCount: seriesCount ?? 
 Balisage: <div class="mk-line-graph" id="mklg<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `mkLineGraph` is optional: SVG line series graph draw-on with animated dot markers. { seriesCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:13
+## [fait] palier 2 · 2026-09-03 11:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.badgeMatrix
 Forme   : { rows?: number, cols?: number, durationInSeconds?: number }
@@ -274,7 +313,7 @@ Timeline: dans buildTimeline, scene.badgeMatrix ? { rows: rows ?? 2, cols: cols 
 Balisage: <div class="badge-matrix" id="bmx<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `badgeMatrix` is optional: grid matrix of status pills (success/warning/neutral). { rows?, cols?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:13
+## [fait] palier 2 · 2026-09-03 11:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.metricCalloutGrid
 Forme   : { cards?: number, durationInSeconds?: number }
@@ -282,7 +321,7 @@ Timeline: dans buildTimeline, scene.metricCalloutGrid ? { cards: cards ?? 3, dur
 Balisage: <div class="metric-callout-grid" id="mcg<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `metricCalloutGrid` is optional: multi-card KPI display grid with stagger animation. { cards?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:13
+## [fait] palier 2 · 2026-09-03 11:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.mkProgressStat
 Forme   : { value?: number, max?: number, durationInSeconds?: number }
@@ -290,7 +329,7 @@ Timeline: dans buildTimeline, scene.mkProgressStat ? { value: value ?? 85, max: 
 Balisage: <div class="mk-progress-stat" id="mkps<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `mkProgressStat` is optional: big numeral count-up with progress bar filling to target. { value?, max?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:13
+## [fait] palier 2 · 2026-09-03 11:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.mkSpecsList
 Forme   : { itemsCount?: number, durationInSeconds?: number }
@@ -298,7 +337,7 @@ Timeline: dans buildTimeline, scene.mkSpecsList ? { itemsCount: itemsCount ?? 4,
 Balisage: <div class="mk-specs-list" id="mksl<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `mkSpecsList` is optional: left-aligned checklist with staggered row slide-ins. { itemsCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:14
+## [fait] palier 2 · 2026-09-03 11:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.mkUsageArc
 Forme   : { percentage?: number, durationInSeconds?: number }
@@ -306,7 +345,7 @@ Timeline: dans buildTimeline, scene.mkUsageArc ? { percentage: percentage ?? 75,
 Balisage: <div class="mk-usage-arc" id="mkua<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `mkUsageArc` is optional: circular gauge drawing on with count-up percentage. { percentage?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:14
+## [fait] palier 2 · 2026-09-03 11:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.flowchart
 Forme   : { nodesCount?: number, durationInSeconds?: number }
@@ -314,7 +353,7 @@ Timeline: dans buildTimeline, scene.flowchart ? { nodesCount: nodesCount ?? 4, d
 Balisage: <div class="flowchart" id="fc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `flowchart` is optional: horizontal animated decision tree with connected nodes. { nodesCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:14
+## [fait] palier 2 · 2026-09-03 11:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.flowchartVertical
 Forme   : { nodesCount?: number, durationInSeconds?: number }
@@ -322,7 +361,7 @@ Timeline: dans buildTimeline, scene.flowchartVertical ? { nodesCount: nodesCount
 Balisage: <div class="flowchart-vertical" id="fcv<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `flowchartVertical` is optional: vertical portrait decision tree with connected nodes. { nodesCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:14
+## [fait] palier 2 · 2026-09-03 11:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.confetti
 Forme   : { particleCount?: number, durationInSeconds?: number }
@@ -330,7 +369,7 @@ Timeline: dans buildTimeline, scene.confetti ? { particleCount: particleCount ??
 Balisage: <div class="confetti" id="cnf<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `confetti` is optional: deterministic particle burst celebration effect. { particleCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:14
+## [fait] palier 2 · 2026-09-03 11:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.focusSwap
 Forme   : { targetCard?: 'left' | 'right', durationInSeconds?: number }
@@ -338,7 +377,7 @@ Timeline: dans buildTimeline, scene.focusSwap ? { targetCard: targetCard ?? 'lef
 Balisage: <div class="focus-swap" id="fsw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `focusSwap` is optional: card focus swap with blur and scale depth transitions. { targetCard?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:15
+## [fait] palier 2 · 2026-09-03 11:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.meshGradientBg
 Forme   : { durationInSeconds?: number }
@@ -346,7 +385,7 @@ Timeline: dans buildTimeline, scene.meshGradientBg ? { durationInSeconds: durati
 Balisage: <div class="mesh-gradient-bg" id="mgb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `meshGradientBg` is optional: render-safe animated radial mesh gradient background. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:15
+## [fait] palier 2 · 2026-09-03 11:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.motionBlur
 Forme   : { intensity?: number, durationInSeconds?: number }
@@ -354,7 +393,7 @@ Timeline: dans buildTimeline, scene.motionBlur ? { intensity: intensity ?? 3, du
 Balisage: <div class="motion-blur" id="mb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `motionBlur` is optional: velocity-driven SVG directional motion blur trail. { intensity?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:15
+## [fait] palier 2 · 2026-09-03 11:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.spotlightCard
 Forme   : { durationInSeconds?: number }
@@ -362,7 +401,7 @@ Timeline: dans buildTimeline, scene.spotlightCard ? { durationInSeconds: duratio
 Balisage: <div class="spotlight-card" id="sc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `spotlightCard` is optional: card container with scripted cursor spotlight and lit border. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:15
+## [fait] palier 2 · 2026-09-03 11:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.svgMaskReveal
 Forme   : { durationInSeconds?: number }
@@ -370,7 +409,7 @@ Timeline: dans buildTimeline, scene.svgMaskReveal ? { durationInSeconds: duratio
 Balisage: <div class="svg-mask-reveal" id="smr<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `svgMaskReveal` is optional: soft token sweep revealing media through an SVG wordmark mask. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:15
+## [fait] palier 2 · 2026-09-03 11:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ytScreenWarp
 Forme   : { durationInSeconds?: number }
@@ -378,7 +417,7 @@ Timeline: dans buildTimeline, scene.ytScreenWarp ? { durationInSeconds: duration
 Balisage: <div class="yt-screen-warp" id="ysw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ytScreenWarp` is optional: CRT display grid, scanline, vignette, and 3D screen warp wrapper. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:57
+## [fait] palier 2 · 2026-09-03 11:57
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.avatarCloud
 Forme   : { count?: number, durationInSeconds?: number }
@@ -386,7 +425,7 @@ Timeline: dans buildTimeline, scene.avatarCloud ? { count: count ?? 8, durationI
 Balisage: <div class="avatar-cloud" id="avc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `avatarCloud` is optional: lettermark avatars populating an elliptical cloud with fine SVG links. { count?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:57
+## [fait] palier 2 · 2026-09-03 11:57
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.overwhelmSurround
 Forme   : { itemsCount?: number, durationInSeconds?: number }
@@ -394,7 +433,7 @@ Timeline: dans buildTimeline, scene.overwhelmSurround ? { itemsCount: itemsCount
 Balisage: <div class="overwhelm-surround" id="ows<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `overwhelmSurround` is optional: task and ping bubbles accelerating inward around subject. { itemsCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:57
+## [fait] palier 2 · 2026-09-03 11:57
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.staggerCascade
 Forme   : { columns?: number, durationInSeconds?: number }
@@ -402,7 +441,7 @@ Timeline: dans buildTimeline, scene.staggerCascade ? { columns: columns ?? 3, du
 Balisage: <div class="stagger-cascade" id="sgc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `staggerCascade` is optional: grid of tile cards fading and traveling into place with stagger. { columns?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:57
+## [fait] palier 2 · 2026-09-03 11:57
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.freezeFrameDressing
 Forme   : { paperTexture?: boolean, tapeStickers?: boolean, durationInSeconds?: number }
@@ -410,13 +449,95 @@ Timeline: dans buildTimeline, scene.freezeFrameDressing ? { paperTexture: paperT
 Balisage: <div class="freeze-frame-dressing" id="ffd<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `freezeFrameDressing` is optional: paper, tape, and flash dressing for freeze-frame subject. { paperTexture?, tapeStickers?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 11:57
+## [fait] palier 2 · 2026-09-03 11:57
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.hwArrow
 Forme   : { curve?: 'straight' | 'gentle' | 'swoop', strokeStyle?: 'plain' | 'soft' | 'sharp' | 'spray', durationInSeconds?: number }
 Timeline: dans buildTimeline, scene.hwArrow ? { curve: curve ?? 'gentle', strokeStyle: strokeStyle ?? 'plain', durationInSeconds: durationInSeconds ?? 1.2 } : null
 Balisage: <div class="hw-arrow" id="hwa<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `hwArrow` is optional: wobbled draw-on annotation arrow with travel-aligned head arrival stretch. { curve?, strokeStyle?, durationInSeconds? }"
+
+## [fait] palier 2 · 2026-09-03 11:59
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.hwTextCloud
+Forme   : { text?: string, tailPosition?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.hwTextCloud ? { text: text ?? '', tailPosition: tailPosition ?? 'bottom-left', durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="hw-text-cloud" id="hwtc<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `hwTextCloud` is optional: hand-drawn speech bubble with positionable tail and typewriter text. { text?, tailPosition?, durationInSeconds? }"
+
+## [fait] palier 2 · 2026-09-03 11:59
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.hwUnderline
+Forme   : { style?: 'squiggle' | 'strikethrough' | 'bracket', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.hwUnderline ? { style: style ?? 'squiggle', durationInSeconds: durationInSeconds ?? 1.2 } : null
+Balisage: <div class="hw-underline" id="hwul<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `hwUnderline` is optional: hand-drawn squiggle underline, strikethrough or bracket mark draw-on. { style?, durationInSeconds? }"
+
+## [fait] palier 2 · 2026-09-03 11:59
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.spiralGalaxy
+Forme   : { starCount?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.spiralGalaxy ? { starCount: starCount ?? 20000, durationInSeconds: durationInSeconds ?? 3.0 } : null
+Balisage: <div class="spiral-galaxy" id="spg<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `spiralGalaxy` is optional: GPU-accelerated turning spiral galaxy with differential rotation. { starCount?, durationInSeconds? }"
+
+## [fait] palier 2 · 2026-09-03 11:59
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.ytFeatherHighlight
+Forme   : { x?: number, y?: number, size?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.ytFeatherHighlight ? { x: x ?? 50, y: y ?? 42, size: size ?? 40, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="yt-feather-highlight" id="yfh<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `ytFeatherHighlight` is optional: spotlight hole glides across frame with dimmed surrounding backdrop. { x?, y?, size?, durationInSeconds? }"
+
+## [fait] palier 2 · 2026-09-03 11:59
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.liquidGlassContextMenu
+Forme   : { itemsCount?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.liquidGlassContextMenu ? { itemsCount: itemsCount ?? 4, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="liquid-glass-context-menu" id="lgcm<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `liquidGlassContextMenu` is optional: frosted glass context menu drifting over aurora background. { itemsCount?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 12:06
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.liquidGlassMediaControls
+Forme   : { variant?: 'compact' | 'full', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.liquidGlassMediaControls ? { variant: variant ?? 'full', durationInSeconds: durationInSeconds ?? 2.2 } : null
+Balisage: <div class="liquid-glass-media-controls" id="lgmc<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `liquidGlassMediaControls` is optional: frosted glass media control panels spreading over aurora shader. { variant?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 12:06
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.liquidGlassNotification
+Forme   : { count?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.liquidGlassNotification ? { count: count ?? 3, durationInSeconds: durationInSeconds ?? 1.8 } : null
+Balisage: <div class="liquid-glass-notification" id="lgn<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `liquidGlassNotification` is optional: frosted glass notification cards floating over aurora shader. { count?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 12:06
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.liquidGlassWidgets
+Forme   : { columns?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.liquidGlassWidgets ? { columns: columns ?? 2, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="liquid-glass-widgets" id="lgw<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `liquidGlassWidgets` is optional: frosted glass stat cards and showcase panel over aurora shader. { columns?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 12:06
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.macosTahoeLiquidGlass
+Forme   : { theme?: 'dark' | 'light', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.macosTahoeLiquidGlass ? { theme: theme ?? 'dark', durationInSeconds: durationInSeconds ?? 3.0 } : null
+Balisage: <div class="macos-tahoe-liquid-glass" id="mtlg<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `macosTahoeLiquidGlass` is optional: 3D MacBook with macOS Tahoe glass UI and cinematic device camera move. { theme?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 12:06
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.vfxIphoneDevice
+Forme   : { model?: 'iphone15' | 'macbook', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.vfxIphoneDevice ? { model: model ?? 'iphone15', durationInSeconds: durationInSeconds ?? 3.0 } : null
+Balisage: <div class="vfx-iphone-device" id="vid<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `vfxIphoneDevice` is optional: GLTF 3D device with live HTML content, morphing lens and turntable. { model?, durationInSeconds? }"
+
+
 
 
 

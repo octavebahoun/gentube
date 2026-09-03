@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EFFETS_SCHEMA } from './effets';
+import { EFFETS_SCHEMA, MANUSCRIT_SCHEMA } from './effets';
 import {
   chartSchema,
   comparisonSchema,
@@ -454,6 +454,71 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
+  hwTextCloud: z
+    .object({
+      text: z.string().optional(),
+      tailPosition: z
+        .enum(['bottom-left', 'bottom-right', 'top-left', 'top-right'])
+        .optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  hwUnderline: z
+    .object({
+      style: z.enum(['squiggle', 'strikethrough', 'bracket']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  spiralGalaxy: z
+    .object({
+      starCount: z.number().int().min(1000).max(50000).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  ytFeatherHighlight: z
+    .object({
+      x: z.number().min(0).max(100).optional(),
+      y: z.number().min(0).max(100).optional(),
+      size: z.number().positive().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  liquidGlassContextMenu: z
+    .object({
+      itemsCount: z.number().int().min(2).max(8).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  liquidGlassMediaControls: z
+    .object({
+      variant: z.enum(['compact', 'full']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  liquidGlassNotification: z
+    .object({
+      count: z.number().int().min(1).max(5).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  liquidGlassWidgets: z
+    .object({
+      columns: z.number().int().min(1).max(4).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  macosTahoeLiquidGlass: z
+    .object({
+      theme: z.enum(['dark', 'light']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  vfxIphoneDevice: z
+    .object({
+      model: z.enum(['iphone15', 'macbook']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
   /*
    * Les nappes déclarées dans `effets.ts`.
    *
@@ -463,6 +528,7 @@ export const sceneEffectsSchema = z.object({
    * un effet est une ligne et non quatre éditions dans quatre fichiers.
    */
   ...EFFETS_SCHEMA,
+  ...MANUSCRIT_SCHEMA,
 });
 
 export const sceneRenderSchema = z.object({

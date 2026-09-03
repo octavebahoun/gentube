@@ -43,16 +43,16 @@ que la composition ne sait pas encore dessiner.
 - `hw-callout-circle` — Wobbled ellipse draws around a target with optional scribble fill and curved connector; the handwritten label pops in WITH momentum and the drawn shapes absorb the arrival with a volume-preserving contact squash; outline and connector take the family stroke matrix (plain/soft/sharp/spray); boils _(handwritten, annotation, callout)_
 - `hw-frame` — Media in a hand-drawn border with corner doodles and a handwritten caption; the unit tilts slightly and boils (images inside the block; keep live footage in the host) _(handwritten, frame, media)_
 - `hw-pipeline` — Wobbled boxes with handwritten labels joined by curved connectors, drawing on in sequence from a node list _(handwritten, diagram, data-viz)_
-- `hw-text-cloud` — Hand-drawn speech bubble with a positionable tail: outline draws on, paper fill fades in, handwritten text types per character; boils _(handwritten, speech-bubble, overlay)_
-- `hw-underline` — Hand-drawn squiggle underline, double-pass strikethrough, and bracket marks that draw on _(handwritten, annotation, text-treatment)_
-- `spiral-galaxy` — A spiral galaxy seen from outside, turning with real differential rotation: inner stars orbit faster than outer ones, so the arms wind up over the shot instead of spinning rigidly. 20,000 additive GPU sprites, seeded once and solved directly from time, so any frame can be rendered on its own _(hero, space, particles)_
-- `yt-feather-highlight` — Dims the frame except a feathered ellipse; the hole's position and size are CSS variables, so helpers glide the spotlight between targets _(highlight, spotlight, effect)_
-- `liquid-glass-context-menu` — Frosted glass context menu panel drifting over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
-- `liquid-glass-media-controls` — Frosted glass media control panels spreading over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
-- `liquid-glass-notification` — Frosted glass notification cards floating over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
-- `liquid-glass-widgets` — Frosted glass stat cards, showcase panel and pill chips over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
-- `macos-tahoe-liquid-glass` — 3D MacBook with a macOS Tahoe-style desktop, glass menu bar, Finder window, dock, and cinematic device camera move _(html-in-canvas, 3d, macos)_
-- `vfx-iphone-device` — Real GLTF iPhone 15 Pro Max and MacBook Pro models with live HTML-in-Canvas screen content, morphing glass lens, product review camera choreography, and 360° turntable _(html-in-canvas, 3d, device)_
+- [x] `hw-text-cloud` — Hand-drawn speech bubble with a positionable tail: outline draws on, paper fill fades in, handwritten text types per character; boils _(handwritten, speech-bubble, overlay)_
+- [x] `hw-underline` — Hand-drawn squiggle underline, double-pass strikethrough, and bracket marks that draw on _(handwritten, annotation, text-treatment)_
+- [x] `spiral-galaxy` — A spiral galaxy seen from outside, turning with real differential rotation: inner stars orbit faster than outer ones, so the arms wind up over the shot instead of spinning rigidly. 20,000 additive GPU sprites, seeded once and solved directly from time, so any frame can be rendered on its own _(hero, space, particles)_
+- [x] `yt-feather-highlight` — Dims the frame except a feathered ellipse; the hole's position and size are CSS variables, so helpers glide the spotlight between targets _(highlight, spotlight, effect)_
+- [x] `liquid-glass-context-menu` — Frosted glass context menu panel drifting over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
+- [x] `liquid-glass-media-controls` — Frosted glass media control panels spreading over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
+- [x] `liquid-glass-notification` — Frosted glass notification cards floating over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
+- [x] `liquid-glass-widgets` — Frosted glass stat cards, showcase panel and pill chips over an aurora shader background _(html-in-canvas, liquid-glass-html-in-canvas, webgpu)_
+- [x] `macos-tahoe-liquid-glass` — 3D MacBook with a macOS Tahoe-style desktop, glass menu bar, Finder window, dock, and cinematic device camera move _(html-in-canvas, 3d, macos)_
+- [x] `vfx-iphone-device` — Real GLTF iPhone 15 Pro Max and MacBook Pro models with live HTML-in-Canvas screen content, morphing glass lens, product review camera choreography, and 360° turntable _(html-in-canvas, 3d, device)_
 - `vfx-liquid-background` — Organic liquid simulation with vertex displacement on a subdivided plane. HTML content floats above rippling fluid surface with real-time wave dynamics _(html-in-canvas, liquid, webgl)_
 - `vfx-liquid-glass` — VFX composition block _(html-in-canvas, webgl)_
 - `vfx-magnetic` — VFX composition block _(html-in-canvas, webgl)_

@@ -761,6 +761,41 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the handwritten marks', () => {
+    const withHw = (effets: Record<string, unknown>) =>
+      html([{ ...shot(), render: { effects: effets } } as Shot]);
+
+    it('draws paths, never shapes, so pathLength applies', () => {
+      // Chrome ignore `pathLength` sur `rect` et `ellipse` : sans lui, le
+      // dessin progressif tomberait sur le vrai périmètre, donc sur une
+      // valeur que le format de la vidéo change.
+      const page = withHw({ hwFrame: { caption: 'x' } });
+      expect(page).toContain('pathLength="100"');
+      expect(page).not.toContain('<rect');
+    });
+
+    it('trembles the same way twice, because the seed is the scene', () => {
+      // Un tirage au hasard dans la page donnerait un trait différent à chaque
+      // image, et le moteur cherche chaque image : le trait grouillerait.
+      const a = withHw({ hwFrame: {} });
+      const b = withHw({ hwFrame: {} });
+      expect(a).toEqual(b);
+    });
+
+    it('carries the names of a chain, never their count', () => {
+      const page = withHw({ hwPipeline: { nodes: ['Semer', 'Vendre'] } });
+      expect(page).toContain('>Semer</div>');
+      expect(page).toContain('>Vendre</div>');
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      // Une liaison de moins que de nœuds : elles vivent entre eux.
+      expect(T.scenes[0].hwPipeline.traces).toBe(1);
+    });
+
+    it('leaves the page alone when no scene asks for one', () => {
+      expect(html([shot()])).not.toContain('hw-frame');
+    });
+  });
+
   describe('the quote', () => {
     const withQuote = (quote: Record<string, unknown>) =>
       html([{ ...shot(), render: { quote } } as Shot]);
@@ -1132,6 +1167,24 @@ describe('the palier-2 effects', () => {
     expect(palier2()).toMatch(/\.aurora \{[^}]*opacity: 0/);
     expect(palier2()).toMatch(/\.od-t \{[^}]*scaleX\(0\)/);
     expect(palier2()).toMatch(/\.od-l \{[^}]*scaleY\(0\)/);
+  });
+
+  it('draws the handwritten family from absolute instants', () => {
+    // Trois gestes partages, un tiret normalise sur path, jamais de to.
+    for (const champ of ['scene.hwBoxLabel', 'scene.hwCalloutCircle', 'scene.hwFrame', 'scene.hwPipeline']) {
+      expect(SCENES_JS, champ).toContain(champ);
+    }
+    for (const id of ['"hb" + scene.index', '"hc" + scene.index', '"hf" + scene.index', '"hp" + scene.index']) {
+      expect(SCENES_JS).toContain(id);
+    }
+    expect(SCENES_JS).toContain('function hwTrace');
+    expect(SCENES_JS).toContain('function hwBouilli');
+    expect(SCENES_JS).toContain('function hwEtiquette');
+  });
+
+  it('hides ink and labels at rest', () => {
+    expect(palier2()).toContain('stroke-dasharray: 100;');
+    expect(palier2()).toMatch(/\.hw-label,[\s\S]*?opacity: 0/);
   });
 
   describe('through the real pipeline', () => {

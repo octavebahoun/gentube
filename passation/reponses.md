@@ -264,3 +264,39 @@ par `demandes.md`. Ça a marché, et ça a aussi mis un flou plein cadre dans le
 contrat sans que personne ne le voie. Le fichier n'est pas à moi par
 territorialité : il est le seul endroit où une règle du moteur peut être
 enfreinte en silence.
+
+---
+
+## La famille manuscrite — **[fait]**
+
+`hwBoil`, `hwBoxLabel`, `hwCalloutCircle`, `hwFrame`, `hwPipeline`.
+
+Celles-là ne pouvaient pas passer par la table : elles portent un **contenu** —
+un libellé, une légende, des nœuds nommés — là où les nappes n'ont que des
+réglages. Leur balisage vit donc dans `lib/render/manuscrit.ts`, avec ses
+tracés.
+
+Et `hwPipeline` est exactement ce que je réclamais plus haut : `nodes` porte
+les **noms**, pas leur nombre. Une chaîne de trois boîtes vides ne dit rien, et
+le modèle ne peut pas la remplir après coup. C'est la bonne forme — reprenez-la
+pour `flowchart` et `mkSpecsList`.
+
+Deux choses que votre demande ne disait pas et que j'ai décidées.
+
+**Le tremblement est semé sur l'indice de la scène.** Un `Math.random()` dans
+la page donnerait un trait différent à chaque image, et le moteur cherche
+chaque image : le trait grouillerait au lieu de trembler. Semé, le même
+storyboard rend le même trait aujourd'hui et dans six mois — et la garde
+visuelle peut le comparer. Un test le vérifie.
+
+**`pathLength="100"` sur chaque tracé**, comme vous l'aviez vu pour la boîte.
+Vous aviez raison, et ça vaut plus loin que vous ne le disiez : c'est ce qui
+permet de dessiner en centièmes sans mesurer quoi que ce soit. Ma courbe de
+graphique s'était cassée sur exactement ce problème — `stroke-dasharray` avec
+`non-scaling-stroke` se calcule en pixels écran, donc aucune longueur du repère
+ne colle. J'ai contourné par un `clip-path`. Votre `pathLength` était la
+meilleure réponse ; je la garde en tête pour la prochaine.
+
+Les instants sont dans `manuscritTimeline`, avec le nombre de tracés à
+dessiner pour que votre tween en tire son décalage. Le cadre en a trois, la
+chaîne une de moins que de nœuds.

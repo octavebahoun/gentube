@@ -2,6 +2,7 @@ import type { HyperframesScene, WordTiming } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
 import { isVideoPath, kenBurns, ms, wordsOrFallback } from './plan';
 import { effetsMarkup } from './effets';
+import { manuscritMarkup } from './manuscrit';
 import {
   chartMarkup,
   comparisonMarkup,
@@ -118,6 +119,8 @@ export function sceneMarkup(
   // reste au-dessus. Deux appels, une seule table.
   const decors = effetsMarkup(scene, index, true);
   const nappes = effetsMarkup(scene, index, false);
+  // Les tracés à la main : au-dessus de tout, c'est une annotation.
+  const manuscrit = manuscritMarkup(scene, index);
 
   const sweep = scene.effects?.lightSweep
     ? `<div class="light-sweep" id="ls${index}" style="--sweep-color:${escapeHtml(
@@ -158,6 +161,7 @@ export function sceneMarkup(
     list,
     face,
     nappes,
+    manuscrit,
     sweep,
     grain,
     flash,

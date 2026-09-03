@@ -24,6 +24,45 @@ const ms = (seconds: number) => Math.round(seconds * 1000) / 1000;
  * hors du navigateur — et parce qu'ils sont la partie du moteur qui grandit le
  * plus vite.
  */
+/**
+ * Les instants des tracés manuscrits.
+ *
+ * Chacun se dessine en `stroke-dasharray`, en centièmes grâce à `pathLength` —
+ * la page n'a donc aucune longueur à mesurer, et l'étirement du SVG ne peut
+ * pas la fausser. Ne reste ici que le quand.
+ */
+export function manuscritTimeline(scene: HyperframesScene) {
+  const effets = scene.effects as Record<string, Record<string, unknown>> | undefined;
+  if (!effets) return {};
+
+  const sortie: Record<string, unknown> = {};
+  for (const nom of ['hwBoxLabel', 'hwCalloutCircle', 'hwFrame', 'hwPipeline']) {
+    const pose = effets[nom];
+    if (!pose) continue;
+    const depart =
+      scene.startInSeconds + ((pose.startInSeconds as number | undefined) ?? 0.4);
+    const reste = Math.max(
+      0.2,
+      scene.startInSeconds + scene.durationInSeconds - depart
+    );
+    sortie[nom] = {
+      at: ms(depart),
+      duration: Math.min(
+        (pose.durationInSeconds as number | undefined) ?? 0.9,
+        reste
+      ),
+      // Le nombre de tracés à dessiner : le tween en tire son décalage.
+      traces:
+        nom === 'hwFrame'
+          ? 3
+          : nom === 'hwPipeline'
+            ? Math.max(0, ((pose.nodes as string[] | undefined)?.length ?? 2) - 1)
+            : 1,
+    };
+  }
+  return sortie;
+}
+
 export function structuredPlans(scene: HyperframesScene) {
   const tiers = scene.lowerThird;
   const chart = scene.chart;

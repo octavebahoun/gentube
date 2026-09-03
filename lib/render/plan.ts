@@ -5,7 +5,7 @@ import type {
 } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
 import { effetsTimeline } from './effets';
-import { structuredPlans } from './plans-timeline';
+import { manuscritTimeline, structuredPlans } from './plans-timeline';
 import {
   isMoveTransition,
   isShaderTransition,
@@ -302,6 +302,7 @@ export function buildTimeline(
         ...structuredPlans(scene),
         // Les nappes, lues dans la même table que leur balisage.
         ...effetsTimeline(scene, (instant) => onBeat(scene, beats, instant)),
+        ...manuscritTimeline(scene),
         kinetic: title
           ? {
               at: ms(scene.startInSeconds + (title.startInSeconds ?? 0)),

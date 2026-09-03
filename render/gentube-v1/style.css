@@ -970,6 +970,120 @@ video.media {
   opacity: 0.3;
 }
 
+/* --- Tracés manuscrits ---------------------------------------------------- */
+
+/*
+ * Encadrés, entourages et enchaînements dessinés à la main par-dessus le plan.
+ *
+ * Le tracé se fait par `stroke-dasharray` en **centièmes**, grâce au
+ * `pathLength="100"` posé sur chaque `path` : la page n'a aucune longueur à
+ * mesurer, et l'étirement du SVG ne peut pas la fausser. C'est aussi pourquoi
+ * ce sont des `path` et jamais des `rect` — Chrome ignore `pathLength` sur les
+ * formes.
+ */
+.hw-box,
+.hw-callout,
+.hw-frame,
+.hw-pipe {
+  position: absolute;
+  font-family: "Caveat", "Lato", system-ui, cursive;
+  --hw-ink: #ffd9a0;
+  pointer-events: none;
+}
+
+.hw-box svg,
+.hw-callout svg,
+.hw-frame svg,
+.hw-link {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hw-box path,
+.hw-callout path,
+.hw-frame path,
+.hw-link path {
+  fill: none;
+  stroke: var(--hw-ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Caché avant le premier tween : la timeline ramène l'offset à zéro. */
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  vector-effect: non-scaling-stroke;
+}
+
+.hw-box {
+  left: 14%;
+  top: 30%;
+  width: 40%;
+  height: 22%;
+}
+
+.hw-frame {
+  inset: 6% 7%;
+}
+
+.hw-label,
+.hw-caption {
+  position: absolute;
+  color: var(--hw-ink);
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+  white-space: nowrap;
+}
+
+.hw-box .hw-label {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5em;
+}
+
+.hw-callout .hw-label {
+  left: 50%;
+  top: 104%;
+  transform: translateX(-50%);
+  font-size: 1.3em;
+}
+
+.hw-caption {
+  left: 50%;
+  bottom: -1.8em;
+  transform: translateX(-50%);
+  font-size: 1.25em;
+}
+
+/* L'enchaînement : les boîtes en ligne, les liaisons posées entre elles. */
+.hw-pipe {
+  left: 8%;
+  right: 8%;
+  top: 34%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4%;
+}
+
+.hw-node {
+  position: relative;
+  flex: 1 1 0;
+  padding: 0.6em 0.4em;
+  border: 2.5px solid var(--hw-ink);
+  border-radius: 0.5em;
+  text-align: center;
+}
+
+.hw-node .hw-label {
+  position: static;
+  transform: none;
+  font-size: 1.15em;
+}
+
 /* --- Compteur ------------------------------------------------------------ */
 
 /*
@@ -1696,3 +1810,91 @@ video.media {
 .od-r { right: 0; transform-origin: center top; transform: scaleY(0); }
 .od-b { bottom: 0; transform-origin: right center; transform: scaleX(0); }
 .od-l { left: 0; transform-origin: center bottom; transform: scaleY(0); }
+
+/*
+ * La famille manuscrite : des traits blancs epais au bout rond, caches au
+ * repos par dashoffset 100, et des legendes d ecriture inclinees. Les chemins
+ * wobbles sont dans le balisage ; ici on ne pose que l encre et le papier.
+ */
+.hw-box,
+.hw-callout,
+.hw-frame,
+.hw-pipe {
+  position: absolute;
+  pointer-events: none;
+  --hw-ink: #ffffff;
+  font-family: "Segoe Print", "Comic Sans MS", "Chalkboard SE", cursive;
+}
+
+.hw-box { inset: 18% 10%; }
+.hw-callout { inset: auto; }
+.hw-frame { inset: 8%; transform: rotate(-1.2deg); }
+.hw-pipe { inset: 20% 6%; display: flex; align-items: center; gap: 4%; }
+
+.hw-box svg,
+.hw-callout svg,
+.hw-frame svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hw-box path,
+.hw-callout path,
+.hw-frame path,
+.hw-node path,
+.hw-pipe svg path {
+  fill: none;
+  stroke: var(--hw-ink);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+.hw-label,
+.hw-caption {
+  position: absolute;
+  color: var(--hw-ink);
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.hw-box .hw-label { top: -1.6em; left: 0; font-size: 1.25em; }
+.hw-callout .hw-label { bottom: -1.7em; left: 0; right: 0; text-align: center; font-size: 1.1em; }
+.hw-frame .hw-caption { bottom: -2em; left: 0; right: 0; text-align: center; font-size: 1.05em; }
+
+.hw-node {
+  position: relative;
+  flex: 1 1 0;
+  align-self: stretch;
+  border: 3px solid var(--hw-ink);
+  border-radius: 0.6em;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.hw-pipe svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.hw-node .hw-label {
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.95em;
+  padding: 0 0.4em;
+}

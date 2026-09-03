@@ -162,3 +162,60 @@ function champ(effet: Effet) {
 export const EFFETS_SCHEMA = Object.fromEntries(
   Object.entries(EFFETS).map(([nom, effet]) => [nom, champ(effet)])
 ) as Record<string, z.ZodTypeAny>;
+
+/**
+ * La famille manuscrite, à part du reste.
+ *
+ * Elle porte du **contenu** — un libellé, une légende, des nœuds nommés — là
+ * où les nappes ci-dessus n'ont que des réglages. Son balisage ne se déduit
+ * donc pas d'une fiche : il vit dans `lib/render/manuscrit.ts`, avec ses
+ * tracés tremblés.
+ *
+ * Le tremblement (`boil`) est semé sur l'indice de la scène. Un tirage au
+ * hasard dans la page donnerait un trait différent à chaque image, et le
+ * moteur cherche chaque image : le trait grouillerait.
+ */
+const tempsManuscrit = {
+  startInSeconds: z.number().min(0).optional(),
+  durationInSeconds: z.number().positive().optional(),
+  /** L'ampleur du tremblement, en unités du tracé. Zéro donne un trait net. */
+  boil: z.number().min(0).max(4).optional(),
+  color: z.string().optional(),
+};
+
+export const MANUSCRIT_SCHEMA = {
+  /** Le tremblement seul, appliqué à tout ce que la scène trace à la main. */
+  hwBoil: z
+    .object({
+      amount: z.number().min(0).max(4).optional(),
+      startInSeconds: z.number().min(0).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  /** Un encadré tracé autour d'un mot, avec son libellé. */
+  hwBoxLabel: z.object({ label: z.string().max(60).optional(), ...tempsManuscrit }).optional(),
+  /** Un rond entouré à la main, posé où la scène le demande. */
+  hwCalloutCircle: z
+    .object({
+      label: z.string().max(60).optional(),
+      x: z.number().optional(),
+      y: z.number().optional(),
+      size: z.number().optional(),
+      ...tempsManuscrit,
+    })
+    .optional(),
+  /** Un cadre dessiné autour du plan, avec sa légende. */
+  hwFrame: z.object({ caption: z.string().max(90).optional(), ...tempsManuscrit }).optional(),
+  /**
+   * Un enchaînement de boîtes reliées.
+   *
+   * `nodes` porte les **noms**, pas leur nombre : une chaîne de trois boîtes
+   * vides ne dit rien, et le modèle ne peut pas la remplir après coup.
+   */
+  hwPipeline: z
+    .object({
+      nodes: z.array(z.string().max(24)).min(2).max(5),
+      ...tempsManuscrit,
+    })
+    .optional(),
+} as const;
