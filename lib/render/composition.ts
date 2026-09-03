@@ -53,6 +53,8 @@ export const COMPOSITION_DIR = 'render/gentube-v1';
 /** Taille de police des sous-titres, en fraction de la hauteur de trame. */
 const SUBTITLE_HEIGHT_RATIO = 0.058;
 const WATERMARK_HEIGHT_RATIO = 0.032;
+/** Taille de base des plans structurés — citation, fil — en fraction de trame. */
+const STRUCTURED_HEIGHT_RATIO = 0.042;
 
 /**
  * À quelle hauteur du bas les sous-titres s'arrêtent, par format.
@@ -130,6 +132,7 @@ export function composeHtml({
 
   const subtitleSize = Math.round(height * SUBTITLE_HEIGHT_RATIO);
   const watermarkSize = Math.round(height * WATERMARK_HEIGHT_RATIO);
+  const structuredSize = Math.round(height * STRUCTURED_HEIGHT_RATIO);
   const subtitleBottom = (SUBTITLE_BOTTOM[storyboard.ratio] ?? 0.09) * 100;
 
   const music = storyboard.music
@@ -175,6 +178,13 @@ export function composeHtml({
     <style>
       html, body { width: ${width}px; height: ${height}px; }
       .captions { font-size: ${subtitleSize}px; bottom: ${subtitleBottom}%; }
+      /*
+       * Les plans structurés se mesurent sur la trame, comme les sous-titres,
+       * et non sur le 16 px par defaut du navigateur. Un plan de citation ou
+       * de fil doit tenir dans le cadre en 16:9 comme en 9:16, et c est la
+       * hauteur qui commande.
+       */
+      .quote, .thread { font-size: ${structuredSize}px; }
       .veil {
         --veil-start: ${Math.round(100 - subtitleBottom - 36)}%;
         --veil-mid: ${Math.round(100 - subtitleBottom - 3)}%;

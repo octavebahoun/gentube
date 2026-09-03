@@ -181,4 +181,31 @@ export const CONTENUS_JS = `
             );
           });
         }
+        /*
+         * La citation : la phrase, puis la signature.
+         *
+         * Deux fromTo a deux instants absolus, jamais un delai relatif. La
+         * signature arrive quand la phrase est lisible, pas quand la phrase a
+         * fini de s animer : ce n est pas la meme chose sous la recherche
+         * d image.
+         */
+        if (scene.quote) {
+          tl.fromTo(
+            "#q" + scene.index + " .quote-text",
+            { opacity: 0, y: "0.4em" },
+            {
+              opacity: 1,
+              y: "0em",
+              duration: scene.quote.duration,
+              ease: "power3.out",
+            },
+            scene.quote.at
+          );
+          tl.fromTo(
+            "#q" + scene.index + " .quote-sign",
+            { opacity: 0 },
+            { opacity: 1, duration: 0.35, ease: "power2.out" },
+            scene.quote.sign
+          );
+        }
       }`;

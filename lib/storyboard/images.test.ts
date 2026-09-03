@@ -318,26 +318,60 @@ describe('generating the stills', () => {
     ).rejects.toThrow(/no scene to illustrate/);
   });
 
-  it('draws nothing for a scene that draws itself', async () => {
-    // Une carte ou un compteur affiche son propre écran : lui générer une
-    // illustration, c'est payer une image que personne ne verra.
-    const tdb = await createTenant('Alpha', { credits: 1_000 });
-    const video = await validatedVideo(tdb, ['image', 'image']);
-    const [first] = await listShots(tdb, video.id);
-    await tdb.update(
-      shots,
-      { render: { counter: { value: 6000, label: 'soldates' } } },
-      eq(shots.id, first.id)
-    );
+  /*
+   * Une scène qui dessine son propre écran ne doit jamais atteindre le
+   * générateur d'images : ce serait payer une illustration que personne ne
+   * verra. C'est l'économie qui rend ces plans intéressants — dix FCFA la
+   * minute contre quatre cents — donc elle mérite un test par forme, et non
+   * un seul sur le compteur.
+   *
+   * L'oubli le plus cher possible est d'ajouter un plan structuré sans
+   * l'ajouter à `rendersOwnContent`. Ce tableau est là pour qu'il se voie.
+   */
+  const dessinentSeules: [string, Record<string, unknown>][] = [
+    ['un compteur', { counter: { value: 6000, label: 'soldates' } }],
+    ['une carte', { card: { text: 'Carte de fin' } }],
+    [
+      'un graphique',
+      {
+        chart: {
+          points: [
+            { label: 'a', value: 3 },
+            { label: 'b', value: 1 },
+          ],
+        },
+      },
+    ],
+    ['une citation', { quote: { text: 'La terre ne ment pas' } }],
+    [
+      'un fil',
+      {
+        thread: {
+          messages: [
+            { from: 'Awa', text: 'Tu as vu ?' },
+            { from: 'Moi', text: 'Oui.', mine: true },
+          ],
+        },
+      },
+    ],
+  ];
 
-    const { client, calls } = generator();
-    const result = await generateImages(tdb, video.id, {
-      client,
-      store: store().assets,
+  for (const [quoi, render] of dessinentSeules) {
+    it(`draws nothing for a scene that draws itself: ${quoi}`, async () => {
+      const tdb = await createTenant('Alpha', { credits: 1_000 });
+      const video = await validatedVideo(tdb, ['image', 'image']);
+      const [first] = await listShots(tdb, video.id);
+      await tdb.update(shots, { render }, eq(shots.id, first.id));
+
+      const { client, calls } = generator();
+      const result = await generateImages(tdb, video.id, {
+        client,
+        store: store().assets,
+      });
+
+      expect(result.generated).toBe(1);
+      expect(result.skipped).toBe(1);
+      expect(calls).toHaveLength(1);
     });
-
-    expect(result.generated).toBe(1);
-    expect(result.skipped).toBe(1);
-    expect(calls).toHaveLength(1);
-  });
+  }
 });

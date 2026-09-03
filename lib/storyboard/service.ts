@@ -26,6 +26,7 @@ import {
   TRANSITIONS,
   chartSchema,
   lowerThirdSchema,
+  quoteSchema,
   sceneCounterSchema,
   threadSchema,
   sceneEffectsSchema,
@@ -154,6 +155,11 @@ const SYSTEM_PROMPT = [
   '  `text` under about fifteen words — a bubble nobody can read in three',
   '  seconds is wasted. Like `counter` and `chart`, such a scene needs NO',
   '  `prompt`. Use it when the narration quotes what people said.',
+  '- `quote` is optional and puts a sentence on screen with its source:',
+  '  { text, author?, role?, variant: mark|rule|plain }. Keep the three apart —',
+  '  never fold the name into the sentence. Use it when the narration quotes',
+  '  someone worth naming. Like the others above, such a scene needs NO',
+  '  `prompt`.',
   '- `lowerThird` is optional and names who or what is on screen:',
   '  { name, role?, variant: bar|stack|boxed, side?: left|right, holdSeconds? }.',
   '  `name` is the strong line, `role` the smaller one under it — a job, a',
@@ -240,12 +246,13 @@ const llmSceneSchema = z.object({
   counter: sceneCounterSchema.optional(),
   chart: chartSchema.optional(),
   thread: threadSchema.optional(),
+  quote: quoteSchema.optional(),
   lowerThird: lowerThirdSchema.optional(),
   sounds: z.array(sceneSoundSchema.partial({ src: true })).optional(),
 })
   .refine(
     (scene) =>
-      Boolean(scene.counter || scene.chart || scene.thread) ||
+      Boolean(scene.counter || scene.chart || scene.thread || scene.quote) ||
       (scene.prompt ?? '').length >= 10,
     {
       path: ['prompt'],
@@ -295,6 +302,7 @@ export function normalizeStoryboard(
     if (scene.counter) render.counter = scene.counter;
     if (scene.chart) render.chart = scene.chart;
     if (scene.thread) render.thread = scene.thread;
+    if (scene.quote) render.quote = scene.quote;
     if (scene.lowerThird) render.lowerThird = scene.lowerThird;
     if (sounds.length > 0) render.sounds = sounds;
 

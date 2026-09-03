@@ -217,6 +217,7 @@ export function buildTimeline(
       const tiers = scene.lowerThird;
       const chart = scene.chart;
       const thread = scene.thread;
+      const quote = scene.quote;
 
       return {
         index,
@@ -399,6 +400,19 @@ export function buildTimeline(
                   at: ms(debut + i * pas),
                 })),
               };
+            })()
+          : null,
+        /*
+         * La citation : la phrase d'abord, la signature après.
+         *
+         * Le nom arrive une fois la phrase lisible. L'ordre est le sens même
+         * du plan — on cite, puis on dit qui.
+         */
+        quote: quote
+          ? (() => {
+              const at = scene.startInSeconds + (quote.startInSeconds ?? 0);
+              const duree = quote.durationInSeconds ?? 0.6;
+              return { at: ms(at), duration: duree, sign: ms(at + duree * 0.8) };
             })()
           : null,
         kinetic: title

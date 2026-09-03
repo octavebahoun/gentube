@@ -5,6 +5,7 @@ import {
   chartMarkup,
   counterMarkup,
   lowerThirdMarkup,
+  quoteMarkup,
   threadMarkup,
 } from './structures';
 import { TITRE_PAR_LETTRE as PAR_LETTRE } from './plan';
@@ -96,6 +97,7 @@ export function sceneMarkup(
   const tiers = lowerThirdMarkup(scene, index);
   const chart = chartMarkup(scene, index);
   const thread = threadMarkup(scene, index);
+  const quote = quoteMarkup(scene, index);
 
   /*
    * Le balayage et le grain : deux nappes dans la scène, comme l'éclair.
@@ -140,6 +142,7 @@ export function sceneMarkup(
     counter,
     chart,
     thread,
+    quote,
     sweep,
     grain,
     flash,
@@ -345,5 +348,6 @@ export {
   chartMarkup,
   counterMarkup,
   lowerThirdMarkup,
+  quoteMarkup,
   threadMarkup,
 } from './structures';

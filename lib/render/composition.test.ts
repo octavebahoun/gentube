@@ -599,6 +599,52 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the quote', () => {
+    const withQuote = (quote: Record<string, unknown>) =>
+      html([{ ...shot(), render: { quote } } as Shot]);
+
+    it('keeps the sentence, the name and the role as three elements', () => {
+      const page = withQuote({
+        text: 'La terre ne ment pas',
+        author: 'Kofi Mensah',
+        role: 'agronome',
+      });
+      expect(page).toContain('>La terre ne ment pas</blockquote>');
+      expect(page).toContain('<div class="quote-author">Kofi Mensah</div>');
+      expect(page).toContain('<div class="quote-role">agronome</div>');
+    });
+
+    it('drops the signature block when nobody is named', () => {
+      // Sur le balisage, pas sur la page entière : le tween vise
+      // `.quote-sign` par son nom, donc la chaîne existe dans le script
+      // même quand aucune scène ne signe.
+      expect(withQuote({ text: 'Un dicton' })).not.toContain(
+        '<div class="quote-sign">'
+      );
+    });
+
+    it('hides the decorative mark from anything that reads the page', () => {
+      expect(withQuote({ text: 'x' })).toContain(
+        '<div class="quote-mark" aria-hidden="true">'
+      );
+      expect(withQuote({ text: 'x', variant: 'rule' })).not.toContain(
+        'quote-mark'
+      );
+    });
+
+    it('signs after the sentence, never before it', () => {
+      // L'ordre est le sens du plan : on cite, puis on dit qui.
+      const page = withQuote({ text: 'x', author: 'y' });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      const quote = T.scenes[0].quote;
+      expect(quote.sign).toBeGreaterThan(quote.at);
+    });
+
+    it('leaves the page alone when no scene asks for one', () => {
+      expect(html([shot()])).not.toContain('class="quote');
+    });
+  });
+
   describe('the thread', () => {
     const messages = [
       { from: 'Awa', text: 'Tu as vu les chiffres ?' },

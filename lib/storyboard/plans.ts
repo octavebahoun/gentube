@@ -154,3 +154,29 @@ export const threadSchema = z.object({
   /** L'écart entre deux messages. C'est lui qui donne le rythme de la lecture. */
   stepSeconds: z.number().positive().max(2).optional(),
 });
+
+/**
+ * Une citation.
+ *
+ * Trois informations de rangs différents — ce qui est dit, qui l'a dit, à quel
+ * titre — et c'est exactement pourquoi elle est ici et non dans `overlayText`.
+ * « La terre ne ment pas — Kofi Mensah, agronome » dans une seule chaîne
+ * oblige la page à retrouver les coupures, et elle les rate dès qu'une virgule
+ * apparaît dans la phrase citée.
+ *
+ * Le plan le plus courant du contenu sans visage après le compteur, et le
+ * moins cher avec lui : aucune image générée.
+ */
+export const quoteSchema = z.object({
+  /** Ce qui est dit. Sans guillemets : la mise en page les pose. */
+  text: z.string().max(240),
+  /** Qui l'a dit. */
+  author: z.string().optional(),
+  /** À quel titre. La ligne faible, sous le nom. */
+  role: z.string().optional(),
+  /** `mark` pose un gros guillemet, `rule` un filet, `plain` ni l'un ni l'autre. */
+  variant: z.enum(['mark', 'rule', 'plain']).optional(),
+  accentColor: z.string().optional(),
+  startInSeconds: z.number().min(0).optional(),
+  durationInSeconds: z.number().positive().optional(),
+});

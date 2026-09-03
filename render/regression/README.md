@@ -5,7 +5,7 @@ pnpm test:visual              # compare aux références
 npx tsx render/regression/run.ts --update   # les réécrit
 ```
 
-Six passes s'ajoutent à la demande, hors du jeu par défaut pour qu'il reste
+Sept passes s'ajoutent à la demande, hors du jeu par défaut pour qu'il reste
 lançable à chaque changement :
 
 ```bash
@@ -15,6 +15,7 @@ npx tsx render/regression/run.ts --transitions  # un rendu par transition par d�
 npx tsx render/regression/run.ts --tiers        # un rendu par variante de tiers inférieur
 npx tsx render/regression/run.ts --graphiques   # un rendu par type de graphique
 npx tsx render/regression/run.ts --fils         # le fil de discussion
+npx tsx render/regression/run.ts --citations    # la citation
 ```
 
 `--transitions` ne capture qu'un instant par transition, au milieu de la

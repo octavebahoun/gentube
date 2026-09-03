@@ -9,6 +9,7 @@ import {
   MOMENTS,
   momentDeLaCoupe,
   DEPART_DU_GRAPHIQUE,
+  momentDeLaCitation,
   momentDuFil,
   momentDuGraphique,
   momentDuTiers,
@@ -91,6 +92,8 @@ type Jeu = {
   chart?: string;
   /** Pose un fil de discussion à la place du compteur, cinquième scène. */
   thread?: boolean;
+  /** Pose une citation à la place du compteur, cinquième scène. */
+  quote?: boolean;
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -153,9 +156,19 @@ const FILS: Jeu[] = [
   },
 ];
 
+const CITATIONS: Jeu[] = [
+  {
+    nom: 'citation',
+    video: REFERENCE_VIDEO,
+    quote: true,
+    moments: [momentDeLaCitation()],
+  },
+];
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(jeu: Jeu): string {
-  const { video, variant, transition, lowerThird, chart, thread } = jeu;
+  const { video, variant, transition, lowerThird, chart, thread, quote } =
+    jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
     cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
@@ -215,6 +228,17 @@ function projet(jeu: Jeu): string {
     };
   }
 
+  if (quote) {
+    const render = shots[4].render as Record<string, unknown>;
+    delete render.counter;
+    render.quote = {
+      text: 'La terre ne ment jamais sur ce qu on lui a donne',
+      author: 'Kofi Mensah',
+      role: 'agronome, Cotonou',
+      startInSeconds: DEPART_DU_GRAPHIQUE,
+    };
+  }
+
   const storyboard = toHyperframesStoryboard(video, shots);
   writeFileSync(join(dir, 'index.html'), composeHtml({ storyboard, watermark: true }));
   return dir;
@@ -267,6 +291,7 @@ function main() {
   if (process.argv.includes('--tiers')) jeux = [...jeux, ...TIERS];
   if (process.argv.includes('--graphiques')) jeux = [...jeux, ...GRAPHIQUES];
   if (process.argv.includes('--fils')) jeux = [...jeux, ...FILS];
+  if (process.argv.includes('--citations')) jeux = [...jeux, ...CITATIONS];
 
   for (const jeu of jeux) {
     console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);

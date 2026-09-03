@@ -275,6 +275,22 @@ export function momentDuFil(): Moment {
 }
 
 /**
+ * L'instant où la citation est posée et signée.
+ *
+ * La signature arrive à 80 % de l'animation de la phrase, puis met 0,35 s :
+ * capturé avant, on photographie une citation anonyme, ce qui ne prouve rien
+ * du plan qu'on prétend rendre.
+ */
+export function momentDeLaCitation(): Moment {
+  return {
+    at: arrondi(
+      scenesMinutees()[4].startInSeconds + DEPART_DU_GRAPHIQUE + 0.6 + 0.35
+    ),
+    nom: 'citation',
+  };
+}
+
+/**
  * L'instant où le tiers inférieur est entièrement posé.
  *
  * Il entre en 0,4 s et sort avant la fin de la scène : capturé au début ou à

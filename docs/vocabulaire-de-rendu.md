@@ -252,6 +252,29 @@ Vérifié par `--fils`, une capture quand l'avant-dernier message vient
 d'arriver — au début il n'y a qu'une bulle, à la fin elles sont toutes
 immobiles, et ni l'une ni l'autre ne dirait si la cascade marche.
 
+**La citation, livrée le 3 septembre 2026.** Trois rangs — ce qui est dit, qui
+l'a dit, à quel titre — et c'est exactement pourquoi elle n'est pas un
+`overlayText`. « La terre ne ment pas — Kofi Mensah, agronome » dans une seule
+chaîne oblige la page à retrouver les coupures, et elle les rate dès qu'une
+virgule apparaît dans la phrase citée. La signature arrive après la phrase :
+l'ordre est le sens du plan, on cite puis on dit qui.
+
+Deux réglages de mise en page se sont révélés à l'image, pas au test.
+
+Les plans structurés se mesuraient sur le 16 px par défaut du navigateur, pas
+sur la trame : la citation sortait trois fois trop grosse et débordait du
+cadre. Ils prennent maintenant une taille de base injectée dans la page comme
+celle des sous-titres, en fraction de hauteur — donc juste en 16:9 comme en
+9:16.
+
+Et le `* { margin: 0; padding: 0 }` en tête de feuille écrase la hauteur de
+ligne héritée : sans hauteur posée explicitement, le nom passait par-dessus la
+dernière ligne de la phrase.
+
+Vérifié par `--citations`, capturé une fois la signature apparue — avant, on
+photographie une citation anonyme, ce qui ne prouve rien du plan qu'on prétend
+rendre.
+
 Au passage, deux fichiers ont été dégonflés avant d'y ajouter quoi que ce soit,
 selon la règle : `structures.ts` prend le balisage des plans structurés
 (`markup.ts` retombe de 516 à 341 lignes) et `plans.ts` leurs schémas

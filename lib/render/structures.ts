@@ -247,3 +247,46 @@ export function threadMarkup(
     '</div>'
   );
 }
+
+/**
+ * La citation : trois rangs, trois éléments.
+ *
+ * La phrase, le nom, la fonction. Le guillemet de la variante `mark` est
+ * décoratif et porte donc `aria-hidden` — il n'ajoute rien à ce qui est dit,
+ * et un lecteur d'écran qui l'annoncerait couperait la phrase en deux.
+ */
+export function quoteMarkup(
+  scene: HyperframesScene,
+  index: number
+): string {
+  const quote = scene.quote;
+  if (!quote) return '';
+
+  const style = quote.accentColor
+    ? ` style="--quote-accent:${escapeHtml(quote.accentColor)}"`
+    : '';
+
+  const variant = quote.variant ?? 'mark';
+  const marque =
+    variant === 'mark'
+      ? '<div class="quote-mark" aria-hidden="true">\u201C</div>'
+      : '';
+
+  const auteur = quote.author
+    ? `<div class="quote-author">${escapeHtml(quote.author)}</div>`
+    : '';
+  const role = quote.role
+    ? `<div class="quote-role">${escapeHtml(quote.role)}</div>`
+    : '';
+
+  const signature =
+    auteur || role ? `<div class="quote-sign">${auteur}${role}</div>` : '';
+
+  return (
+    `<div class="quote quote-${escapeHtml(variant)}" id="q${index}"${style}>` +
+    marque +
+    `<blockquote class="quote-text">${escapeHtml(quote.text)}</blockquote>` +
+    signature +
+    '</div>'
+  );
+}

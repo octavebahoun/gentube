@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   chartSchema,
   lowerThirdSchema,
+  quoteSchema,
   sceneCounterSchema,
   threadSchema,
 } from './plans';
@@ -428,6 +429,8 @@ export const sceneRenderSchema = z.object({
   chart: chartSchema.optional(),
   /** Un fil de discussion. Comme le graphique, la scène se dessine seule. */
   thread: threadSchema.optional(),
+  /** Une citation. La scène se dessine seule, elle aussi. */
+  quote: quoteSchema.optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
   card: z
     .object({
@@ -484,7 +487,8 @@ export function rendersOwnContent(render: unknown): boolean {
     parsed.data.card ||
       parsed.data.counter ||
       parsed.data.chart ||
-      parsed.data.thread
+      parsed.data.thread ||
+      parsed.data.quote
   );
 }
 
@@ -834,6 +838,7 @@ export function toHyperframesStoryboard(
 export {
   chartSchema,
   lowerThirdSchema,
+  quoteSchema,
   sceneCounterSchema,
   threadSchema,
 } from './plans';
