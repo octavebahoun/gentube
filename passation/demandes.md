@@ -378,6 +378,47 @@ Timeline: dans buildTimeline, scene.ytScreenWarp ? { durationInSeconds: duration
 Balisage: <div class="yt-screen-warp" id="ysw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ytScreenWarp` is optional: CRT display grid, scanline, vignette, and 3D screen warp wrapper. { durationInSeconds? }"
 
+## palier 2 · 2026-09-03 11:57
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.avatarCloud
+Forme   : { count?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.avatarCloud ? { count: count ?? 8, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="avatar-cloud" id="avc<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `avatarCloud` is optional: lettermark avatars populating an elliptical cloud with fine SVG links. { count?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:57
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.overwhelmSurround
+Forme   : { itemsCount?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.overwhelmSurround ? { itemsCount: itemsCount ?? 8, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="overwhelm-surround" id="ows<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `overwhelmSurround` is optional: task and ping bubbles accelerating inward around subject. { itemsCount?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:57
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.staggerCascade
+Forme   : { columns?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.staggerCascade ? { columns: columns ?? 3, durationInSeconds: durationInSeconds ?? 1.8 } : null
+Balisage: <div class="stagger-cascade" id="sgc<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `staggerCascade` is optional: grid of tile cards fading and traveling into place with stagger. { columns?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:57
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.freezeFrameDressing
+Forme   : { paperTexture?: boolean, tapeStickers?: boolean, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.freezeFrameDressing ? { paperTexture: paperTexture ?? true, tapeStickers: tapeStickers ?? true, durationInSeconds: durationInSeconds ?? 1.5 } : null
+Balisage: <div class="freeze-frame-dressing" id="ffd<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `freezeFrameDressing` is optional: paper, tape, and flash dressing for freeze-frame subject. { paperTexture?, tapeStickers?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:57
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.hwArrow
+Forme   : { curve?: 'straight' | 'gentle' | 'swoop', strokeStyle?: 'plain' | 'soft' | 'sharp' | 'spray', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.hwArrow ? { curve: curve ?? 'gentle', strokeStyle: strokeStyle ?? 'plain', durationInSeconds: durationInSeconds ?? 1.2 } : null
+Balisage: <div class="hw-arrow" id="hwa<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `hwArrow` is optional: wobbled draw-on annotation arrow with travel-aligned head arrival stretch. { curve?, strokeStyle?, durationInSeconds? }"
+
+
 
 
 

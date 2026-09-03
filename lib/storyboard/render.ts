@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EFFETS_SCHEMA } from './effets';
 import {
   chartSchema,
   comparisonSchema,
@@ -421,6 +422,47 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
+  avatarCloud: z
+    .object({
+      count: z.number().int().min(3).max(20).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  overwhelmSurround: z
+    .object({
+      itemsCount: z.number().int().min(4).max(16).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  staggerCascade: z
+    .object({
+      columns: z.number().int().min(2).max(6).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  freezeFrameDressing: z
+    .object({
+      paperTexture: z.boolean().optional(),
+      tapeStickers: z.boolean().optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  hwArrow: z
+    .object({
+      curve: z.enum(['straight', 'gentle', 'swoop']).optional(),
+      strokeStyle: z.enum(['plain', 'soft', 'sharp', 'spray']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  /*
+   * Les nappes déclarées dans `effets.ts`.
+   *
+   * Elles entrent par une table plutôt qu'une par une : trente demandes en une
+   * journée, toutes de la même forme — un champ, un div, deux variables CSS,
+   * un instant. Le balisage et la timeline lisent la même table, donc ajouter
+   * un effet est une ligne et non quatre éditions dans quatre fichiers.
+   */
+  ...EFFETS_SCHEMA,
 });
 
 export const sceneRenderSchema = z.object({
