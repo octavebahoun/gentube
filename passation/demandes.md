@@ -298,6 +298,47 @@ Timeline: dans buildTimeline, scene.mkSpecsList ? { itemsCount: itemsCount ?? 4,
 Balisage: <div class="mk-specs-list" id="mksl<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `mkSpecsList` is optional: left-aligned checklist with staggered row slide-ins. { itemsCount?, durationInSeconds? }"
 
+## palier 2 · 2026-09-03 11:14
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.mkUsageArc
+Forme   : { percentage?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.mkUsageArc ? { percentage: percentage ?? 75, durationInSeconds: durationInSeconds ?? 1.8 } : null
+Balisage: <div class="mk-usage-arc" id="mkua<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `mkUsageArc` is optional: circular gauge drawing on with count-up percentage. { percentage?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:14
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.flowchart
+Forme   : { nodesCount?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.flowchart ? { nodesCount: nodesCount ?? 4, durationInSeconds: durationInSeconds ?? 2.5 } : null
+Balisage: <div class="flowchart" id="fc<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `flowchart` is optional: horizontal animated decision tree with connected nodes. { nodesCount?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:14
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.flowchartVertical
+Forme   : { nodesCount?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.flowchartVertical ? { nodesCount: nodesCount ?? 4, durationInSeconds: durationInSeconds ?? 2.5 } : null
+Balisage: <div class="flowchart-vertical" id="fcv<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `flowchartVertical` is optional: vertical portrait decision tree with connected nodes. { nodesCount?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:14
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.confetti
+Forme   : { particleCount?: number, durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.confetti ? { particleCount: particleCount ?? 50, durationInSeconds: durationInSeconds ?? 2.0 } : null
+Balisage: <div class="confetti" id="cnf<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `confetti` is optional: deterministic particle burst celebration effect. { particleCount?, durationInSeconds? }"
+
+## palier 2 · 2026-09-03 11:14
+Fichier : lib/storyboard/render.ts
+Champ   : sceneEffectsSchema.focusSwap
+Forme   : { targetCard?: 'left' | 'right', durationInSeconds?: number }
+Timeline: dans buildTimeline, scene.focusSwap ? { targetCard: targetCard ?? 'left', durationInSeconds: durationInSeconds ?? 1.5 } : null
+Balisage: <div class="focus-swap" id="fsw<index>"></div> dans sceneMarkup, dans .scene
+Prompt  : "- `focusSwap` is optional: card focus swap with blur and scale depth transitions. { targetCard?, durationInSeconds? }"
+
+
 
 
 

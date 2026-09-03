@@ -23,11 +23,11 @@ que la composition ne sait pas encore dessiner.
 - [x] `mk-line-graph` — One or two SVG series draw on with dots popping and value labels riding the draw front; dim baseline axis, x-labels, color-dot legend _(data-viz, chart, graph)_
 - [x] `mk-progress-stat` — Big-numeral statistic with count-up, label, thin progress track filling to value/max, and caption; light and dark schemes _(data-viz, stat, minimal)_
 - [x] `mk-specs-list` — Left-aligned specs/traits checklist over footage or a board: rows slide in staggered with an accent underline sweep; light and dark schemes _(data-viz, list, minimal)_
-- `mk-usage-arc` — Thin circular gauge that draws on while its percentage counts up; one helper call drives both _(data-viz, gauge, minimal)_
-- `flowchart` — Animated decision tree with SVG connectors, sticky-note nodes, cursor interaction, and typing correction _(diagram, flowchart, interactive)_
-- `flowchart-vertical` — Portrait animated decision tree with SVG connectors, sticky-note nodes, cursor interaction, and typing correction _(diagram, flowchart, interactive)_
-- `confetti` — A deterministic celebration burst with seeded particles and gravity _(effect)_
-- `focus-swap` — Moves attention between two side-by-side cards as one recedes with scale, blur, and dimming while the other advances to full focus _(effect, ui-props, focus)_
+- [x] `mk-usage-arc` — Thin circular gauge that draws on while its percentage counts up; one helper call drives both _(data-viz, gauge, minimal)_
+- [x] `flowchart` — Animated decision tree with SVG connectors, sticky-note nodes, cursor interaction, and typing correction _(diagram, flowchart, interactive)_
+- [x] `flowchart-vertical` — Portrait animated decision tree with SVG connectors, sticky-note nodes, cursor interaction, and typing correction _(diagram, flowchart, interactive)_
+- [x] `confetti` — A deterministic celebration burst with seeded particles and gravity _(effect)_
+- [x] `focus-swap` — Moves attention between two side-by-side cards as one recedes with scale, blur, and dimming while the other advances to full focus _(effect, ui-props, focus)_
 - `mesh-gradient-bg` — A render-safe mesh gradient using animated radial layers _(effect)_
 - `motion-blur` — Velocity-driven motion blur — samples element position each frame and applies a one-sided SVG feGaussianBlur ghost trail proportional to speed _(effect, motion-blur, velocity)_
 - `spotlight-card` — A card with a scripted cursor spotlight and lit border _(effect)_

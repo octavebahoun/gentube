@@ -365,6 +365,36 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
+  mkUsageArc: z
+    .object({
+      percentage: z.number().min(0).max(100).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  flowchart: z
+    .object({
+      nodesCount: z.number().int().min(2).max(10).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  flowchartVertical: z
+    .object({
+      nodesCount: z.number().int().min(2).max(10).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  confetti: z
+    .object({
+      particleCount: z.number().int().min(10).max(200).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  focusSwap: z
+    .object({
+      targetCard: z.enum(['left', 'right']).optional(),
+      durationInSeconds: z.number().positive().optional(),
+    })
+    .optional(),
 });
 
 export const sceneRenderSchema = z.object({
