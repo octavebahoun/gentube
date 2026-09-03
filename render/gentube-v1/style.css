@@ -601,6 +601,94 @@ video.media {
   flex: 1 1 0;
 }
 
+/* --- Fil de discussion ---------------------------------------------------- */
+
+/*
+ * Un plan qui se dessine seul, comme le compteur et le graphique : pas
+ * d'image derrière, le fond noir de `#bg` sert de scène.
+ *
+ * Les bulles sont posées dès le départ et seule leur apparition est animée.
+ * Un fil qui remonterait au fur et à mesure demanderait de connaître la
+ * hauteur des bulles précédentes — donc un calcul dans la page, donc une
+ * dérive d'un rendu à l'autre.
+ */
+.thread {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75em;
+  padding: 8% 9% 16%;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  --thread-accent: #ce1f20;
+}
+
+.thread-title {
+  align-self: center;
+  font-size: 0.82em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.thread-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+
+.thread-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16em;
+  max-width: 78%;
+  will-change: opacity, transform;
+}
+
+.thread-theirs {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.thread-mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.thread-from {
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0 0.4em;
+}
+
+/*
+ * Le coin plat pointe vers celui qui parle : c'est lui, plus que la couleur,
+ * qui fait lire un échange plutôt qu'une liste.
+ */
+.thread-bubble {
+  padding: 0.42em 0.7em;
+  border-radius: 0.9em;
+  font-size: 1.05em;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.thread-theirs .thread-bubble {
+  border-bottom-left-radius: 0.16em;
+}
+
+.thread-mine .thread-bubble {
+  background: var(--thread-accent);
+  border-bottom-right-radius: 0.16em;
+}
+
 /* --- Compteur ------------------------------------------------------------ */
 
 /*
@@ -1042,4 +1130,237 @@ video.media {
   will-change: opacity;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
   background-size: 180px 180px;
+}
+
+/*
+ * La vignette : un assombrissement radial pur CSS. Aucune animation, donc
+ * aucun repos a styler : le div n existe que quand la scene la demande.
+ */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 52%,
+    rgba(0, 0, 0, var(--vg-strength, 0.55)) 100%
+  );
+}
+
+/*
+ * L anneau de choc : un cercle fin, pose au centre par son coin haut-gauche
+ * (left/top 50%) et recentre par xPercent/yPercent dans le tween — un scale
+ * GSAP ecraserait un translate CSS. La bordure s affine en s elargissant,
+ * comme une onde.
+ */
+.shock-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56%;
+  aspect-ratio: 1 / 1;
+  border: 0.35em solid var(--ring-color, #ce1f20);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/*
+ * Le projecteur : le cadre s assombrit sauf un trou elliptique a bords
+ * fondus. Le fondu est dans le degrade (55% vers 100%), pas dans un filtre :
+ * voir l en-tete du fichier.
+ */
+.feather-spot {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  background: radial-gradient(
+    ellipse var(--spot-size, 40%) var(--spot-size, 40%) at var(--spot-x, 50%) var(--spot-y, 42%),
+    transparent 0%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+}
+
+/*
+ * La grille : deux reseaux perpendiculaires en tuile de 48 px, inseparables
+ * par construction — la boucle du tween repart donc sans couture. En premier
+ * dans la scene : un fond, que le media recouvre quand il y en a un.
+ */
+.grid-drift {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, background-position;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: 0px 0px;
+}
+
+/*
+ * Le curseur : une fleche SVG fige en fond (aucun cout par image), une bague
+ * qui s elargit au clic. La bague est calee sur la pointe, en haut a gauche
+ * du div, et recentree par xPercent/yPercent dans le tween.
+ */
+.cursor-click {
+  position: absolute;
+  width: 26px;
+  height: 38px;
+  left: 12%;
+  top: 12%;
+  opacity: 0;
+  pointer-events: none;
+  will-change: left, top, opacity;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='38'%3E%3Cpath d='M2,2 L2,28 L9,22 L12,32 L16,30 L13,20 L20,20 Z' fill='%23ffffff' stroke='%23000000' stroke-width='2'/%3E%3C/svg%3E") no-repeat;
+}
+
+.cursor-ring {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 46px;
+  height: 46px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*
+ * Le viseur : quatre coins, une ligne qui balaie. La lueur de la ligne est
+ * une ombre portee sur 2 px, pas un filtre — meme tolerance que les mots
+ * neon.
+ */
+.scan-gate {
+  position: absolute;
+  inset: 18% 12%;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+.gate-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 0 solid var(--gate-color, #4ad9ff);
+}
+
+.gate-corner.tl { left: 0; top: 0; border-left-width: 4px; border-top-width: 4px; }
+.gate-corner.tr { right: 0; top: 0; border-right-width: 4px; border-top-width: 4px; }
+.gate-corner.bl { left: 0; bottom: 0; border-left-width: 4px; border-bottom-width: 4px; }
+.gate-corner.br { right: 0; bottom: 0; border-right-width: 4px; border-bottom-width: 4px; }
+
+.scan-line {
+  position: absolute;
+  left: 2%;
+  right: 2%;
+  top: 8%;
+  height: 2px;
+  background: var(--gate-color, #4ad9ff);
+  box-shadow: 0 0 12px var(--gate-color, #4ad9ff);
+}
+
+/*
+ * L interrupteur : une piste arrondie fixe, une pastille qui glisse. Tailles
+ * en px, pas en % : c est un objet pose, pas un plein cadre — comme le
+ * curseur, il a sa taille propre quelle que soit la resolution.
+ */
+.toggle-flip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120px;
+  height: 64px;
+  margin-left: -60px;
+  margin-top: -32px;
+  border-radius: 999px;
+  background: #555b66;
+  pointer-events: none;
+  will-change: transform, background-color;
+}
+
+.toggle-flip.on {
+  background: #1faa53;
+}
+
+.toggle-thumb {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+  will-change: transform;
+}
+
+/*
+ * L aurore : trois nappes radiales floues par construction (degrade large),
+ * jamais par filtre. En premier dans la scene : un fond, sous le media.
+ */
+.aurora {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  will-change: opacity;
+  background: #0b1026;
+}
+
+.aurora .blob-a,
+.aurora .blob-b,
+.aurora .blob-c {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.blob-a {
+  background: radial-gradient(ellipse 45% 40% at 30% 35%, rgba(122, 90, 248, 0.55), transparent 70%);
+}
+
+.blob-b {
+  background: radial-gradient(ellipse 45% 40% at 70% 60%, rgba(74, 217, 255, 0.45), transparent 70%);
+}
+
+.blob-c {
+  background: radial-gradient(ellipse 40% 38% at 55% 30%, rgba(206, 31, 32, 0.4), transparent 70%);
+}
+
+/*
+ * Le contour : un SVG plein cadre, un rect au perimetre normalise. Le trait
+ * ne s amincit pas a l etirement (non-scaling-stroke), comme la courbe du
+ * graphique.
+ */
+.outline-draw {
+  position: absolute;
+  inset: 6%;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.outline-draw svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.outline-draw rect {
+  fill: none;
+  stroke: var(--trace-color, #ffd9a0);
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
 }

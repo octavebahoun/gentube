@@ -27,6 +27,7 @@ import {
   chartSchema,
   lowerThirdSchema,
   sceneCounterSchema,
+  threadSchema,
   sceneEffectsSchema,
   sceneSoundSchema,
 } from './render';
@@ -146,6 +147,13 @@ const SYSTEM_PROMPT = [
   '  axis tick, and half our videos are vertical. Like `counter`, such a scene',
   '  needs NO `prompt`: it draws itself and costs nothing to illustrate. Use it',
   '  when the narration compares figures instead of stating one.',
+  '- `thread` is optional and plays a short conversation:',
+  '  { messages: [{from, text, mine?}] (2 to 5), title?, stepSeconds? }. The',
+  '  messages appear in the order you write them, one after another; `mine`',
+  '  puts a reply on the other side so it reads as an exchange. Keep each',
+  '  `text` under about fifteen words — a bubble nobody can read in three',
+  '  seconds is wasted. Like `counter` and `chart`, such a scene needs NO',
+  '  `prompt`. Use it when the narration quotes what people said.',
   '- `lowerThird` is optional and names who or what is on screen:',
   '  { name, role?, variant: bar|stack|boxed, side?: left|right, holdSeconds? }.',
   '  `name` is the strong line, `role` the smaller one under it — a job, a',
@@ -231,12 +239,14 @@ const llmSceneSchema = z.object({
    */
   counter: sceneCounterSchema.optional(),
   chart: chartSchema.optional(),
+  thread: threadSchema.optional(),
   lowerThird: lowerThirdSchema.optional(),
   sounds: z.array(sceneSoundSchema.partial({ src: true })).optional(),
 })
   .refine(
     (scene) =>
-      Boolean(scene.counter || scene.chart) || (scene.prompt ?? '').length >= 10,
+      Boolean(scene.counter || scene.chart || scene.thread) ||
+      (scene.prompt ?? '').length >= 10,
     {
       path: ['prompt'],
       message: 'a scene that has no structured content needs a visual prompt',
@@ -284,6 +294,7 @@ export function normalizeStoryboard(
     if (scene.effects) render.effects = scene.effects;
     if (scene.counter) render.counter = scene.counter;
     if (scene.chart) render.chart = scene.chart;
+    if (scene.thread) render.thread = scene.thread;
     if (scene.lowerThird) render.lowerThird = scene.lowerThird;
     if (sounds.length > 0) render.sounds = sounds;
 

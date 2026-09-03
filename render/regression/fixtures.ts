@@ -256,6 +256,25 @@ export function momentDuGraphique(kind: string): Moment {
 }
 
 /**
+ * Le moment où l'avant-dernier message vient d'arriver.
+ *
+ * Ni au début ni à la fin : au début il n'y a qu'une bulle, à la fin elles
+ * sont toutes posées et immobiles — deux images qui ne diraient pas si la
+ * cascade fonctionne. Pris entre les deux, une bulle est encore en train de
+ * monter et les autres sont déjà là.
+ */
+export function momentDuFil(): Moment {
+  const scenes = scenesMinutees();
+  const pas = 0.7;
+  return {
+    at: arrondi(
+      scenes[4].startInSeconds + DEPART_DU_GRAPHIQUE + 2 * pas + 0.16
+    ),
+    nom: 'fil',
+  };
+}
+
+/**
  * L'instant où le tiers inférieur est entièrement posé.
  *
  * Il entre en 0,4 s et sort avant la fin de la scène : capturé au début ou à

@@ -155,4 +155,30 @@ export const CONTENUS_JS = `
             });
           }
         }
+
+        /*
+         * Le fil : chaque message arrive a son tour.
+         *
+         * Une bulle monte et s installe. Rien ne defile : sous la recherche
+         * d image, un fil qui remonterait au fur et a mesure demanderait de
+         * connaitre la hauteur des bulles precedentes, donc un calcul dans la
+         * page. Elles sont posees des le depart et seule leur apparition est
+         * animee.
+         */
+        if (scene.thread) {
+          scene.thread.messages.forEach(function (message, i) {
+            tl.fromTo(
+              "#th" + scene.index + "-" + i,
+              { opacity: 0, y: "0.6em", scale: 0.96 },
+              {
+                opacity: 1,
+                y: "0em",
+                scale: 1,
+                duration: 0.32,
+                ease: "back.out(1.6)",
+              },
+              message.at
+            );
+          });
+        }
       }`;

@@ -9,6 +9,7 @@ import {
   MOMENTS,
   momentDeLaCoupe,
   DEPART_DU_GRAPHIQUE,
+  momentDuFil,
   momentDuGraphique,
   momentDuTiers,
   momentDuTitre,
@@ -88,6 +89,8 @@ type Jeu = {
   lowerThird?: string;
   /** Type de graphique posé à la place du compteur, cinquième scène. */
   chart?: string;
+  /** Pose un fil de discussion à la place du compteur, cinquième scène. */
+  thread?: boolean;
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -135,9 +138,24 @@ const GRAPHIQUES: Jeu[] = ['bar', 'line'].map((kind) => ({
   moments: [momentDuGraphique(kind)],
 }));
 
+/**
+ * Le fil de discussion, activé par --fils.
+ *
+ * Sur la cinquième scène comme le graphique : un plan qui se dessine seul n'a
+ * pas d'image à recouvrir, et le compteur lui cède la place.
+ */
+const FILS: Jeu[] = [
+  {
+    nom: 'fil',
+    video: REFERENCE_VIDEO,
+    thread: true,
+    moments: [momentDuFil()],
+  },
+];
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(jeu: Jeu): string {
-  const { video, variant, transition, lowerThird, chart } = jeu;
+  const { video, variant, transition, lowerThird, chart, thread } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
     cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
@@ -180,6 +198,20 @@ function projet(jeu: Jeu): string {
       ],
       suffix: ' %',
       startInSeconds: DEPART_DU_GRAPHIQUE,
+    };
+  }
+
+  if (thread) {
+    const render = shots[4].render as Record<string, unknown>;
+    delete render.counter;
+    render.thread = {
+      title: 'Groupe cooperative',
+      startInSeconds: DEPART_DU_GRAPHIQUE,
+      messages: [
+        { from: 'Awa', text: 'Tu as vu les chiffres du mois ?' },
+        { from: 'Moi', text: 'Trois fois plus qu en juin.', mine: true },
+        { from: 'Awa', text: 'On garde le meme rythme.' },
+      ],
     };
   }
 
@@ -234,6 +266,7 @@ function main() {
   if (process.argv.includes('--transitions')) jeux = [...jeux, ...COUPES];
   if (process.argv.includes('--tiers')) jeux = [...jeux, ...TIERS];
   if (process.argv.includes('--graphiques')) jeux = [...jeux, ...GRAPHIQUES];
+  if (process.argv.includes('--fils')) jeux = [...jeux, ...FILS];
 
   for (const jeu of jeux) {
     console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);

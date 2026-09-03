@@ -234,6 +234,29 @@ cher. La contrainte est devenue conditionnelle.
 
 Vérifié par `--graphiques`, une capture au milieu de la montée.
 
+**Le fil de discussion, livré le 3 septembre 2026.** Le plan structuré le plus
+proche de ce que le modèle sait déjà écrire : des répliques. Deux à cinq
+messages, un auteur et un texte par bulle — deux éléments, jamais une chaîne —
+et un côté, `mine`, qui fait lire un échange plutôt qu'une liste.
+
+Rien ne défile. Un fil qui remonterait au fur et à mesure demanderait de
+connaître la hauteur des bulles déjà posées, donc un calcul dans la page, donc
+une dérive d'un rendu à l'autre. Les bulles sont là dès le départ et seule leur
+apparition est animée.
+
+Le pas entre deux messages est borné par ce qui reste de la scène : cinq
+messages à une seconde d'écart ne tiennent pas dans un plan de trois secondes,
+et les deux derniers n'apparaîtraient jamais.
+
+Vérifié par `--fils`, une capture quand l'avant-dernier message vient
+d'arriver — au début il n'y a qu'une bulle, à la fin elles sont toutes
+immobiles, et ni l'une ni l'autre ne dirait si la cascade marche.
+
+Au passage, deux fichiers ont été dégonflés avant d'y ajouter quoi que ce soit,
+selon la règle : `structures.ts` prend le balisage des plans structurés
+(`markup.ts` retombe de 516 à 341 lignes) et `plans.ts` leurs schémas
+(`render.ts` de 880 à 795).
+
 ### Lot 4 — Les plans structurés  ·  palier 3
 
 **Ce qui sort** : des scènes dont le contenu est une donnée, pas une image —
@@ -267,6 +290,19 @@ le porte pas encore ) :
 Vérifiés à l'image par `hyperframes snapshot` au milieu du geste : la bande
 est centrée à 1,45 s et partie à 2,5 s, le grain tient toute la scène, le pic
 rend le titre 6 % plus grand puis le repose exactement.
+
+Deuxième lot (demandes posées, tween et CSS livrés, schéma en attente) :
+
+- `vignette` ← `vignette` : un assombrissement radial pur CSS, sans tween —
+  c'est un état, pas un geste.
+- `shockRing` ← `logo-sting` (l'anneau seul) : un cercle qui s'élargit et
+  s'efface en une fois, centré par `xPercent`/`yPercent` car un scale GSAP
+  écrase un translate CSS.
+- `featherSpot` ← `yt-feather-highlight` : le cadre s'assombrit sauf un trou
+  elliptique à bords fondus, trou placé par variables CSS.
+
+Vérifiés eux aussi : bords sombres et centre net, anneau centré à mi-course
+puis parti, trou doux posé puis lumière revenue.
 
 ---
 

@@ -216,6 +216,7 @@ export function buildTimeline(
       const accent = scene.effects?.beatAccent;
       const tiers = scene.lowerThird;
       const chart = scene.chart;
+      const thread = scene.thread;
 
       return {
         index,
@@ -369,6 +370,34 @@ export function buildTimeline(
                         })),
                       }
                     : null,
+              };
+            })()
+          : null,
+        /*
+         * Le fil : un instant par message, en cascade.
+         *
+         * Le pas est borné par ce qui reste de la scène. Cinq messages à une
+         * seconde d'écart tiennent cinq secondes ; sur un plan de trois, les
+         * deux derniers n'apparaîtraient jamais et le storyboard mentirait sur
+         * ce qu'il montre.
+         */
+        thread: thread
+          ? (() => {
+              const debut =
+                scene.startInSeconds + (thread.startInSeconds ?? 0);
+              const reste = Math.max(
+                0.3,
+                scene.startInSeconds + scene.durationInSeconds - debut - 0.4
+              );
+              const pas = Math.min(
+                thread.stepSeconds ?? 0.7,
+                reste / Math.max(1, thread.messages.length - 1)
+              );
+              return {
+                at: ms(debut),
+                messages: thread.messages.map((_, i) => ({
+                  at: ms(debut + i * pas),
+                })),
               };
             })()
           : null,

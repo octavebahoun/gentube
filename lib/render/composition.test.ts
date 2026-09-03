@@ -599,6 +599,54 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the thread', () => {
+    const messages = [
+      { from: 'Awa', text: 'Tu as vu les chiffres ?' },
+      { from: 'Moi', text: 'Trois fois plus', mine: true },
+      { from: 'Awa', text: 'En un mois.' },
+    ];
+    const withThread = (thread: Record<string, unknown>) =>
+      html([{ ...shot(), render: { thread } } as Shot]);
+
+    it('keeps the author and the line apart, as two elements', () => {
+      const page = withThread({ messages });
+      expect(page).toContain('<div class="thread-from">Awa</div>');
+      expect(page).toContain('<div class="thread-bubble">En un mois.</div>');
+    });
+
+    it('puts a reply on the other side so it reads as an exchange', () => {
+      const page = withThread({ messages });
+      expect(page).toContain('thread-row thread-theirs');
+      expect(page).toContain('thread-row thread-mine');
+    });
+
+    it('brings the messages in the order they were written', () => {
+      const page = withThread({ messages });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      const ats = T.scenes[0].thread.messages.map((m: { at: number }) => m.at);
+      expect(ats).toEqual([...ats].sort((a, b) => a - b));
+      expect(new Set(ats).size).toBe(3);
+    });
+
+    it('squeezes the step so the last message still lands in the scene', () => {
+      // Cinq messages à une seconde d'écart ne tiennent pas dans trois : les
+      // deux derniers n'apparaîtraient jamais, et le plan mentirait.
+      const cinq = Array.from({ length: 5 }, (_, i) => ({
+        from: 'x',
+        text: 'y' + i,
+      }));
+      const page = withThread({ messages: cinq, stepSeconds: 2 });
+      const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+      const scene = T.scenes[0];
+      const dernier = scene.thread.messages[4].at;
+      expect(dernier).toBeLessThan(scene.start + scene.duration);
+    });
+
+    it('leaves the page alone when no scene asks for one', () => {
+      expect(html([shot()])).not.toContain('class="thread');
+    });
+  });
+
   describe('the lower third', () => {
     const withTiers = (lowerThird: Record<string, unknown>) =>
       html([{ ...shot(), render: { lowerThird } } as Shot]);
@@ -848,6 +896,23 @@ describe('the palier-2 effects', () => {
     expect(palier2()).toMatch(/\.grid-drift \{[^}]*opacity: 0/);
     expect(palier2()).toMatch(/\.cursor-click \{[^}]*opacity: 0/);
     expect(palier2()).toMatch(/\.scan-gate \{[^}]*opacity: 0/);
+  });
+
+  it('declares the fourth batch on their own ids', () => {
+    // tf, au et od : aucun ne recouvre un identifiant existant.
+    for (const champ of ['scene.toggleFlip', 'scene.auroraDrift', 'scene.outlineDraw']) {
+      expect(SCENES_JS, champ).toContain(champ);
+    }
+    expect(SCENES_JS).toContain('"#tf"');
+    expect(SCENES_JS).toContain('"#au"');
+    expect(SCENES_JS).toContain('"#od"');
+  });
+
+  it('hides the fourth batch at rest, and normalizes the trace', () => {
+    // pathLength 100 : le tiret va de 100 a 0 sans mesure dans la page.
+    expect(palier2()).toMatch(/\.toggle-flip \{[^}]*background: #555b66/);
+    expect(palier2()).toMatch(/\.aurora \{[^}]*opacity: 0/);
+    expect(palier2()).toContain('stroke-dasharray: 100;');
   });
 
   describe('through the real pipeline', () => {

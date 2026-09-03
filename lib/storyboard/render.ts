@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import {
+  chartSchema,
+  lowerThirdSchema,
+  sceneCounterSchema,
+  threadSchema,
+} from './plans';
 import type {
   Ratio,
   Resolution,
@@ -283,104 +289,6 @@ export const sceneEffectsSchema = z.object({
     .optional(),
 });
 
-export const sceneCounterSchema = z.object({
-  /** La valeur d'arrivée. C'est elle que le spectateur retient. */
-  value: z.number(),
-  /** Le départ. Zéro sauf si la progression elle-même veut dire quelque chose. */
-  from: z.number().optional(),
-  /** Ce que le chiffre compte. Sans lui, un nombre nu ne dit rien. */
-  label: z.string().optional(),
-  prefix: z.string().optional(),
-  suffix: z.string().optional(),
-  decimals: z.number().int().min(0).max(3).optional(),
-  /** `count` monte en chiffres, `ring` remplit un anneau autour d'eux. */
-  variant: z.enum(['count', 'ring']).optional(),
-  startInSeconds: z.number().min(0).optional(),
-  durationInSeconds: z.number().positive().optional(),
-});
-
-/**
- * Le tiers inférieur : qui parle, et à quel titre.
- *
- * `overlayText` ne porte qu'une chaîne, et c'est précisément ce qui lui
- * manque ici. Un tiers inférieur porte **deux** informations de rangs
- * différents — un nom et une fonction — et le rendu doit savoir laquelle
- * grossir. Passer « Kofi Mensah, agronome » dans un seul champ oblige la
- * page à redécouper la chaîne pour deviner la hiérarchie ; elle devinerait
- * mal dès la première virgule dans un titre.
- *
- * Premier champ du contrat dont le contenu est structuré plutôt que rédigé.
- */
-export const lowerThirdSchema = z.object({
-  /** La ligne forte. Un nom de personne, de lieu, de source. */
-  name: z.string(),
-  /** La ligne faible : fonction, date, provenance. */
-  role: z.string().optional(),
-  /** `bar` souligne, `stack` empile sans filet, `boxed` pose un cartouche. */
-  variant: z.enum(['bar', 'stack', 'boxed', 'bild']).optional(),
-  side: z.enum(['left', 'right']).optional(),
-  accentColor: z.string().optional(),
-  startInSeconds: z.number().min(0).optional(),
-  /**
-   * Combien de temps il reste à l'écran.
-   *
-   * Un tiers inférieur sort, contrairement au bandeau : il annonce
-   * quelqu'un, il n'accompagne pas le plan. Sans valeur, il tient trois
-   * secondes — ou jusqu'à la fin de la scène si elle est plus courte.
-   */
-  holdSeconds: z.number().positive().optional(),
-});
-
-/**
- * Un graphique.
- *
- * Le premier plan du catalogue dont le contenu est une **série** et non une
- * valeur. Le compteur porte un nombre, le tiers inférieur deux lignes ; ici il
- * faut des couples étiquette/valeur, et leur ordre compte — c'est lui que
- * l'œil lit.
- *
- * Trois à six entrées. En dessous, un compteur dit la même chose plus fort ;
- * au-delà, les étiquettes ne tiennent plus dans un cadre vertical, où la
- * moitié de nos vidéos sont vues.
- *
- * Comme le compteur, il ne coûte que sa voix off : rien n'est généré.
- */
-export const chartSchema = z.object({
-  /** `bar` compare des quantités, `line` montre une évolution. */
-  kind: z.enum(['bar', 'line']).optional(),
-  /** Ce que le graphique dit, en une ligne. Sans lui, des chiffres nus. */
-  title: z.string().optional(),
-  /**
-   * Les points, dans l'ordre où ils doivent être lus.
-   *
-   * `label` est court : c'est une étiquette d'axe, pas une phrase. En 9:16
-   * elle a la largeur d'un doigt.
-   */
-  points: z
-    .array(
-      z.object({
-        label: z.string(),
-        value: z.number(),
-      })
-    )
-    .min(2)
-    .max(6),
-  /**
-   * La valeur haute de l'échelle.
-   *
-   * Omise, c'est la plus grande valeur de la série. On la pose quand l'échelle
-   * elle-même veut dire quelque chose — un pourcentage va jusqu'à 100 même si
-   * aucune barre ne l'atteint, sinon la plus haute paraît pleine.
-   */
-  max: z.number().positive().optional(),
-  prefix: z.string().optional(),
-  suffix: z.string().optional(),
-  decimals: z.number().int().min(0).max(3).optional(),
-  accentColor: z.string().optional(),
-  startInSeconds: z.number().min(0).optional(),
-  durationInSeconds: z.number().positive().optional(),
-});
-
 export const sceneRenderSchema = z.object({
   effects: sceneEffectsSchema.optional(),
   overlayText: z
@@ -487,6 +395,8 @@ export const sceneRenderSchema = z.object({
    * Un graphique. Comme le compteur, la scène se dessine seule.
    */
   chart: chartSchema.optional(),
+  /** Un fil de discussion. Comme le graphique, la scène se dessine seule. */
+  thread: threadSchema.optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
   card: z
     .object({
@@ -539,7 +449,12 @@ export const sceneRenderSchema = z.object({
 export function rendersOwnContent(render: unknown): boolean {
   const parsed = sceneRenderSchema.safeParse(render ?? {});
   if (!parsed.success) return false;
-  return Boolean(parsed.data.card || parsed.data.counter || parsed.data.chart);
+  return Boolean(
+    parsed.data.card ||
+      parsed.data.counter ||
+      parsed.data.chart ||
+      parsed.data.thread
+  );
 }
 
 export type WordTiming = z.infer<typeof wordTimingSchema>;
@@ -878,3 +793,16 @@ export function toHyperframesStoryboard(
     }),
   };
 }
+
+/**
+ * Réexports de compatibilité.
+ *
+ * Les schémas des plans structurés vivent dans `plans.ts` depuis le
+ * 3 septembre 2026 ; `service.ts` et les tests importent encore d'ici.
+ */
+export {
+  chartSchema,
+  lowerThirdSchema,
+  sceneCounterSchema,
+  threadSchema,
+} from './plans';
