@@ -49,6 +49,13 @@ export const ratioEnum = pgEnum('ratio', ['16:9', '9:16']);
  * Les six derniers sont transposés des composants `caption-*` du registre
  * HyperFrames (`docs/vocabulaire-de-rendu.md`).
  */
+/*
+ * Le seul morceau du vocabulaire de rendu qui vive en base, et c'est un
+ * accident d'histoire : le style de sous-titre est arrivé avant que le contrat
+ * de rendu ne s'installe en `jsonb`. Conséquence, chaque style de plus est une
+ * migration, là où une transition ou une variante de titre n'est qu'un
+ * déploiement. À reprendre le jour où l'on touchera à `videos`.
+ */
 export const subtitleStyleEnum = pgEnum('subtitle_style', [
   'karaoke',
   'fondant',
@@ -59,6 +66,15 @@ export const subtitleStyleEnum = pgEnum('subtitle_style', [
   'neon',
   'gradient',
   'blend',
+  // Transposés des `caption-*` du registre, le 3 septembre 2026.
+  'glitch-rgb',
+  'editorial-emphasis',
+  'kinetic-slam',
+  'matrix-decode',
+  'parallax-layers',
+  'texture',
+  'weight-shift',
+  'camera-follow',
 ]);
 
 /**
