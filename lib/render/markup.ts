@@ -90,6 +90,25 @@ export function sceneMarkup(
   const tiers = lowerThirdMarkup(scene, index);
   const chart = chartMarkup(scene, index);
 
+  /*
+   * Le balayage et le grain : deux nappes dans la scène, comme l'éclair.
+   *
+   * Dans le div de la scène et non au-dessus : ils meurent avec elle. Un
+   * voile posé au niveau du document survivrait au plan qu'il habille.
+   *
+   * `gr` et non `g` pour le grain : `g<index>` est déjà l'anneau du compteur,
+   * et deux éléments sous le même identifiant se volent le tween.
+   */
+  const sweep = scene.effects?.lightSweep
+    ? `<div class="light-sweep" id="ls${index}" style="--sweep-color:${escapeHtml(
+        scene.effects.lightSweep.color ?? '#ffffff'
+      )}"></div>`
+    : '';
+
+  const grain = scene.effects?.grain
+    ? `<div class="grain" id="gr${index}"></div>`
+    : '';
+
   // Un éclair est une nappe de couleur pleine trame. Elle est dans la scène
   // pour disparaître avec elle, jamais au-dessus du reste de la vidéo.
   const flash = scene.effects?.flash
@@ -113,6 +132,8 @@ export function sceneMarkup(
     kinetic,
     counter,
     chart,
+    sweep,
+    grain,
     flash,
     '</div>',
   ]

@@ -211,6 +211,9 @@ export function buildTimeline(
     scenes: scenes.map((scene, index) => {
       const title = scene.kineticTitle;
       const flash = scene.effects?.flash;
+      const sweep = scene.effects?.lightSweep;
+      const grain = scene.effects?.grain;
+      const accent = scene.effects?.beatAccent;
       const tiers = scene.lowerThird;
       const chart = scene.chart;
 
@@ -238,6 +241,51 @@ export function buildTimeline(
           ? {
               at: onBeat(scene, beats, scene.startInSeconds + (flash.startInSeconds ?? 0)),
               duration: flash.durationInSeconds ?? 0.18,
+            }
+          : null,
+        lightSweep: sweep
+          ? {
+              at: onBeat(
+                scene,
+                beats,
+                scene.startInSeconds + (sweep.startInSeconds ?? 0.6)
+              ),
+              duration: sweep.durationInSeconds ?? 0.9,
+              color: sweep.color ?? '#ffffff',
+            }
+          : null,
+        /*
+         * Le grain couvre la scène par défaut, et jamais au-delà.
+         *
+         * Un voile qui survivrait à son plan se retrouverait sur le suivant,
+         * qui n'en a peut-être pas voulu — même règle que le tiers inférieur.
+         */
+        grain: grain
+          ? (() => {
+              const debut = scene.startInSeconds + (grain.startInSeconds ?? 0);
+              const reste =
+                scene.startInSeconds + scene.durationInSeconds - debut;
+              return {
+                at: ms(debut),
+                duration: Math.min(
+                  grain.durationInSeconds ?? reste,
+                  Math.max(0.05, reste)
+                ),
+                opacity: grain.opacity ?? 0.22,
+              };
+            })()
+          : null,
+        // Toujours calé, `onBeat` ou non : un accent qui rate la frappe n'est
+        // plus un accent.
+        beatAccent: accent
+          ? {
+              at: onBeat(
+                { ...scene, effects: { ...scene.effects, onBeat: true } },
+                beats,
+                scene.startInSeconds + (accent.startInSeconds ?? 0)
+              ),
+              duration: accent.durationInSeconds ?? 0.35,
+              strength: accent.strength ?? 0.035,
             }
           : null,
         overlay: scene.overlayText

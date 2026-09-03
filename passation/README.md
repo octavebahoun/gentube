@@ -157,9 +157,28 @@ pas, ne le dupliquez pas.
 
 ```bash
 docker compose up -d      # Postgres local sur 54322, sinon rien ne tourne
-pnpm test                 # 496 tests, 34 fichiers
+
+# Chacun sa base. Le nom vous appartient : p1, p2, p3.
+export TEST_DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:54322/gentube_p1_test'
+
+pnpm test
 pnpm typecheck
 ```
+
+**Chacun sa base, et ce n'est pas facultatif.** Les suites branchées sur la
+base **tronquent toutes les tables entre chaque test**. Trois agents qui
+lancent `pnpm test` en même temps sur la même base se vident mutuellement les
+tenants sous les pieds : le 3 septembre à 2 h 40, quatorze tests ont échoué sur
+des « Tenant 1 not found » et des violations de clé étrangère, sans qu'aucune
+ligne de code soit en cause. Les mêmes suites passent 61 sur 61 sur une base
+privée.
+
+`TEST_DATABASE_URL` court-circuite la dérivation, et le setup global crée la
+base si elle n'existe pas. Une ligne à poser une fois par terminal.
+
+Si vous voyez des échecs qui parlent de tenants absents, de clés étrangères ou
+de lignes disparues : **regardez d'abord si un autre agent teste en ce
+moment**. Ce n'est presque jamais votre code.
 
 **`DATABASE_URL` vise Supabase distant.** Ne lancez aucune commande `db:*`.
 Les tests, eux, fabriquent leur propre base locale.
