@@ -10,6 +10,7 @@ import {
   momentDeLaCoupe,
   DEPART_DU_GRAPHIQUE,
   momentDeLaCascade,
+  momentDeLaRoue,
   momentDeLaCitation,
   momentDuFil,
   momentDuGraphique,
@@ -97,6 +98,8 @@ type Jeu = {
   quote?: boolean;
   /** Pose une liste ou une comparaison, cinquième scène. */
   cascade?: 'list' | 'comparison';
+  /** Variante de compteur posée sur la cinquième scène. */
+  counter?: string;
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -181,6 +184,23 @@ const CASCADES: Jeu[] = (['list', 'comparison'] as const).map((quoi) => ({
   moments: [momentDeLaCascade(4)],
 }));
 
+/**
+ * La roue du compteur, activée par --roue.
+ *
+ * Capturée à mi-course : à la fin les chiffres sont posés et l'image ne dirait
+ * pas si la roue a tourné.
+ */
+const ROUE: Jeu[] = [
+  {
+    nom: 'roue',
+    video: REFERENCE_VIDEO,
+    counter: 'wheel',
+    // Au milieu de la course, pas à la fin : une roue arrêtée ne dit pas
+    // qu'elle a tourné, et c'est tout ce que cette variante ajoute.
+    moments: [momentDeLaRoue()],
+  },
+];
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(jeu: Jeu): string {
   const {
@@ -192,6 +212,7 @@ function projet(jeu: Jeu): string {
     thread,
     quote,
     cascade,
+    counter,
   } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
@@ -247,7 +268,7 @@ function projet(jeu: Jeu): string {
       messages: [
         { from: 'Awa', text: 'Tu as vu les chiffres du mois ?' },
         { from: 'Moi', text: 'Trois fois plus qu en juin.', mine: true },
-        { from: 'Awa', text: 'On garde le meme rythme.' },
+        { from: 'Awa', text: 'On garde le meme rythme.', typing: true },
       ],
     };
   }
@@ -292,6 +313,11 @@ function projet(jeu: Jeu): string {
         },
       };
     }
+  }
+
+  if (counter) {
+    const render = shots[4].render as { counter?: { variant?: string } };
+    if (render.counter) render.counter.variant = counter;
   }
 
   const storyboard = toHyperframesStoryboard(video, shots);
@@ -348,6 +374,7 @@ function main() {
   if (process.argv.includes('--fils')) jeux = [...jeux, ...FILS];
   if (process.argv.includes('--citations')) jeux = [...jeux, ...CITATIONS];
   if (process.argv.includes('--cascades')) jeux = [...jeux, ...CASCADES];
+  if (process.argv.includes('--roue')) jeux = [...jeux, ...ROUE];
 
   for (const jeu of jeux) {
     console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);

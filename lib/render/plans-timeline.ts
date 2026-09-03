@@ -56,6 +56,22 @@ export function structuredPlans(scene: HyperframesScene) {
         prefix: scene.counter.prefix ?? '',
         suffix: scene.counter.suffix ?? '',
         ring: scene.counter.variant === 'ring',
+        /*
+         * La roue : un rang par chiffre de la valeur d'arrivée, et le
+         * déplacement de sa bande en pourcentage.
+         *
+         * Calculé ici et pas dans la page pour la raison habituelle, plus une
+         * autre : le nombre de rangs vient de la valeur d'arrivée, pas de la
+         * valeur courante. Une roue qui gagnerait une colonne en route
+         * sauterait à chaque dizaine franchie.
+         */
+        wheel:
+          scene.counter.variant === 'wheel'
+            ? Math.abs(Math.round(scene.counter.value))
+                .toString()
+                .split('')
+                .map((chiffre) => ({ to: -Number(chiffre) * 10 }))
+            : null,
       }
     : null,
   /*

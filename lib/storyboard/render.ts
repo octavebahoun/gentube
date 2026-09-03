@@ -325,10 +325,24 @@ export const sceneEffectsSchema = z.object({
 
 export const sceneRenderSchema = z.object({
   effects: sceneEffectsSchema.optional(),
+  /**
+   * Un bandeau posé sur l'image, distinct des sous-titres : il ne suit pas la
+   * voix, il annonce ou commente.
+   */
   overlayText: z
     .object({
       text: z.string(),
       startInSeconds: z.number().min(0).optional(),
+      /**
+       * Où il se pose.
+       *
+       * En haut par défaut, comme depuis l'origine. `bottom` le met au-dessus
+       * des sous-titres et non à leur place — un bandeau qui les couvrirait
+       * ferait perdre la phrase que la voix est en train de lire.
+       */
+      position: z.enum(['top', 'center', 'bottom']).optional(),
+      /** Le bandeau porte l'accent plutôt que le blanc. Une fois par vidéo. */
+      accent: z.boolean().optional(),
     })
     .optional(),
   kineticTitle: z

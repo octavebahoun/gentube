@@ -311,6 +311,17 @@ export function momentDeLaCascade(lignes: number): Moment {
 }
 
 /**
+ * Le milieu de la course de la roue.
+ *
+ * Le compteur de référence dure deux secondes ; capturé après, les quatre
+ * chiffres sont posés et l'image est celle d'un compteur ordinaire. Une roue
+ * arrêtée ne prouve pas qu'elle a tourné.
+ */
+export function momentDeLaRoue(): Moment {
+  return { at: arrondi(scenesMinutees()[4].startInSeconds + 0.9), nom: 'roue' };
+}
+
+/**
  * L'instant où le tiers inférieur est entièrement posé.
  *
  * Il entre en 0,4 s et sort avant la fin de la scène : capturé au début ou à

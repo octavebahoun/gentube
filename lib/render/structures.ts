@@ -194,12 +194,53 @@ export function counterMarkup(
 
   const digits = `<div class="counter-value" id="n${index}">${shown}</div>`;
 
+  const corps =
+    counter.variant === 'ring'
+      ? `<div class="counter-dial" id="g${index}">${digits}</div>`
+      : counter.variant === 'wheel'
+        ? wheelMarkup(counter, index)
+        : digits;
+
   return (
     `<div class="counter counter-${escapeHtml(counter.variant ?? 'count')}">` +
-    (counter.variant === 'ring'
-      ? `<div class="counter-dial" id="g${index}">${digits}</div>`
-      : digits) +
+    corps +
     label +
+    '</div>'
+  );
+}
+
+/**
+ * La roue : une colonne de dix chiffres par rang, qu'on fait glisser.
+ *
+ * Chaque colonne porte 0 à 9 dans l'ordre, et la timeline la translate de
+ * `-chiffre × 10 %` : la roue s'arrête sur le bon chiffre sans qu'aucun texte
+ * ne soit réécrit. C'est la seule forme qui survive à la recherche d'image —
+ * réécrire le chiffre à chaque trame, comme le fait `count`, marche aussi,
+ * mais on ne verrait alors rouler personne.
+ *
+ * Les rangs viennent de la **valeur d'arrivée** : une roue dont le nombre de
+ * colonnes changerait en route sauterait à chaque dizaine franchie.
+ */
+function wheelMarkup(
+  counter: NonNullable<HyperframesScene['counter']>,
+  index: number
+): string {
+  const rangs = Math.abs(Math.round(counter.value)).toString().split('');
+  const bande = Array.from({ length: 10 }, (_, n) => `<i>${n}</i>`).join('');
+
+  const colonnes = rangs
+    .map(
+      (_, i) =>
+        `<span class="wheel-col"><span class="wheel-strip" ` +
+        `id="wh${index}-${i}">${bande}</span></span>`
+    )
+    .join('');
+
+  return (
+    '<div class="counter-wheel">' +
+    (counter.prefix ? `<span>${escapeHtml(counter.prefix)}</span>` : '') +
+    colonnes +
+    (counter.suffix ? `<span>${escapeHtml(counter.suffix)}</span>` : '') +
     '</div>'
   );
 }
@@ -236,7 +277,13 @@ export function threadMarkup(
         `<div class="thread-row thread-${message.mine ? 'mine' : 'theirs'}" ` +
         `id="th${index}-${i}">` +
         `<div class="thread-from">${escapeHtml(message.from)}</div>` +
-        `<div class="thread-bubble">${escapeHtml(message.text)}</div>` +
+        (message.typing
+          ? // Trois points, et le texte disparaît : c'est le seul message
+            // dont le contenu n'est pas ce qu'on montre.
+            `<div class="thread-bubble thread-typing" aria-label="${escapeHtml(
+              message.from
+            )} écrit"><i></i><i></i><i></i></div>`
+          : `<div class="thread-bubble">${escapeHtml(message.text)}</div>`) +
         '</div>'
     )
     .join('');

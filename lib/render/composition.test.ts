@@ -599,6 +599,61 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
+  describe('the typing bubble and the banner', () => {
+    it('replaces the text with three dots when someone is writing', () => {
+      const page = html([
+        {
+          ...shot(),
+          render: {
+            thread: {
+              messages: [
+                { from: 'Awa', text: 'Tu as vu ?' },
+                { from: 'Moi', text: 'Oui', typing: true },
+              ],
+            },
+          },
+        } as Shot,
+      ]);
+      expect(page).toContain('thread-bubble thread-typing');
+      // Le texte du message reste dans le storyboard, jamais à l'écran.
+      expect(page).not.toContain('>Oui</div>');
+    });
+
+    it('beats the dots from the timeline, never from a CSS keyframe', () => {
+      // Une `@keyframes` dépend du temps écoulé depuis le chargement ; le
+      // moteur cherche chaque image et ne joue rien, les points seraient figés.
+      const page = html([
+        {
+          ...shot(),
+          render: {
+            thread: {
+              messages: [
+                { from: 'A', text: 'x' },
+                { from: 'B', text: 'y', typing: true },
+              ],
+            },
+          },
+        } as Shot,
+      ]);
+      const script = page.slice(page.lastIndexOf('<script>'));
+      expect(script).toContain('.thread-typing i');
+      expect(script).toContain('yoyo: true');
+    });
+
+    it('places the banner where the scene asks, and never on the captions', () => {
+      const posed = (position?: string) =>
+        html([
+          {
+            ...shot(),
+            render: { overlayText: { text: 'Bandeau', position } },
+          } as Shot,
+        ]);
+      expect(posed()).toContain('overlay overlay-top');
+      expect(posed('center')).toContain('overlay overlay-center');
+      expect(posed('bottom')).toContain('overlay overlay-bottom');
+    });
+  });
+
   describe('the list and the comparison', () => {
     const items = [
       { text: 'Adhesions', value: '412' },

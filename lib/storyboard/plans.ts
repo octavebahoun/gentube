@@ -23,8 +23,14 @@ export const sceneCounterSchema = z.object({
   prefix: z.string().optional(),
   suffix: z.string().optional(),
   decimals: z.number().int().min(0).max(3).optional(),
-  /** `count` monte en chiffres, `ring` remplit un anneau autour d'eux. */
-  variant: z.enum(['count', 'ring']).optional(),
+  /**
+   * `count` monte en chiffres, `ring` remplit un anneau autour d'eux, `wheel`
+   * fait rouler chaque chiffre à sa place comme un compteur mécanique.
+   *
+   * `wheel` ne convient qu'aux entiers : une roue de décimales tourne trop
+   * vite pour se lire, et le point flotterait entre deux colonnes.
+   */
+  variant: z.enum(['count', 'ring', 'wheel']).optional(),
   startInSeconds: z.number().min(0).optional(),
   durationInSeconds: z.number().positive().optional(),
 });
@@ -145,6 +151,14 @@ export const threadSchema = z.object({
          * qui répond à qui.
          */
         mine: z.boolean().optional(),
+        /**
+         * Les trois points, à la place du texte.
+         *
+         * Ce que tout le monde reconnaît sans qu'on l'explique : quelqu'un
+         * écrit. C'est le seul message dont le `text` ne sert pas — il reste
+         * exigé pour que le storyboard dise quand même ce qui allait être dit.
+         */
+        typing: z.boolean().optional(),
       })
     )
     .min(2)

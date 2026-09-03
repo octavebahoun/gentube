@@ -87,9 +87,10 @@ export function sceneMarkup(
   // Un bandeau posé sur l'image, distinct des sous-titres : il ne suit pas la
   // voix, il annonce ou commente.
   const overlay = scene.overlayText
-    ? `<div class="overlay" id="o${index}">${escapeHtml(
-        scene.overlayText.text
-      )}</div>`
+    ? `<div class="overlay overlay-${escapeHtml(
+        scene.overlayText.position ?? 'top'
+      )}${scene.overlayText.accent ? ' overlay-accent' : ''}" id="o${index}">` +
+      `${escapeHtml(scene.overlayText.text)}</div>`
     : '';
 
   // Le titre cinétique s'anime mot à mot ; chaque mot est donc un élément,

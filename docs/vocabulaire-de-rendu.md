@@ -299,6 +299,26 @@ hors du plan.
 
 Vérifié par `--cascades`, capturé quand l'avant-dernière ligne vient d'entrer.
 
+**Trois finitions, le 3 septembre au petit matin.**
+
+`number-wheel` arrive comme une variante du compteur : une fenêtre d'un chiffre
+de haut, une bande de dix qui glisse derrière, un rang par chiffre de la valeur
+d'arrivée. Rien n'est réécrit — c'est ce qui permet de la voir tourner, là où
+`count` change le texte à chaque image. Les rangs viennent de la valeur
+d'arrivée et non de la valeur courante : une roue qui gagnerait une colonne en
+route sauterait à chaque dizaine franchie.
+
+Les trois points du fil — `typing` sur un message — remplacent la bulle par ce
+que tout le monde reconnaît sans qu'on l'explique. Le battement est une
+timeline et non une `@keyframes` : une animation CSS dépend du temps écoulé
+depuis le chargement, et le moteur ne joue rien, il cherche des images. Les
+points seraient figés.
+
+Et `overlayText` gagne enfin sa position et son accent — le seul reste du lot 3
+qui ne demandait aucune décision. `bottom` s'arrête **au-dessus** des
+sous-titres : un bandeau posé dessus ferait perdre la phrase que la voix est en
+train de lire.
+
 Et deux fichiers de plus ont été coupés avant d'y ajouter quoi que ce soit :
 `plans-timeline.ts` prend les instants des plans structurés, ce qui ramène
 `plan.ts` de 689 à 491 lignes.
@@ -354,6 +374,35 @@ Deuxième lot (demandes posées, tween et CSS livrés, schéma en attente) :
 
 Vérifiés eux aussi : bords sombres et centre net, anneau centré à mi-course
 puis parti, trou doux posé puis lumière revenue.
+
+Troisième lot (demandes posées, tween et CSS livrés) :
+
+- `gridDrift` ← `dynamic-grid` : un fond de grille technique qui dérive en
+  boucle exacte (une tuile en 6 s), pour les plans sans image — le média le
+  recouvre quand il y en a un.
+- `cursorClick` ← `simulated-cursor` : un curseur glisse vers sa cible et
+  clique (bague). Trajet en `x/y` pixels calculés au format exact, jamais en
+  `left/top` : la garde les refuse (arrondi au pixel).
+- `scanGate` ← `camera-scan-gate` : coins de viseur, ligne qui balaie en `y`
+  pixels (même règle), verrouillage d'un souffle.
+
+Vérifiés : grille seule sur fond noir, curseur arrivé avec sa bague puis
+reparti, ligne à mi-cadre.
+
+Quatrième lot (demandes posées, tween et CSS livrés) :
+
+- `toggleFlip` ← `toggle-flip` : un interrupteur surdimensionné qui s'enfonce,
+  glisse avec dépassement et vire au vert. Trois tweens au même instant sur
+  trois propriétés différentes.
+- `auroraDrift` ← `aurora-drift` : trois nappes à vitesses premières (9/13/17
+  s) qui ne se répètent jamais dans la scène.
+- `outlineDraw` ← `outline-draw` : quatre bords se tracent dans le sens
+  horaire, un axe chacun. Pas de SVG : `pathLength` est ignoré sur les formes
+  et le tiret tombait sur le vrai périmètre — vérifié à l'image, trois fois,
+  avant de changer d'approche.
+
+Vérifiés : bascule à mi-course puis posée ON, aurore douce, cadre en cours de
+tracé puis fermé exactement. Total palier 2 : 12 effets sur 162.
 
 ---
 

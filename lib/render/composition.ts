@@ -55,6 +55,8 @@ const SUBTITLE_HEIGHT_RATIO = 0.058;
 const WATERMARK_HEIGHT_RATIO = 0.032;
 /** Taille de base des plans structurés — citation, fil — en fraction de trame. */
 const STRUCTURED_HEIGHT_RATIO = 0.042;
+/** Hauteur d'un chiffre de la roue, en fraction de trame. */
+const WHEEL_HEIGHT_RATIO = 0.16;
 
 /**
  * À quelle hauteur du bas les sous-titres s'arrêtent, par format.
@@ -133,6 +135,7 @@ export function composeHtml({
   const subtitleSize = Math.round(height * SUBTITLE_HEIGHT_RATIO);
   const watermarkSize = Math.round(height * WATERMARK_HEIGHT_RATIO);
   const structuredSize = Math.round(height * STRUCTURED_HEIGHT_RATIO);
+  const wheelSize = Math.round(height * WHEEL_HEIGHT_RATIO);
   const subtitleBottom = (SUBTITLE_BOTTOM[storyboard.ratio] ?? 0.09) * 100;
 
   const music = storyboard.music
@@ -185,6 +188,7 @@ export function composeHtml({
        * hauteur qui commande.
        */
       .quote, .thread, .list, .face { font-size: ${structuredSize}px; }
+      .counter-wheel { font-size: ${wheelSize}px; }
       .veil {
         --veil-start: ${Math.round(100 - subtitleBottom - 36)}%;
         --veil-mid: ${Math.round(100 - subtitleBottom - 3)}%;

@@ -76,7 +76,28 @@ export const CONTENUS_JS = `
       },
       scene.counter.at
     );
+
+    /*
+     * La roue tourne pendant que le nombre se compte : les deux lisent la
+     * meme duree, donc ils s arretent ensemble. Le retard par rang pose les
+     * unites avant les milliers, comme sur un compteur mecanique.
+     */
+    if (scene.counter.wheel) {
+      scene.counter.wheel.forEach(function (rang, i) {
+        tl.fromTo(
+          "#wh" + scene.index + "-" + i,
+          { yPercent: 0 },
+          {
+            yPercent: rang.to,
+            duration: scene.counter.duration,
+            ease: "power3.out",
+          },
+          scene.counter.at + (scene.counter.wheel.length - 1 - i) * 0.06
+        );
+      });
+    }
   }
+
         /*
          * Le graphique.
          *
@@ -179,6 +200,27 @@ export const CONTENUS_JS = `
               },
               message.at
             );
+
+            if (message.typing) {
+              const points = document.querySelectorAll(
+                "#th" + scene.index + "-" + i + " .thread-typing i"
+              );
+              points.forEach(function (point, n) {
+                tl.fromTo(
+                  point,
+                  { opacity: 0.3, y: "0em" },
+                  {
+                    opacity: 1,
+                    y: "-0.18em",
+                    duration: 0.22,
+                    ease: "sine.inOut",
+                    repeat: 5,
+                    yoyo: true,
+                  },
+                  message.at + 0.3 + n * 0.12
+                );
+              });
+            }
           });
         }
         /*

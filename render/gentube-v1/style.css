@@ -239,6 +239,25 @@ video.media {
   will-change: opacity, transform;
 }
 
+/*
+ * Trois places, et une seule règle : ne jamais couvrir les sous-titres.
+ * `bottom` s'arrête au-dessus d'eux — un bandeau posé dessus ferait perdre la
+ * phrase que la voix est en train de lire.
+ */
+.overlay-center {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.overlay-bottom {
+  top: auto;
+  bottom: 26%;
+}
+
+.overlay-accent {
+  color: #ff6b2b;
+}
+
 /* --- Tiers inférieur ----------------------------------------------------- */
 
 /*
@@ -921,6 +940,29 @@ video.media {
   will-change: opacity, transform;
 }
 
+/*
+ * Les trois points du fil : quelqu'un écrit.
+ *
+ * Le battement est une timeline, pas une animation CSS. Une `@keyframes`
+ * dépend du temps écoulé depuis le chargement de la page ; le moteur, lui,
+ * cherche chaque image et ne joue rien — les points seraient figés.
+ */
+.thread-typing {
+  display: flex;
+  align-items: center;
+  gap: 0.22em;
+  padding: 0.62em 0.8em;
+}
+
+.thread-typing i {
+  display: block;
+  width: 0.32em;
+  height: 0.32em;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.3;
+}
+
 /* --- Compteur ------------------------------------------------------------ */
 
 /*
@@ -963,6 +1005,47 @@ video.media {
  * L'anneau est un dégradé conique piloté par `--fill`, écrit par la timeline.
  * Aucune géométrie n'est calculée dans la page, et rien n'est un `filter`.
  */
+/*
+ * La roue mécanique : une fenêtre d'un chiffre de haut, et une bande de dix
+ * qui glisse derrière. Rien n'est réécrit — c'est ce qui permet de la voir
+ * tourner, là où `count` change le texte à chaque image.
+ */
+.counter-wheel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /*
+   * La taille est injectée dans la page, en fraction de trame — pas en `em`.
+   * Quatre colonnes de chiffres tiennent la largeur du cadre : leur taille ne
+   * peut pas dépendre du seize pixels par défaut du navigateur, qui ne sait
+   * rien du format de la vidéo.
+   */
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.wheel-col {
+  display: block;
+  overflow: hidden;
+  height: 1em;
+  width: 0.62em;
+}
+
+.wheel-strip {
+  display: block;
+  will-change: transform;
+}
+
+.wheel-strip i {
+  display: block;
+  height: 1em;
+  font-style: normal;
+  text-align: center;
+}
+
 /*
  * `counter-dial` et non `counter-ring` : le conteneur porte déjà
  * `counter-<variante>` comme modificateur, et deux éléments imbriqués sous la
