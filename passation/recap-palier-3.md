@@ -20,6 +20,7 @@ type en coûte dix. C'est la marge la plus haute du catalogue.
 | `quote` | une phrase, un nom, un titre | `--citations` |
 | `list` | des lignes et leurs valeurs | `--cascades` |
 | `comparison` | deux colonnes en face-à-face | `--cascades` |
+| `counter` variante `wheel` | la roue mécanique | `--roue` |
 
 Chacun traverse les six endroits qu'un plan de palier 3 doit traverser : le
 schéma (`lib/storyboard/plans.ts`), le balisage (`lib/render/structures.ts`),
@@ -141,22 +142,24 @@ demande une décision produit et non du code — les cartes géographiques
 
 **Le plus proche à prendre**, parce qu'il ne demande aucune notion nouvelle :
 
-- `number-wheel` — un chiffre qui roule ; même contenu que le compteur, autre
-  mécanique.
 - `notes-reveal` / `notes-typing` — le mot tapé dans une application de notes.
-  Un `thread` à une seule voix.
-- `typing-indicator` — les trois points du fil. Un booléen sur le dernier
-  message, et le fil respire.
-- La position et l'emphase d'`overlayText` — le seul reste du lot 3 qui ne
-  demande aucune décision.
+  Un `thread` à une seule voix, avec une frappe caractère par caractère.
+- `spring-stack-shuffle` — une pile de cartes qui se rebat. Le contenu est une
+  liste, la mécanique est neuve.
+- `mk-progress-stat` — le compteur avec sa piste de progression linéaire ; on a
+  l'anneau, pas la barre.
+
+**Faits depuis la première version de ce document** : `number-wheel`,
+`typing-indicator`, et la position d'`overlayText`.
 
 ---
 
 ## 7. L'état du dépôt
 
-Cinq commits sur `ai-video-saas`, **non poussés** :
+Sept commits sur `ai-video-saas`, **non poussés** :
 
 ```
+71c4dd9  La roue, les trois points, et le bandeau qui bouge enfin
 b42c05d  Une liste et une comparaison — les deux formes qu'on n'avait pas
 a0d4649  Une citation, et deux mensonges de mise en page
 2e85a49  Un fil de discussion, et deux fichiers dégonflés avant d'y toucher
@@ -167,8 +170,8 @@ b9517c3  Les trois effets du palier 2 traversent enfin le contrat
 Plus, plus tôt dans la journée : le lot 2 (23 transitions), le tiers inférieur,
 et le graphique.
 
-**542 tests, 34 fichiers.** 23 instants visuels pour les seuls plans
-structurés, sur 137 références au total.
+**545 tests, 34 fichiers.** 25 instants visuels pour les seuls plans
+structurés, sur 139 références au total.
 
 Un avertissement qui vaut pour la revue : les trois agents ont travaillé dans
 **un seul répertoire de travail**, sans worktree. Des modifications du contrat
