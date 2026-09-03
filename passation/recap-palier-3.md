@@ -1,26 +1,29 @@
 # Récapitulatif — palier 3
 
-**3 septembre 2026.** Ce que le palier 3 a livré, ce qu'il a trouvé en chemin,
-ce qui reste, et ce qui n'est pas prouvé.
+**3 septembre 2026, 12 h 40.** Ce que le palier 3 a livré, ce qu'il a trouvé en
+chemin, ce qui reste, et ce qui n'est pas prouvé.
 
 ---
 
 ## 1. Ce qui a été livré
 
-Six plans dont le contenu est une **donnée** et non un texte rédigé. Aucun ne
+Huit plans dont le contenu est une **donnée** et non un texte rédigé. Aucun ne
 génère d'image : sur une minute facturée 400 FCFA de fournisseur, un plan de ce
 type en coûte dix. C'est la marge la plus haute du catalogue.
 
 | Plan | Ce qu'il porte | Vérifié par |
 |---|---|---|
 | `counter` | une valeur, un format | `--update` (existait) |
+| `counter` variante `wheel` | la roue mécanique | `--roue` |
 | `lowerThird` | un nom, une fonction | `--tiers` |
 | `chart` | une série, en barres ou en courbe | `--graphiques` |
 | `thread` | des répliques, deux côtés | `--fils` |
 | `quote` | une phrase, un nom, un titre | `--citations` |
 | `list` | des lignes et leurs valeurs | `--cascades` |
 | `comparison` | deux colonnes en face-à-face | `--cascades` |
-| `counter` variante `wheel` | la roue mécanique | `--roue` |
+
+Plus la position et l'accent d'`overlayText`, et un **rendu complet de bout en
+bout** : dix scènes, 50,5 s, en SwiftShader local — `render/demo/palier-3.ts`.
 
 Chacun traverse les six endroits qu'un plan de palier 3 doit traverser : le
 schéma (`lib/storyboard/plans.ts`), le balisage (`lib/render/structures.ts`),
@@ -61,12 +64,32 @@ sous le même nom partagé.
 en pourcentage, et la projection est partagée par le balisage et la timeline
 pour qu'ils ne dérivent pas l'un de l'autre.
 
+**La courbe se brisait en tirets détachés.** `stroke-dasharray` avec
+`vector-effect="non-scaling-stroke"` se calcule en pixels écran, après
+l'étirement du SVG : aucune longueur mesurée dans le repère du tracé ne peut
+coller. Elle se découvre maintenant par un `clip-path`, qui ne dépend d'aucune
+longueur.
+
 **Les plans structurés se mesuraient sur le navigateur, pas sur la trame.** La
 citation sortait trois fois trop grosse. Ils prennent maintenant une taille de
 base injectée dans la page comme celle des sous-titres, en fraction de hauteur.
 
 **Le `* { margin: 0; padding: 0 }` écrase aussi la hauteur de ligne.** Sans
 hauteur posée, le nom passait par-dessus la dernière ligne de la citation.
+
+**La courbe émettait des tweens de barres.** `bars` était construit aussi pour
+`kind: 'line'`, visant des `#b<n>` inexistants ; GSAP le signalait à chaque
+rendu. Une garde qui crie pour rien finit par ne plus être lue.
+
+**Et les points de la courbe ne tombaient pas sous leur nom.** L'axe range ses
+libellés en colonnes égales ; la série s'étalait, elle, de 0 à 100 % du cadre.
+Le premier point se posait au bord gauche du tracé pendant que son libellé
+restait au sixième. Ils tombent maintenant au centre de leur colonne,
+`(i + 0,5) / n`, et le `gap` de l'axe est devenu une marge intérieure — un
+`gap` décalait les centres d'une fraction qui dépendait de la taille du texte.
+Le volet passe du même coup à vitesse constante : les pastilles s'allument à
+intervalles réguliers, et un `power2.inOut` les laissait s'allumer dans le vide
+dès quatre points.
 
 ---
 
@@ -79,15 +102,11 @@ déclaré, la mécanique est celle de l'éclair — qui, elle, est prouvée. **C
 un trou, pas une validation.** Une cinquième image de fixture avec du détail —
 une grille, un motif — le fermerait.
 
-**Les huit nouveaux styles de sous-titres n'ont pas d'entrée dans `MOTS`.** Le
-`pgEnum` est ouvert et les classes CSS existent ; sans entrée de tween, le
-style tombe sur le repli `karaoke`. L'apparence est juste, le geste est celui
-d'un autre. C'est au palier 1.
-
-**Aucun rendu complet n'a été fait de bout en bout** avec un de ces plans dans
-une vraie vidéo — seulement des captures d'instants. Le premier qui monte une
-vidéo entière avec un `chart` ou un `thread` verra des choses que la garde ne
-voit pas.
+C'est le seul qui reste. Les deux autres sont fermés : le rendu complet a été
+fait (§1), et les huit styles de sous-titres ont maintenant leur entrée dans
+`MOTS` — c'est le palier 1 qui l'a posée. `cinematic` n'en a toujours pas, et
+c'est voulu : il est court-circuité avant la table, parce qu'il révèle la ligne
+entière et non les mots un par un.
 
 ---
 
@@ -102,6 +121,25 @@ autres paliers. Voir [`reponses.md`](reponses.md) pour le détail.
 - Huit styles de sous-titres, qui ont demandé une **migration** — le style de
   sous-titre est le seul morceau du vocabulaire de rendu qui vive en base.
   Appliquée sur le distant, 11 sur 11.
+- **Neuf nappes de plus, par une table plutôt qu'à la main**
+  (`lib/storyboard/effets.ts`) : `vignette`, `shockRing`, `featherSpot`,
+  `gridDrift`, `auroraDrift`, `scanGate`, `outlineDraw`, `toggleFlip`,
+  `cursorClick`. Le schéma, le balisage et la timeline se lisent tous les trois
+  dans cette table ; ajouter un effet est une ligne.
+- **La famille manuscrite** (`lib/render/manuscrit.ts`) : `hwBoil`,
+  `hwBoxLabel`, `hwCalloutCircle`, `hwFrame`, `hwPipeline`. Elle est à part de
+  la table parce qu'elle porte un **contenu** — un libellé, des nœuds nommés —
+  là où une nappe n'a que des réglages. Le tremblement est semé sur l'indice de
+  la scène : tiré au hasard, il donnerait un trait différent à chaque image, et
+  le moteur cherche chaque image ; le trait grouillerait au lieu de trembler.
+
+**Deux refus, motivés dans `reponses.md`.** `motionBlur` : un flou plein cadre
+triple le temps de rendu en rastérisation logicielle, c'est un invariant du
+dépôt et non une préférence. Et sept champs en forme de compte —
+`flowchart { nodesCount }`, `mkSpecsList { itemsCount }`, `badgeMatrix { rows,
+cols }`… — qui dessinent des boîtes vides que le storyboard ne peut pas
+remplir. `hwPipeline`, qui reçoit les **noms** des nœuds, est la forme à
+reprendre pour eux ; ce sont des plans de palier 3, pas des effets.
 
 Et une panne qui n'appartenait à personne : les trois agents testaient sur la
 même base locale, qui se tronque entre chaque test. Quatorze échecs sans aucune
@@ -128,14 +166,27 @@ La séparation n'est pas esthétique. `animations.ts` anime la scène,
 `contenus.ts` dessine ce qu'elle raconte — et c'est ce qui permet au palier 2
 de travailler dans le premier pendant que le palier 3 écrit dans le second.
 
+**À reprendre en revue : `lib/storyboard/render.ts` est reparti à 1076 lignes
+au dernier commit, et 1745 dans l'arbre de travail.** Trois fois la limite. Le
+fichier porte le contrat, donc les trois paliers écrivent dedans, et personne
+ne coupe. La coupe naturelle est la même que la première : les schémas d'une
+famille partent dans leur propre fichier, comme `plans.ts`.
+
 ---
 
 ## 6. Ce qui reste
 
-**Du palier 3 : 293 entrées sur 373 dans le catalogue entier**, dont l'essentiel
-demande une décision produit et non du code — les cartes géographiques
-(`us-map-flow`, `nyc-paris-flight`), les maquettes d'interface, les quatorze
-`code-snippet-*`, les terminaux.
+**Tous paliers confondus : 278 entrées sur 373.** 82 rendues, 13 partielles.
+
+| Palier | Reste | Sur | Rendues | Partielles |
+|---|---|---|---|---|
+| 1 | 57 | 105 | 46 | 2 |
+| 2 | 138 | 165 | 20 | 7 |
+| **3** | **83** | **103** | **16** | **4** |
+
+Du palier 3, l'essentiel de ces 83 demande une décision produit et non du code
+— les cartes géographiques (`us-map-flow`, `nyc-paris-flight`), les maquettes
+d'interface, les quatorze `code-snippet-*`, les terminaux.
 
 État à jour, entrée par entrée, avec un filtre « Reste seulement » :
 <https://claude.ai/code/artifact/7cfe7d76-6dc7-4497-879c-2708f4360c6a>
@@ -149,31 +200,37 @@ demande une décision produit et non du code — les cartes géographiques
 - `mk-progress-stat` — le compteur avec sa piste de progression linéaire ; on a
   l'anneau, pas la barre.
 
-**Faits depuis la première version de ce document** : `number-wheel`,
-`typing-indicator`, et la position d'`overlayText`.
-
 ---
 
 ## 7. L'état du dépôt
 
-Sept commits sur `ai-video-saas`, **non poussés** :
+**27 commits sur `ai-video-saas`, non poussés** — 15 du palier 3, 12 des deux
+autres. Ceux du palier 3, du plus récent au plus ancien :
 
 ```
+25865bb  Les points de la courbe au-dessus de leur nom
+8e4a472  La famille manuscrite, et un tremblement qui ne grouille pas
+52dc3b8  Neuf nappes du palier 2, par une table plutôt qu'à la main
+707569b  Un rendu complet, et la courbe qui visait des barres absentes
+321d9b0  Le récapitulatif suit la roue
 71c4dd9  La roue, les trois points, et le bandeau qui bouge enfin
+c9a9609  Le récapitulatif du palier 3
 b42c05d  Une liste et une comparaison — les deux formes qu'on n'avait pas
 a0d4649  Une citation, et deux mensonges de mise en page
 2e85a49  Un fil de discussion, et deux fichiers dégonflés avant d'y toucher
 9bda458  Huit styles de sous-titres, et la migration que ça coûte
 b9517c3  Les trois effets du palier 2 traversent enfin le contrat
+eec3eed  Un graphique, et le prompt qui refusait les scènes sans image
+ce18275  Un nom et une fonction, pas une chaîne à redécouper
+85dac20  Dix-sept gestes de plus, et trois qui ne bougeaient pas
 ```
 
-Plus, plus tôt dans la journée : le lot 2 (23 transitions), le tiers inférieur,
-et le graphique.
-
-**545 tests, 34 fichiers.** 25 instants visuels pour les seuls plans
-structurés, sur 139 références au total.
+**558 tests, 34 fichiers.** 137 références visuelles, dont 25 pour les seuls
+plans structurés.
 
 Un avertissement qui vaut pour la revue : les trois agents ont travaillé dans
 **un seul répertoire de travail**, sans worktree. Des modifications du contrat
-se sont retrouvées dans des commits d'un autre palier qui ne les mentionne pas.
-Rien n'est perdu, mais l'historique ment par endroits.
+se sont retrouvées dans des commits d'un autre palier qui ne les mentionne pas
+— et l'épaississement de la courbe est parti dans « Neuf nappes du palier 2 »,
+qui ne parle pas de graphique. Rien n'est perdu, mais l'historique ment par
+endroits.
