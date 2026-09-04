@@ -5,11 +5,13 @@ import { effetsMarkup } from './effets';
 import { manuscritMarkup } from './manuscrit';
 import {
   chartMarkup,
+  callToActionMarkup,
   comparisonMarkup,
   counterMarkup,
   listMarkup,
   lowerThirdMarkup,
   quoteMarkup,
+  socialCardMarkup,
   threadMarkup,
 } from './structures';
 import { TITRE_PAR_LETTRE as PAR_LETTRE } from './plan';
@@ -105,6 +107,8 @@ export function sceneMarkup(
   const quote = quoteMarkup(scene, index);
   const list = listMarkup(scene, index);
   const face = comparisonMarkup(scene, index);
+  const social = socialCardMarkup(scene, index);
+  const cta = callToActionMarkup(scene, index);
 
   /*
    * Le balayage et le grain : deux nappes dans la scène, comme l'éclair.
@@ -160,6 +164,8 @@ export function sceneMarkup(
     quote,
     list,
     face,
+    social,
+    cta,
     nappes,
     manuscrit,
     sweep,

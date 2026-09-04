@@ -4,6 +4,7 @@ import type { Shot, Video } from '@/lib/db/schema';
 import {
   MOVE_TRANSITIONS,
   TRANSITION_DURATIONS,
+  rendersOwnContent,
   toHyperframesStoryboard,
 } from '@/lib/storyboard/render';
 import {
@@ -15,7 +16,12 @@ import {
   wordsOrFallback,
 } from './composition';
 import { SCENES_JS } from './animations';
-import { listSchema, lowerThirdSchema } from '@/lib/storyboard/plans';
+import {
+  callToActionSchema,
+  listSchema,
+  lowerThirdSchema,
+  socialCardSchema,
+} from '@/lib/storyboard/plans';
 import { EFFETS } from '@/lib/storyboard/effets';
 
 function shot(overrides: Partial<Shot> = {}): Shot {
@@ -1073,6 +1079,64 @@ describe('subtitles without an alignment', () => {
   });
 });
 
+describe('the social card and the closing card', () => {
+  const withRender = (render: Record<string, unknown>) =>
+    html([{ ...shot(), render } as Shot]);
+
+  it('keeps the two lines apart instead of folding them into one', () => {
+    // La règle qui gouverne tous les plans : un champ par information. « Ama
+    // Doe · @amadoe » dans un seul champ oblige la page à deviner laquelle
+    // grossir, et elle devine mal dès le premier séparateur.
+    const page = withRender({
+      socialCard: { network: 'x', title: 'Ama Doe', subtitle: '@amadoe' },
+    });
+    expect(page).toContain('class="sc-title">Ama Doe<');
+    expect(page).toContain('class="sc-subtitle">@amadoe<');
+  });
+
+  it('lets the card leave before the scene does', () => {
+    // Une carte qui survivrait à sa scène se poserait sur la suivante, qui
+    // n'en a pas voulu. Même borne que le tiers inférieur.
+    const page = withRender({
+      socialCard: { network: 'tiktok', title: 'Ama', holdSeconds: 900 },
+    });
+    const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+    const fin = Number(/data-duration="([\d.]+)"/.exec(page)![1]);
+    expect(T.scenes[0].socialCard.out).toBeLessThanOrEqual(fin);
+  });
+
+  it('counts the stars instead of writing them', () => {
+    // 4,5 sur 5 fait quatre étoiles pleines et une demie. Le calcul est fait
+    // une fois à la composition, pas trente fois par seconde dans la page.
+    const page = withRender({ callToAction: { headline: 'Venez', rating: 4.5 } });
+    const parts = [...page.matchAll(/--fill:(\d+)%/g)].map((m) => Number(m[1]));
+    expect(parts).toEqual([100, 100, 100, 100, 50]);
+  });
+
+  it('brings the button in after the sentence, and inside the scene', () => {
+    // On lit la promesse avant de voir ce qu'on demande. Et sur un plan court
+    // l'écart se resserre, sinon le bouton n'arriverait jamais.
+    const page = withRender({ callToAction: { headline: 'Venez', buttonText: 'Go' } });
+    const T = JSON.parse(/const T = (\{.*?\});/s.exec(page)![1]);
+    const fin = Number(/data-duration="([\d.]+)"/.exec(page)![1]);
+    const cta = T.scenes[0].callToAction;
+    expect(cta.button).toBeGreaterThan(cta.at);
+    expect(cta.button).toBeLessThan(fin);
+  });
+
+  it('spares the image step when the scene is only a closing card', () => {
+    // C'est l'économie du palier 3 : une scène qui se dessine seule ne fait
+    // pas générer d'illustration qu'elle ne montrera jamais.
+    expect(rendersOwnContent({ callToAction: { headline: 'Venez' } })).toBe(true);
+  });
+
+  it('leaves the page alone when no scene asks for one', () => {
+    const page = html([shot()]);
+    expect(page).not.toContain('class="social-card');
+    expect(page).not.toContain('class="cta cta-');
+  });
+});
+
 describe('every declared appearance has a rule', () => {
   // La garde qui manquait. Un champ ou une variante peut traverser le schéma,
   // le balisage et le prompt sans qu'une seule règle ne le dessine : la page
@@ -1091,6 +1155,26 @@ describe('every declared appearance has a rule', () => {
     const layouts = listSchema.shape.layout.unwrap().options;
     const sans = layouts.filter((l: string) => !css.includes(`.list-${l}`));
     expect(sans, 'dispositions sans règle CSS').toEqual([]);
+  });
+
+  it('draws every social network it offers', () => {
+    const reseaux = socialCardSchema.shape.network.options;
+    const sans = reseaux.filter((r: string) => !css.includes(`.sc-${r}`));
+    expect(sans, 'réseaux sans règle CSS').toEqual([]);
+  });
+
+  it('draws every closing-card variant it offers', () => {
+    const variantes = callToActionSchema.shape.variant.unwrap().options;
+    const sans = variantes.filter((v: string) => !css.includes(`.cta-${v}`));
+    expect(sans, 'variantes sans règle CSS').toEqual([]);
+  });
+
+  it('sizes the two new plans on the frame, not on the browser', () => {
+    // La citation est sortie trois fois trop grosse pour avoir été mesurée sur
+    // les 16 px du navigateur au lieu de la hauteur de la trame.
+    const regle = /\.quote,[^{]*\{ font-size: \d+px; \}/.exec(html([shot()]))?.[0] ?? '';
+    expect(regle).toContain('.social-card');
+    expect(regle).toContain('.cta');
   });
 
   it('draws every effect the table declares', () => {

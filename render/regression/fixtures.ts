@@ -365,3 +365,19 @@ export function momentDeLaNappe(effet: {
       : 1;
   return { at: arrondi(scene.startInSeconds + decalage), nom: 'nappe' };
 }
+
+/**
+ * Le moment où la carte de clôture est entièrement posée, bouton compris.
+ *
+ * Le bouton arrive après la phrase — c'est tout le sujet de ce plan : on lit la
+ * promesse avant de voir ce qu'on demande. Capturée trop tôt, la référence
+ * montre une carte sans bouton et ne dit rien de l'allure. La première l'a
+ * fait, sur les cinq allures à la fois.
+ */
+export function momentDeLaCloture(): Moment {
+  const scenes = scenesMinutees();
+  return {
+    at: arrondi(scenes[4].startInSeconds + DEPART_DU_GRAPHIQUE + 1.4),
+    nom: 'cloture',
+  };
+}

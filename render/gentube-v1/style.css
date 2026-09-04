@@ -3214,3 +3214,312 @@ video.media {
 .list-timeline .list-value {
   font-variant-numeric: tabular-nums;
 }
+
+/* --- Carte de réseau social ----------------------------------------------- */
+
+/*
+ * Un seul objet pour sept réseaux. Ce qui change d'un réseau à l'autre est la
+ * couleur, l'arrondi et la place du bouton — jamais ce que la carte porte.
+ *
+ * Elle est posée haut à 12 %, pas en bas : le tiers inférieur et les
+ * sous-titres occupent déjà le bord bas, et les trois se marcheraient dessus.
+ */
+.social-card {
+  position: absolute;
+  top: 12%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7em;
+  max-width: 46%;
+  padding: 0.75em 0.9em;
+  border-radius: 0.7em;
+  background: rgba(252, 252, 253, 0.97);
+  box-shadow: 0 1em 2.6em rgba(0, 0, 0, 0.45);
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  --sc-accent: #1d9bf0;
+  will-change: opacity, transform;
+}
+
+.social-card.sc-left {
+  left: 6%;
+}
+
+.social-card.sc-right {
+  right: 6%;
+}
+
+/*
+ * L'avatar est un rond plein, sans initiale.
+ *
+ * Nous n'avons aucune image de profil, et une lettre tirée du nom serait une
+ * invention : « A » pour un compte qui n'a jamais eu cet avatar. Un rond
+ * neutre se lit comme un avatar ; une fausse initiale se lit comme une erreur.
+ */
+.sc-avatar {
+  flex: 0 0 2.2em;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;
+  background: var(--sc-accent);
+}
+
+.sc-lines {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sc-title {
+  font-size: 1.05em;
+  font-weight: 900;
+  line-height: 1.2;
+  color: #14100f;
+}
+
+.sc-subtitle {
+  font-size: 0.85em;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgba(20, 16, 15, 0.55);
+}
+
+.sc-body {
+  margin-top: 0.35em;
+  font-size: 0.92em;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #14100f;
+}
+
+.sc-action {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 0.3em 0.8em;
+  border-radius: 999px;
+  background: var(--sc-accent);
+  color: #fff;
+  font-size: 0.85em;
+  font-weight: 900;
+}
+
+/* Les sept réseaux : une couleur, et deux formes qui ne sont pas la carte. */
+.sc-x {
+  --sc-accent: #14100f;
+  border-radius: 1em;
+}
+
+.sc-instagram {
+  --sc-accent: #c13584;
+}
+
+.sc-tiktok {
+  --sc-accent: #fe2c55;
+}
+
+.sc-youtube {
+  --sc-accent: #ce1f20;
+}
+
+.sc-reddit {
+  --sc-accent: #ff4500;
+}
+
+.sc-spotify {
+  --sc-accent: #1db954;
+  border-radius: 0.4em;
+}
+
+/* La notification du système : sombre, et sans bouton mis en avant. */
+.sc-system {
+  --sc-accent: #6b7280;
+  background: rgba(28, 28, 32, 0.94);
+  border-radius: 1.1em;
+}
+
+.sc-system .sc-title,
+.sc-system .sc-body {
+  color: #f4f4f6;
+}
+
+.sc-system .sc-subtitle {
+  color: rgba(244, 244, 246, 0.6);
+}
+
+/* --- Carte de clôture ------------------------------------------------------ */
+
+/*
+ * Ce qu'on demande au spectateur, et rien d'autre à l'écran.
+ *
+ * Elle se dessine seule : pas d'image derrière, le fond noir de `#bg` sert de
+ * scène. C'est le plan le moins cher du catalogue, et le dernier vu.
+ */
+.cta {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7em;
+  padding: 8% 10% 16%;
+  text-align: center;
+  font-family: "Lato", "Inter", system-ui, sans-serif;
+  --cta-accent: #ce1f20;
+}
+
+.cta-headline {
+  font-size: 2.1em;
+  font-weight: 900;
+  line-height: 1.1;
+  max-width: 18ch;
+  color: #fff;
+  text-wrap: balance;
+  will-change: opacity, transform;
+}
+
+.cta-button {
+  padding: 0.45em 1.3em;
+  border-radius: 999px;
+  background: var(--cta-accent);
+  color: #fff;
+  font-size: 1.1em;
+  font-weight: 900;
+  will-change: opacity, transform;
+}
+
+.cta-subtext {
+  font-size: 0.95em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/*
+ * Les étoiles. Le remplissage est un dégradé arrêté net à `--fill`, posé par
+ * la composition : une demi-étoile est un dégradé à 50 %, pas un demi-caractère.
+ */
+.cta-stars {
+  display: flex;
+  gap: 0.18em;
+}
+
+.cta-star {
+  width: 1.1em;
+  height: 1.1em;
+  background: linear-gradient(
+    to right,
+    var(--cta-accent) 0,
+    var(--cta-accent) var(--fill, 100%),
+    rgba(255, 255, 255, 0.22) var(--fill, 100%),
+    rgba(255, 255, 255, 0.22) 100%
+  );
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+}
+
+/* Le verrouillage : la phrase, le bouton, la ligne d'appui. Le cas de base. */
+.cta-lockup .cta-headline {
+  font-size: 2.3em;
+}
+
+/* La clôture : plus sobre, la phrase porte l'accent plutôt que le bouton. */
+.cta-close .cta-headline {
+  color: var(--cta-accent);
+}
+
+.cta-close .cta-button {
+  background: #fff;
+  color: #14100f;
+}
+
+/*
+ * Les pastilles de magasin. Deux plaques noires, dessinées et non chargées :
+ * les logos des magasins sont des marques déposées, et une image de plus est
+ * une requête de plus au rendu.
+ */
+.cta-badges .cta-button {
+  position: relative;
+  width: 13.4em;
+  height: 2.3em;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  /*
+   * Le libellé du bouton est rendu transparent et non supprimé : les deux
+   * plaques sont ses pseudo-éléments, et elles se mesurent en `em`. Mettre le
+   * bouton à `font-size: 0` les réduirait à rien. La première planche-contact
+   * montrait « Commencer » posé entre deux rectangles vides.
+   */
+  color: transparent;
+  overflow: hidden;
+}
+
+.cta-badges .cta-button::before,
+.cta-badges .cta-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 6.4em;
+  height: 2.3em;
+  border-radius: 0.35em;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  /*
+   * Une plaque dessinée, pas un logo chargé : les marques des magasins sont
+   * déposées, et une image de plus est une requête de plus au rendu. Un rond
+   * et deux barres suffisent à la lire comme une pastille de magasin.
+   */
+  background:
+    radial-gradient(
+        circle at 1em 50%,
+        rgba(255, 255, 255, 0.8) 0.34em,
+        transparent 0.35em
+      )
+      no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75))
+      no-repeat 2.1em 0.62em / 3.4em 0.2em,
+    linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45))
+      no-repeat 2.1em 1.12em / 2.6em 0.34em,
+    #14100f;
+}
+
+.cta-badges .cta-button::before {
+  left: 0;
+}
+
+.cta-badges .cta-button::after {
+  right: 0;
+}
+
+/* Le logo : la marque tient seule, la phrase se fait petite sous elle. */
+.cta-logo .cta-headline {
+  font-size: 3em;
+  letter-spacing: -0.02em;
+}
+
+.cta-logo .cta-button {
+  display: none;
+}
+
+/* Le tampon : la variante d'ouverture. Un cadre d'accent autour du titre. */
+.cta-stamp .cta-headline {
+  padding: 0.3em 0.8em;
+  border: 0.12em solid var(--cta-accent);
+  border-radius: 0.3em;
+  font-size: 2.6em;
+  text-transform: uppercase;
+}
+
+.cta-stamp .cta-button {
+  background: none;
+  color: var(--cta-accent);
+  font-size: 0.95em;
+  letter-spacing: 0.14em;
+}

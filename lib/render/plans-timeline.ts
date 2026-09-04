@@ -70,6 +70,8 @@ export function structuredPlans(scene: HyperframesScene) {
   const quote = scene.quote;
   const list = scene.list;
   const face = scene.comparison;
+  const social = scene.socialCard;
+  const cta = scene.callToAction;
 
   return {
   lowerThird: tiers
@@ -218,6 +220,40 @@ export function structuredPlans(scene: HyperframesScene) {
      */
     list: list
       ? cascade(scene, list.startInSeconds, list.stepSeconds, list.items.length)
+      : null,
+    /*
+     * La carte de réseau social entre et **sort**, comme le tiers inférieur :
+     * elle commente un moment du plan, elle ne l'habille pas du début à la fin.
+     * Sa sortie est bornée par la fin de la scène — une carte qui lui
+     * survivrait se poserait sur le plan suivant, qui n'en a pas voulu.
+     */
+    socialCard: social
+      ? (() => {
+          const at = scene.startInSeconds + (social.startInSeconds ?? 0);
+          const fin = scene.startInSeconds + scene.durationInSeconds;
+          return {
+            at: ms(at),
+            out: ms(Math.min(at + (social.holdSeconds ?? 3.5), fin)),
+            dx: social.side === 'right' ? 40 : -40,
+          };
+        })()
+      : null,
+    /*
+     * La carte de clôture : la phrase, puis le bouton un temps après.
+     *
+     * Le bouton arrive en dernier et c'est tout le sujet — on lit la promesse
+     * avant de voir ce qu'on demande. L'écart est borné par ce qui reste de la
+     * scène, sinon sur un plan court le bouton n'apparaîtrait jamais.
+     */
+    callToAction: cta
+      ? (() => {
+          const at = scene.startInSeconds + (cta.startInSeconds ?? 0);
+          const reste = Math.max(
+            0.2,
+            scene.startInSeconds + scene.durationInSeconds - at - 0.3
+          );
+          return { at: ms(at), button: ms(at + Math.min(0.75, reste)) };
+        })()
       : null,
     // Les deux colonnes avancent ensemble : le rang commande, pas le côté.
     comparison: face

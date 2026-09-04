@@ -1,12 +1,14 @@
 import { z } from 'zod';
 import { EFFETS_SCHEMA, MANUSCRIT_SCHEMA } from './effets';
 import {
+  callToActionSchema,
   chartSchema,
   comparisonSchema,
   listSchema,
   lowerThirdSchema,
   quoteSchema,
   sceneCounterSchema,
+  socialCardSchema,
   threadSchema,
 } from './plans';
 import type {
@@ -1050,6 +1052,15 @@ export const sceneRenderSchema = z.object({
   list: listSchema.optional(),
   /** Une comparaison en deux colonnes. Elle se dessine seule. */
   comparison: comparisonSchema.optional(),
+  /**
+   * Une carte de réseau social posée sur le plan.
+   *
+   * Elle se pose **sur** l'image, comme le tiers inférieur : elle commente ce
+   * qu'on voit. La scène garde donc son `prompt`.
+   */
+  socialCard: socialCardSchema.optional(),
+  /** La carte de clôture. Elle se dessine seule, comme la carte texte. */
+  callToAction: callToActionSchema.optional(),
   /** Écran noir avec texte centré : pas de voix, pas de média, pas de son. */
   card: z
     .object({
@@ -1109,7 +1120,8 @@ export function rendersOwnContent(render: unknown): boolean {
       parsed.data.thread ||
       parsed.data.quote ||
       parsed.data.list ||
-      parsed.data.comparison
+      parsed.data.comparison ||
+      parsed.data.callToAction
   );
 }
 
@@ -1457,11 +1469,13 @@ export function toHyperframesStoryboard(
  * 3 septembre 2026 ; `service.ts` et les tests importent encore d'ici.
  */
 export {
+  callToActionSchema,
   chartSchema,
   comparisonSchema,
   listSchema,
   lowerThirdSchema,
   quoteSchema,
   sceneCounterSchema,
+  socialCardSchema,
   threadSchema,
 } from './plans';

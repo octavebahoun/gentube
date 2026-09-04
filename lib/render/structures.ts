@@ -444,3 +444,88 @@ export function comparisonMarkup(
     '</div>'
   );
 }
+
+/**
+ * La carte de réseau social.
+ *
+ * Un seul balisage pour les sept réseaux : la classe porte le nom, la feuille
+ * de style en tire la couleur et la forme. L'avatar est un rond vide — nous
+ * n'avons aucune image de profil à y mettre, et un rond neutre se lit comme un
+ * avatar là où une initiale inventée se lirait comme une erreur.
+ */
+export function socialCardMarkup(
+  scene: HyperframesScene,
+  index: number
+): string {
+  const carte = scene.socialCard;
+  if (!carte) return '';
+
+  const sousTitre = carte.subtitle
+    ? `<div class="sc-subtitle">${escapeHtml(carte.subtitle)}</div>`
+    : '';
+  const corps = carte.body
+    ? `<div class="sc-body">${escapeHtml(carte.body)}</div>`
+    : '';
+  const bouton = carte.action
+    ? `<div class="sc-action">${escapeHtml(carte.action)}</div>`
+    : '';
+
+  return (
+    `<div class="social-card sc-${escapeHtml(carte.network)} ` +
+    `sc-${escapeHtml(carte.side ?? 'left')}" id="sc${index}">` +
+    '<div class="sc-avatar" aria-hidden="true"></div>' +
+    '<div class="sc-lines">' +
+    `<div class="sc-title">${escapeHtml(carte.title)}</div>` +
+    sousTitre +
+    corps +
+    '</div>' +
+    bouton +
+    '</div>'
+  );
+}
+
+/**
+ * La carte de clôture.
+ *
+ * Les étoiles sont dessinées ici et non dans la page : `4,5` sur cinq fait
+ * quatre étoiles pleines, une demie et rien d'autre — un calcul, donc il se
+ * fait une fois à la composition et pas trente fois par seconde.
+ */
+export function callToActionMarkup(
+  scene: HyperframesScene,
+  index: number
+): string {
+  const cta = scene.callToAction;
+  if (!cta) return '';
+
+  const style = cta.accentColor
+    ? ` style="--cta-accent:${escapeHtml(cta.accentColor)}"`
+    : '';
+
+  const etoiles =
+    cta.rating === undefined
+      ? ''
+      : '<div class="cta-stars" aria-hidden="true">' +
+        Array.from({ length: 5 }, (_, i) => {
+          const part = Math.min(1, Math.max(0, cta.rating! - i));
+          return `<span class="cta-star" style="--fill:${Math.round(part * 100)}%"></span>`;
+        }).join('') +
+        '</div>';
+
+  const bouton = cta.buttonText
+    ? `<div class="cta-button" id="cb${index}">${escapeHtml(cta.buttonText)}</div>`
+    : '';
+  const appui = cta.subtext
+    ? `<div class="cta-subtext">${escapeHtml(cta.subtext)}</div>`
+    : '';
+
+  return (
+    `<div class="cta cta-${escapeHtml(cta.variant ?? 'lockup')}" ` +
+    `id="ct${index}"${style}>` +
+    etoiles +
+    `<div class="cta-headline">${escapeHtml(cta.headline)}</div>` +
+    bouton +
+    appui +
+    '</div>'
+  );
+}

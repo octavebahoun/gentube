@@ -9,7 +9,12 @@ import {
 } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
 import { SUBTITLE_STYLES } from '@/lib/videos';
-import { listSchema, lowerThirdSchema } from '@/lib/storyboard/plans';
+import {
+  callToActionSchema,
+  listSchema,
+  lowerThirdSchema,
+  socialCardSchema,
+} from '@/lib/storyboard/plans';
 import { EFFETS, type Effet } from '@/lib/storyboard/effets';
 import {
   MOMENTS,
@@ -20,6 +25,7 @@ import {
   momentDeLaCitation,
   momentDuFil,
   momentDuGraphique,
+  momentDeLaCloture,
   momentDeLaNappe,
   momentDuTiers,
   momentDuTitre,
@@ -117,6 +123,10 @@ type Jeu = {
   nappe?: string;
   /** Disposition posée sur la liste, quand `cascade` vaut `list`. */
   listLayout?: string;
+  /** Réseau de la carte sociale, posée sur la deuxième scène. */
+  socialCard?: string;
+  /** Allure de la carte de clôture, posée sur la cinquième. */
+  cta?: string;
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -257,6 +267,30 @@ const NAPPES: Jeu[] = Object.entries(EFFETS).map(([nom, effet]) => ({
   moments: [momentDeLaNappe(effet)],
 }));
 
+/**
+ * Une image par réseau et par allure de clôture, activées par --cartes.
+ *
+ * La carte sociale va sur la deuxième scène, celle qui a une image : elle se
+ * pose **sur** un plan. La carte de clôture va sur la cinquième, qui n'en a
+ * pas : elle se dessine seule.
+ */
+const CARTES: Jeu[] = [
+  ...socialCardSchema.shape.network.options.map((network) => ({
+    nom: `carte-${network}`,
+    video: REFERENCE_VIDEO,
+    socialCard: network,
+    moments: [momentDuTiers()],
+  })),
+  ...callToActionSchema.shape.variant
+    .unwrap()
+    .options.map((variant) => ({
+      nom: `cloture-${variant}`,
+      video: REFERENCE_VIDEO,
+      cta: variant,
+      moments: [momentDeLaCloture()],
+    })),
+];
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(jeu: Jeu): string {
   const {
@@ -271,6 +305,8 @@ function projet(jeu: Jeu): string {
     counter,
     nappe,
     listLayout,
+    socialCard,
+    cta,
   } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
@@ -306,6 +342,27 @@ function projet(jeu: Jeu): string {
     const render = shots[scene].render as Record<string, unknown>;
     if (scene === 4) delete render.counter;
     render.effects = { ...(render.effects as object), [nappe]: {} };
+  }
+  if (socialCard) {
+    (shots[1].render as Record<string, unknown>).socialCard = {
+      network: socialCard,
+      title: 'Ama Doe',
+      subtitle: '@amadoe',
+      body: 'Trois sacs collectes ce matin, et il en reste deux.',
+      action: 'Suivre',
+    };
+  }
+  if (cta) {
+    const render = shots[4].render as Record<string, unknown>;
+    delete render.counter;
+    render.callToAction = {
+      headline: 'Rejoignez la cooperative',
+      buttonText: 'Commencer',
+      subtext: 'Premiere adhesion offerte',
+      rating: 4.5,
+      variant: cta,
+      startInSeconds: DEPART_DU_GRAPHIQUE,
+    };
   }
   if (chart) {
     // La cinquième scène porte le compteur : on la reprend pour le graphique,
@@ -446,6 +503,7 @@ function main() {
   if (process.argv.includes('--cascades')) jeux = [...jeux, ...CASCADES];
   if (process.argv.includes('--roue')) jeux = [...jeux, ...ROUE];
   if (process.argv.includes('--nappes')) jeux = [...jeux, ...NAPPES];
+  if (process.argv.includes('--cartes')) jeux = [...jeux, ...CARTES];
 
   for (const jeu of jeux) {
     console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);

@@ -272,6 +272,49 @@ export const CONTENUS_JS = `
           );
         }
         /*
+         * La carte de reseau social : elle entre par son bord et elle repart.
+         *
+         * Deux fromTo a deux instants absolus, jamais une entree suivie d une
+         * sortie relative : le moteur cherche chaque image, et une sortie
+         * calee sur la fin de l entree ne saurait pas ou elle en est.
+         */
+        if (scene.socialCard) {
+          tl.fromTo(
+            "#sc" + scene.index,
+            { opacity: 0, x: scene.socialCard.dx, scale: 0.94 },
+            { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" },
+            scene.socialCard.at
+          );
+          tl.fromTo(
+            "#sc" + scene.index,
+            { opacity: 1 },
+            { opacity: 0, duration: 0.35, ease: "power2.in" },
+            scene.socialCard.out
+          );
+        }
+
+        /*
+         * La carte de cloture : la phrase, puis le bouton.
+         *
+         * Le bouton arrive apres, et c est tout le sujet — on lit la promesse
+         * avant de voir ce qu on demande.
+         */
+        if (scene.callToAction) {
+          tl.fromTo(
+            "#ct" + scene.index + " .cta-headline",
+            { opacity: 0, y: "0.5em" },
+            { opacity: 1, y: "0em", duration: 0.55, ease: "power3.out" },
+            scene.callToAction.at
+          );
+          tl.fromTo(
+            "#cb" + scene.index,
+            { opacity: 0, scale: 0.8 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.2)" },
+            scene.callToAction.button
+          );
+        }
+
+        /*
          * La liste et la comparaison : une entree par rang, en cascade.
          *
          * Meme geste pour les deux, et ce n est pas un raccourci : une ligne

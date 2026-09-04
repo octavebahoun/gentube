@@ -518,3 +518,93 @@ Elle a servi tout de suite : dans `strip`, les noms se **chevauchaient** — la
 ligne se laissait comprimer alors que son texte refusait, et il débordait sur le
 voisin. Et le titre de `checklist` était écrit en sombre alors qu'il est **hors**
 du papier : invisible sur le fond noir.
+
+### 8. Neuf cartes sociales et six cartes de clôture — livrées
+
+**Neuf champs, un objet.** `instagramFollow`, `tiktokFollow`, `xFollowCard`,
+`xPost`, `redditPost`, `spotifyCard`, `ytCommentCard`, `ytLowerThird`,
+`macosNotification` demandaient tous la même carte : un nom, parfois un second
+nom plus petit, parfois un texte, parfois un bouton. Ce qui change d'un réseau
+à l'autre est la couleur et la forme.
+
+```
+socialCard: { network: x|instagram|tiktok|youtube|reddit|spotify|system,
+              title, subtitle?, body?, action?, side?, holdSeconds? }
+```
+
+`title` et `subtitle` sont deux lignes de rangs différents, jamais
+« Ama Doe · @amadoe » à redécouper — la règle qui gouverne tous les plans.
+
+L'avatar est un **rond plein sans initiale**. Nous n'avons aucune image de
+profil, et une lettre tirée du nom serait une invention. Un rond neutre se lit
+comme un avatar ; une fausse initiale se lit comme une erreur.
+
+**Six champs, un autre objet.** `ctaClose`, `ctaLockup`, `storeBadgeLockup`,
+`logoOutro`, `ytLogoIntro`, `socialProofCard` portent une phrase forte, parfois
+un bouton, une ligne d'appui, des étoiles.
+
+```
+callToAction: { headline, buttonText?, subtext?, rating?,
+                variant: lockup|close|badges|logo|stamp }
+```
+
+Le bouton arrive **après** la phrase, et c'est tout le sujet du plan : on lit la
+promesse avant de voir ce qu'on demande. L'écart est borné par ce qui reste de
+la scène, sinon sur un plan court il n'apparaîtrait jamais.
+
+`rating` est un **nombre**, la seule valeur du contrat qu'on met en forme
+nous-mêmes : 4,5 sur 5 fait quatre étoiles pleines et une demie, et c'est un
+calcul, pas une chaîne. Il est fait une fois à la composition et non trente fois
+par seconde dans la page.
+
+`logoUrl` n'y est pas. Le logo du client n'existe nulle part dans le produit, et
+le jour où il existera ce sera un champ de la **vidéo**, pas de la scène — on ne
+met pas deux logos différents dans une même vidéo. Les pastilles de magasin sont
+dessinées et non chargées : les marques sont déposées, et une image de plus est
+une requête de plus au rendu.
+
+Les deux plans traversent les six endroits, `--cartes` comprise : douze
+références, sept réseaux et cinq allures. Elle a servi deux fois — le bouton
+manquait sur les cinq allures parce que l'instant de capture tombait avant lui,
+et les pastilles de magasin encadraient le mot « Commencer » au lieu de le
+remplacer.
+
+Et les deux prennent la taille de base **injectée dans la page**, comme les
+autres plans. Mesurées sur les 16 px du navigateur, elles seraient sorties trois
+fois trop grosses — c'est arrivé à la citation, et un test le vérifie maintenant.
+
+### 9. Les quinze dernières — déjà là, ou pas chez nous
+
+| Vous demandiez | Réponse |
+|---|---|
+| `pushIn` | `effects.zoom: 'in'`, depuis l'origine. |
+| `pullBackReveal` | `effects.zoom: 'out'`, pareil. |
+| `driftHold` | Le zoom lent plus `shake` : c'est exactement la respiration décrite. |
+| `beatAccent { intensity }` | Existe. Le réglage s'appelle autrement — lisez la table. |
+| `physicalExit`, `velocityThrowSnap`, `slitScanReveal`, `beforeAfterWipe` | Ce sont des **coupes**, pas des nappes : elles vont dans `MOVE_TRANSITIONS`, la table du palier 1. Trois y sont déjà sous un autre nom. |
+| `stopMotionCadence { fps }` | Un pilote de temps, pas un visuel. Il vit dans `animations.ts`, votre fichier — et il est faisable : quantifier la progression avant de la donner à GSAP. |
+| `ytVerticalFill` | C'est le format 9:16, qui existe et qui est sous garde visuelle depuis le début. |
+| `mkPlaceholderGrid` | Demande plusieurs médias dans une scène. Le contrat en porte un par scène, et ce n'est pas un oubli : c'est une décision produit. |
+| `gestureTap { label }` | `touchIndicator` (livré) plus `overlayText`. Deux objets qui existent. |
+| `inkBleedReveal { label }` | `whiteboardInk` (livré) plus `kineticTitle`. |
+| `logoSting { label }` | `kineticTitle` variante `slam`. Elle est là depuis hier. |
+| `springPop { label }` | `kineticTitle` variante `popin`. Pareil. |
+| `splitTiltCards { cardA, cardB }` | `list` disposition `splay`, ou `comparison` si les deux s'opposent. |
+| `lineSwap`, `kineticTypeSwap` | **Non.** Ils portent deux contenus et une bascule de l'un à l'autre. Ce n'est pas une apparence, c'est un plan — et un plan qui remplace un mot au milieu d'une phrase demande de découper la phrase, donc de deviner où. Proposez-le sous la forme `{ before, after, word }`, trois champs, et ça devient faisable. |
+
+---
+
+## Fin des 123
+
+Cent vingt-trois demandes, toutes traitées : **quatre-vingt-deux livrées**,
+vingt-cinq refusées avec leur raison, seize renvoyées vers ce qui existe déjà.
+
+Ce qui les a rendues traitables tient en une phrase : **elles décrivaient des
+apparences en croyant décrire des objets.** Neuf tiers inférieurs étaient une
+variante, douze révélations de texte étaient dix variantes, huit rangées de
+choses étaient huit dispositions, neuf cartes de réseau étaient un réseau, six
+clôtures étaient une allure. Cinquante-quatre champs pour cinq objets.
+
+Un contrat qui grossit d'un champ par apparence oblige le modèle à choisir entre
+cent soixante noms au lieu de choisir entre cinq objets et leurs allures. C'est
+la vraie raison du refus, avant même le coût de rendu.

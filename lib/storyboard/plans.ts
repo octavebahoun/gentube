@@ -308,3 +308,75 @@ export const comparisonSchema = z.object({
   startInSeconds: z.number().min(0).optional(),
   stepSeconds: z.number().positive().max(2).optional(),
 });
+
+/**
+ * Une carte de réseau social posée sur le plan.
+ *
+ * Neuf champs du palier 2 — `instagramFollow`, `tiktokFollow`, `xFollowCard`,
+ * `xPost`, `redditPost`, `spotifyCard`, `ytCommentCard`, `ytLowerThird`,
+ * `macosNotification` — demandaient tous le même objet : une carte avec un nom,
+ * parfois un second nom plus petit, parfois un texte, parfois un bouton. Ce qui
+ * change d'un réseau à l'autre est la **couleur et la forme**, pas le contenu.
+ *
+ * Un champ par information, comme partout : `title` et `subtitle` sont deux
+ * lignes de rangs différents, jamais « Ama Doe · @amadoe » à redécouper.
+ */
+export const socialCardSchema = z.object({
+  /** Le réseau. Il choisit la couleur, l'arrondi et la place du bouton. */
+  network: z.enum([
+    'x',
+    'instagram',
+    'tiktok',
+    'youtube',
+    'reddit',
+    'spotify',
+    'system',
+  ]),
+  /** La ligne forte : un nom de compte, une chaîne, un titre de morceau. */
+  title: z.string().max(60),
+  /** La ligne faible : la poignée, l'artiste, l'auteur. */
+  subtitle: z.string().max(60).optional(),
+  /** Le corps : le message, le commentaire, la publication. */
+  body: z.string().max(200).optional(),
+  /** Le bouton. « Suivre », « S'abonner » — deux mots, pas une phrase. */
+  action: z.string().max(20).optional(),
+  side: z.enum(['left', 'right']).optional(),
+  startInSeconds: z.number().min(0).optional(),
+  /** Combien de temps elle reste. Elle sort, comme le tiers inférieur. */
+  holdSeconds: z.number().positive().optional(),
+});
+
+/**
+ * La carte de clôture : ce qu'on demande au spectateur de faire.
+ *
+ * Cinq champs du palier 2 — `ctaClose`, `ctaLockup`, `storeBadgeLockup`,
+ * `logoOutro`, `ytLogoIntro` — plus `socialProofCard`. Tous portent une phrase
+ * forte, parfois un bouton, parfois une ligne en dessous. Ce qui les distingue
+ * est l'allure.
+ *
+ * `logoUrl` n'y est pas, et c'est délibéré : le logo du client n'existe nulle
+ * part dans le produit. Le jour où il existera, ce sera un champ de la vidéo et
+ * non de la scène — on ne met pas deux logos différents dans une même vidéo.
+ */
+export const callToActionSchema = z.object({
+  /** La phrase. Une seule, courte : c'est la dernière chose lue. */
+  headline: z.string().max(80),
+  /** Le bouton, s'il y en a un. */
+  buttonText: z.string().max(24).optional(),
+  /** La ligne d'appui sous le bouton. Une promesse, un prix, une date. */
+  subtext: z.string().max(80).optional(),
+  /**
+   * Des étoiles, de zéro à cinq.
+   *
+   * Un nombre et non une chaîne : c'est la seule valeur du contrat qu'on met
+   * en forme nous-mêmes, parce que « 4,5 » et « 4.5 » ne se dessinent pas,
+   * ils se comptent.
+   */
+  rating: z.number().min(0).max(5).optional(),
+  /** L'allure. `stamp` ouvre une vidéo, les quatre autres la ferment. */
+  variant: z
+    .enum(['lockup', 'close', 'badges', 'logo', 'stamp'])
+    .optional(),
+  accentColor: z.string().optional(),
+  startInSeconds: z.number().min(0).optional(),
+});
