@@ -357,9 +357,13 @@ export function listMarkup(scene: HyperframesScene, index: number): string {
     ? ` style="--list-accent:${escapeHtml(list.accentColor)}"`
     : '';
 
-  const titre = list.title
-    ? `<div class="list-title">${escapeHtml(list.title)}</div>`
+  const etiquette = list.label
+    ? `<div class="list-label">${escapeHtml(list.label)}</div>`
     : '';
+
+  const titre = list.title
+    ? `<div class="list-title">${etiquette}${escapeHtml(list.title)}</div>`
+    : etiquette;
 
   const lignes = list.items
     .map((item, i) => {
@@ -380,7 +384,8 @@ export function listMarkup(scene: HyperframesScene, index: number): string {
     .join('');
 
   return (
-    `<div class="list${list.ordered ? ' list-ordered' : ''}"${style}>` +
+    `<div class="list list-${escapeHtml(list.layout ?? 'column')}` +
+    `${list.ordered ? ' list-ordered' : ''}"${style}>` +
     titre +
     `<div class="list-rows">${lignes}</div>` +
     '</div>'

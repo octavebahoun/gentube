@@ -253,6 +253,30 @@ export const listSchema = z.object({
     .max(6),
   /** Numérotée plutôt que pastillée. Vrai quand l'ordre est un classement. */
   ordered: z.boolean().optional(),
+  /**
+   * Comment les lignes se rangent.
+   *
+   * Huit champs du palier 2 — `trustStrip`, `swipeRail`, `radialSurround`,
+   * `constellationHub`, `multiDeviceSplay`, `markerChecklistCard`,
+   * `newsTicker`, `beatTimeline` — demandaient tous la même chose : une suite
+   * de choses nommées. Ce qui les distingue est la **disposition**, pas le
+   * contenu. Une ligne reste une ligne : un texte, une valeur facultative.
+   */
+  layout: z
+    .enum([
+      'column',
+      'rail',
+      'strip',
+      'ring',
+      'hub',
+      'splay',
+      'checklist',
+      'ticker',
+      'timeline',
+    ])
+    .optional(),
+  /** Une étiquette courte posée avant le titre. Le « DIRECT » d'un bandeau. */
+  label: z.string().max(24).optional(),
   accentColor: z.string().optional(),
   startInSeconds: z.number().min(0).optional(),
   /** L'écart entre deux lignes. C'est lui qui cale la liste sur la voix. */

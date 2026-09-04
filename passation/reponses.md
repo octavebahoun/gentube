@@ -485,3 +485,36 @@ Et il y a une passe de garde : `--nappes` se lit **dans la table**. Une fiche de
 plus est une image de plus. Les listes écrites à la main se sont arrêtées deux
 fois sans que personne le voie — 27 variantes de titre sur 65, 3 tiers
 inférieurs sur 13.
+
+### 7. Huit champs qui étaient une disposition — livrés
+
+`trustStrip`, `swipeRail`, `radialSurround`, `constellationHub`,
+`multiDeviceSplay`, `markerChecklistCard`, `newsTicker`, `beatTimeline`.
+
+Tous demandaient la même chose : **une suite de choses nommées**. Des logos, des
+cartes, des puces, des nœuds, des étapes — c'est un texte et, parfois, une
+valeur à côté. Ce qui les distingue est la façon de les ranger.
+
+Ce sont donc huit dispositions de `list` :
+
+```
+list: { items: [{ text, value? }], title?, label?, layout?, ordered? }
+layout: column | rail | strip | ring | hub | splay | checklist | ticker | timeline
+```
+
+`trustStrip` est `strip`, `swipeRail` est `rail`, `radialSurround` est `ring`,
+`constellationHub` est `hub`, `multiDeviceSplay` est `splay`,
+`markerChecklistCard` est `checklist`, `newsTicker` est `ticker` avec son
+`label`, `beatTimeline` est `timeline`.
+
+Le balisage ne change pas d'une disposition à l'autre : un titre, des lignes,
+une puce, un texte, une valeur. Tout le reste est de la feuille de style. Les
+places de l'anneau sont **écrites** et non calculées dans la page, pour la
+raison qui gouverne tout le rendu : le moteur cherche chaque image, et un calcul
+fait dans le navigateur dérive d'un rendu à l'autre.
+
+La passe `--cascades` couvre maintenant chaque disposition, lue dans le schéma.
+Elle a servi tout de suite : dans `strip`, les noms se **chevauchaient** — la
+ligne se laissait comprimer alors que son texte refusait, et il débordait sur le
+voisin. Et le titre de `checklist` était écrit en sombre alors qu'il est **hors**
+du papier : invisible sur le fond noir.

@@ -15,7 +15,7 @@ import {
   wordsOrFallback,
 } from './composition';
 import { SCENES_JS } from './animations';
-import { lowerThirdSchema } from '@/lib/storyboard/plans';
+import { listSchema, lowerThirdSchema } from '@/lib/storyboard/plans';
 import { EFFETS } from '@/lib/storyboard/effets';
 
 function shot(overrides: Partial<Shot> = {}): Shot {
@@ -1085,6 +1085,12 @@ describe('every declared appearance has a rule', () => {
     const variantes = lowerThirdSchema.shape.variant.unwrap().options;
     const sans = variantes.filter((v: string) => !css.includes(`.lt-${v}`));
     expect(sans, 'variantes sans règle CSS').toEqual([]);
+  });
+
+  it('draws every list layout it offers', () => {
+    const layouts = listSchema.shape.layout.unwrap().options;
+    const sans = layouts.filter((l: string) => !css.includes(`.list-${l}`));
+    expect(sans, 'dispositions sans règle CSS').toEqual([]);
   });
 
   it('draws every effect the table declares', () => {

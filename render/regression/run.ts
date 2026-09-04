@@ -9,7 +9,7 @@ import {
 } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
 import { SUBTITLE_STYLES } from '@/lib/videos';
-import { lowerThirdSchema } from '@/lib/storyboard/plans';
+import { listSchema, lowerThirdSchema } from '@/lib/storyboard/plans';
 import { EFFETS, type Effet } from '@/lib/storyboard/effets';
 import {
   MOMENTS,
@@ -115,6 +115,8 @@ type Jeu = {
   counter?: string;
   /** Nappe d'effet posée sur la deuxième scène — ou la cinquième si c'est un fond. */
   nappe?: string;
+  /** Disposition posée sur la liste, quand `cascade` vaut `list`. */
+  listLayout?: string;
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -197,12 +199,28 @@ const CITATIONS: Jeu[] = [
  * Quatre lignes chacune : assez pour que le décalage se voie, assez peu pour
  * qu'elles tiennent dans un plan de trois secondes.
  */
-const CASCADES: Jeu[] = (['list', 'comparison'] as const).map((quoi) => ({
-  nom: quoi === 'list' ? 'liste' : 'comparaison',
-  video: REFERENCE_VIDEO,
-  cascade: quoi,
-  moments: [momentDeLaCascade(4)],
-}));
+const CASCADES: Jeu[] = [
+  ...(['list', 'comparison'] as const).map((quoi) => ({
+    nom: quoi === 'list' ? 'liste' : 'comparaison',
+    video: REFERENCE_VIDEO,
+    cascade: quoi as 'list' | 'comparison',
+    moments: [momentDeLaCascade(4)],
+  })),
+  /*
+   * Et une image par disposition, lue dans le schéma. Même règle que pour les
+   * variantes de titre et de tiers inférieur : ce qui est écrit à la main
+   * s'arrête, et personne ne le voit.
+   */
+  ...listSchema.shape.layout
+    .unwrap()
+    .options.map((layout) => ({
+      nom: `liste-${layout}`,
+      video: REFERENCE_VIDEO,
+      cascade: 'list' as const,
+      listLayout: layout,
+      moments: [momentDeLaCascade(4)],
+    })),
+];
 
 /**
  * La roue du compteur, activée par --roue.
@@ -252,6 +270,7 @@ function projet(jeu: Jeu): string {
     cascade,
     counter,
     nappe,
+    listLayout,
   } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
@@ -337,6 +356,10 @@ function projet(jeu: Jeu): string {
     if (cascade === 'list') {
       render.list = {
         title: 'Quatre chiffres du mois',
+        // L'étiquette n'a de sens qu'au bandeau, mais elle est posée partout :
+        // une disposition qui la mettrait au mauvais endroit se verrait.
+        label: listLayout ? 'DIRECT' : undefined,
+        layout: listLayout,
         ordered: true,
         startInSeconds: DEPART_DU_GRAPHIQUE,
         items: [

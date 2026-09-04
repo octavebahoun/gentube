@@ -2883,3 +2883,334 @@ video.media {
   -webkit-mask-image: linear-gradient(to right, transparent, #000);
   mask-image: linear-gradient(to right, transparent, #000);
 }
+
+/* --- Huit dispositions de liste ------------------------------------------- */
+
+/*
+ * Huit champs du palier 2 — `trustStrip`, `swipeRail`, `radialSurround`,
+ * `constellationHub`, `multiDeviceSplay`, `markerChecklistCard`, `newsTicker`,
+ * `beatTimeline` — demandaient tous la même chose : une suite de choses
+ * nommées. Ce qui les distingue est la disposition, pas le contenu.
+ *
+ * Le balisage ne change pas d'une à l'autre : un titre, des lignes, une puce,
+ * un texte, une valeur. Tout ce qui suit range ces mêmes éléments autrement.
+ */
+
+/*
+ * La colonne, qui est la disposition par défaut.
+ *
+ * Elle n'ajoute rien aux règles de `.list` ci-dessus, et elle est écrite quand
+ * même : la garde vérifie qu'une disposition déclarée a une règle, et une
+ * disposition qui compte sur l'absence de règle est indistinguable d'une
+ * disposition oubliée.
+ */
+.list-column .list-rows {
+  flex-direction: column;
+}
+
+/* L'étiquette : le « DIRECT » d'un bandeau, posée avant le titre. */
+.list-label {
+  display: inline-block;
+  margin-right: 0.5em;
+  padding: 0.1em 0.45em;
+  border-radius: 0.2em;
+  background: var(--list-accent);
+  color: #fff;
+  font-size: 0.72em;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  vertical-align: 0.12em;
+}
+
+/* Le rail : des cartes côte à côte, comme un carrousel arrêté. */
+.list-rail .list-rows {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.7em;
+}
+
+.list-rail .list-row {
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35em;
+  padding: 0.7em 0.8em;
+  border-radius: 0.5em;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.list-rail .list-dot,
+.list-rail .list-rank {
+  flex: 0 0 auto;
+}
+
+/*
+ * La bande : une rangée sourde, sans puce. Les logos d'une page d'accueil.
+ *
+ * `flex: 0 0 auto` sur la **ligne** et non seulement sur son texte. Sans ça la
+ * ligne se laisse comprimer alors que son contenu, lui, refuse : le texte
+ * déborde de sa propre boîte et vient se poser sur celui d'à côté. Les noms se
+ * chevauchaient à la première planche-contact.
+ */
+.list-strip .list-rows {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6em 1.4em;
+}
+
+.list-strip .list-row {
+  flex: 0 0 auto;
+}
+
+.list-strip .list-dot,
+.list-strip .list-rank,
+.list-strip .list-value {
+  display: none;
+}
+
+.list-strip .list-text {
+  flex: 0 0 auto;
+  font-size: 0.95em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+/*
+ * L'anneau : les lignes se posent sur une ellipse autour du centre.
+ *
+ * Chaque place est écrite ici plutôt que calculée dans la page, pour la raison
+ * qui gouverne tout le fichier : le moteur cherche chaque image, et un calcul
+ * fait dans le navigateur dériverait d'un rendu à l'autre. Six places, comme
+ * le maximum du schéma.
+ */
+.list-ring .list-rows,
+.list-hub .list-rows {
+  position: absolute;
+  inset: 0;
+}
+
+.list-ring .list-row,
+.list-hub .list-row {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  align-items: center;
+  padding: 0.32em 0.7em;
+  border-radius: 999px;
+  background: rgba(14, 14, 17, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  white-space: nowrap;
+}
+
+.list-ring .list-row:nth-child(1),
+.list-hub .list-row:nth-child(1) {
+  transform: translate(-50%, -50%) translate(0, -9em);
+}
+
+.list-ring .list-row:nth-child(2),
+.list-hub .list-row:nth-child(2) {
+  transform: translate(-50%, -50%) translate(11em, -4.5em);
+}
+
+.list-ring .list-row:nth-child(3),
+.list-hub .list-row:nth-child(3) {
+  transform: translate(-50%, -50%) translate(11em, 4.5em);
+}
+
+.list-ring .list-row:nth-child(4),
+.list-hub .list-row:nth-child(4) {
+  transform: translate(-50%, -50%) translate(0, 9em);
+}
+
+.list-ring .list-row:nth-child(5),
+.list-hub .list-row:nth-child(5) {
+  transform: translate(-50%, -50%) translate(-11em, 4.5em);
+}
+
+.list-ring .list-row:nth-child(6),
+.list-hub .list-row:nth-child(6) {
+  transform: translate(-50%, -50%) translate(-11em, -4.5em);
+}
+
+/* Le moyeu : le titre tient le centre, et les nœuds tournent autour. */
+.list-hub .list-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.4em 0.9em;
+  border-radius: 0.4em;
+  background: var(--list-accent);
+  text-align: center;
+}
+
+/* L'éventail : des cartes en écailles, chacune un peu plus inclinée. */
+.list-splay .list-rows {
+  flex-direction: row;
+  justify-content: center;
+  gap: 0;
+}
+
+.list-splay .list-row {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+  width: 8.5em;
+  height: 13em;
+  margin: 0 -1.1em;
+  padding: 0.8em 0.6em;
+  border-radius: 0.7em;
+  background: rgba(248, 248, 250, 0.95);
+  box-shadow: 0 0.8em 2em rgba(0, 0, 0, 0.45);
+}
+
+.list-splay .list-text,
+.list-splay .list-value {
+  color: #14100f;
+  text-shadow: none;
+  text-align: center;
+}
+
+.list-splay .list-row:nth-child(1) {
+  transform: rotate(-8deg) translateY(0.5em);
+}
+
+.list-splay .list-row:nth-child(2) {
+  transform: rotate(-3deg);
+}
+
+.list-splay .list-row:nth-child(4) {
+  transform: rotate(3deg);
+}
+
+.list-splay .list-row:nth-child(5) {
+  transform: rotate(8deg) translateY(0.5em);
+}
+
+/* La liste cochée, sur un papier. La puce devient une coche. */
+.list-checklist {
+  padding: 12% 16% 18%;
+}
+
+.list-checklist .list-rows {
+  padding: 1.1em 1.3em;
+  border-radius: 0.4em;
+  background: #f6f2e8;
+  box-shadow: 0 1em 2.6em rgba(0, 0, 0, 0.45);
+  gap: 0.7em;
+}
+
+/*
+ * Le titre est **hors** du papier : il garde donc la couleur du cadre et non
+ * celle de la carte. Écrit en sombre comme les lignes, il disparaissait sur le
+ * fond noir — lisible sur la planche-contact seulement parce qu'on savait
+ * qu'il était là.
+ */
+.list-checklist .list-title {
+  color: #f6f2e8;
+  font-family: "Caveat", "Lato", system-ui, cursive;
+}
+
+.list-checklist .list-text,
+.list-checklist .list-value,
+.list-checklist .list-rank {
+  color: #14100f;
+  text-shadow: none;
+  font-family: "Caveat", "Lato", system-ui, cursive;
+}
+
+.list-checklist .list-rank {
+  color: var(--list-accent);
+}
+
+.list-checklist .list-title {
+  font-size: 1.7em;
+}
+
+.list-checklist .list-text {
+  font-size: 1.3em;
+}
+
+.list-checklist .list-dot {
+  width: 0.75em;
+  height: 0.4em;
+  border-radius: 0;
+  background: none;
+  border-left: 0.16em solid var(--list-accent);
+  border-bottom: 0.16em solid var(--list-accent);
+  transform: rotate(-45deg);
+}
+
+/* Le bandeau défilant : une ribambelle en bas de cadre, au-dessus des mots. */
+.list-ticker {
+  justify-content: flex-end;
+  padding: 0 0 22%;
+}
+
+.list-ticker .list-title {
+  padding: 0.28em 0.7em;
+  background: rgba(14, 14, 17, 0.9);
+  font-size: 1.1em;
+}
+
+.list-ticker .list-rows {
+  flex-direction: row;
+  gap: 1.6em;
+  padding: 0.3em 0.7em;
+  background: var(--list-accent);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.list-ticker .list-row {
+  flex: 0 0 auto;
+}
+
+.list-ticker .list-dot {
+  flex: 0 0 0.42em;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.list-ticker .list-text,
+.list-ticker .list-value {
+  font-size: 0.92em;
+  color: #fff;
+  text-shadow: none;
+}
+
+/* La colonne vertébrale : les lignes accrochées à un trait vertical. */
+.list-timeline .list-rows {
+  position: relative;
+  gap: 0.8em;
+  padding-left: 1.2em;
+}
+
+.list-timeline .list-rows::before {
+  content: "";
+  position: absolute;
+  left: 0.68em;
+  top: 0.4em;
+  bottom: 0.4em;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.list-timeline .list-row {
+  align-items: center;
+}
+
+.list-timeline .list-dot {
+  flex: 0 0 0.7em;
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: -1.55em;
+  box-shadow: 0 0 0 0.24em rgba(14, 14, 17, 0.9);
+}
+
+.list-timeline .list-value {
+  font-variant-numeric: tabular-nums;
+}

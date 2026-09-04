@@ -665,7 +665,7 @@ Timeline: dans buildTimeline, scene.ltStackBars ? { name, role: role ?? '', dura
 Balisage: <div class="lt-stack-bars" id="lsb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ltStackBars` is optional: two stacked bars lower third with dual wipe entrances. { name, role?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [fait] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.newsTicker
 Forme   : { headline: string, label?: string, items?: string[], durationInSeconds?: number }
@@ -729,7 +729,7 @@ Timeline: dans buildTimeline, scene.chartStory ? { title: title ?? '', kind: kin
 Balisage: <div class="chart-story" id="chs<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `chartStory` is optional: statistical chart animated in reading order with value callout. { title?, kind?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:16
+## [fait] palier 2 · 2026-09-03 12:16
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.constellationHub
 Forme   : { title?: string, nodes?: string[], durationInSeconds?: number }
@@ -881,7 +881,7 @@ Timeline: dans buildTimeline, scene.logoSting ? { label: label ?? '', durationIn
 Balisage: <div class="logo-sting" id="lst<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `logoSting` is optional: wordmark slam with accent ring and impact frame. { label?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:18
+## [fait] palier 2 · 2026-09-03 12:18
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.markerChecklistCard
 Forme   : { headline?: string, items?: string[], durationInSeconds?: number }
@@ -897,7 +897,7 @@ Timeline: dans buildTimeline, scene.modalMorph ? { durationInSeconds: durationIn
 Balisage: <div class="modal-morph" id="mmr<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `modalMorph` is optional: small card expanding into full panel with shared-element morph. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:20
+## [fait] palier 2 · 2026-09-03 12:20
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.multiDeviceSplay
 Forme   : { devices?: string[], durationInSeconds?: number }
@@ -961,7 +961,7 @@ Timeline: dans buildTimeline, scene.pushIn ? { durationInSeconds: durationInSeco
 Balisage: <div class="push-in" id="pin<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `pushIn` is optional: centered headline focus with continuous camera push. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:24
+## [fait] palier 2 · 2026-09-03 12:24
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.radialSurround
 Forme   : { chips?: string[], durationInSeconds?: number }
@@ -1049,7 +1049,7 @@ Timeline: dans buildTimeline, scene.svgStrokeTrace ? { pathData: pathData ?? '',
 Balisage: <div class="svg-stroke-trace" id="sst<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `svgStrokeTrace` is optional: authored SVG path drawing from its measured length. { pathData?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.swipeRail
 Forme   : { cards?: string[], durationInSeconds?: number }
@@ -1081,7 +1081,7 @@ Timeline: dans buildTimeline, scene.touchIndicator ? { mode: mode ?? 'tap', dura
 Balisage: <div class="touch-indicator" id="tin<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `touchIndicator` is optional: contact-circle gesture actor touching glass and lifting. { mode?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.trustStrip
 Forme   : { logos?: string[], durationInSeconds?: number }
@@ -1121,7 +1121,7 @@ Timeline: dans buildTimeline, scene.notificationPileup ? { durationInSeconds: du
 Balisage: <div class="notification-pileup" id="npl<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `notificationPileup` is optional: mobile notifications pushing existing stack downward. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.beatTimeline
 Forme   : { durationInSeconds?: number }
