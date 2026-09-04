@@ -608,3 +608,173 @@ clôtures étaient une allure. Cinquante-quatre champs pour cinq objets.
 Un contrat qui grossit d'un champ par apparence oblige le modèle à choisir entre
 cent soixante noms au lieu de choisir entre cinq objets et leurs allures. C'est
 la vraie raison du refus, avant même le coût de rendu.
+
+---
+
+## palier 1 · relevé du 5 septembre — fini sur le geste, pas sur l'apparence
+
+Vérifié dans le code, pas dans les coches.
+
+| Vocabulaire | Déclaré | Avec un geste | Avec une règle de style |
+|---|---|---|---|
+| `MOVES_JS` | 46 | 46 | — |
+| `SHADER_TRANSITIONS` | 14 | 14 | — |
+| `MOTS` (sous-titres) | 10 | 10 | — |
+| variantes de `kineticTitle` | 65 | 65 | **20** |
+
+Les 65 variantes ont toutes leur geste. **Quarante-cinq n'ont aucune règle de
+style à elles.** Le balisage est le même pour toutes — `markup.ts` ne pose
+qu'une classe, `kt-<variante>` — donc l'apparence ne peut venir que de la
+feuille de style. Sans règle, il n'y a rien à voir de plus qu'un titre nu.
+
+```
+blur-out explode focus lines lockup decode crossfade scan axis-y axis-z reel
+fade-up strike ticker calm split weight wave backdrop drop handwritten marker
+marquee brand stagger stateswap prism tiles emphasis popin badge-pop
+card-resize icon-swap menu-morph skeleton-reveal success-check tilt-card
+input-feedback micro-transitions panel-reveal tabs-slide-indicator
+avatar-group-hover callout morphtext logo-outro
+```
+
+Une partie de cette liste n'a pas besoin de règle : `fade-up`, `crossfade`,
+`split`, `wave`, `drop` sont des **manières d'arriver**, et le geste est toute
+leur définition. Mais `marker` promet un trait de surligneur, `badge-pop` une
+pastille, `panel-reveal` un panneau, `skeleton-reveal` des barres grises,
+`tabs-slide-indicator` des onglets. Ces noms-là promettent un **objet à
+l'écran**, et un objet ne peut pas sortir d'un tween.
+
+Le dépôt le dit déjà, dans `run.ts` : la capture des titres est prise **au
+milieu** du geste, et le commentaire explique pourquoi — prise après la fin,
+elle rendait les variantes identiques. La garde visuelle surveille donc le
+mouvement, et rien d'autre.
+
+**Ce qu'il reste, précisément :** trier ces 45 en deux tas — celles dont le nom
+ne promet qu'un mouvement, qui sont finies, et celles dont le nom promet une
+apparence, qui demandent une règle. Le second tas fait une vingtaine d'entrées.
+
+Et une coche qui ne tient toujours pas : **`vox-annotate` n'existe nulle part**
+dans le dépôt, sous aucun nom. `caption-particle-burst` reste différé, et c'est
+la bonne décision.
+
+---
+
+## palier 2 · ce qui reste, et comment le finir
+
+**L'état est mesuré, pas coché.** Pour chaque entrée, la page est composée avec
+le champ rempli puis sans, et les deux sont comparées octet par octet. Sur les
+165 entrées du palier : **98 rendues, 3 partielles, 15 disponibles autrement,
+30 impossibles, 19 restantes.**
+
+### La règle, avant la liste
+
+**Un champ qui ne change pas la page n'est pas livré.** Ni le schéma, ni la
+ligne de prompt, ni l'entrée de timeline ne comptent : seul compte le fait que
+la page composée soit différente. Le contrôle tient en dix lignes, il est dans
+`scratchpad/audit-full.ts`, et il faut le passer **avant** de cocher :
+
+```
+const nu = page({});
+page({ effects: { monChamp: uneValeur } }) === nu   // → pas livré
+```
+
+Le 3 septembre, 162 entrées étaient cochées et 160 rendaient une page identique
+à l'octet près. Ce n'est pas un reproche de méthode : c'est que **les tests ne
+peuvent pas le voir**. Un champ optionnel que personne ne lit ne casse aucun
+test. Seule l'image le dit, ou ce script.
+
+### Les six endroits, et aucun raccourci
+
+Une entrée traverse : le schéma (`effets.ts`), le balisage, les instants de la
+timeline, le tween, la ligne de prompt, et **une passe de garde visuelle**. Les
+cinq premiers sans le sixième donnent exactement ce qu'on vient de corriger.
+
+Pour une nappe, les cinq premiers sont **une ligne dans la table** de
+`lib/storyboard/effets.ts` : le schéma, le balisage et la timeline s'y lisent
+tous les trois. N'écrivez pas dans `render.ts` — il est à 1 467 lignes, il porte
+le contrat des trois paliers, et chaque ajout direct y est une collision.
+
+Et la garde se **dérive du contrat**, jamais d'une liste écrite à la main :
+`--nappes` lit la table, `--titres` lit l'énumération. Les listes manuscrites
+s'étaient arrêtées deux fois sans prévenir — 27 variantes de titre sur 65,
+3 tiers inférieurs sur 13.
+
+### Ce que le moteur interdit, et pourquoi
+
+Trois invariants. Ils ne sont pas négociables parce qu'ils ne viennent pas d'un
+goût, mais de la machine.
+
+1. **Le moteur cherche chaque image.** Il saute à 30 s sans avoir calculé les
+   899 d'avant. Donc : un `fromTo` à un instant absolu, jamais un `to`, jamais
+   un temps accumulé, jamais un `@keyframes` CSS, jamais un tirage au hasard
+   non semé. Tout ce qui garde un état entre deux images rend n'importe quoi.
+2. **Lambda n'a pas de GPU.** Pas de `backdrop-filter`, pas de flou plein cadre,
+   pas de modèle 3D, pas de champ de particules, pas de lecture du canvas. Un
+   `filter` sur une ligne de texte est permis : quelques milliers de pixels
+   contre deux millions.
+3. **Un calcul fait dans la page dérive d'un rendu à l'autre.** Les places de
+   l'anneau de `list` sont écrites, pas calculées. Faites pareil.
+
+### Un compte n'est pas un contenu — sauf quand la chose n'a pas de texte
+
+C'est la troisième fois que la remarque revient, alors voici la règle exacte
+plutôt que le refus.
+
+- Un **compte suffit** quand la chose dessinée ne porte aucun texte : une
+  pastille d'avatar, une étoile, un confetti, une flèche de curseur, un arrêt
+  de travelling. `avatarCloud { count }` et `spiralGalaxy { starCount }` sont
+  donc recevables tels quels.
+- Un **compte dessine des boîtes vides** quand la chose porte du texte : une
+  carte, un nœud, une ligne, un badge, une entrée de menu. Là, le champ doit
+  recevoir les **noms**. `hwPipeline`, qui reçoit ses nœuds nommés, est la forme
+  à reprendre.
+
+### Les 19 qui restent, rangées par ce qu'elles demandent
+
+**Six mouvements de caméra ou de mise au point.** Aucun contenu, donc rien à
+inventer : c'est le tas le plus court à finir.
+`cameraDollyZoom { direction }`, `ytCameraMove { mode }`, `focusSwap
+{ targetCard }`, `spotlightCard`, `svgMaskReveal`, `freezeFrameDressing
+{ paperTexture, tapeStickers }`.
+
+**Deux travellings pilotés par un compte**, recevables tels quels — les arrêts
+sont des positions, pas du texte : `panStations { stops }`, `scrollCameraStory
+{ sections }`.
+
+**Deux nuées comptables**, recevables aussi, par la règle ci-dessus :
+`avatarCloud { count }`, `spiralGalaxy { starCount }`.
+
+**Trois qui doivent recevoir des noms** avant d'être écrites :
+`liquidGlassContextMenu { itemsCount }` — une entrée de menu est un mot, donnez
+`items: string[]`, et sans le verre dépoli ; `overwhelmSurround { itemsCount }`
+— même chose ; `multiplayerCursors { count }` — un curseur porte une étiquette,
+donnez `cursors: [{ label }]`.
+
+**Une à regarder avant d’écrire :** `staggerCascade { columns }` — « une grille
+de tuiles qui se posent en décalé » — est à un cheveu de `staggerLattice`, livré
+le 4, qui découvre un treillis de cellules en diagonale. L’un est un fond, l’autre
+des tuiles qui arrivent. Composez les deux côte à côte avant d’écrire le second :
+si l’image est la même, c’est un doublon de plus.
+
+**Trois de la famille manuscrite**, à poser dans `manuscrit.ts` sur le modèle
+de `hwBoxLabel` : `hwArrow { curve, strokeStyle }`, `hwUnderline { style }`,
+`hwTextCloud { text, tailPosition }`. Le tremblement se sème sur l'indice de la
+scène — tiré au hasard, il donne un trait différent à chaque image, et le trait
+grouille au lieu de trembler.
+
+**Deux qui ne sont pas de ce palier :** `terminalSimulator { command, output }`
+et `mkUsageArc { percentage }` portent un **contenu**. Ce sont des plans de
+palier 3, pas des effets. Ne les écrivez pas ici.
+
+### Et une qui est de nous
+
+`hwBoil` est déclaré, documenté, et **inerte** : mesuré, le tremblement seul ne
+change pas la page, même posé à côté de `hwFrame`. C'est notre propre version de
+la panne décrite plus haut, et elle est à notre charge. Elle est marquée
+partielle dans le catalogue, pas rendue.
+
+### Les 30 impossibles
+
+Elles sont closes, avec leur raison en clair, entrée par entrée, dans le
+catalogue. Deux d'entre elles redeviennent faisables si la forme change :
+`lineSwap` et `kineticTypeSwap` sous la forme `{ before, after, word }`, trois
+champs et aucune phrase à redécouper.
