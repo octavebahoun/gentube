@@ -472,7 +472,21 @@ function onBeat(
  * reste du fichier : le moteur cherche chaque image, et un calcul fait dans le
  * navigateur dériverait d'un rendu à l'autre.
  */
-export const TITRE_PAR_LETTRE = new Set(['typewriter', 'tracking', 'cascade']);
+export const TITRE_PAR_LETTRE = new Set([
+  'typewriter',
+  'tracking',
+  'cascade',
+  /*
+   * Les quatre suivantes animent aussi la lettre : un panneau à volets bat
+   * lettre par lettre, un brouillage se verrouille de gauche à droite, une
+   * réponse qui se tape arrive caractère par caractère, et des glyphes qui
+   * montent du bas se décalent l'un après l'autre.
+   */
+  'bottom-up',
+  'scramble',
+  'split-flap',
+  'streaming',
+]);
 
 export function titleTargets(
   title: { text: string; variant?: string },

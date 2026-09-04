@@ -29,6 +29,33 @@ export const TITRES_JS = `
         slam: { de: { opacity: 0, scale: 2.4 }, vers: { opacity: 1, scale: 1 }, ease: "power4.out" },
         // Le mot monte du flou vers le net. Le flou est sur un mot, pas plein cadre.
         rise: { de: { opacity: 0, y: "0.5em", filter: "blur(8px)" }, vers: { opacity: 1, y: "0em", filter: "blur(0px)" }, ease: "power2.out" },
+        /*
+         * Les dix du palier 2. Chacune a son geste : sans entrée ici, la
+         * variante tomberait sur celui de reveal — l'apparence serait juste et
+         * le mouvement serait celui d'une autre. C'est le trou qu'on a déjà eu
+         * sur les styles de sous-titres.
+         */
+        // La lettre monte du bas et se pose.
+        "bottom-up": { de: { opacity: 0, y: "0.8em" }, vers: { opacity: 1, y: "0em" }, ease: "power3.out" },
+        // Le brouillage se verrouille : la lettre arrive de travers et se redresse.
+        scramble: { de: { opacity: 0, y: "-0.25em", skewX: -18 }, vers: { opacity: 1, y: "0em", skewX: 0 }, ease: "steps(3)" },
+        // Le volet bat : la lettre pivote sur son axe horizontal.
+        "split-flap": { de: { opacity: 0, rotationX: -92 }, vers: { opacity: 1, rotationX: 0 }, ease: "power2.out" },
+        // La réponse se tape : aucun fondu, le caractère est là ou il n'y est pas.
+        streaming: { de: { opacity: 0 }, vers: { opacity: 1 }, ease: "none" },
+        // Le fil se coud : le mot se découvre de la gauche.
+        stitched: { de: { opacity: 0, clipPath: "inset(0 100% 0 0)" }, vers: { opacity: 1, clipPath: "inset(0 0% 0 0)" }, ease: "none" },
+        // Le reflet passe. Le mot est déjà là, c'est la lumière qui bouge.
+        shimmer: { de: { opacity: 0, backgroundPosition: "180% 0" }, vers: { opacity: 1, backgroundPosition: "-80% 0" }, ease: "power1.inOut" },
+        // Du flou vers le net, sur le mot et jamais plein cadre.
+        "blur-in": { de: { opacity: 0, filter: "blur(10px)", y: "0.25em" }, vers: { opacity: 1, filter: "blur(0px)", y: "0em" }, ease: "power2.out" },
+        // Le mot creuse ce qu'il y a derrière : il grandit à peine en arrivant.
+        difference: { de: { opacity: 0, scale: 1.12 }, vers: { opacity: 1, scale: 1 }, ease: "power2.out" },
+        // La matière se découvre par le bas.
+        texture: { de: { opacity: 0, clipPath: "inset(100% 0 0 0)" }, vers: { opacity: 1, clipPath: "inset(0% 0 0 0)" }, ease: "power2.out" },
+        // La graisse et la chasse se détendent en arrivant.
+        flex: { de: { opacity: 0, fontWeight: 300, letterSpacing: "0.18em" }, vers: { opacity: 1, fontWeight: 900, letterSpacing: "0em" }, ease: "power3.out" },
+
         // Une secousse chromatique brève, puis le mot se pose.
         glitch: { de: { opacity: 0, x: -8, skewX: 12 }, vers: { opacity: 1, x: 0, skewX: 0 }, ease: "steps(4)" },
 

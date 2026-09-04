@@ -1766,6 +1766,143 @@ video.media {
     0 4px 18px rgba(0, 0, 0, 0.7);
 }
 
+/* --- Les dix variantes du palier 2 ---------------------------------------- */
+
+/*
+ * Douze champs demandés, dix variantes livrées : `textShimmer` et
+ * `shimmerSweep` étaient deux noms pour un seul geste, `softBlurIn` et `blurIn`
+ * deux autres. Elles portent toutes la même chose — une phrase, et la façon
+ * dont elle arrive.
+ *
+ * Aucune n'emploie de flou plein cadre. `blur-in` floute le mot, pas la trame :
+ * un `filter` sur une ligne de texte est une passe sur quelques milliers de
+ * pixels, plein cadre c'en est deux millions, et Lambda n'a pas de GPU.
+ */
+
+/* Le glyphe monte du bas ; il lui faut sa propre boîte pour être découpé. */
+.kt-bottom-up .kt-word {
+  overflow: hidden;
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* Le brouillage se verrouille de gauche à droite. Mono : les colonnes tiennent. */
+.kt-scramble {
+  font-family: "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+.kt-scramble .kt-word {
+  color: #fff;
+  text-shadow: 0 0 0.5em rgba(120, 255, 190, 0.45);
+}
+
+/*
+ * Le panneau à volets. Chaque lettre est un carreau sombre qui bascule sur son
+ * axe horizontal — d'où la perspective, sans laquelle la rotation serait plate.
+ */
+.kt-split-flap {
+  perspective: 600px;
+  font-family: "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  gap: 0.14em 0.3em;
+}
+
+.kt-split-flap .kt-char {
+  min-width: 0.78em;
+  padding: 0.08em 0.05em;
+  background: #16161a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  text-align: center;
+  transform-style: preserve-3d;
+}
+
+/* La réponse se tape. Aucun fondu, aucune ombre : c'est du texte d'interface. */
+.kt-streaming {
+  font-family: "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  font-size: 1.5em;
+  font-weight: 400;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.kt-streaming .kt-word {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/*
+ * Le fil cousu. Le trait de couture est une bordure en tirets sous le mot ;
+ * les trous d'aiguille sont un dégradé répété, pas des éléments.
+ */
+.kt-stitched .kt-word {
+  padding-bottom: 0.12em;
+  border-bottom: 0.06em dashed var(--kt-accent, #ffd9a0);
+  color: #fff;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.75);
+}
+
+/*
+ * Le reflet. Le dégradé est peint dans le glyphe par `background-clip: text`,
+ * et c'est sa position que la timeline déplace — le texte ne bouge pas.
+ */
+.kt-shimmer .kt-word {
+  background: linear-gradient(
+    100deg,
+    #ffffff 0%,
+    #ffffff 38%,
+    var(--kt-accent, #ffd9a0) 50%,
+    #ffffff 62%,
+    #ffffff 100%
+  );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Du flou vers le net, sur le mot. */
+.kt-blur-in .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+}
+
+/*
+ * Le mot creuse l'image. `mix-blend-mode: difference` inverse ce qu'il y a
+ * derrière : il reste lisible sur n'importe quel fond, clair ou sombre, ce
+ * qu'aucune couleur fixe ne sait faire.
+ */
+.kt-difference .kt-word {
+  color: #fff;
+  mix-blend-mode: difference;
+  text-shadow: none;
+}
+
+/*
+ * La matière découpée dans le glyphe. Le motif est un dégradé conique répété —
+ * une image de texture serait un fichier de plus à embarquer dans le projet,
+ * et une requête de plus au rendu.
+ */
+.kt-texture .kt-word {
+  background:
+    repeating-conic-gradient(
+      from 30deg,
+      rgba(255, 255, 255, 0.95) 0deg 6deg,
+      rgba(255, 255, 255, 0.55) 6deg 12deg
+    ),
+    linear-gradient(160deg, var(--kt-accent, #ffd9a0), #ffffff);
+  background-blend-mode: multiply;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* La graisse et la chasse se détendent. */
+.kt-flex .kt-word {
+  color: #fff;
+  font-stretch: 100%;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
+}
+
 /* --- Effets palier 2 ------------------------------------------------------ */
 
 /*

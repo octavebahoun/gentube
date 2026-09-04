@@ -713,7 +713,7 @@ Timeline: dans buildTimeline, scene.beatPulseBackground ? { frequency: frequency
 Balisage: <div class="beat-pulse-background" id="bpb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `beatPulseBackground` is optional: accent backdrop pulsing glow and saturation on beat grid. { frequency?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:16
+## [fait] palier 2 · 2026-09-03 12:16
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.bottomUpLetters
 Forme   : { text: string, durationInSeconds?: number }
@@ -969,7 +969,7 @@ Timeline: dans buildTimeline, scene.radialSurround ? { chips: chips ?? [], durat
 Balisage: <div class="radial-surround" id="rsr<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `radialSurround` is optional: labeled hairline chips assembling around centered subject on elliptical ring. { chips?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:24
+## [fait] palier 2 · 2026-09-03 12:24
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.scrambleReveal
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1001,7 +1001,7 @@ Timeline: dans buildTimeline, scene.socialProofCard ? { headline: headline ?? ''
 Balisage: <div class="social-proof-card" id="spc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `socialProofCard` is optional: app-store close card with stars, proof line, and CTA. { headline?, rating?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.softBlurIn
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1025,7 +1025,7 @@ Timeline: dans buildTimeline, scene.springPop ? { label: label ?? '', durationIn
 Balisage: <div class="spring-pop" id="spp<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `springPop` is optional: badge popping in with single overshoot. { label?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.stitchedTextDraw
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1065,7 +1065,7 @@ Timeline: dans buildTimeline, scene.testimonialProofCard ? { quote: quote ?? '',
 Balisage: <div class="testimonial-proof-card" id="tpc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `testimonialProofCard` is optional: quote card with soft mask line reveal and author info. { quote?, author?, role?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.textShimmer
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1089,7 +1089,7 @@ Timeline: dans buildTimeline, scene.trustStrip ? { logos: logos ?? [], durationI
 Balisage: <div class="trust-strip" id="tst<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `trustStrip` is optional: monochrome trust row with left-to-right opacity stagger. { logos?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.variableFontFlex
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1297,7 +1297,7 @@ Timeline: dans buildTimeline, scene.xFollowCard ? { handle: handle ?? '', durati
 Balisage: <div class="x-follow-card" id="xfc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `xFollowCard` is optional: X social follow card. { handle?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.captionBlendDifference
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1305,7 +1305,7 @@ Timeline: dans buildTimeline, scene.captionBlendDifference ? { text: text ?? '',
 Balisage: <div class="caption-blend-difference" id="cbd<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `captionBlendDifference` is optional: text with difference blend mode. { text?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.shimmerSweep
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1313,7 +1313,7 @@ Timeline: dans buildTimeline, scene.shimmerSweep ? { text: text ?? '', durationI
 Balisage: <div class="shimmer-sweep" id="ssw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `shimmerSweep` is optional: gradient mask sweep across text. { text?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.splitFlapBoard
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1321,7 +1321,7 @@ Timeline: dans buildTimeline, scene.splitFlapBoard ? { text: text ?? '', duratio
 Balisage: <div class="split-flap-board" id="sfb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `splitFlapBoard` is optional: Solari departure board split-flap cascade. { text?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.textureMaskText
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1369,7 +1369,7 @@ Timeline: dans buildTimeline, scene.arcMotionPath ? { durationInSeconds: duratio
 Balisage: <div class="arc-motion-path" id="amp<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `arcMotionPath` is optional: callout along curved arc. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.blurIn
 Forme   : { text?: string, durationInSeconds?: number }
@@ -1401,7 +1401,7 @@ Timeline: dans buildTimeline, scene.simulatedCursor ? { durationInSeconds: durat
 Balisage: <div class="simulated-cursor" id="smc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `simulatedCursor` is optional: cursor pointer and click pulse. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.streamingText
 Forme   : { text?: string, durationInSeconds?: number }

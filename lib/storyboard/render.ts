@@ -588,12 +588,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  bottomUpLetters: z
-    .object({
-      text: z.string(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   constellationHub: z
     .object({
       title: z.string().optional(),
@@ -767,12 +761,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  scrambleReveal: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   scrollFeed: z
     .object({
       durationInSeconds: z.number().positive().optional(),
@@ -790,12 +778,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  softBlurIn: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   splitTiltCards: z
     .object({
       cardA: z.string().optional(),
@@ -806,12 +788,6 @@ export const sceneEffectsSchema = z.object({
   springPop: z
     .object({
       label: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  stitchedTextDraw: z
-    .object({
-      text: z.string().optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -833,12 +809,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  textShimmer: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   touchIndicator: z
     .object({
       mode: z.enum(["tap", "swipe"]).optional(),
@@ -848,12 +818,6 @@ export const sceneEffectsSchema = z.object({
   trustStrip: z
     .object({
       logos: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  variableFontFlex: z
-    .object({
-      text: z.string().optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -972,30 +936,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  captionBlendDifference: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  shimmerSweep: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  splitFlapBoard: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  textureMaskText: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   onboardingStepperFlow: z
     .object({
       durationInSeconds: z.number().positive().optional(),
@@ -1016,21 +956,9 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  blurIn: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   separator: z
     .object({
       orientation: z.enum(["horizontal", "vertical"]).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  streamingText: z
-    .object({
-      text: z.string().optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -1139,6 +1067,23 @@ export const sceneRenderSchema = z.object({
           'scan',
           'axis-y',
           'axis-z',
+          /*
+           * Les dix suivantes viennent du palier 2, qui les demandait comme
+           * douze champs séparés — `softBlurIn`, `textShimmer`, `blurIn`… Elles
+           * portent toutes la même chose : une phrase et la façon dont elle
+           * arrive. `textShimmer` et `shimmerSweep` étaient même deux noms pour
+           * un seul geste, et `softBlurIn` et `blurIn` deux autres.
+           */
+          'bottom-up',
+          'scramble',
+          'split-flap',
+          'streaming',
+          'stitched',
+          'shimmer',
+          'blur-in',
+          'difference',
+          'texture',
+          'flex',
           'reel',
           'fade-up',
           'strike',

@@ -2,7 +2,11 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { MOVE_TRANSITIONS, toHyperframesStoryboard } from '@/lib/storyboard/render';
+import {
+  MOVE_TRANSITIONS,
+  sceneRenderSchema,
+  toHyperframesStoryboard,
+} from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
 import { SUBTITLE_STYLES } from '@/lib/videos';
 import { lowerThirdSchema } from '@/lib/storyboard/plans';
@@ -64,12 +68,18 @@ const FORMATS = [
  * Hors du jeu par défaut : neuf styles font neuf rendus, et la garde doit
  * rester assez rapide pour être lancée à chaque changement.
  */
-const TITRES = [
-  'reveal', 'typewriter', 'tracking', 'cascade', 'slam', 'rise', 'glitch',
-  'blur-out', 'explode', 'focus', 'lines', 'lockup', 'decode', 'crossfade',
-  'scan', 'axis-y', 'axis-z', 'reel', 'fade-up', 'strike', 'ticker', 'calm',
-  'split', 'weight', 'wave', 'backdrop', 'drop',
-].map((variant) => ({
+/*
+ * Toutes les variantes déclarées, lues dans le contrat.
+ *
+ * La liste était écrite à la main et s'était arrêtée à vingt-sept sur
+ * cinquante-cinq : les vingt-huit autres n'avaient aucune référence, donc
+ * aucune garde. Lue dans l'énumération, une variante de plus est une image de
+ * plus — et il n'est plus possible d'en ajouter une sans la regarder.
+ */
+const TITRES = sceneRenderSchema.shape.kineticTitle
+  .unwrap()
+  .shape.variant.unwrap()
+  .options.map((variant) => ({
   nom: `titre-${variant}`,
   video: REFERENCE_VIDEO,
   variant,
