@@ -176,21 +176,35 @@ famille partent dans leur propre fichier, comme `plans.ts`.
 
 ## 6. Ce qui reste
 
-**Tous paliers confondus : 223 entrées sur 373.** 137 rendues, 13 partielles.
-Relevé après la vérification du §8, pas d'après les coches des paliers.
+**Tous paliers confondus : 104 entrées restent sur 373.** 214 rendues, 10
+partielles, 15 disponibles autrement, 30 impossibles. Relevé le 4 septembre au
+soir, **à la mesure** : pour chaque entrée du palier 2, la page est composée avec
+le champ rempli puis sans, et les deux sont comparées octet par octet. Aucun état
+ne vient d'une coche.
 
-| Palier | Reste | Sur | Rendues | Partielles |
-|---|---|---|---|---|
-| 1 | 2 | 105 | 101 | 2 |
-| 2 | 138 | 165 | 20 | 7 |
-| **3** | **83** | **103** | **16** | **4** |
+| Palier | Reste | Sur | Rendues | Partielles | Autrement | Impossibles |
+|---|---|---|---|---|---|---|
+| 1 | 2 | 105 | 101 | 2 | — | — |
+| 2 | 19 | 165 | 98 | 3 | 15 | 30 |
+| **3** | **83** | **103** | **16** | **4** | — | — |
+
+Trois corrections que la mesure a imposées contre les coches. `motionBlur` était
+marqué fait alors qu'il est refusé — un flou plein cadre triple le temps de rendu
+en rastérisation logicielle. `hwBoil` est **de nous**, et il est inerte : le
+tremblement seul ne change pas la page, même posé à côté de `hwFrame`. Et 45 des
+65 variantes de `kineticTitle` n'ont aucune règle de style à elles : elles ont
+leur geste, mais l'allure est celle du titre nu. Un `marker` sans trait de
+surligneur se lit comme du texte ordinaire.
 
 Du palier 3, l'essentiel de ces 83 demande une décision produit et non du code
 — les cartes géographiques (`us-map-flow`, `nyc-paris-flight`), les maquettes
 d'interface, les quatorze `code-snippet-*`, les terminaux.
 
-État à jour, entrée par entrée, avec un filtre « Reste seulement » :
-<https://claude.ai/code/artifact/7cfe7d76-6dc7-4497-879c-2708f4360c6a>
+État à jour, entrée par entrée, avec un filtre « Reste seulement » et un bouton
+« Impossibles » qui isole les 30 refus, chacun avec sa raison en clair :
+<https://claude.ai/code/artifact/87f9a25b-a3e1-429a-9e70-8cd9cde396b0>
+
+L'ancien lien (`7cfe7d76…`) a été supprimé et ne répond plus.
 
 **Le plus proche à prendre**, parce qu'il ne demande aucune notion nouvelle :
 
@@ -257,7 +271,13 @@ particules trop lourd sur Lambda, et c'est la bonne décision. Une seule coche
 ne tient pas : **`vox-annotate` n'existe nulle part** dans le dépôt, sous aucun
 nom. Elle reste au reste dans le catalogue.
 
-### Palier 2 — pas fini
+### Palier 2 — pas fini le 3, fermé le 4
+
+**Ce qui suit est le constat du 3 septembre.** Les 123 demandes qu'il a
+déposées ce jour-là sont closes depuis le 4 au soir : 98 rendues, 3 partielles,
+15 disponibles autrement, 30 impossibles avec leur raison, 19 restantes. La
+mesure décrite plus bas a été refaite après coup, et c'est elle qui donne ces
+chiffres — pas les coches. Le §6 les porte.
 
 162 entrées cochées, et **le rendu n'en dessine aucune.**
 
