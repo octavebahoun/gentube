@@ -392,3 +392,96 @@ Il reste 99 demandes. Elles se classent en trois :
 - **Une dizaine d'impossibles** : GLTF, Three.js, WebGL, champs de particules,
   échantillonnage de canvas image par image. Le moteur cherche chaque image sur
   une machine sans GPU. Réponse détaillée au prochain lot.
+
+---
+
+## Les 123 demandes — deuxième lot [fait] et les impossibles
+
+### 4. Douze champs qui étaient dix apparences — livrés
+
+`bottomUpLetters`, `scrambleReveal`, `splitFlapBoard`, `stitchedTextDraw`,
+`textShimmer`, `shimmerSweep`, `softBlurIn`, `blurIn`, `captionBlendDifference`,
+`textureMaskText`, `variableFontFlex`, `streamingText`.
+
+Même histoire que les tiers inférieurs : ils portent tous la même chose, une
+phrase et la façon dont elle arrive. Deux paires étaient même deux noms pour un
+seul geste — `textShimmer` et `shimmerSweep`, `softBlurIn` et `blurIn`. Douze
+champs, dix variantes de `kineticTitle`.
+
+Chacune a **son geste dans `TITRES`** et **sa règle dans `style.css`**. Les deux,
+pas l'un des deux : une variante sans geste tombe sur celui de `reveal` — son
+apparence est juste et son mouvement est celui d'une autre. C'est le trou qu'on
+a déjà eu sur les styles de sous-titres.
+
+Quatre animent la lettre et sont déclarées dans `TITRE_PAR_LETTRE` : un panneau
+à volets bat lettre par lettre, un brouillage se verrouille de gauche à droite,
+une réponse qui se tape arrive caractère par caractère, un glyphe qui monte du
+bas se décale après le précédent.
+
+`blur-in` floute le **mot**, pas la trame. Un `filter` sur une ligne de texte
+travaille sur quelques milliers de pixels ; plein cadre, c'en est deux millions,
+et Lambda n'a pas de GPU. La règle n'a jamais interdit le flou, elle interdit le
+flou plein cadre.
+
+Et le jeu `--titres` se lit maintenant dans l'énumération. Il était écrit à la
+main et s'était arrêté à **27 variantes sur 65** : les 38 autres n'avaient
+aucune référence, donc aucune garde.
+
+### 5. Vingt-deux demandes que le moteur ne peut pas rendre
+
+Ce n'est pas une question de temps. Deux contraintes du moteur les excluent, et
+elles ne se négocient pas.
+
+**Le moteur cherche chaque image.** Il ne joue pas la vidéo du début à la fin :
+il saute à l'instant *t*, rend, saute à *t + 1/30*, rend. Tout ce qui a un état
+qui s'accumule d'une image à la suivante rend n'importe quoi — la deuxième
+image ne connaît pas la première.
+
+**Lambda n'a pas de GPU.** Tout passe par SwiftShader, en logiciel.
+
+| Demandes | Pourquoi non |
+|---|---|
+| `vfxLiquidBackground`, `vfxLiquidGlass`, `vfxMagnetic`, `vfxPortal`, `vfxShatter`, `threeOrbitingCards`, `facetMorph` | Simulations WebGL **à état**. Nos transitions shader marchent parce qu'elles sont des fonctions de la progression : la même valeur donne la même image, à n'importe quel instant. Une simulation de liquide ou un éclatement de verre n'a pas cette propriété. |
+| `macosTahoeLiquidGlass`, `vfxIphoneDevice`, `ios26LiquidGlass` | Modèles 3D GLTF. Aucun pipeline pour les charger, et rien pour les rastériser sans GPU. |
+| `particleImageReveal`, `particleTextDissolve` | Champs de particules. Le palier 1 a différé `caption-particle-burst` pour exactement ça, et il a eu raison. |
+| `asciiRenderPass`, `asciiTrailReveal` | Échantillonnage de la luminance du canvas à chaque image. Lire la trame pendant qu'on la rend, trente fois par seconde, en logiciel. |
+| `liquidGlassMediaControls`, `liquidGlassNotification`, `liquidGlassWidgets`, `focusRack` | Verre dépoli, donc `backdrop-filter`. Une passe de rastérisation par image, pour un flou que personne ne voit derrière deux lignes de texte. |
+| `echoTrail { count }`, `gridCardAssemble { count }`, `lockedNucleusOrbit { satellites }` | Champs en forme de compte. Quatre boîtes vides que le storyboard ne peut pas remplir. C'est la troisième fois : `hwPipeline`, qui reçoit les **noms**, est la forme à reprendre. |
+| `svgStrokeTrace { pathData }` | Un tracé SVG écrit par le modèle. Ce n'est pas un dessin, c'est un tirage au sort — et il arrive dans le balisage. |
+| `oversizedCursor { targetId }` | L'identifiant d'un élément que le storyboard ne connaît pas. `cursorClick` fait déjà le curseur, en pourcents du cadre. |
+| `logoOutro { logoUrl }`, `ios26LiquidGlass { wallpaper }` | Une URL d'image que personne ne fournit. Le logo du client n'existe nulle part dans le produit ; c'est une décision produit, pas un effet. |
+
+Ce qui est faisable de cette liste, si vous y tenez, ce sont les **équivalents
+sans simulation** : un éclatement de verre peut être douze éclats en CSS posés
+par une suite semée sur l'indice de la scène — déterministe, donc cherchable.
+C'est la mécanique du tremblement manuscrit. Demandez-le sous cette forme et
+c'est une nappe de plus ; demandez-le en WebGL et c'est non.
+
+### 6. Dix-neuf nappes de plus — livrées
+
+`separator`, `svgLineDrawLoader`, `staggerLattice`, `ytCirclePointer`,
+`scrollFeed`, `notificationPileup`, `modalMorph`, `deviceFrameStage`,
+`whiteboardInk`, `pullToRefresh`, `onboardingStepperFlow`, `settingsToggleFlow`,
+`signupFlow`, `vectorEditorRig`, `keyframeScrubStack`, `cameraRigDepthStack`,
+`arcMotionPath`, `touchIndicator`, `cursorGlyphTrail`.
+
+Une ligne chacune dans la table, plus leur CSS. Vos champs explicites sont
+retirés du contrat : la table les y remet, avec leur balisage et leurs instants.
+
+Deux choix qui ne sont pas dans vos demandes.
+
+**Elles se dessinent au repos.** Vos douze nappes du commit de 12 h 55 sont
+posées à `opacity: 0` et attendent leur tween. Le tween est là, donc ça marche —
+mais le jour où il manque, la nappe ne dessine rien et rien ne le dit. Les
+miennes existent sans tween ; il les anime, il ne les fait pas exister.
+
+**Les maquettes d'interface sont des squelettes.** Le formulaire d'inscription
+n'a pas de libellés, l'éditeur vectoriel n'a pas de noms d'outils. Le storyboard
+n'a rien à leur donner, et un libellé inventé par le modèle serait pire que pas
+de libellé. C'est aussi ce que font les vraies vidéos de produit derrière un
+sujet — la maquette est un décor, pas un écran à lire.
+
+Et il y a une passe de garde : `--nappes` se lit **dans la table**. Une fiche de
+plus est une image de plus. Les listes écrites à la main se sont arrêtées deux
+fois sans que personne le voie — 27 variantes de titre sur 65, 3 tiers
+inférieurs sur 13.

@@ -610,12 +610,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  cursorGlyphTrail: z
-    .object({
-      speed: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   driftHold: z
     .object({
       speed: z.number().positive().optional(),
@@ -710,11 +704,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  modalMorph: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   multiDeviceSplay: z
     .object({
       devices: z.array(z.string()).optional(),
@@ -761,11 +750,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  scrollFeed: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   slitScanReveal: z
     .object({
       durationInSeconds: z.number().positive().optional(),
@@ -809,12 +793,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  touchIndicator: z
-    .object({
-      mode: z.enum(["tap", "swipe"]).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   trustStrip: z
     .object({
       logos: z.array(z.string()).optional(),
@@ -822,16 +800,6 @@ export const sceneEffectsSchema = z.object({
     })
     .optional(),
   velocityThrowSnap: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  whiteboardInk: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  notificationPileup: z
     .object({
       durationInSeconds: z.number().positive().optional(),
     })
@@ -851,17 +819,7 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  pullToRefresh: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   beforeAfterWipe: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  deviceFrameStage: z
     .object({
       durationInSeconds: z.number().positive().optional(),
     })
@@ -869,11 +827,6 @@ export const sceneEffectsSchema = z.object({
   storeBadgeLockup: z
     .object({
       headline: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  vectorEditorRig: z
-    .object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -936,58 +889,7 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  onboardingStepperFlow: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  settingsToggleFlow: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  signupFlow: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  arcMotionPath: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  separator: z
-    .object({
-      orientation: z.enum(["horizontal", "vertical"]).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  svgLineDrawLoader: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   threeOrbitingCards: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  cameraRigDepthStack: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  keyframeScrubStack: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  staggerLattice: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ytCirclePointer: z
     .object({
       durationInSeconds: z.number().positive().optional(),
     })

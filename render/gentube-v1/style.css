@@ -2405,3 +2405,481 @@ video.media {
   pointer-events: none;
 }
 
+
+/* --- Dix-neuf nappes du troisième lot -------------------------------------- */
+
+/*
+ * Toutes se dessinent **au repos**. Une nappe posée à `opacity: 0` qui attend
+ * un tween qui n'arrive jamais ne dessine rien, et c'est la panne qu'on vient
+ * de mesurer cent soixante fois : le champ valide, la vidéo est facturée, et
+ * l'écran est le même que sans. Le tween les anime ; il ne les fait pas exister.
+ *
+ * Les maquettes d'interface sont des **squelettes**, sans texte. Le storyboard
+ * n'a aucun libellé à leur donner, et un libellé inventé par le modèle serait
+ * pire que pas de libellé — c'est aussi ce que font les vraies vidéos de
+ * produit derrière un sujet.
+ *
+ * Rien n'est centré par une marge négative en pourcents : une marge en
+ * pourcents se résout sur la **largeur** du bloc conteneur, y compris
+ * `margin-top`. En 16:9 un `-31%` vertical vaut donc 55 % de la hauteur, et le
+ * cadre du téléphone sortait par le haut. Ce qui doit être centré l'est par
+ * `inset: 0; margin: auto`, qui ne touche pas à `transform` — donc un tween
+ * peut le déplacer sans défaire son centrage.
+ *
+ * Aucun flou d'arrière-plan, aucun flou plein cadre : une passe de
+ * rastérisation logicielle par image sur une machine sans GPU. Le nom de la
+ * propriété n'est pas écrit ici, et c'est voulu — la garde de la section
+ * cherche le mot, pas la règle, donc l'écrire même pour dire qu'on ne s'en sert
+ * pas la fait échouer.
+ */
+
+/* Le filet. `--sep-dir` porte le mot, la règle en tire les deux dimensions. */
+.separator {
+  position: absolute;
+  inset: 0;
+  width: 46%;
+  height: 2px;
+  margin: auto;
+  background: var(--sep-color, rgba(255, 255, 255, 0.55));
+  transform-origin: center;
+}
+
+/* La piste de chargement : un rail sombre, un segment clair qui court dessus. */
+.line-loader {
+  position: absolute;
+  left: 27%;
+  right: 27%;
+  top: 52%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.line-loader::after {
+  content: "";
+  position: absolute;
+  inset: 0 62% 0 0;
+  border-radius: 999px;
+  background: var(--loader-color, #4ad9ff);
+}
+
+/* Le treillis. Deux dégradés répétés valent une grille, sans un seul élément. */
+.lattice {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      var(--lat-color, rgba(255, 255, 255, 0.14)) 0 1px,
+      transparent 1px 8.34%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--lat-color, rgba(255, 255, 255, 0.14)) 0 1px,
+      transparent 1px 12.5%
+    );
+}
+
+/* L'ellipse d'annotation, posée où la scène la demande. */
+.circle-pointer {
+  position: absolute;
+  width: 26%;
+  height: 22%;
+  border: 0.32em solid var(--cp-color, #ffd400);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-6deg);
+}
+
+/*
+ * Le fil d'actualité : des cartes squelettes empilées.
+ *
+ * Un dégradé répété plutôt que des éléments — une carte de plus ne coûte pas un
+ * nœud de plus, et la colonne défile en déplaçant un seul fond.
+ */
+.scroll-feed {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  top: 8%;
+  bottom: 8%;
+  border-radius: 0.6em;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.12) 0 20%,
+      transparent 20% 25%
+    ),
+    rgba(10, 10, 12, 0.7);
+}
+
+/* Trois bandeaux de notification, décalés vers le bas. */
+.notif-pile {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 7%;
+  height: 26%;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(245, 245, 247, 0.92) 0 26%,
+      transparent 26% 33.4%
+    );
+  border-radius: 0.7em;
+}
+
+/* La carte qui s'ouvre. Au repos, elle est déjà le panneau. */
+.modal-morph {
+  position: absolute;
+  inset: 0;
+  width: 46%;
+  height: 40%;
+  margin: auto;
+  border-radius: 0.8em;
+  background: rgba(248, 248, 250, 0.95);
+  box-shadow: 0 1.2em 3em rgba(0, 0, 0, 0.45);
+}
+
+/*
+ * Le cadre du téléphone. L'encoche est un `::before` : un élément de plus dans
+ * le balisage voudrait dire une fiche de plus dans la table, pour un rectangle.
+ */
+.device-frame {
+  position: absolute;
+  inset: 0;
+  width: 21%;
+  height: 62%;
+  margin: auto;
+  border: 0.7em solid #17171b;
+  border-radius: 1.6em;
+  box-shadow: 0 1.4em 3.4em rgba(0, 0, 0, 0.55);
+}
+
+.device-frame::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 34%;
+  height: 1.5em;
+  transform: translateX(-50%);
+  background: #17171b;
+  border-radius: 0 0 0.8em 0.8em;
+}
+
+/* Le trait de feutre. Deux courbes, pas une ligne droite. */
+.whiteboard-ink {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 46%;
+  height: 0.5em;
+  border-radius: 999px;
+  background: var(--ink-color, #1f6feb);
+  transform: rotate(-1.5deg);
+}
+
+.whiteboard-ink::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 34%;
+  top: 1.6em;
+  height: 0.36em;
+  border-radius: 999px;
+  background: var(--ink-color, #1f6feb);
+  opacity: 0.75;
+  transform: rotate(1deg);
+}
+
+/* La liste tirée vers le bas, et l'anneau qui apparaît au-dessus. */
+.pull-refresh {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  top: 16%;
+  bottom: 6%;
+  border-radius: 0.6em 0.6em 0 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.14) 0 19%,
+      transparent 19% 25%
+    ),
+    rgba(10, 10, 12, 0.68);
+}
+
+.pull-refresh::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -2.2em;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: -0.75em;
+  border: 0.22em solid rgba(255, 255, 255, 0.85);
+  border-top-color: transparent;
+  border-radius: 50%;
+}
+
+/*
+ * Le rail d'étapes. Le trait est le fond, les jalons sont un second dégradé
+ * répété posé dessus : trois éléments en un.
+ */
+.stepper-flow {
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  top: 50%;
+  height: 0.28em;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.stepper-flow::before {
+  content: "";
+  position: absolute;
+  inset: 0 55% 0 0;
+  background: var(--step-color, #4ad9ff);
+}
+
+.stepper-flow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.1em;
+  margin-top: -0.55em;
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--step-color, #4ad9ff) 0 1.1em,
+      transparent 1.1em 33.34%
+    );
+  border-radius: 999px;
+}
+
+/* Trois interrupteurs. Le premier est allumé, les autres non. */
+.settings-flow {
+  position: absolute;
+  left: 32%;
+  right: 32%;
+  top: 26%;
+  height: 44%;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.1) 0 20%,
+      transparent 20% 33.4%
+    );
+  border-radius: 0.5em;
+}
+
+.settings-flow::before {
+  content: "";
+  position: absolute;
+  right: 6%;
+  top: 4%;
+  width: 2.4em;
+  height: 1.2em;
+  border-radius: 999px;
+  background: #3ddc84;
+}
+
+.settings-flow::after {
+  content: "";
+  position: absolute;
+  right: 6.6%;
+  top: 4.6%;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* Le formulaire : deux champs et un bouton, sans un mot dedans. */
+.signup-flow {
+  position: absolute;
+  left: 34%;
+  right: 34%;
+  top: 28%;
+  height: 40%;
+  padding: 1.1em;
+  border-radius: 0.7em;
+  background: rgba(248, 248, 250, 0.95);
+  box-shadow: 0 1em 2.6em rgba(0, 0, 0, 0.4);
+}
+
+.signup-flow::before {
+  content: "";
+  position: absolute;
+  left: 1.1em;
+  right: 1.1em;
+  top: 1.4em;
+  height: 42%;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(20, 16, 15, 0.12) 0 38%,
+      transparent 38% 55%
+    );
+  border-radius: 0.3em;
+}
+
+.signup-flow::after {
+  content: "";
+  position: absolute;
+  left: 1.1em;
+  right: 1.1em;
+  bottom: 1.2em;
+  height: 1.9em;
+  border-radius: 0.35em;
+  background: var(--form-accent, #ce1f20);
+}
+
+/* L'éditeur : une barre d'outils à gauche, un tracé au milieu. */
+.vector-rig {
+  position: absolute;
+  inset: 10% 14% 26%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.5em;
+  background: rgba(16, 16, 19, 0.72);
+}
+
+.vector-rig::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2.6em;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.2) 0.6em 1.6em,
+      transparent 1.6em 3em
+    ),
+    rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.vector-rig::after {
+  content: "";
+  position: absolute;
+  left: 28%;
+  top: 28%;
+  width: 34%;
+  height: 40%;
+  border: 2px dashed rgba(120, 200, 255, 0.85);
+  border-radius: 40% 8% 40% 8%;
+}
+
+/* La pile de vignettes d'une piste de montage. */
+.scrub-stack {
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  top: 40%;
+  height: 20%;
+  background:
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.16) 0 12%,
+      transparent 12% 14%
+    );
+  border-radius: 0.35em;
+}
+
+/*
+ * Trois cartes en profondeur. La perspective est sur le conteneur, les deux
+ * cartes du fond sont ses pseudo-éléments — donc trois plans pour un div.
+ */
+.depth-stack {
+  position: absolute;
+  inset: 0;
+  width: 34%;
+  height: 42%;
+  margin: auto;
+  border-radius: 0.7em;
+  background: rgba(248, 248, 250, 0.95);
+  box-shadow: 0 1.2em 3em rgba(0, 0, 0, 0.5);
+  transform: perspective(900px) rotateY(-16deg);
+}
+
+.depth-stack::before,
+.depth-stack::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0.7em;
+  background: rgba(200, 200, 210, 0.55);
+  z-index: -1;
+}
+
+.depth-stack::before {
+  transform: translate(8%, -5%) scale(0.94);
+}
+
+.depth-stack::after {
+  transform: translate(16%, -10%) scale(0.88);
+  background: rgba(160, 160, 172, 0.4);
+}
+
+/* L'arc, et le point qui le suit. */
+.arc-path {
+  position: absolute;
+  left: 26%;
+  right: 26%;
+  top: 34%;
+  height: 26%;
+  border-top: 0.16em dashed var(--arc-color, #ffd9a0);
+  border-radius: 50% / 100% 100% 0 0;
+}
+
+.arc-path::after {
+  content: "";
+  position: absolute;
+  right: -0.45em;
+  top: 44%;
+  width: 0.9em;
+  height: 0.9em;
+  border-radius: 50%;
+  background: var(--arc-color, #ffd9a0);
+}
+
+/* Le rond de contact, et son onde. */
+.touch-indicator {
+  position: absolute;
+  width: 2.6em;
+  height: 2.6em;
+  margin: -1.3em 0 0 -1.3em;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 0.18em rgba(255, 255, 255, 0.75);
+}
+
+.touch-indicator::after {
+  content: "";
+  position: absolute;
+  inset: -0.9em;
+  border: 0.14em solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+}
+
+/* La traînée : des glyphes qui s'effacent derrière le curseur. */
+.glyph-trail {
+  position: absolute;
+  left: 18%;
+  right: 42%;
+  top: 44%;
+  height: 1.2em;
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--trail-color, rgba(255, 255, 255, 0.5)) 0 0.28em,
+      transparent 0.28em 1.5em
+    );
+  -webkit-mask-image: linear-gradient(to right, transparent, #000);
+  mask-image: linear-gradient(to right, transparent, #000);
+}

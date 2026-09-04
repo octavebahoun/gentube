@@ -497,7 +497,7 @@ Timeline: dans buildTimeline, scene.liquidGlassContextMenu ? { itemsCount: items
 Balisage: <div class="liquid-glass-context-menu" id="lgcm<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `liquidGlassContextMenu` is optional: frosted glass context menu drifting over aurora background. { itemsCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:06
+## [refusé] palier 2 · 2026-09-03 12:06
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.liquidGlassMediaControls
 Forme   : { variant?: 'compact' | 'full', durationInSeconds?: number }
@@ -505,7 +505,7 @@ Timeline: dans buildTimeline, scene.liquidGlassMediaControls ? { variant: varian
 Balisage: <div class="liquid-glass-media-controls" id="lgmc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `liquidGlassMediaControls` is optional: frosted glass media control panels spreading over aurora shader. { variant?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:06
+## [refusé] palier 2 · 2026-09-03 12:06
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.liquidGlassNotification
 Forme   : { count?: number, durationInSeconds?: number }
@@ -513,7 +513,7 @@ Timeline: dans buildTimeline, scene.liquidGlassNotification ? { count: count ?? 
 Balisage: <div class="liquid-glass-notification" id="lgn<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `liquidGlassNotification` is optional: frosted glass notification cards floating over aurora shader. { count?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:06
+## [refusé] palier 2 · 2026-09-03 12:06
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.liquidGlassWidgets
 Forme   : { columns?: number, durationInSeconds?: number }
@@ -521,7 +521,7 @@ Timeline: dans buildTimeline, scene.liquidGlassWidgets ? { columns: columns ?? 2
 Balisage: <div class="liquid-glass-widgets" id="lgw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `liquidGlassWidgets` is optional: frosted glass stat cards and showcase panel over aurora shader. { columns?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:06
+## [refusé] palier 2 · 2026-09-03 12:06
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.macosTahoeLiquidGlass
 Forme   : { theme?: 'dark' | 'light', durationInSeconds?: number }
@@ -529,7 +529,7 @@ Timeline: dans buildTimeline, scene.macosTahoeLiquidGlass ? { theme: theme ?? 'd
 Balisage: <div class="macos-tahoe-liquid-glass" id="mtlg<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `macosTahoeLiquidGlass` is optional: 3D MacBook with macOS Tahoe glass UI and cinematic device camera move. { theme?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:06
+## [refusé] palier 2 · 2026-09-03 12:06
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vfxIphoneDevice
 Forme   : { model?: 'iphone15' | 'macbook', durationInSeconds?: number }
@@ -537,7 +537,7 @@ Timeline: dans buildTimeline, scene.vfxIphoneDevice ? { model: model ?? 'iphone1
 Balisage: <div class="vfx-iphone-device" id="vid<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `vfxIphoneDevice` is optional: GLTF 3D device with live HTML content, morphing lens and turntable. { model?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:13
+## [refusé] palier 2 · 2026-09-03 12:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vfxLiquidBackground
 Forme   : { speed?: number, durationInSeconds?: number }
@@ -545,7 +545,7 @@ Timeline: dans buildTimeline, scene.vfxLiquidBackground ? { speed: speed ?? 1.0,
 Balisage: <div class="vfx-liquid-background" id="vlb<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `vfxLiquidBackground` is optional: organic liquid simulation with vertex displacement plane. { speed?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:13
+## [refusé] palier 2 · 2026-09-03 12:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vfxLiquidGlass
 Forme   : { blur?: number, durationInSeconds?: number }
@@ -553,7 +553,7 @@ Timeline: dans buildTimeline, scene.vfxLiquidGlass ? { blur: blur ?? 10, duratio
 Balisage: <div class="vfx-liquid-glass" id="vlg<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `vfxLiquidGlass` is optional: liquid glass VFX composition block. { blur?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:13
+## [refusé] palier 2 · 2026-09-03 12:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vfxMagnetic
 Forme   : { strength?: number, durationInSeconds?: number }
@@ -561,7 +561,7 @@ Timeline: dans buildTimeline, scene.vfxMagnetic ? { strength: strength ?? 1.0, d
 Balisage: <div class="vfx-magnetic" id="vmg<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `vfxMagnetic` is optional: magnetic pull/repulsion WebGL effect composition block. { strength?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:13
+## [refusé] palier 2 · 2026-09-03 12:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vfxPortal
 Forme   : { scale?: number, durationInSeconds?: number }
@@ -569,7 +569,7 @@ Timeline: dans buildTimeline, scene.vfxPortal ? { scale: scale ?? 1.0, durationI
 Balisage: <div class="vfx-portal" id="vpt<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `vfxPortal` is optional: portal vortex WebGL effect composition block. { scale?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:13
+## [refusé] palier 2 · 2026-09-03 12:13
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vfxShatter
 Forme   : { piecesCount?: number, durationInSeconds?: number }
@@ -577,7 +577,7 @@ Timeline: dans buildTimeline, scene.vfxShatter ? { piecesCount: piecesCount ?? 2
 Balisage: <div class="vfx-shatter" id="vst<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `vfxShatter` is optional: glass shatter fragment dispersal WebGL composition block. { piecesCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:14
+## [refusé] palier 2 · 2026-09-03 12:14
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ios26LiquidGlass
 Forme   : { wallpaper?: string, durationInSeconds?: number }
@@ -673,7 +673,7 @@ Timeline: dans buildTimeline, scene.newsTicker ? { headline, label: label ?? 'LI
 Balisage: <div class="news-ticker" id="ntk<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `newsTicker` is optional: broadcast lower-third ticker with headline ribbon and crawl. { headline, label?, items?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [refusé] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.asciiRenderPass
 Forme   : { charset?: string, durationInSeconds?: number }
@@ -681,7 +681,7 @@ Timeline: dans buildTimeline, scene.asciiRenderPass ? { charset: charset ?? 'Sta
 Balisage: <div class="ascii-render-pass" id="arp<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `asciiRenderPass` is optional: live ASCII canvas luminance sampling. { charset?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:15
+## [refusé] palier 2 · 2026-09-03 12:15
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.asciiTrailReveal
 Forme   : { label?: string, durationInSeconds?: number }
@@ -705,7 +705,7 @@ Timeline: dans buildTimeline, scene.beatAccent ? { intensity: intensity ?? 1.0, 
 Balisage: <div class="beat-accent" id="ba<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `beatAccent` is optional: single music-hit sting with impact flash and micro scale pulse. { intensity?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:16
+## [fait] palier 2 · 2026-09-03 12:16
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.beatPulseBackground
 Forme   : { frequency?: number, durationInSeconds?: number }
@@ -753,7 +753,7 @@ Timeline: dans buildTimeline, scene.ctaLockup ? { headline, buttonText: buttonTe
 Balisage: <div class="cta-lockup" id="ctal<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ctaLockup` is optional: canonical closing lockup with CTA capsule and subtext. { headline, buttonText?, subtext?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:16
+## [fait] palier 2 · 2026-09-03 12:16
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.cursorGlyphTrail
 Forme   : { speed?: number, durationInSeconds?: number }
@@ -769,7 +769,7 @@ Timeline: dans buildTimeline, scene.driftHold ? { speed: speed ?? 1.0, durationI
 Balisage: <div class="drift-hold" id="dfh<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `driftHold` is optional: card holding subtle loop rotation, scale breathing, and light sweep. { speed?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:16
+## [refusé] palier 2 · 2026-09-03 12:16
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.echoTrail
 Forme   : { count?: number, durationInSeconds?: number }
@@ -777,7 +777,7 @@ Timeline: dans buildTimeline, scene.echoTrail ? { count: count ?? 3, durationInS
 Balisage: <div class="echo-trail" id="ect<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `echoTrail` is optional: moving element with ghosted trail copies collapsing into rest. { count?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:17
+## [refusé] palier 2 · 2026-09-03 12:17
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.facetMorph
 Forme   : { silhouettes?: string[], durationInSeconds?: number }
@@ -785,7 +785,7 @@ Timeline: dans buildTimeline, scene.facetMorph ? { silhouettes: silhouettes ?? [
 Balisage: <div class="facet-morph" id="fm<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `facetMorph` is optional: low-poly triangle mass morphing continuously between silhouettes. { silhouettes?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:17
+## [refusé] palier 2 · 2026-09-03 12:17
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.focusRack
 Forme   : { blurAmount?: number, durationInSeconds?: number }
@@ -801,7 +801,7 @@ Timeline: dans buildTimeline, scene.gestureTap ? { label: label ?? '', durationI
 Balisage: <div class="gesture-tap" id="gtp<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `gestureTap` is optional: contact circle tapping mobile button into new state. { label?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:17
+## [fait] palier 2 · 2026-09-03 12:17
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.glossSweep
 Forme   : { angle?: number, durationInSeconds?: number }
@@ -809,7 +809,7 @@ Timeline: dans buildTimeline, scene.glossSweep ? { angle: angle ?? 45, durationI
 Balisage: <div class="gloss-sweep" id="gsw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `glossSweep` is optional: card landing with slam and catching specular gloss pass. { angle?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:17
+## [fait] palier 2 · 2026-09-03 12:17
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.grainField
 Forme   : { density?: number, durationInSeconds?: number }
@@ -817,7 +817,7 @@ Timeline: dans buildTimeline, scene.grainField ? { density: density ?? 1.0, dura
 Balisage: <div class="grain-field" id="grf<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `grainField` is optional: dot field drifting over subtle luminance gradient loop. { density?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:17
+## [refusé] palier 2 · 2026-09-03 12:17
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.gridCardAssemble
 Forme   : { count?: number, durationInSeconds?: number }
@@ -833,7 +833,7 @@ Timeline: dans buildTimeline, scene.inkBleedReveal ? { label: label ?? '', durat
 Balisage: <div class="ink-bleed-reveal" id="ibr<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `inkBleedReveal` is optional: liquid ink blooming through paper revealing slotted mark. { label?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:17
+## [fait] palier 2 · 2026-09-03 12:17
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.inlineHighlight
 Forme   : { color?: string, durationInSeconds?: number }
@@ -865,7 +865,7 @@ Timeline: dans buildTimeline, scene.lineSwap ? { lineA: lineA ?? '', lineB: line
 Balisage: <div class="line-swap" id="lsw<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `lineSwap` is optional: masked full-line beat replacement with optional accent underline. { lineA?, lineB?, accentWord?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:18
+## [refusé] palier 2 · 2026-09-03 12:18
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.lockedNucleusOrbit
 Forme   : { satellites?: number, durationInSeconds?: number }
@@ -889,7 +889,7 @@ Timeline: dans buildTimeline, scene.markerChecklistCard ? { headline: headline ?
 Balisage: <div class="marker-checklist-card" id="mcc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `markerChecklistCard` is optional: hand-lettered paper card with marker headline and checklist rows. { headline?, items?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:18
+## [fait] palier 2 · 2026-09-03 12:18
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.modalMorph
 Forme   : { durationInSeconds?: number }
@@ -913,7 +913,7 @@ Timeline: dans buildTimeline, scene.outlineDraw ? { durationInSeconds: durationI
 Balisage: <div class="outline-draw" id="old<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `outlineDraw` is optional: rounded outline drawing clockwise as conic-gradient border. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:20
+## [refusé] palier 2 · 2026-09-03 12:20
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.oversizedCursor
 Forme   : { targetId?: string, durationInSeconds?: number }
@@ -921,7 +921,7 @@ Timeline: dans buildTimeline, scene.oversizedCursor ? { targetId: targetId ?? ''
 Balisage: <div class="oversized-cursor" id="osc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `oversizedCursor` is optional: oversized pointer traveling to target, clicking, then exiting. { targetId?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:20
+## [refusé] palier 2 · 2026-09-03 12:20
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.particleImageReveal
 Forme   : { particleCount?: number, durationInSeconds?: number }
@@ -929,7 +929,7 @@ Timeline: dans buildTimeline, scene.particleImageReveal ? { particleCount: parti
 Balisage: <div class="particle-image-reveal" id="pir<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `particleImageReveal` is optional: particle field converging while image reveals beneath. { particleCount?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:20
+## [refusé] palier 2 · 2026-09-03 12:20
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.particleTextDissolve
 Forme   : { text?: string, durationInSeconds?: number }
@@ -977,7 +977,7 @@ Timeline: dans buildTimeline, scene.scrambleReveal ? { text: text ?? '', duratio
 Balisage: <div class="scramble-reveal" id="scr<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `scrambleReveal` is optional: hacker-style text reveal locking string left to right. { text?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.scrollFeed
 Forme   : { durationInSeconds?: number }
@@ -1041,7 +1041,7 @@ Timeline: dans buildTimeline, scene.stopMotionCadence ? { fps: fps ?? 12, durati
 Balisage: <div class="stop-motion-cadence" id="smc<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `stopMotionCadence` is optional: stepped-time motion driver with quantized frame rate. { fps?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [refusé] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.svgStrokeTrace
 Forme   : { pathData?: string, durationInSeconds?: number }
@@ -1073,7 +1073,7 @@ Timeline: dans buildTimeline, scene.textShimmer ? { text: text ?? '', durationIn
 Balisage: <div class="text-shimmer" id="tsh<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `textShimmer` is optional: specular gradient sweep through glyphs. { text?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:28
+## [fait] palier 2 · 2026-09-03 12:28
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.touchIndicator
 Forme   : { mode?: "tap" | "swipe", durationInSeconds?: number }
@@ -1105,7 +1105,7 @@ Timeline: dans buildTimeline, scene.velocityThrowSnap ? { durationInSeconds: dur
 Balisage: <div class="velocity-throw-snap" id="vts<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `velocityThrowSnap` is optional: multi-shot rail whipping past and snapping hero shot to center. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.whiteboardInk
 Forme   : { durationInSeconds?: number }
@@ -1113,7 +1113,7 @@ Timeline: dans buildTimeline, scene.whiteboardInk ? { durationInSeconds: duratio
 Balisage: <div class="whiteboard-ink" id="wbk<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `whiteboardInk` is optional: whiteboard sketch drawing measured stroke at a time with pen nib. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.notificationPileup
 Forme   : { durationInSeconds?: number }
@@ -1145,7 +1145,7 @@ Timeline: dans buildTimeline, scene.ytVerticalFill ? { durationInSeconds: durati
 Balisage: <div class="yt-vertical-fill" id="yvf<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `ytVerticalFill` is optional: portrait media filling widescreen frame via side fills. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.pullToRefresh
 Forme   : { durationInSeconds?: number }
@@ -1177,7 +1177,7 @@ Timeline: dans buildTimeline, scene.comparisonSplit ? { durationInSeconds: durat
 Balisage: <div class="comparison-split" id="cps<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `comparisonSplit` is optional: full-bleed panels comparing before and after states. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.deviceFrameStage
 Forme   : { durationInSeconds?: number }
@@ -1209,7 +1209,7 @@ Timeline: dans buildTimeline, scene.toggleFlip ? { durationInSeconds: durationIn
 Balisage: <div class="toggle-flip" id="tgf<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `toggleFlip` is optional: oversized UI toggle switch flipping with momentum. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.vectorEditorRig
 Forme   : { durationInSeconds?: number }
@@ -1337,7 +1337,7 @@ Timeline: dans buildTimeline, scene.grainOverlay ? { intensity: intensity ?? 1, 
 Balisage: <div class="grain-overlay" id="gro<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `grainOverlay` is optional: film grain CSS texture overlay. { intensity?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.onboardingStepperFlow
 Forme   : { durationInSeconds?: number }
@@ -1345,7 +1345,7 @@ Timeline: dans buildTimeline, scene.onboardingStepperFlow ? { durationInSeconds:
 Balisage: <div class="onboarding-stepper-flow" id="osf<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `onboardingStepperFlow` is optional: onboarding flow milestone rail. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.settingsToggleFlow
 Forme   : { durationInSeconds?: number }
@@ -1353,7 +1353,7 @@ Timeline: dans buildTimeline, scene.settingsToggleFlow ? { durationInSeconds: du
 Balisage: <div class="settings-toggle-flow" id="stf<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `settingsToggleFlow` is optional: settings flow with toggle switches. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.signupFlow
 Forme   : { durationInSeconds?: number }
@@ -1361,7 +1361,7 @@ Timeline: dans buildTimeline, scene.signupFlow ? { durationInSeconds: durationIn
 Balisage: <div class="signup-flow" id="suf<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `signupFlow` is optional: signup flow form. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.arcMotionPath
 Forme   : { durationInSeconds?: number }
@@ -1385,7 +1385,7 @@ Timeline: dans buildTimeline, scene.dynamicGrid ? { durationInSeconds: durationI
 Balisage: <div class="dynamic-grid" id="dgd<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `dynamicGrid` is optional: animated grid background. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.separator
 Forme   : { orientation?: "horizontal" | "vertical", durationInSeconds?: number }
@@ -1409,7 +1409,7 @@ Timeline: dans buildTimeline, scene.streamingText ? { text: text ?? '', duration
 Balisage: <div class="streaming-text" id="smt<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `streamingText` is optional: AI answer token rhythm text stream. { text?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [fait] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.svgLineDrawLoader
 Forme   : { durationInSeconds?: number }
@@ -1417,7 +1417,7 @@ Timeline: dans buildTimeline, scene.svgLineDrawLoader ? { durationInSeconds: dur
 Balisage: <div class="svg-line-draw-loader" id="sld<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `svgLineDrawLoader` is optional: stroke timeline path loader. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:35
+## [refusé] palier 2 · 2026-09-03 12:35
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.threeOrbitingCards
 Forme   : { durationInSeconds?: number }
@@ -1433,7 +1433,7 @@ Timeline: dans buildTimeline, scene.vignette ? { intensity: intensity ?? 1, dura
 Balisage: <div class="vignette" id="vgn<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `vignette` is optional: cinematic radial vignette overlay. { intensity?, durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:36
+## [fait] palier 2 · 2026-09-03 12:36
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.cameraRigDepthStack
 Forme   : { durationInSeconds?: number }
@@ -1441,7 +1441,7 @@ Timeline: dans buildTimeline, scene.cameraRigDepthStack ? { durationInSeconds: d
 Balisage: <div class="camera-rig-depth-stack" id="crd<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `cameraRigDepthStack` is optional: 3D camera-rig card stack with depth and parallax. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:36
+## [fait] palier 2 · 2026-09-03 12:36
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.keyframeScrubStack
 Forme   : { durationInSeconds?: number }
@@ -1449,7 +1449,7 @@ Timeline: dans buildTimeline, scene.keyframeScrubStack ? { durationInSeconds: du
 Balisage: <div class="keyframe-scrub-stack" id="kss<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `keyframeScrubStack` is optional: keyframe-sequenced stack of cards. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:36
+## [fait] palier 2 · 2026-09-03 12:36
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.staggerLattice
 Forme   : { durationInSeconds?: number }
@@ -1457,7 +1457,7 @@ Timeline: dans buildTimeline, scene.staggerLattice ? { durationInSeconds: durati
 Balisage: <div class="stagger-lattice" id="stl<index>"></div> dans sceneMarkup, dans .scene
 Prompt  : "- `staggerLattice` is optional: staggered grid reveal. { durationInSeconds? }"
 
-## palier 2 · 2026-09-03 12:36
+## [fait] palier 2 · 2026-09-03 12:36
 Fichier : lib/storyboard/render.ts
 Champ   : sceneEffectsSchema.ytCirclePointer
 Forme   : { durationInSeconds?: number }

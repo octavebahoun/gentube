@@ -342,3 +342,26 @@ export function momentDeLaCoupe(transition: string): Moment {
 }
 
 export const MOMENTS: Moment[] = momentsDeReference();
+
+/**
+ * L'instant où une nappe est en pleine action.
+ *
+ * Un effet ponctuel se juge au milieu de sa course : au départ il n'a pas
+ * commencé, à l'arrivée il est fini, et dans les deux cas la référence ne dit
+ * rien. Un état ou une ambiance tiennent tout du long — une seconde après le
+ * début de la scène suffit, et évite l'entrée du plan.
+ */
+export function momentDeLaNappe(effet: {
+  minutage: string;
+  depart?: number;
+  duree?: number;
+  fond?: boolean;
+}): Moment {
+  const scenes = scenesMinutees();
+  const scene = scenes[effet.fond ? 4 : 1];
+  const decalage =
+    effet.minutage === 'ponctuel'
+      ? (effet.depart ?? 0) + (effet.duree ?? 0.6) / 2
+      : 1;
+  return { at: arrondi(scene.startInSeconds + decalage), nom: 'nappe' };
+}

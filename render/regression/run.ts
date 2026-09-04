@@ -10,6 +10,7 @@ import {
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
 import { SUBTITLE_STYLES } from '@/lib/videos';
 import { lowerThirdSchema } from '@/lib/storyboard/plans';
+import { EFFETS, type Effet } from '@/lib/storyboard/effets';
 import {
   MOMENTS,
   momentDeLaCoupe,
@@ -19,6 +20,7 @@ import {
   momentDeLaCitation,
   momentDuFil,
   momentDuGraphique,
+  momentDeLaNappe,
   momentDuTiers,
   momentDuTitre,
   REFERENCE_VIDEO,
@@ -111,6 +113,8 @@ type Jeu = {
   cascade?: 'list' | 'comparison';
   /** Variante de compteur posée sur la cinquième scène. */
   counter?: string;
+  /** Nappe d'effet posée sur la deuxième scène — ou la cinquième si c'est un fond. */
+  nappe?: string;
   /** Restreint la capture : par défaut, tous les instants. */
   moments?: typeof MOMENTS;
 };
@@ -217,6 +221,24 @@ const ROUE: Jeu[] = [
   },
 ];
 
+/**
+ * Une nappe par fiche de la table, activé par --nappes.
+ *
+ * Le jeu se lit dans `EFFETS` et non dans une liste écrite à la main : c'est ce
+ * qui fait qu'on ne peut plus ajouter une nappe sans la regarder. Les listes
+ * écrites à la main se sont arrêtées deux fois — 27 variantes de titre sur 65,
+ * 3 tiers inférieurs sur 13 — et personne ne l'avait vu.
+ *
+ * Un fond va sur la cinquième scène, qui n'a pas d'image : posé sous le média,
+ * il serait entièrement recouvert et la référence serait un carré noir.
+ */
+const NAPPES: Jeu[] = Object.entries(EFFETS).map(([nom, effet]) => ({
+  nom: `nappe-${nom}`,
+  video: REFERENCE_VIDEO,
+  nappe: nom,
+  moments: [momentDeLaNappe(effet)],
+}));
+
 /** Un projet jetable : le vrai style et le vrai vendor, des médias figés. */
 function projet(jeu: Jeu): string {
   const {
@@ -229,6 +251,7 @@ function projet(jeu: Jeu): string {
     quote,
     cascade,
     counter,
+    nappe,
   } = jeu;
   const dir = mkdtempSync(join(tmpdir(), 'gentube-regression-'));
   for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
@@ -256,6 +279,14 @@ function projet(jeu: Jeu): string {
       variant: lowerThird,
       side: SIDE_DROIT.has(lowerThird) ? 'right' : 'left',
     };
+  }
+  if (nappe) {
+    // Un fond se pose sur la scène sans image ; tout le reste sur la deuxième,
+    // qui a une image et rien qui lui dispute la place.
+    const scene = EFFETS[nappe].fond ? 4 : 1;
+    const render = shots[scene].render as Record<string, unknown>;
+    if (scene === 4) delete render.counter;
+    render.effects = { ...(render.effects as object), [nappe]: {} };
   }
   if (chart) {
     // La cinquième scène porte le compteur : on la reprend pour le graphique,
@@ -391,6 +422,7 @@ function main() {
   if (process.argv.includes('--citations')) jeux = [...jeux, ...CITATIONS];
   if (process.argv.includes('--cascades')) jeux = [...jeux, ...CASCADES];
   if (process.argv.includes('--roue')) jeux = [...jeux, ...ROUE];
+  if (process.argv.includes('--nappes')) jeux = [...jeux, ...NAPPES];
 
   for (const jeu of jeux) {
     console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);

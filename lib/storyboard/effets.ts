@@ -228,6 +228,182 @@ export const EFFETS: Record<string, Effet> = {
     surLeTemps: true,
     reglages: { count: { defaut: 30 } },
   },
+
+  /*
+   * Dix-neuf nappes de plus, du troisième lot des demandes du palier 2.
+   *
+   * Toutes se dessinent au repos, sans attendre leur tween. C'est délibéré :
+   * une nappe posée à `opacity: 0` qui attend un tween qui n'arrive pas ne
+   * dessine rien, et c'est précisément la panne qu'on vient de mesurer cent
+   * soixante fois. Le tween les anime ensuite ; il ne les fait pas exister.
+   *
+   * Aucune ne porte de contenu. Les maquettes d'interface — le formulaire,
+   * les réglages, l'éditeur — sont des **squelettes**, des pavés gris sans
+   * texte : le storyboard n'a aucun libellé à leur donner, et un faux libellé
+   * inventé par le modèle serait pire que pas de libellé du tout. C'est aussi
+   * ce que font les vraies vidéos de produit derrière un sujet.
+   */
+
+  /** Un filet d'un pixel, horizontal ou vertical. */
+  separator: {
+    classe: 'separator',
+    id: 'sep',
+    minutage: 'ponctuel',
+    depart: 0.2,
+    duree: 0.6,
+    reglages: {
+      orientation: { css: '--sep-dir', defaut: 'horizontal' },
+      color: { css: '--sep-color', defaut: 'rgba(255,255,255,0.55)' },
+    },
+  },
+  /** Une piste de chargement dont le segment court. */
+  svgLineDrawLoader: {
+    classe: 'line-loader',
+    id: 'lld',
+    minutage: 'ambiance',
+    reglages: { color: { css: '--loader-color', defaut: '#4ad9ff' } },
+  },
+  /** Un treillis de cellules qui se découvre en diagonale. */
+  staggerLattice: {
+    classe: 'lattice',
+    id: 'lat',
+    minutage: 'ambiance',
+    fond: true,
+    reglages: { color: { css: '--lat-color', defaut: 'rgba(255,255,255,0.14)' } },
+  },
+  /** L'ellipse d'annotation tracée à la volée. */
+  ytCirclePointer: {
+    classe: 'circle-pointer',
+    id: 'cp',
+    minutage: 'ponctuel',
+    depart: 0.4,
+    duree: 1,
+    reglages: {
+      color: { css: '--cp-color', defaut: '#ffd400' },
+      x: { css: 'left', defaut: 50 },
+      y: { css: 'top', defaut: 46 },
+    },
+  },
+  /** Une colonne de cartes squelettes qui remonte. */
+  scrollFeed: {
+    classe: 'scroll-feed',
+    id: 'sf',
+    minutage: 'ambiance',
+    reglages: {},
+  },
+  /** Des bandeaux de notification qui s'empilent en haut. */
+  notificationPileup: {
+    classe: 'notif-pile',
+    id: 'np',
+    minutage: 'ponctuel',
+    depart: 0.3,
+    duree: 1.4,
+    reglages: {},
+  },
+  /** Une carte qui s'ouvre en panneau. */
+  modalMorph: {
+    classe: 'modal-morph',
+    id: 'mm',
+    minutage: 'ponctuel',
+    depart: 0.3,
+    duree: 1,
+    reglages: {},
+  },
+  /** Le cadre d'un téléphone posé au centre. */
+  deviceFrameStage: {
+    classe: 'device-frame',
+    id: 'df',
+    minutage: 'etat',
+    reglages: {},
+  },
+  /** Un trait de feutre sur un tableau blanc. */
+  whiteboardInk: {
+    classe: 'whiteboard-ink',
+    id: 'wi',
+    minutage: 'ponctuel',
+    depart: 0.3,
+    duree: 1.2,
+    reglages: { color: { css: '--ink-color', defaut: '#1f6feb' } },
+  },
+  /** Une liste tirée vers le bas, et son ressort. */
+  pullToRefresh: {
+    classe: 'pull-refresh',
+    id: 'pr',
+    minutage: 'ponctuel',
+    depart: 0.3,
+    duree: 1.2,
+    reglages: {},
+  },
+  /** Un rail d'étapes franchies l'une après l'autre. */
+  onboardingStepperFlow: {
+    classe: 'stepper-flow',
+    id: 'osf',
+    minutage: 'ambiance',
+    reglages: { color: { css: '--step-color', defaut: '#4ad9ff' } },
+  },
+  /** Des interrupteurs de réglages, dont un basculé. */
+  settingsToggleFlow: {
+    classe: 'settings-flow',
+    id: 'stf',
+    minutage: 'ambiance',
+    reglages: {},
+  },
+  /** Un formulaire d'inscription, en squelette. */
+  signupFlow: {
+    classe: 'signup-flow',
+    id: 'sgf',
+    minutage: 'ambiance',
+    reglages: { color: { css: '--form-accent', defaut: '#ce1f20' } },
+  },
+  /** La barre d'outils d'un éditeur vectoriel, et son tracé. */
+  vectorEditorRig: {
+    classe: 'vector-rig',
+    id: 'vr',
+    minutage: 'ambiance',
+    reglages: {},
+  },
+  /** Une pile de cartes décalées, comme une piste de montage. */
+  keyframeScrubStack: {
+    classe: 'scrub-stack',
+    id: 'kss',
+    minutage: 'ambiance',
+    reglages: {},
+  },
+  /** Trois cartes en profondeur, vues de biais. */
+  cameraRigDepthStack: {
+    classe: 'depth-stack',
+    id: 'drs',
+    minutage: 'ambiance',
+    reglages: {},
+  },
+  /** Un point qui suit un arc, et l'arc derrière lui. */
+  arcMotionPath: {
+    classe: 'arc-path',
+    id: 'amp',
+    minutage: 'ponctuel',
+    depart: 0.3,
+    duree: 1.2,
+    reglages: { color: { css: '--arc-color', defaut: '#ffd9a0' } },
+  },
+  /** Le rond de contact d'un doigt sur l'écran. */
+  touchIndicator: {
+    classe: 'touch-indicator',
+    id: 'ti',
+    minutage: 'ponctuel',
+    depart: 0.4,
+    duree: 0.9,
+    reglages: {
+      x: { css: 'left', defaut: 50 },
+      y: { css: 'top', defaut: 55 },
+    },
+  },
+  /** La traînée de glyphes derrière un curseur. */
+  cursorGlyphTrail: {
+    classe: 'glyph-trail',
+    id: 'gt',
+    minutage: 'ambiance',
+    reglages: { color: { css: '--trail-color', defaut: 'rgba(255,255,255,0.5)' } },
+  },
 };
 
 /** Le champ optionnel d'un effet, tel que le contrat le porte. */
