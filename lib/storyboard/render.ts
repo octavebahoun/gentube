@@ -287,19 +287,6 @@ export const sceneEffectsSchema = z.object({
       dateText: z.string().optional(),
     })
     .optional(),
-  cameraDollyZoom: z
-    .object({
-      direction: z.enum(['in', 'out']).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  cameraShake: z
-    .object({
-      profile: z.string().optional(),
-      intensity: z.number().min(0).max(1).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   panStations: z
     .object({
       stops: z.number().int().min(2).max(8).optional(),
@@ -344,12 +331,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  mkLineGraph: z
-    .object({
-      seriesCount: z.number().int().min(1).max(3).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   badgeMatrix: z
     .object({
       rows: z.number().int().min(1).max(4).optional(),
@@ -370,27 +351,9 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  mkSpecsList: z
-    .object({
-      itemsCount: z.number().int().min(1).max(8).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   mkUsageArc: z
     .object({
       percentage: z.number().min(0).max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  flowchart: z
-    .object({
-      nodesCount: z.number().int().min(2).max(10).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  flowchartVertical: z
-    .object({
-      nodesCount: z.number().int().min(2).max(10).optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -400,20 +363,8 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  focusSwap: z
-    .object({
-      targetCard: z.enum(['left', 'right']).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   meshGradientBg: z
     .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  motionBlur: z
-    .object({
-      intensity: z.number().min(0).max(10).optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -462,12 +413,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  spiralGalaxy: z
-    .object({
-      starCount: z.number().int().min(1000).max(50000).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   ytFeatherHighlight: z
     .object({
       x: z.number().min(0).max(100).optional(),
@@ -482,154 +427,9 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  liquidGlassMediaControls: z
-    .object({
-      variant: z.enum(['compact', 'full']).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  liquidGlassNotification: z
-    .object({
-      count: z.number().int().min(1).max(5).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  liquidGlassWidgets: z
-    .object({
-      columns: z.number().int().min(1).max(4).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  macosTahoeLiquidGlass: z
-    .object({
-      theme: z.enum(['dark', 'light']).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  vfxIphoneDevice: z
-    .object({
-      model: z.enum(['iphone15', 'macbook']).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  vfxLiquidBackground: z
-    .object({
-      speed: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  vfxLiquidGlass: z
-    .object({
-      blur: z.number().min(0).max(20).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  vfxMagnetic: z
-    .object({
-      strength: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  vfxPortal: z
-    .object({
-      scale: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  vfxShatter: z
-    .object({
-      piecesCount: z.number().int().min(5).max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ios26LiquidGlass: z
-    .object({
-      wallpaper: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ytLogoIntro: z
-    .object({
-      title: z.string().min(1).max(100),
-      kicker: z.string().max(100).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  newsTicker: z
-    .object({
-      headline: z.string().min(1).max(200),
-      label: z.string().max(50).optional(),
-      items: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  asciiRenderPass: z
-    .object({
-      charset: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  asciiTrailReveal: z
-    .object({
-      label: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   beatPulseBackground: z
     .object({
       frequency: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  constellationHub: z
-    .object({
-      title: z.string().optional(),
-      nodes: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ctaClose: z
-    .object({
-      headline: z.string(),
-      buttonText: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ctaLockup: z
-    .object({
-      headline: z.string(),
-      buttonText: z.string().optional(),
-      subtext: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  driftHold: z
-    .object({
-      speed: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  echoTrail: z
-    .object({
-      count: z.number().int().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  facetMorph: z
-    .object({
-      silhouettes: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  focusRack: z
-    .object({
-      blurAmount: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  gestureTap: z
-    .object({
-      label: z.string().optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -645,252 +445,9 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  gridCardAssemble: z
-    .object({
-      count: z.number().int().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  inkBleedReveal: z
-    .object({
-      label: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   inlineHighlight: z
     .object({
       color: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  kineticTypeSwap: z
-    .object({
-      sentence: z.string().optional(),
-      options: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  lineSwap: z
-    .object({
-      lineA: z.string().optional(),
-      lineB: z.string().optional(),
-      accentWord: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  lockedNucleusOrbit: z
-    .object({
-      satellites: z.number().int().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  logoSting: z
-    .object({
-      label: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  markerChecklistCard: z
-    .object({
-      headline: z.string().optional(),
-      items: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  multiDeviceSplay: z
-    .object({
-      devices: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  oversizedCursor: z
-    .object({
-      targetId: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  particleImageReveal: z
-    .object({
-      particleCount: z.number().int().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  particleTextDissolve: z
-    .object({
-      text: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  physicalExit: z
-    .object({
-      mode: z.enum(["toss", "drop", "slide"]).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  pullBackReveal: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  pushIn: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  radialSurround: z
-    .object({
-      chips: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  slitScanReveal: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  socialProofCard: z
-    .object({
-      headline: z.string().optional(),
-      rating: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  splitTiltCards: z
-    .object({
-      cardA: z.string().optional(),
-      cardB: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  springPop: z
-    .object({
-      label: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  stopMotionCadence: z
-    .object({
-      fps: z.number().positive().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  svgStrokeTrace: z
-    .object({
-      pathData: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  swipeRail: z
-    .object({
-      cards: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  trustStrip: z
-    .object({
-      logos: z.array(z.string()).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  velocityThrowSnap: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  beatTimeline: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  mkPlaceholderGrid: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ytVerticalFill: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  beforeAfterWipe: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  storeBadgeLockup: z
-    .object({
-      headline: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  instagramFollow: z
-    .object({
-      username: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  macosNotification: z
-    .object({
-      title: z.string().optional(),
-      message: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  redditPost: z
-    .object({
-      title: z.string().optional(),
-      author: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  spotifyCard: z
-    .object({
-      track: z.string().optional(),
-      artist: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  tiktokFollow: z
-    .object({
-      username: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  xPost: z
-    .object({
-      text: z.string().optional(),
-      handle: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ytCommentCard: z
-    .object({
-      text: z.string().optional(),
-      author: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  ytLowerThird: z
-    .object({
-      channelName: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  xFollowCard: z
-    .object({
-      handle: z.string().optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  threeOrbitingCards: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  logoOutro: z
-    .object({
-      logoUrl: z.string().optional(),
-      tagline: z.string().optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -1372,6 +929,41 @@ export type HyperframesStoryboard = {
  * d'assets de la composition est le seul endroit qui doit connaître la
  * différence.
  */
+/**
+ * Dire à voix haute qu'un plan vient d'être jeté.
+ *
+ * `safeParse` échoue sur **l'objet entier** : un seul champ mal nommé et la
+ * scène perd son graphique, son fil, sa carte — et se rend comme un fond noir
+ * avec ses seuls sous-titres. La vidéo part quand même, et elle est facturée
+ * pareil.
+ *
+ * Le 5 septembre, trois scènes sur treize d'une vidéo d'essai sont sorties
+ * noires : `crossfade` n'est pas dans la table des coupes, `comparison` veut
+ * `label` et non `title`, `thread` veut `from` et non `author`. Rien ne l'a
+ * dit. Ce sont exactement les fautes qu'un modèle commet — `author` au lieu de
+ * `from` est un mot qu'un LLM invente sans hésiter.
+ *
+ * On ne fait pas échouer le rendu pour autant : perdre une vidéo entière pour
+ * un champ est pire que perdre un plan. Mais plus personne ne le perd en
+ * silence.
+ */
+function signalerLeRejet(shot: Shot, erreur: z.ZodError): void {
+  const causes = erreur.issues
+    .slice(0, 6)
+    // Le message d'une énumération de soixante coupes fait mille caractères et
+    // noie la seule chose utile : le chemin du champ et la valeur reçue.
+    .map((issue) => {
+      const chemin = issue.path.join('.') || '(racine)';
+      const dit = issue.message.length > 90 ? `${issue.message.slice(0, 90)}…` : issue.message;
+      return `${chemin} : ${dit}`;
+    })
+    .join(' | ');
+  console.warn(
+    `[storyboard] render rejeté · plan ${shot.order ?? '?'} · ${causes}` +
+      (erreur.issues.length > 6 ? ` | +${erreur.issues.length - 6}` : '')
+  );
+}
+
 export function toHyperframesStoryboard(
   video: Pick<
     Video,
@@ -1403,6 +995,7 @@ export function toHyperframesStoryboard(
 ): HyperframesStoryboard {
   const parsed = shots.map((shot) => {
     const render = sceneRenderSchema.safeParse(shot.render ?? {});
+    if (!render.success) signalerLeRejet(shot, render.error);
     return {
       shot,
       render: render.success ? render.data : {},

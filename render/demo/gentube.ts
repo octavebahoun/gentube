@@ -167,7 +167,7 @@ const shots: Shot[] = [
   }, 3),
 
   plan(5, 'Elle dit avoir gagne ses journees', {
-    effects: { transition: 'crossfade' },
+    effects: { transition: 'fade' },
     quote: {
       text: 'Je monte une video pendant que le the refroidit',
       author: 'Ama Doe',
@@ -181,8 +181,8 @@ const shots: Shot[] = [
     effects: { transition: 'barn-doors' },
     comparison: {
       title: 'Le meme film',
-      left: { title: 'A la main', items: ['6 jours', '3 personnes', '250 000 FCFA'] },
-      right: { title: 'Avec GenTube', items: ['6 minutes', '1 personne', '2 400 FCFA'] },
+      left: { label: 'A la main', items: ['6 jours', '3 personnes', '250 000 FCFA'] },
+      right: { label: 'Avec GenTube', items: ['6 minutes', '1 personne', '2 400 FCFA'] },
       startInSeconds: 0.3,
     },
   }, null),
@@ -208,9 +208,9 @@ const shots: Shot[] = [
     thread: {
       title: 'Support GenTube',
       messages: [
-        { side: 'left', author: 'Ama', text: 'Ma video est en 9:16 ?' },
-        { side: 'right', author: 'GenTube', text: 'Oui, le format est un reglage.' },
-        { side: 'left', author: 'Ama', text: 'Parfait, je publie.' },
+        { from: 'Ama', text: 'Ma video est en 9:16 ?' },
+        { from: 'GenTube', text: 'Oui, le format est un reglage.', mine: true },
+        { from: 'Ama', text: 'Parfait, je publie.' },
       ],
       startInSeconds: 0.3,
     },
