@@ -70,3 +70,5 @@ openmontage/
 
 # Cas 4 : audio extrait et transcript, dérivés du fichier du client
 render/demo/imports/
+.env*
+!.env.example
