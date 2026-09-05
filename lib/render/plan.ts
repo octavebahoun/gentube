@@ -151,6 +151,57 @@ export function fadeInSeconds(scene: HyperframesScene, index: number): number {
  * de la narration. C'est visiblement moins bon, et c'est le but : on doit voir
  * qu'un alignement manque.
  */
+/**
+ * Combien de mots tiennent à l'écran d'un coup.
+ *
+ * **Pourquoi il fallait une borne.** Un mot s'allume et il **reste** : c'est ce
+ * qui fait la lecture karaoké. Sur une scène de cinq secondes et douze mots,
+ * c'est un sous-titre de deux lignes. Sur une vidéo importée de soixante
+ * secondes, dont le transcript fait deux cents mots, c'est un mur de texte —
+ * et personne ne l'avait vu parce qu'aucune scène générée n'était assez longue.
+ *
+ * Neuf mots font deux lignes lisibles à la taille de sous-titre du dépôt. Une
+ * scène qui en a moins n'est pas découpée du tout, et rend exactement ce
+ * qu'elle rendait avant.
+ */
+export const MAX_WORDS_PER_LINE = 9;
+
+/**
+ * Découpe les mots d'une scène en lignes qui se succèdent.
+ *
+ * **La répartition est régulière, pas gloutonne.** Vingt mots en paquets de
+ * neuf donneraient 9, 9, 2 — une dernière ligne orpheline qui saute aux yeux.
+ * On calcule d'abord combien de lignes il faut, puis on répartit : 7, 7, 6.
+ *
+ * **Et le reste se répartit ligne par ligne, pas en bloc.** Arrondir la taille
+ * au-dessus une fois pour toutes suffit quand le compte tombe juste, et échoue
+ * sinon : 109 mots donnaient douze lignes de neuf et une treizième d'**un seul
+ * mot**, affichée soixante millisecondes — deux images. On donne donc un mot
+ * de plus aux `reste` premières lignes : 109 fait cinq lignes de neuf puis
+ * huit de huit.
+ *
+ * `markup.ts` et cette timeline doivent découper **identiquement**, sinon un
+ * tween viserait un conteneur qui ne contient pas ce mot. D'où une seule
+ * fonction, ici, et pas une copie de chaque côté.
+ */
+export function wordLines(words: WordTiming[]): WordTiming[][] {
+  if (words.length === 0) return [];
+  if (words.length <= MAX_WORDS_PER_LINE) return [words];
+
+  const lignes = Math.ceil(words.length / MAX_WORDS_PER_LINE);
+  const base = Math.floor(words.length / lignes);
+  const reste = words.length % lignes;
+
+  const sortie: WordTiming[][] = [];
+  let i = 0;
+  for (let l = 0; l < lignes; l += 1) {
+    const taille = base + (l < reste ? 1 : 0);
+    sortie.push(words.slice(i, i + taille));
+    i += taille;
+  }
+  return sortie;
+}
+
 export function wordsOrFallback(
   scene: HyperframesScene
 ): WordTiming[] {
@@ -216,6 +267,14 @@ export function buildTimeline(
       const sweep = scene.effects?.lightSweep;
       const grain = scene.effects?.grain;
       const accent = scene.effects?.beatAccent;
+
+      // Découpés une seule fois : `markup.ts` appelle la même `wordLines()` sur
+      // les mêmes mots, et les deux découpages doivent tomber pareil — sinon un
+      // tween viserait un conteneur qui ne porte pas ce mot.
+      const motsMontres = (scene.showSubtitles ?? storyboard.subtitles)
+        ? wordsOrFallback(scene)
+        : [];
+      const lignes = wordLines(motsMontres);
 
       return {
         index,
@@ -338,12 +397,43 @@ export function buildTimeline(
           : null,
         // Même règle que le balisage : sans mots posés, un tween de karaoké
         // viserait un identifiant qui n'existe pas.
-        words: ((scene.showSubtitles ?? storyboard.subtitles)
-          ? wordsOrFallback(scene)
-          : []
-        ).map(
-          (word) => ({ at: ms(scene.startInSeconds + word.start) })
-        ),
+        words: motsMontres.map((word) => ({
+          at: ms(scene.startInSeconds + word.start),
+        })),
+        /**
+         * Les instants de chaque ligne de sous-titre.
+         *
+         * Une seule ligne ne produit rien à animer : le conteneur est visible
+         * du début à la fin de la scène, comme il l'a toujours été. C'est
+         * au-delà que la page doit faire entrer et sortir les lignes.
+         *
+         * **Une ligne tient jusqu'à ce que la suivante la remplace**, et la
+         * dernière jusqu'à la fin de la scène. Pas jusqu'à la fin de son
+         * dernier mot : on ne finit pas de lire une phrase à l'instant où elle
+         * est prononcée, et c'est déjà ce que fait le conteneur unique d'une
+         * scène courte, visible du début à la fin.
+         *
+         * Ça règle deux choses d'un coup. Les lignes ne se chevauchent jamais —
+         * elles occupent le même bas d'écran, donc une seule peut être lisible.
+         * Et une ligne dont le fournisseur a écrasé les timings ne clignote
+         * plus : Whisper a rendu les sept derniers mots d'un transcript sur
+         * douze centièmes de seconde, ce qui donnait une ligne affichée deux
+         * images.
+         */
+        lines:
+          lignes.length > 1
+            ? lignes.map((ligne, ligneIndex) => {
+                const suivante = lignes[ligneIndex + 1];
+                return {
+                  at: ms(scene.startInSeconds + ligne[0].start),
+                  out: ms(
+                    suivante
+                      ? scene.startInSeconds + suivante[0].start
+                      : scene.startInSeconds + scene.durationInSeconds
+                  ),
+                };
+              })
+            : [],
       };
     }),
     /**

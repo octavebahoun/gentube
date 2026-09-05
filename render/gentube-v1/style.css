@@ -11,6 +11,11 @@
  *  - Aucun `filter: blur()` plein cadre. En rastérisation logicielle — celle
  *    de Lambda, qui n'a pas de GPU — un flou plein cadre multiplie le temps de
  *    rendu par trois.
+ *
+ *  - Les couleurs du registre se lisent en variables, jamais en dur :
+ *    `var(--gt-accent, #ce1f20)`. La composition les pose en `style` sur
+ *    `#root` depuis `lib/storyboard/apparence.ts`, et le repli vaut la valeur
+ *    d'hier — une page composée sans elles rend le même pixel.
  */
 
 * {
@@ -70,6 +75,21 @@ body {
 }
 
 /* --- Sous-titres -------------------------------------------------------- */
+
+/*
+ * L'enveloppe d'une ligne de sous-titre.
+ *
+ * Elle ne déplace rien : `inset: 0` lui donne exactement la boîte du cadre,
+ * donc les pourcentages de `.captions` se résolvent comme s'il était resté
+ * l'enfant direct. Elle n'existe que pour porter une seconde opacité — la
+ * sortie de la ligne — sans se battre avec celle que `.captions` porte pour
+ * son entrée.
+ */
+.caption-line {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 
 .captions {
   position: absolute;
@@ -177,7 +197,7 @@ body {
 .watermark .dot {
   display: block;
   border-radius: 999px;
-  background: #ce1f20;
+  background: var(--gt-accent, #ce1f20);
 }
 
 /* --- Plans animés -------------------------------------------------------- */
@@ -275,7 +295,7 @@ video.media {
   max-width: 60%;
   padding: 0.5em 0.9em;
   font-family: "Lato", "Inter", system-ui, sans-serif;
-  --lt-accent: #ff5a36;
+  --lt-accent: var(--gt-accent-2, #ff5a36);
   will-change: opacity, transform;
 }
 
@@ -602,7 +622,7 @@ video.media {
   font-weight: 900;
   line-height: 1.05;
   text-align: center;
-  --kt-accent: #ce1f20;
+  --kt-accent: var(--gt-accent, #ce1f20);
   --kt-glow: #ff5a3c;
 }
 
@@ -721,7 +741,7 @@ video.media {
    */
   padding: 6% 7% 13%;
   font-family: "Lato", "Inter", system-ui, sans-serif;
-  --chart-accent: #ce1f20;
+  --chart-accent: var(--gt-accent, #ce1f20);
 }
 
 .chart-title {
@@ -895,7 +915,7 @@ video.media {
   gap: 0.75em;
   padding: 8% 9% 16%;
   font-family: "Lato", "Inter", system-ui, sans-serif;
-  --thread-accent: #ce1f20;
+  --thread-accent: var(--gt-accent, #ce1f20);
 }
 
 .thread-title {
@@ -983,7 +1003,7 @@ video.media {
   padding: 9% 10% 16%;
   text-align: center;
   font-family: "Lato", "Inter", system-ui, sans-serif;
-  --quote-accent: #ce1f20;
+  --quote-accent: var(--gt-accent, #ce1f20);
 }
 
 .quote-mark {
@@ -1061,7 +1081,7 @@ video.media {
   gap: 0.9em;
   padding: 8% 9% 15%;
   font-family: "Lato", "Inter", system-ui, sans-serif;
-  --list-accent: #ce1f20;
+  --list-accent: var(--gt-accent, #ce1f20);
 }
 
 .list-title {
@@ -1143,7 +1163,7 @@ video.media {
   gap: 1em;
   padding: 8% 7% 15%;
   font-family: "Lato", "Inter", system-ui, sans-serif;
-  --face-accent: #ce1f20;
+  --face-accent: var(--gt-accent, #ce1f20);
 }
 
 .face-title {
@@ -1235,7 +1255,7 @@ video.media {
 .hw-pipe {
   position: absolute;
   font-family: "Caveat", "Lato", system-ui, cursive;
-  --hw-ink: #ffd9a0;
+  --hw-ink: var(--gt-encre, #ffd9a0);
   pointer-events: none;
 }
 
@@ -1433,7 +1453,7 @@ video.media {
   height: 7.2em;
   border-radius: 999px;
   background:
-    conic-gradient(#ce1f20 var(--fill), rgba(255, 255, 255, 0.12) 0);
+    conic-gradient(var(--gt-accent, #ce1f20) var(--fill), rgba(255, 255, 255, 0.12) 0);
 }
 
 /* Le disque intérieur creuse l'anneau : pas de masque, pas de SVG. */
@@ -1479,7 +1499,7 @@ video.media {
    */
   background-image: linear-gradient(
     to right,
-    #ce1f20 50%,
+    var(--gt-accent, #ce1f20) 50%,
     rgba(0, 0, 0, 0) 50%
   );
   background-repeat: no-repeat;
@@ -1509,7 +1529,7 @@ video.media {
 }
 
 .captions-pill .word.fort {
-  background: #ce1f20;
+  background: var(--gt-accent, #ce1f20);
 }
 
 /* `wipe` : le mot se découvre de gauche à droite, sans bouger. */
@@ -1540,7 +1560,7 @@ video.media {
  * autres styles ne s'applique donc pas, d'où l'ombre portée à la place.
  */
 .captions-gradient .word {
-  background: linear-gradient(180deg, #ffffff 0%, #ffd7a0 55%, #ce1f20 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #ffd7a0 55%, var(--gt-accent, #ce1f20) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1608,7 +1628,7 @@ video.media {
 }
 
 .captions-kinetic-slam .word.fort {
-  color: #ce1f20;
+  color: var(--gt-accent, #ce1f20);
   text-shadow:
     0 4px 0 #000,
     0 0 18px rgba(206, 31, 32, 0.7);
@@ -1655,7 +1675,7 @@ video.media {
 
 /* `texture` : texte masque dégradé doré/rouge texturé. */
 .captions-texture .word {
-  background: linear-gradient(135deg, #ffffff 0%, #ffd7a0 50%, #ce1f20 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ffd7a0 50%, var(--gt-accent, #ce1f20) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1836,7 +1856,7 @@ video.media {
  */
 .kt-stitched .kt-word {
   padding-bottom: 0.12em;
-  border-bottom: 0.06em dashed var(--kt-accent, #ffd9a0);
+  border-bottom: 0.06em dashed var(--kt-accent, var(--gt-encre, #ffd9a0));
   color: #fff;
   text-shadow: 0 3px 14px rgba(0, 0, 0, 0.75);
 }
@@ -1850,7 +1870,7 @@ video.media {
     100deg,
     #ffffff 0%,
     #ffffff 38%,
-    var(--kt-accent, #ffd9a0) 50%,
+    var(--kt-accent, var(--gt-encre, #ffd9a0)) 50%,
     #ffffff 62%,
     #ffffff 100%
   );
@@ -1889,7 +1909,7 @@ video.media {
       rgba(255, 255, 255, 0.95) 0deg 6deg,
       rgba(255, 255, 255, 0.55) 6deg 12deg
     ),
-    linear-gradient(160deg, var(--kt-accent, #ffd9a0), #ffffff);
+    linear-gradient(160deg, var(--kt-accent, var(--gt-encre, #ffd9a0)), #ffffff);
   background-blend-mode: multiply;
   -webkit-background-clip: text;
   background-clip: text;
@@ -4051,7 +4071,7 @@ video.media {
   padding: 8% 10% 16%;
   text-align: center;
   font-family: "Lato", "Inter", system-ui, sans-serif;
-  --cta-accent: #ce1f20;
+  --cta-accent: var(--gt-accent, #ce1f20);
 }
 
 .cta-headline {

@@ -1,6 +1,6 @@
 import type { HyperframesScene, WordTiming } from '@/lib/storyboard/render';
 import type { SubtitleStyle } from '@/lib/db/schema';
-import { isVideoPath, kenBurns, ms, wordsOrFallback } from './plan';
+import { isVideoPath, kenBurns, ms, wordLines, wordsOrFallback } from './plan';
 import { effetsMarkup } from './effets';
 import { manuscritMarkup } from './manuscrit';
 import {
@@ -55,21 +55,69 @@ export function sceneMarkup(
     mot.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
   const portants = new Set((scene.emphasis ?? []).map(nu));
 
-  const captions =
-    words.length > 0
-      ? `<div class="captions captions-${subtitleStyle}" id="c${index}" data-layout-allow-overlap>${words
-          .map((word, wordIndex) => {
-            const fort = portants.has(nu(word.text)) ? ' fort' : '';
-            return `<span class="word${fort}" id="w${index}-${wordIndex}">${escapeHtml(
-              word.text
-            )}</span>`;
-          })
-          .join('')}${
-          scene.emoji
-            ? `<span class="word-emoji">${escapeHtml(scene.emoji)}</span>`
-            : ''
-        }</div>`
-      : '';
+  /*
+   * Un conteneur par ligne, et c'est ce qui règle le conflit.
+   *
+   * Un mot s'allume et reste : sur une scène longue — une vidéo importée et
+   * son transcript — les deux cents mots seraient tous à l'écran. Il faut donc
+   * faire entrer et sortir des groupes.
+   *
+   * Mais quatre styles (`fondant`, `pill`, `gradient`, `blend`) pilotent déjà
+   * l'`opacity` **du mot**. Animer la même propriété sur le même élément pour
+   * deux raisons différentes, c'est deux tweens qui se battent. En posant le
+   * groupe sur son propre `div`, chacun garde sa propriété : le conteneur
+   * porte l'entrée et la sortie de la ligne, le mot porte sa révélation.
+   *
+   * `.captions` est déjà en position absolue, donc les lignes se superposent
+   * sans une règle de plus. Une scène d'une seule ligne rend un seul `div`,
+   * exactement comme avant.
+   *
+   * Les index de mots restent **globaux** : `w{scène}-{n}` est le n-ième mot
+   * de la scène, pas de sa ligne. La timeline les vise ainsi, et elle n'a pas
+   * à savoir comment on a découpé.
+   */
+  const lignes = wordLines(words);
+  let compteur = 0;
+
+  const captions = lignes
+    .map((ligne, ligneIndex) => {
+      const spans = ligne
+        .map((word) => {
+          const fort = portants.has(nu(word.text)) ? ' fort' : '';
+          return `<span class="word${fort}" id="w${index}-${compteur++}">${escapeHtml(
+            word.text
+          )}</span>`;
+        })
+        .join('');
+
+      // L'emoji accompagne la phrase, donc la dernière ligne : posé sur
+      // chacune, il apparaîtrait autant de fois qu'il y a de lignes.
+      const emoji =
+        scene.emoji && ligneIndex === lignes.length - 1
+          ? `<span class="word-emoji">${escapeHtml(scene.emoji)}</span>`
+          : '';
+
+      /*
+       * Deux div par ligne, et ce n'est pas de la décoration.
+       *
+       * Une ligne doit entrer puis sortir. Posées toutes deux sur l'`opacity`
+       * du même élément, l'entrée et la sortie se disputent la propriété : la
+       * seconde animation applique son état de départ dès la construction de
+       * la timeline, donc chaque ligne naît **visible** et les treize lignes
+       * d'un transcript s'empilent dès la première image. C'est arrivé.
+       *
+       * L'enveloppe porte la sortie, le conteneur porte l'entrée. Deux
+       * éléments, deux opacités, qui se multiplient au lieu de se battre.
+       */
+      return (
+        `<div class="caption-line" id="o${index}-${ligneIndex}" ` +
+        `data-layout-allow-overlap>` +
+        `<div class="captions captions-${subtitleStyle}" ` +
+        `id="c${index}-${ligneIndex}" data-layout-allow-overlap>` +
+        `${spans}${emoji}</div></div>`
+      );
+    })
+    .join('');
 
   // Une carte n'a pas d'image : c'est un écran noir avec du texte.
   //

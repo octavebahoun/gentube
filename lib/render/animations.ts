@@ -299,10 +299,64 @@ ${NAPPES_JS}${MANUSCRIT_TWEENS_JS}
          * 'cinematic' est à part : il ne révèle pas les mots un par un mais la
          * phrase entière avec la scène, comme un sous-titre de film.
          */
+        /*
+         * Les lignes de sous-titre, quand la scene en a plus d une.
+         *
+         * Le tableau "lines" est vide en dessous de dix mots : le conteneur
+         * unique reste visible toute la scene, comme il l a toujours fait.
+         * Au-dela, chaque ligne entre a son premier mot et sort apres son
+         * dernier — sinon un transcript de deux cents mots s empilerait a
+         * l ecran.
+         *
+         * L opacite est posee sur le CONTENEUR et jamais sur le mot : quatre
+         * styles animent deja celle du mot, et deux tweens sur la meme
+         * propriete du meme element se battent.
+         *
+         * Et pour la meme raison, l entree et la sortie de la ligne vivent sur
+         * DEUX elements. Un fromTo applique son etat de depart des la
+         * construction de la timeline : une sortie posee sur le conteneur
+         * remettait chaque ligne a opacity 1 avant meme la premiere image, donc
+         * treize lignes empilees a l ecran. L enveloppe porte la sortie, le
+         * conteneur porte l entree, et les deux opacites se multiplient.
+         *
+         * Deux fromTo a des instants absolus, comme partout ici : le moteur
+         * cherche chaque image au lieu de jouer, et une animation qui accumule
+         * du temps marche dans l apercu puis casse au rendu.
+         *
+         * ATTENTION : pas d accent grave dans ce commentaire. Il vit dans un
+         * litteral de gabarit, et un accent grave le refermerait — l erreur
+         * serait rapportee a une ligne qui n a rien a voir.
+         */
+        for (let l = 0; l < scene.lines.length; l += 1) {
+          const ligne = scene.lines[l];
+          tl.fromTo(
+            "#c" + scene.index + "-" + l,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.22, ease: "power2.out" },
+            ligne.at
+          );
+          /*
+           * La sortie FINIT a "out", elle ne commence pas la.
+           *
+           * Le plan borne "out" a l entree de la ligne suivante, et les lignes
+           * occupent le meme bas d ecran. Demarrer le fondu de sortie a cet
+           * instant laisserait les deux lisibles ensemble le temps du fondu.
+           */
+          const sortie = Math.max(ligne.at, ligne.out - 0.16);
+          tl.fromTo(
+            "#o" + scene.index + "-" + l,
+            { opacity: 1 },
+            { opacity: 0, duration: 0.16, ease: "power2.in" },
+            sortie
+          );
+        }
+
         if (T.subtitleStyle === "cinematic") {
-          if (scene.words.length > 0) {
+          // Une seule ligne : c est la scene entiere qui la fait apparaitre.
+          // Plusieurs : la boucle ci-dessus s en occupe deja.
+          if (scene.words.length > 0 && scene.lines.length <= 1) {
             tl.fromTo(
-              "#c" + scene.index,
+              "#c" + scene.index + "-0",
               { opacity: 0 },
               { opacity: 1, duration: 0.3, ease: "power2.out" },
               scene.start

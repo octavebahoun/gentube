@@ -118,8 +118,17 @@ describe('the composition HyperFrames renders', () => {
     expect(starts[1]).toBeGreaterThan(4);
   });
 
-  it('drives every animation from a declared instant, never an accumulated one', () => {
-    // Le moteur cherche chaque image au lieu de jouer. `to` part de l'état
+  it('carries the registre apparence as variables on the root', () => {
+    // Le registre porte la palette et l'échelle, la composition les pose en
+    // variables sur `#root`, et les règles les lisent avec un repli à la
+    // valeur calculée : sans variable, la page rend le même pixel qu'hier.
+    const page = html([shot()]);
+
+    expect(page).toContain('--gt-accent: #ce1f20;');
+    expect(page).toContain('font-size: var(--gt-sous-titre, 28px);');
+  });
+
+  it('drives every animation from a declared instant, never an accumulated one', () => {    // Le moteur cherche chaque image au lieu de jouer. `to` part de l'état
     // courant, donc d'un état faux après un saut arrière. Seul `fromTo`
     // survit.
     const page = html([shot()]);
@@ -177,7 +186,7 @@ describe('the composition HyperFrames renders', () => {
     });
 
     const size = (page: string) =>
-      Number(/\.captions \{ font-size: (\d+)px/.exec(page)?.[1]);
+      Number(/\.captions \{ font-size: var\(--gt-sous-titre, (\d+)px\)/.exec(page)?.[1]);
 
     expect(size(small)).toBeGreaterThan(0);
     expect(size(large)).toBeGreaterThan(size(small));
@@ -986,7 +995,9 @@ describe('the composition HyperFrames renders', () => {
       const page = styled('cinematic');
       const script = page.slice(page.lastIndexOf('<script>'));
       expect(script).toContain('"cinematic"');
-      expect(page).toContain('id="c0"');
+      // `-0` : la première ligne de sous-titre de la scène 0. Les mots sont
+      // désormais groupés par ligne, chacune dans son propre conteneur.
+      expect(page).toContain('id="c0-0"');
     });
 
     it('falls back to karaoke, which is what already-rendered videos got', () => {
@@ -1167,7 +1178,7 @@ describe('every declared appearance has a rule', () => {
   it('sizes the two new plans on the frame, not on the browser', () => {
     // La citation est sortie trois fois trop grosse pour avoir été mesurée sur
     // les 16 px du navigateur au lieu de la hauteur de la trame.
-    const regle = /\.quote,[^{]*\{ font-size: \d+px; \}/.exec(html([shot()]))?.[0] ?? '';
+    const regle = /\.quote,[^{]*\{ font-size: var\(--gt-structure, \d+px\); \}/.exec(html([shot()]))?.[0] ?? '';
     expect(regle).toContain('.social-card');
     expect(regle).toContain('.cta');
   });
@@ -1364,5 +1375,134 @@ describe('the palier-2 effects', () => {
       expect(page).toContain('id="gr0"');
       expect(page.indexOf('id="m0"')).toBeLessThan(page.indexOf('id="ls0"'));
     });
+  });
+});
+
+/**
+ * Les sous-titres d'une scène longue.
+ *
+ * Le cas qui a rendu ce découpage nécessaire : une vidéo importée par le
+ * client, transcrite au mot. Une seule scène, soixante secondes, deux cents
+ * mots — et chaque mot qui s'allume **reste**. Aucune scène générée n'était
+ * assez longue pour le montrer.
+ */
+describe('les lignes de sous-titre d une scène longue', () => {
+  /** Vingt mots minutés sur trente secondes, comme un transcript. */
+  const transcript = Array.from({ length: 20 }, (_, i) => ({
+    text: `mot${i}`,
+    start: i * 1.5,
+    duration: 1.2,
+  }));
+
+  const longue = () =>
+    html([shot({ durationS: 30, words: transcript as never })]);
+
+  it('pose un conteneur par ligne au lieu d un seul', () => {
+    const page = longue();
+    const conteneurs = page.match(/class="captions captions-[a-z-]+"/g) ?? [];
+
+    // Vingt mots, sept par ligne au plus : trois conteneurs.
+    expect(conteneurs).toHaveLength(3);
+    expect(page).toContain('id="c0-0"');
+    expect(page).toContain('id="c0-2"');
+  });
+
+  it('garde les index de mots globaux à la scène', () => {
+    // La timeline vise `w{scène}-{n}` sans savoir comment on a découpé : un
+    // index remis à zéro à chaque ligne ferait viser le mauvais mot.
+    const page = longue();
+    for (let n = 0; n < 20; n += 1) {
+      expect(page).toContain(`id="w0-${n}"`);
+    }
+    expect(page).not.toContain('id="w0-20"');
+  });
+
+  it('fait entrer et sortir chaque ligne, sur le conteneur et pas sur le mot', () => {
+    const page = longue();
+    const script = page.slice(page.lastIndexOf('<script>'));
+
+    // L'opacité de la ligne vit sur le conteneur : quatre styles animent déjà
+    // celle du mot, et deux tweens sur la même propriété se battent.
+    expect(script).toContain('"#c" + scene.index + "-" + l');
+    expect(script).toMatch(/lines/);
+  });
+
+  it('sépare l entrée et la sortie sur deux éléments', () => {
+    // La régression que ce test tient : les deux posées sur le même conteneur,
+    // le `fromTo` de sortie appliquait son `opacity: 1` de départ dès la
+    // construction de la timeline. Toutes les lignes naissaient visibles et
+    // s'empilaient au même endroit dès la première image — vu sur un rendu.
+    const page = longue();
+    const script = page.slice(page.lastIndexOf('<script>'));
+
+    expect(page).toContain('id="o0-0"');
+    expect(page).toContain('class="caption-line"');
+    // La sortie vise l'enveloppe.
+    expect(script).toContain('"#o" + scene.index + "-" + l');
+
+    // Et une seule animation touche le conteneur intérieur.
+    const surLeConteneur = script.match(/"#c" \+ scene\.index \+ "-" \+ l/g) ?? [];
+    expect(surLeConteneur).toHaveLength(1);
+  });
+
+  it('tient chaque ligne jusqu à ce que la suivante la remplace', () => {
+    // Deux raisons. Les lignes se superposent au même bas d'écran, donc deux
+    // lisibles en même temps c'est un enchevêtrement, pas un fondu. Et on ne
+    // finit pas de lire une phrase à l'instant où elle est prononcée : une
+    // ligne coupée à son dernier mot clignote — Whisper a déjà rendu sept mots
+    // sur douze centièmes de seconde.
+    const page = longue();
+    const script = page.slice(page.lastIndexOf('<script>'));
+    const lignes = JSON.parse(
+      /"lines":(\[[^\]]*\])/.exec(script)?.[1] ?? '[]'
+    ) as { at: number; out: number }[];
+
+    expect(lignes.length).toBeGreaterThan(1);
+    for (let i = 0; i < lignes.length - 1; i += 1) {
+      expect(lignes[i].out).toBe(lignes[i + 1].at);
+    }
+
+    // Et la dernière tient jusqu'à la fin du plan, jamais au-delà.
+    const start = Number(/"start":([\d.]+)/.exec(script)?.[1]);
+    const duration = Number(/"duration":([\d.]+)/.exec(script)?.[1]);
+    expect(lignes[lignes.length - 1].out).toBe(start + duration);
+  });
+
+  it('borne la sortie de la dernière ligne à la fin de la scène', () => {
+    // Le dernier mot d'un transcript peut se terminer après le plan : un
+    // sous-titre ne survit pas à la scène qu'il légende.
+    const page = html([
+      shot({
+        durationS: 6,
+        words: Array.from({ length: 20 }, (_, i) => ({
+          text: `mot${i}`,
+          start: i * 0.5,
+          duration: 3,
+        })) as never,
+      }),
+    ]);
+    const script = page.slice(page.lastIndexOf('<script>'));
+    const sorties = [...script.matchAll(/"out":([\d.]+)/g)].map((m) => Number(m[1]));
+
+    // La borne est la durée **à l'écran**, pas la longueur de la narration :
+    // une scène de six secondes de voix en dure sept, la pause de fin de
+    // phrase comprise. On la relit dans la timeline plutôt que de la deviner.
+    const start = Number(/"start":([\d.]+)/.exec(script)?.[1]);
+    const duration = Number(/"duration":([\d.]+)/.exec(script)?.[1]);
+    const fin = start + duration;
+
+    expect(sorties.length).toBeGreaterThan(0);
+    expect(fin).toBeGreaterThan(6);
+    for (const out of sorties) expect(out).toBeLessThanOrEqual(fin);
+  });
+
+  it('laisse une scène courte avec un seul conteneur et aucune ligne à animer', () => {
+    const page = html([shot({ words: transcript.slice(0, 5) as never })]);
+    const conteneurs = page.match(/class="captions captions-[a-z-]+"/g) ?? [];
+    const script = page.slice(page.lastIndexOf('<script>'));
+
+    expect(conteneurs).toHaveLength(1);
+    // `lines` vide : le conteneur reste visible toute la scène, comme avant.
+    expect(script).toContain('"lines":[]');
   });
 });
