@@ -61,3 +61,8 @@ render/demo/palier-3/
 
 # Captures gardées par la régression visuelle quand un instant a changé.
 render/regression/echec-*.png
+
+# Les dossiers de rendu des essais : des images, des voix et une page, tous
+# reproductibles par leur script. Rien à versionner.
+render/demo/gentube/
+render/demo/reel/

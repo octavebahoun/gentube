@@ -1,6 +1,15 @@
 import { TRANSITIONS } from './render';
 import { EFFETS } from './effets';
-import { MAX_SHOTS } from './service';
+
+/**
+ * Le plafond de scènes d'un storyboard.
+ *
+ * Il vit ici et non dans `service.ts` : le prompt le cite, et `service.ts`
+ * importe le prompt. Dans l'autre sens c'était un cycle — invisible tant que
+ * `service.ts` était chargé le premier, et net le jour où un script est entré
+ * par `prompt.ts`.
+ */
+export const MAX_SHOTS = 30;
 
 /**
  * Le prompt système : tout le vocabulaire de rendu, dit au modèle.

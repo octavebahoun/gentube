@@ -137,6 +137,13 @@ export function composeHtml({
   const structuredSize = Math.round(height * STRUCTURED_HEIGHT_RATIO);
   const wheelSize = Math.round(height * WHEEL_HEIGHT_RATIO);
   const subtitleBottom = (SUBTITLE_BOTTOM[storyboard.ratio] ?? 0.09) * 100;
+  /*
+   * Ce qu'il faut laisser au-dessus de la bande pour qu'un bandeau ne la
+   * touche pas : deux lignes de sous-titre, en pourcents de la hauteur.
+   */
+  const subtitleRelief = storyboard.subtitles
+    ? (SUBTITLE_HEIGHT_RATIO * 2.6 * 100)
+    : 5;
 
   const music = storyboard.music
     ? `<audio id="music" src="${escapeHtml(encodeURI(storyboard.music))}" data-start="0" ` +
@@ -181,6 +188,19 @@ export function composeHtml({
     <style>
       html, body { width: ${width}px; height: ${height}px; }
       .captions { font-size: ${subtitleSize}px; bottom: ${subtitleBottom}%; }
+      /*
+       * Le tiers inférieur se pose AU-DESSUS de la bande de sous-titres.
+       *
+       * Il était à 14 % du bas et la bande à 9 % : deux lignes de nom et de
+       * fonction retombaient dessus. Vu sur la vidéo d'essai du 5 septembre,
+       * jamais sur une capture d'instant — la garde du tiers regarde une scène
+       * dont les sous-titres tombent ailleurs.
+       *
+       * La hauteur réservée est celle de la bande plus une ligne : le sous-
+       * titre passe à deux lignes dès qu'une phrase est longue, et un bandeau
+       * calé au ras de la première ligne serait recouvert par la seconde.
+       */
+      .lower-third { bottom: ${Math.round(subtitleBottom + subtitleRelief)}%; }
       /*
        * Les plans structurés se mesurent sur la trame, comme les sous-titres,
        * et non sur le 16 px par defaut du navigateur. Un plan de citation ou

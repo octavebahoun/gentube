@@ -1,6 +1,6 @@
 import { and, asc, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { SYSTEM_PROMPT } from './prompt';
+import { MAX_SHOTS, SYSTEM_PROMPT } from './prompt';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import { shots, type Pipeline, type Shot, type Video } from '@/lib/db/schema';
 import {
@@ -55,7 +55,7 @@ import {
  */
 
 /** Un garde-fou contre un modèle qui déciderait qu'une vidéo demande quatre-vingts scènes. */
-export const MAX_SHOTS = 30;
+export { MAX_SHOTS } from './prompt';
 export const DEFAULT_TARGET_SECONDS = 60;
 export const MIN_SCENE_SECONDS = 1;
 export const MAX_SCENE_SECONDS = 30;
