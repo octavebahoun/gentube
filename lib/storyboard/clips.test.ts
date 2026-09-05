@@ -269,6 +269,15 @@ describe('submitting the clips', () => {
     );
   });
 
+  it('adds video direction so the model does not only receive the image prompt', () => {
+    const prompt = animationPrompt({ prompt: 'a river', render: {} } as never);
+
+    expect(prompt).toContain('coherent motion');
+    expect(prompt).toContain('consistent identity and clothing');
+    expect(prompt).toContain('no sudden camera jumps');
+    expect(prompt).toContain('no text');
+  });
+
   it('ne soumet pas un compteur, même quand le pipeline force la vidéo', async () => {
     // La seconde régression de la revue : `generateImages` saute un compteur,
     // donc il n'a pas d'image fixe, donc `submitClips` levait « Scene N has no

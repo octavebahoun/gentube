@@ -200,14 +200,22 @@ describe('generating the stills', () => {
 
     await generateImages(tdb, video.id, { client, store: store().assets });
 
-    expect(calls[0].prompt).toBe(
+    expect(calls[0].prompt).toContain(
       'Visual prompt number 1, wide angle, hand-painted gouache, warm ochre palette'
     );
   });
 
   it('leaves the prompt alone when the project has no style', () => {
-    expect(visualPrompt(' a baobab ', null)).toBe('a baobab');
-    expect(visualPrompt('a baobab', '   ')).toBe('a baobab');
+    expect(visualPrompt(' a baobab ', null)).toContain('a baobab');
+    expect(visualPrompt('a baobab', '   ')).not.toContain('   ');
+  });
+
+  it('adds a directing brief to avoid weak generated stills', () => {
+    const prompt = visualPrompt('a baobab at sunrise', null);
+
+    expect(prompt).toContain('clear readable composition');
+    expect(prompt).toContain('cinematic documentary frame');
+    expect(prompt).toContain('no on-screen text');
   });
 
   it('resumes after a failure without repaying for what landed', async () => {

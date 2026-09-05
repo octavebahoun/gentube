@@ -70,17 +70,28 @@ const LIVE = ['queued', 'running', 'succeeded'] as const;
  * de caméra vaut mieux qu'un plan qui part dans une direction inventée.
  */
 const CAMERA: Record<string, string> = {
-  orbit: 'slow orbital camera move around the subject',
-  dolly: 'steady dolly push toward the subject',
-  pan: 'smooth horizontal camera pan',
-  static: 'locked-off camera, only the subject moves',
+  orbit: 'slow orbital camera move around the subject, parallax visible in the background',
+  dolly: 'steady dolly push toward the subject, controlled cinematic forward movement',
+  pan: 'smooth horizontal camera pan, steady speed, subject remains framed',
+  static: 'locked-off camera, only the subject and environment move naturally',
 };
+
+const VIDEO_DIRECTION = [
+  'cinematic realistic video, coherent motion through the whole shot',
+  'natural subject movement, stable anatomy, consistent identity and clothing',
+  'smooth 30 fps feel, no sudden camera jumps, no flicker',
+  'no text, no logos, no subtitles, no warped faces, no extra fingers',
+] as const;
 
 export function animationPrompt(shot: Shot): string {
   const parsed = sceneRenderSchema.safeParse(shot.render ?? {});
   const motion = parsed.success ? parsed.data.effects?.cameraMotion : undefined;
 
-  return [shot.prompt.trim(), motion ? CAMERA[motion] : 'subtle natural motion']
+  return [
+    shot.prompt.trim(),
+    motion ? CAMERA[motion] : 'subtle natural motion',
+    ...VIDEO_DIRECTION,
+  ]
     .filter(Boolean)
     .join(', ');
 }

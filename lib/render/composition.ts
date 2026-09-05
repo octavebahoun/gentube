@@ -200,7 +200,9 @@ export function composeHtml({
        * titre passe à deux lignes dès qu'une phrase est longue, et un bandeau
        * calé au ras de la première ligne serait recouvert par la seconde.
        */
-      .lower-third { bottom: ${Math.round(subtitleBottom + subtitleRelief)}%; }
+      ${storyboard.scenes.some((scene) => scene.lowerThird)
+        ? `.lower-third { bottom: ${Math.round(subtitleBottom + subtitleRelief)}%; }`
+        : ''}
       /*
        * Les plans structurés se mesurent sur la trame, comme les sous-titres,
        * et non sur le 16 px par defaut du navigateur. Un plan de citation ou

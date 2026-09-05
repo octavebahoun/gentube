@@ -29,6 +29,8 @@ import { SortableShotCard } from '@/components/storyboard/shot-card';
 import {
   AddShotForm,
   GenerateButton,
+  NovitaForm,
+  RenderForm,
   ValidateForm,
   VisualsForm,
   VoiceoverForm,
@@ -57,6 +59,21 @@ export function StoryboardEditor({
   // passage, `generating` pour une reprise après un échec partiel.
   const producible = video.status === 'validated' || video.status === 'generating';
   const hasAnimated = shots.some((shot) => shot.type === 'video');
+  /*
+   * Montable dès que chaque plan a de quoi s'afficher et de quoi s'entendre.
+   *
+   * Une scène qui dessine son propre écran — une carte, un compteur, un
+   * graphique — n'a pas d'image, et c'est elle l'image : lui réclamer un
+   * `assetUrl` cacherait le bouton pour une scène qui va très bien.
+   */
+  const montable =
+    (video.status === 'validated' ||
+      video.status === 'generating' ||
+      video.status === 'rendered' ||
+      video.status === 'failed') &&
+    shots.length > 0 &&
+    shots.every((shot) => Boolean(shot.audioUrl)) &&
+    shots.every((shot) => Boolean(shot.assetUrl) || shot.status === 'ready');
 
   const [items, setItems] = useState(shots);
   const [reorderError, setReorderError] = useState<string | null>(null);
@@ -126,6 +143,15 @@ export function StoryboardEditor({
             </p>
           )}
           {producible && <VisualsForm videoId={video.id} hasAnimated={hasAnimated} />}
+          {producible && hasAnimated && (
+            <NovitaForm
+              videoId={video.id}
+              plans={shots.filter((shot) => shot.type === 'video' && !shot.assetUrl).length}
+            />
+          )}
+          {montable && (
+            <RenderForm videoId={video.id} dejaRendu={video.status === 'rendered'} />
+          )}
           {reorderError && <p className="text-sm text-red-500">{reorderError}</p>}
         </CardContent>
       </Card>

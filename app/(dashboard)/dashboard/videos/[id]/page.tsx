@@ -12,6 +12,27 @@ import { isVoiceConfigured } from '@/lib/voice/elevenlabs';
 import { DeleteVideoButton, StoryboardEditor } from './storyboard';
 import { VideoSettings } from '@/components/storyboard/video-settings';
 import { listSounds } from '@/lib/sounds';
+import { createAssetStore } from '@/lib/storage';
+
+/** Le temps qu'une lecture tient : assez pour regarder, pas pour partager. */
+const LECTURE_TTL_S = 60 * 60;
+
+/**
+ * L'adresse de lecture du montage.
+ *
+ * `outputUrl` est une clé R2, pas une URL : le navigateur ne peut pas la lire
+ * telle quelle. On la signe pour une heure, et on rend `null` si le magasin
+ * n'est pas configuré — une instance sans R2 doit afficher la page, pas
+ * tomber.
+ */
+async function lienDuMontage(cle: string | null): Promise<string | null> {
+  if (!cle) return null;
+  try {
+    return await createAssetStore().signedUrl(cle, LECTURE_TTL_S);
+  } catch {
+    return null;
+  }
+}
 
 const STATUS_STYLE: Record<string, string> = {
   draft: 'bg-secondary text-secondary-foreground',
@@ -42,6 +63,7 @@ export default async function VideoPage({
     throw error;
   }
 
+  const montage = await lienDuMontage(board.video.outputUrl);
   const project = await getProject(tdb, board.video.projectId);
 
   // Le catalogue est partagé entre tous les projets : il ne passe pas par le
@@ -108,6 +130,22 @@ export default async function VideoPage({
             et la vidéo ne peut pas être validée.
           </p>
         )}
+
+      {montage && (
+        <Card className="mb-8 max-w-3xl">
+          <CardHeader>
+            <CardTitle>Le montage</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <video src={montage} controls playsInline className="w-full rounded-md" />
+            <p className="text-xs text-muted-foreground">
+              Le lien de lecture vaut une heure. Refaites le montage pour le
+              renouveler.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <StoryboardEditor
         video={board.video}

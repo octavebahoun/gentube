@@ -1,7 +1,16 @@
 'use client';
 
 import { useActionState } from 'react';
-import { CheckCircle2, Image as ImageIcon, Loader2, Mic, Video as VideoIcon, Wand2 } from 'lucide-react';
+import {
+  CheckCircle2,
+  Clapperboard,
+  Film,
+  Image as ImageIcon,
+  Loader2,
+  Mic,
+  Video as VideoIcon,
+  Wand2,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -9,9 +18,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import {
   addShotAction,
+  animateNovitaAction,
   generateStoryboardAction,
   generateVisualsAction,
   generateVoiceoverAction,
+  renderVideoAction,
   validateVideoAction,
 } from '@/app/(dashboard)/dashboard/videos/actions';
 import { type ActionState, frenchCredits } from './utils';
@@ -177,6 +188,84 @@ export function VisualsForm({
         {hasAnimated
           ? 'Chaque scène reçoit d’abord son image fixe — c’est elle que le modèle anime. Les clips partent ensuite chez le fournisseur et arrivent au fil de l’eau : rechargez la page pour suivre.'
           : 'Chaque scène reçoit son image fixe. Rien d’autre à attendre : ce pipeline n’a pas de plan animé.'}
+      </p>
+      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
+      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+    </form>
+  );
+}
+
+/**
+ * Les clips par Novita, pour essayer.
+ *
+ * À côté du bouton du produit, pas à sa place. Novita s'interroge au lieu de
+ * rappeler : le bouton attend chaque clip, une à deux minutes par plan animé.
+ * Rien n'est débité.
+ */
+export function NovitaForm({ videoId, plans }: { videoId: number; plans: number }) {
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    animateNovitaAction,
+    {}
+  );
+  return (
+    <form action={formAction} className="space-y-2">
+      <input type="hidden" name="videoId" value={videoId} />
+      <Button type="submit" variant="outline" disabled={isPending}>
+        {isPending ? (
+          <>
+            <Loader2 className="animate-spin" />
+            Animation en cours…
+          </>
+        ) : (
+          <>
+            <Film />
+            Animer par Novita ({plans} plan{plans === 1 ? '' : 's'})
+          </>
+        )}
+      </Button>
+      <p className="max-w-xl text-xs text-muted-foreground">
+        Essai, à côté de Replicate. Novita s&apos;interroge au lieu de rappeler,
+        donc le bouton attend&nbsp;: comptez une à deux minutes par plan animé,
+        et gardez la page ouverte. Rien n&apos;est débité.
+      </p>
+      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
+      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+    </form>
+  );
+}
+
+/**
+ * Le montage, depuis l'écran.
+ *
+ * Le bouton attend la fin : une minute de vidéo demande à peu près une minute
+ * de machine, et l'action serveur tient la connexion pendant ce temps. C'est
+ * fait pour essayer, pas pour servir — la file viendra.
+ */
+export function RenderForm({ videoId, dejaRendu }: { videoId: number; dejaRendu: boolean }) {
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    renderVideoAction,
+    {}
+  );
+  return (
+    <form action={formAction} className="space-y-2">
+      <input type="hidden" name="videoId" value={videoId} />
+      <Button type="submit" disabled={isPending}>
+        {isPending ? (
+          <>
+            <Loader2 className="animate-spin" />
+            Montage en cours…
+          </>
+        ) : (
+          <>
+            <Clapperboard />
+            {dejaRendu ? 'Refaire le montage' : 'Monter la vidéo'}
+          </>
+        )}
+      </Button>
+      <p className="max-w-xl text-xs text-muted-foreground">
+        Les images et les voix redescendent sur le disque, la page se compose, et
+        le moteur rend le fichier. Comptez à peu près une seconde de machine par
+        seconde de vidéo — la page reste ouverte pendant ce temps.
       </p>
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
       {state?.success && <p className="text-sm text-green-600">{state.success}</p>}

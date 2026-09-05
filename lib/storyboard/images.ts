@@ -78,7 +78,16 @@ export function visualPrompt(
 ): string {
   const style = stylePrompt?.trim();
   const visual = shotPrompt.trim();
-  return style ? `${visual}, ${style}` : visual;
+  const direction = [
+    visual,
+    style,
+    'single coherent subject, clear readable composition',
+    'cinematic documentary frame, natural light, realistic textures',
+    'medium shot or wide shot unless the prompt explicitly asks for a close-up',
+    'no on-screen text, no logos, no watermark, no distorted hands',
+  ].filter(Boolean);
+
+  return direction.join(', ');
 }
 
 export async function generateImages(
