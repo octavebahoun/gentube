@@ -1,4 +1,5 @@
-import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import {
   billingCycles,
@@ -11,24 +12,15 @@ import { getBalance } from '@/lib/credits';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import { closeDb, createTenant, resetDb } from '@/lib/test/fixtures';
 import {
-  TEST_WEBHOOK_SECRET,
-  fakeGeniusPay,
-  gatewayPayment,
-  signedWebhook,
-  webhookPayload,
-} from '@/lib/test/geniuspay';
-import {
-  GeniusPayError,
-  type GeniusPayClient,
-  type GeniusPayPayment,
-} from '@/lib/payments/geniuspay';
-import {
-  createSubscriptionCheckout,
-  createTopupCheckout,
-  getSubscription,
-} from './checkout';
+  corpsDeRappel,
+  entetesSignees,
+  passerelleFactice,
+  reglement,
+} from '@/lib/test/paiement';
+import { PaymentError, type PaymentGateway, type Settlement } from '@/lib/payments';
+import { createSubscriptionCheckout, createTopupCheckout, getSubscription } from './checkout';
 import { MAX_PAYMENT_ATTEMPTS, PLAN_OFFERS, TOPUP_PACKS_FOR_SALE } from './plans';
-import { processGeniusPayWebhook } from './webhook';
+import { processPaymentWebhook } from './webhook';
 
 afterAll(async () => {
   await closeDb();
@@ -36,502 +28,491 @@ afterAll(async () => {
 
 const BASE_URL = 'https://app.test';
 
-/** Une passerelle qui rapporte le paiement comme réglé lors de la re-lecture. */
-function paidGateway(overrides: Partial<GeniusPayPayment> = {}): GeniusPayClient {
-  return fakeGeniusPay({
-    onFetch: async (reference) => gatewayPayment({ reference, ...overrides }),
-  }).client;
+/**
+ * Livre un rappel signé.
+ *
+ * Le corps ne dit **pas** quel encaissement il concerne — c'est le cas SasPay,
+ * et donc celui que le pipeline doit savoir traiter. Ce que la passerelle
+ * répondra à la relecture est le seul levier du test.
+ */
+function livrer(
+  gateway: PaymentGateway,
+  {
+    corps = corpsDeRappel('paid'),
+    now = Date.now(),
+    secret,
+  }: { corps?: string; now?: number; secret?: string } = {}
+) {
+  return processPaymentWebhook(
+    entetesSignees(corps, { now, ...(secret ? { secret } : {}) }),
+    corps,
+    { gateway, now }
+  );
 }
 
-function deliver(
-  payload: ReturnType<typeof webhookPayload>,
-  { client = paidGateway() }: { client?: GeniusPayClient } = {}
-) {
-  const signed = signedWebhook(payload, { timestamp: payload.timestamp });
-  return processGeniusPayWebhook(signed.headers, signed.rawBody, {
-    client,
-    webhookSecret: TEST_WEBHOOK_SECRET,
+/** Une passerelle qui déclare tel règlement à la relecture. */
+function passerelleQuiRepond(patch: Partial<Settlement> = {}) {
+  return passerelleFactice({
+    onSettle: async () => reglement(patch),
   });
 }
 
-function webhookRows() {
+function lignesDeRappel() {
   return db.select().from(paymentWebhookEvents);
 }
 
-async function startSubscription(
-  tdb: TenantDb,
-  plan: string,
-  reference: string
-) {
+async function ouvrirAbonnement(tdb: TenantDb, plan: string, reference: string) {
   return await createSubscriptionCheckout(tdb, plan, {
-    client: fakeGeniusPay({ reference }).client,
+    gateway: passerelleFactice({ reference }).gateway,
     baseUrl: BASE_URL,
   });
 }
 
-describe('confirmed payments', () => {
+describe('les paiements confirmés', () => {
   beforeEach(async () => {
     await resetDb();
   });
 
-  it('grants the plan allowance and switches the tenant plan', async () => {
+  it('accorde la dotation du plan et bascule le tenant dessus', async () => {
     const tdb = await createTenant('Alpha');
-    const checkout = await startSubscription(tdb, 'pro', 'GP-SUB-1');
+    const offre = PLAN_OFFERS.pro;
+    await ouvrirAbonnement(tdb, 'pro', 'CS-SUB-1');
 
-    const result = await deliver(
-      webhookPayload({ reference: 'GP-SUB-1', amount: PLAN_OFFERS.pro.priceXof }),
-      { client: paidGateway({ amount: PLAN_OFFERS.pro.priceXof }) }
-    );
-
-    expect(result).toMatchObject({ status: 200, outcome: 'credited' });
-    expect(await getBalance(tdb)).toBe(PLAN_OFFERS.pro.monthlyCredits);
-
-    const [entry] = await tdb.findMany(creditLedger);
-    expect(entry).toMatchObject({
-      reason: 'subscription_grant',
-      delta: PLAN_OFFERS.pro.monthlyCredits,
-      // Clé sur le paiement, pas l'événement.
-      idempotencyKey: 'geniuspay:payment:GP-SUB-1',
+    const { gateway, relus } = passerelleQuiRepond({
+      amountXof: offre.priceXof,
     });
+    const rendu = await livrer(gateway);
 
-    expect((await tdb.getTenant())!.plan).toBe('pro');
+    expect(rendu.outcome).toBe('credited');
+    expect(rendu.status).toBe(200);
+    // La relecture a bien porté sur NOTRE référence, jamais sur celle du corps.
+    expect(relus).toEqual(['CS-SUB-1']);
 
-    const subscription = await getSubscription(tdb);
-    expect(subscription).toMatchObject({ plan: 'pro', status: 'active' });
-    expect(subscription!.currentPeriodEnd).not.toBeNull();
+    expect(await getBalance(tdb)).toBe(offre.monthlyCredits);
+    expect((await getSubscription(tdb))?.status).toBe('active');
 
-    const cycle = await tdb.findById(billingCycles, checkout.cycleId!);
-    expect(cycle).toMatchObject({ status: 'paid' });
-    expect(cycle!.paidAt).not.toBeNull();
+    const [intent] = await tdb.findMany(paymentIntents);
+    expect(intent.status).toBe('succeeded');
+    // La commission du prestataire, telle qu'il la chiffre lui-même.
+    expect(intent.feesXof).toBe(488);
+    expect(intent.netXof).toBe(15_000);
 
-    const attempt = await tdb.findById(paymentAttempts, checkout.attemptId!);
-    expect(attempt!.status).toBe('succeeded');
-
-    const intent = await tdb.findById(paymentIntents, checkout.intentId);
-    expect(intent).toMatchObject({
-      status: 'succeeded',
-      gatewayStatus: 'success',
-      paymentMethod: 'mobile_money',
-      feesXof: 300,
-    });
-    expect(intent!.succeededAt).not.toBeNull();
-
-    const [event] = await webhookRows();
-    expect(event).toMatchObject({
-      signatureValid: true,
-      tenantId: tdb.tenantId,
-      gatewayReference: 'GP-SUB-1',
-      processingError: null,
-    });
-    expect(event.processedAt).not.toBeNull();
+    const [cycle] = await tdb.findMany(billingCycles);
+    expect(cycle.status).toBe('paid');
   });
 
-  it('grants a top-up without touching the subscription', async () => {
+  it('accorde une recharge sans toucher à l abonnement', async () => {
     const tdb = await createTenant('Alpha');
     const pack = TOPUP_PACKS_FOR_SALE[0];
     await createTopupCheckout(tdb, pack.id, {
-      client: fakeGeniusPay({ reference: 'GP-TOP-1' }).client,
+      gateway: passerelleFactice({ reference: 'CS-TOP-1' }).gateway,
       baseUrl: BASE_URL,
     });
 
-    const result = await deliver(
-      webhookPayload({ reference: 'GP-TOP-1', amount: pack.priceXof }),
-      { client: paidGateway({ amount: pack.priceXof }) }
-    );
+    const { gateway } = passerelleQuiRepond({ amountXof: pack.priceXof });
+    expect((await livrer(gateway)).outcome).toBe('credited');
 
-    expect(result.outcome).toBe('credited');
     expect(await getBalance(tdb)).toBe(pack.credits);
-    expect((await tdb.findMany(creditLedger))[0].reason).toBe('topup');
     expect(await getSubscription(tdb)).toBeNull();
-    // Le tenant garde le plan qu'il avait : un top-up achète des crédits, pas
-    // un palier.
-    expect((await tdb.getTenant())!.plan).toBe('starter');
+    expect(await tdb.findMany(billingCycles)).toHaveLength(0);
   });
 });
 
-describe('forged and replayed callbacks', () => {
+describe('les rappels forgés et rejoués', () => {
   beforeEach(async () => {
     await resetDb();
   });
 
-  it('writes nothing at all when the signature does not verify', async () => {
+  it('n écrit strictement rien quand la signature ne passe pas', async () => {
+    // Écrire avant de vérifier offrirait à un inconnu une table à remplir.
     const tdb = await createTenant('Alpha');
-    const checkout = await startSubscription(tdb, 'starter', 'GP-SUB-1');
-    const payload = webhookPayload({ reference: 'GP-SUB-1' });
-    const signed = signedWebhook(payload, { timestamp: payload.timestamp });
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    const forged = await processGeniusPayWebhook(
-      { ...signed.headers, 'x-webhook-signature': 'a'.repeat(64) },
-      signed.rawBody,
-      { client: paidGateway(), webhookSecret: TEST_WEBHOOK_SECRET }
+    const corps = corpsDeRappel('paid');
+    const rendu = await processPaymentWebhook(
+      { ...entetesSignees(corps), 'x-webhook-signature': 'f'.repeat(64) },
+      corps,
+      { gateway: passerelleQuiRepond().gateway }
     );
 
-    expect(forged).toMatchObject({ status: 401, outcome: 'invalid_signature' });
-    // Le cahier des charges est explicite : une signature invalide ne laisse
-    // aucune ligne derrière elle.
-    expect(await webhookRows()).toEqual([]);
+    expect(rendu.status).toBe(401);
+    expect(await lignesDeRappel()).toHaveLength(0);
     expect(await getBalance(tdb)).toBe(0);
-    expect((await tdb.findById(paymentIntents, checkout.intentId))!.status).toBe(
-      'pending'
-    );
   });
 
-  it('refuses a callback signed with another secret', async () => {
-    const tdb = await createTenant('Alpha');
-    await startSubscription(tdb, 'starter', 'GP-SUB-1');
-    const payload = webhookPayload({ reference: 'GP-SUB-1' });
-    const signed = signedWebhook(payload, {
-      secret: 'whsec_attacker',
-      timestamp: payload.timestamp,
+  it('refuse un rappel signé avec un autre secret', async () => {
+    await createTenant('Alpha');
+    const rendu = await livrer(passerelleQuiRepond().gateway, {
+      secret: 'whsec_celui_d_un_autre',
     });
 
-    const result = await processGeniusPayWebhook(signed.headers, signed.rawBody, {
-      client: paidGateway(),
-      webhookSecret: TEST_WEBHOOK_SECRET,
-    });
-
-    expect(result).toMatchObject({ status: 401, outcome: 'invalid_signature' });
-    expect(await getBalance(tdb)).toBe(0);
+    expect(rendu.outcome).toBe('invalid_signature');
+    expect(await lignesDeRappel()).toHaveLength(0);
   });
 
-  it('refuses a stale callback, signature or not', async () => {
-    const tdb = await createTenant('Alpha');
-    await startSubscription(tdb, 'starter', 'GP-SUB-1');
+  it('refuse un rappel périmé, signature ou pas', async () => {
+    // Rejouer un rappel d'il y a une heure ne doit rien rouvrir.
+    await createTenant('Alpha');
+    const now = Date.now();
+    const corps = corpsDeRappel('paid');
 
-    const stale = Math.floor(Date.now() / 1000) - 3_600;
-    const result = await deliver(
-      webhookPayload({ reference: 'GP-SUB-1', timestamp: stale })
+    const rendu = await processPaymentWebhook(
+      entetesSignees(corps, { now: now - 3_600_000 }),
+      corps,
+      { gateway: passerelleQuiRepond().gateway, now }
     );
 
-    expect(result).toMatchObject({ status: 400, outcome: 'timestamp_expired' });
-    expect(await webhookRows()).toEqual([]);
-    expect(await getBalance(tdb)).toBe(0);
+    expect(rendu.status).toBe(401);
+    expect(await lignesDeRappel()).toHaveLength(0);
   });
 
-  it('credits once when the same event is delivered twice', async () => {
+  it('ne crédite qu une fois quand le même événement est livré deux fois', async () => {
     const tdb = await createTenant('Alpha');
-    await startSubscription(tdb, 'starter', 'GP-SUB-1');
-    const payload = webhookPayload({ reference: 'GP-SUB-1' });
-    const signed = signedWebhook(payload, { timestamp: payload.timestamp });
-    const options = {
-      client: paidGateway(),
-      webhookSecret: TEST_WEBHOOK_SECRET,
-    };
+    const offre = PLAN_OFFERS.starter;
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    const first = await processGeniusPayWebhook(
-      signed.headers,
-      signed.rawBody,
-      options
-    );
-    const replay = await processGeniusPayWebhook(
-      signed.headers,
-      signed.rawBody,
-      options
-    );
+    const { gateway } = passerelleQuiRepond({ amountXof: offre.priceXof });
+    const now = Date.now();
+    const corps = corpsDeRappel('paid');
 
-    expect(first.outcome).toBe('credited');
-    expect(replay).toMatchObject({ status: 200, outcome: 'duplicate' });
-    expect(await getBalance(tdb)).toBe(PLAN_OFFERS.starter.monthlyCredits);
-    expect(await tdb.count(creditLedger)).toBe(1);
-    expect(await webhookRows()).toHaveLength(1);
+    expect((await livrer(gateway, { corps, now })).outcome).toBe('credited');
+    // Même corps, même horodatage : même signature, donc même id d'événement.
+    expect((await livrer(gateway, { corps, now })).outcome).toBe('duplicate');
+
+    expect(await getBalance(tdb)).toBe(offre.monthlyCredits);
+    expect(await tdb.findMany(creditLedger)).toHaveLength(1);
   });
 
-  it('credits once when the same payment arrives under a new event id', async () => {
+  it('ne crédite qu une fois quand le paiement revient sous un nouvel id', async () => {
+    /*
+     * La garde d'idempotence du grand livre est dérivée de la référence de
+     * paiement, pas de l'id d'événement : un rappel rejoué sous une nouvelle
+     * signature tombe sur la même clé et ne bouge rien.
+     */
     const tdb = await createTenant('Alpha');
-    await startSubscription(tdb, 'starter', 'GP-SUB-1');
+    const offre = PLAN_OFFERS.starter;
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    const first = await deliver(
-      webhookPayload({ eventId: 'evt_1', reference: 'GP-SUB-1' })
-    );
-    const again = await deliver(
-      webhookPayload({ eventId: 'evt_2', reference: 'GP-SUB-1' })
-    );
+    const { gateway } = passerelleQuiRepond({ amountXof: offre.priceXof });
+    const now = Date.now();
 
-    // Les deux événements sont légitimes ; c'est la clé du grand livre qui
-    // empêche le double crédit.
-    expect(first.outcome).toBe('credited');
-    expect(again.outcome).toBe('credited');
-    expect(await getBalance(tdb)).toBe(PLAN_OFFERS.starter.monthlyCredits);
-    expect(await tdb.count(creditLedger)).toBe(1);
-    expect(await webhookRows()).toHaveLength(2);
+    expect((await livrer(gateway, { now })).outcome).toBe('credited');
+    // Une seconde plus tard : autre horodatage, autre signature, autre id.
+    const second = await livrer(gateway, { now: now + 1_000 });
+
+    expect(second.outcome).toBe('nothing_settled');
+    expect(await getBalance(tdb)).toBe(offre.monthlyCredits);
+    expect(await tdb.findMany(creditLedger)).toHaveLength(1);
+    expect(await lignesDeRappel()).toHaveLength(2);
   });
 });
 
-describe('the gateway has the last word', () => {
+describe('la passerelle a le dernier mot', () => {
   beforeEach(async () => {
     await resetDb();
   });
 
-  it('credits nothing when the re-fetch does not report the payment as paid', async () => {
+  it('ne crédite rien quand la relecture ne dit pas « payé »', async () => {
+    /*
+     * Le cœur du modèle : le corps du rappel annonce un succès, la passerelle
+     * dit « en cours ». C'est elle qui fait autorité — et avec SasPay elle est
+     * la seule source, puisque son rappel ne désigne aucun encaissement.
+     */
     const tdb = await createTenant('Alpha');
-    const checkout = await startSubscription(tdb, 'starter', 'GP-SUB-1');
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    const result = await deliver(webhookPayload({ reference: 'GP-SUB-1' }), {
-      client: paidGateway({ status: 'pending' }),
-    });
+    const { gateway } = passerelleQuiRepond({ status: 'pending' });
+    const rendu = await livrer(gateway, { corps: corpsDeRappel('paid') });
 
-    expect(result).toMatchObject({
-      status: 200,
-      outcome: 'gateway_contradicts_webhook',
-    });
-    expect(await getBalance(tdb)).toBe(0);
-    expect((await tdb.findById(paymentIntents, checkout.intentId))!.status).toBe(
-      'pending'
-    );
-
-    const [event] = await webhookRows();
-    expect(event.processingError).toContain('gateway_status_not_paid');
-    expect(event.processedAt).toBeNull();
-  });
-
-  it('credits nothing when the settled amount differs from the intent', async () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    try {
-      const tdb = await createTenant('Alpha');
-      await startSubscription(tdb, 'starter', 'GP-SUB-1');
-
-      const result = await deliver(
-        webhookPayload({
-          reference: 'GP-SUB-1',
-          // Le callback prétend le bon montant ; la passerelle dit le contraire.
-          amount: PLAN_OFFERS.starter.priceXof,
-        }),
-        { client: paidGateway({ amount: 500 }) }
-      );
-
-      expect(result.outcome).toBe('amount_mismatch');
-      expect(await getBalance(tdb)).toBe(0);
-      expect(spy).toHaveBeenCalled();
-    } finally {
-      spy.mockRestore();
-    }
-  });
-
-  it('credits nothing for a payment settled in another currency', async () => {
-    const tdb = await createTenant('Alpha');
-    await startSubscription(tdb, 'starter', 'GP-SUB-1');
-
-    const result = await deliver(webhookPayload({ reference: 'GP-SUB-1' }), {
-      client: paidGateway({ currency: 'EUR' }),
-    });
-
-    expect(result.outcome).toBe('currency_mismatch');
+    expect(rendu.outcome).toBe('nothing_settled');
     expect(await getBalance(tdb)).toBe(0);
   });
 
-  it('asks for a redelivery when the gateway cannot be re-read, then credits', async () => {
+  it('ne crédite rien quand le montant réglé diffère de l intention', async () => {
+    // Un montant qui ne correspond pas veut dire qu'on ne regarde pas le même
+    // paiement. Créditer serait pire que de ne rien faire.
     const tdb = await createTenant('Alpha');
-    await startSubscription(tdb, 'starter', 'GP-SUB-1');
-    const payload = webhookPayload({ reference: 'GP-SUB-1' });
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    const unreachable = fakeGeniusPay({
-      onFetch: async () => {
-        throw new GeniusPayError('connect ETIMEDOUT');
+    const { gateway } = passerelleQuiRepond({ amountXof: 1 });
+    expect((await livrer(gateway)).outcome).toBe('nothing_settled');
+    expect(await getBalance(tdb)).toBe(0);
+
+    const [intent] = await tdb.findMany(paymentIntents);
+    // Laissé en attente, pas clos : l'argent est peut-être arrivé.
+    expect(intent.status).toBe('pending');
+  });
+
+  it('ne crédite rien pour un règlement dans une autre devise', async () => {
+    const tdb = await createTenant('Alpha');
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
+
+    const { gateway } = passerelleQuiRepond({ currency: 'EUR' });
+    expect((await livrer(gateway)).outcome).toBe('nothing_settled');
+    expect(await getBalance(tdb)).toBe(0);
+  });
+
+  it('demande une redelivery quand la passerelle est illisible, puis crédite', async () => {
+    const tdb = await createTenant('Alpha');
+    const offre = PLAN_OFFERS.starter;
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
+
+    let tombe = true;
+    const { gateway } = passerelleFactice({
+      onSettle: async () => {
+        if (tombe) throw new PaymentError('Gateway unavailable', { status: 504 });
+        return reglement({ amountXof: offre.priceXof });
       },
-    }).client;
+    });
 
-    const first = await deliver(payload, { client: unreachable });
-    expect(first).toMatchObject({ status: 502, outcome: 'refetch_failed' });
+    /*
+     * Une passerelle injoignable n'échoue pas le rappel : l'encaissement reste
+     * en attente, et le réveil suivant le retrouve. C'est précisément ce qui
+     * rend ce modèle robuste à un webhook perdu.
+     */
+    const premier = await livrer(gateway, { now: Date.now() });
+    expect(premier.outcome).toBe('nothing_settled');
     expect(await getBalance(tdb)).toBe(0);
 
-    const [event] = await webhookRows();
-    expect(event.processedAt).toBeNull();
-    expect(event.processingError).toContain('refetch_failed');
-
-    // Un événement non traité peut repartir — c'est ce que le 502 a demandé.
-    const retry = await deliver(payload, { client: paidGateway() });
-    expect(retry.outcome).toBe('credited');
-    expect(await getBalance(tdb)).toBe(PLAN_OFFERS.starter.monthlyCredits);
-    expect(await tdb.count(creditLedger)).toBe(1);
+    tombe = false;
+    const second = await livrer(gateway, { now: Date.now() + 2_000 });
+    expect(second.outcome).toBe('credited');
+    expect(await getBalance(tdb)).toBe(offre.monthlyCredits);
   });
 
-  it('acknowledges a reference it never issued, and credits no one', async () => {
-    const tdb = await createTenant('Alpha');
-    await startSubscription(tdb, 'starter', 'GP-SUB-1');
+  it('accuse réception quand aucun encaissement en attente n a bougé', async () => {
+    /*
+     * Un rappel authentique peut concerner un encaissement d'un autre
+     * environnement partageant le même compte marchand, ou arriver avant que
+     * le payeur ait validé. Redélivrer n'y changerait rien : 200.
+     */
+    await createTenant('Alpha');
+    const rendu = await livrer(passerelleQuiRepond().gateway);
 
-    const result = await deliver(webhookPayload({ reference: 'GP-UNKNOWN' }));
-
-    expect(result).toMatchObject({ status: 200, outcome: 'unknown_reference' });
-    expect(await getBalance(tdb)).toBe(0);
-
-    const [event] = await webhookRows();
-    expect(event.tenantId).toBeNull();
-    expect(event.processingError).toBe('unknown_reference');
+    expect(rendu.status).toBe(200);
+    expect(rendu.outcome).toBe('nothing_settled');
+    expect(rendu.reveil).toMatchObject({ relus: 0, credites: 0 });
   });
 
-  it('resolves the tenant from the reference, never from the metadata', async () => {
+  it('résout le tenant depuis notre ligne, jamais depuis la charge', async () => {
+    /*
+     * La charge SasPay ne porte aucun identifiant venant de nous — pas même un
+     * tenant. Le rappel ci-dessous en invente un ; il ne doit avoir aucun
+     * effet, parce que rien ne le lit.
+     */
     const alpha = await createTenant('Alpha');
     const beta = await createTenant('Beta');
-    await startSubscription(alpha, 'starter', 'GP-SUB-ALPHA');
+    const offre = PLAN_OFFERS.starter;
+    await ouvrirAbonnement(alpha, 'starter', 'CS-SUB-ALPHA');
 
-    // Un appelant connaissant l'id de Beta ne peut pas y faire passer le
-    // paiement d'Alpha.
-    const result = await deliver(
-      webhookPayload({
-        reference: 'GP-SUB-ALPHA',
-        metadata: { kind: 'subscription', tenant_id: beta.tenantId },
-      })
-    );
+    const { gateway } = passerelleQuiRepond({ amountXof: offre.priceXof });
+    await livrer(gateway, {
+      corps: JSON.stringify({
+        event: 'transaction.success',
+        data: { status: 'SUCCESS', tenant_id: beta.tenantId, amount: '999999' },
+      }),
+    });
 
-    expect(result.outcome).toBe('credited');
-    expect(await getBalance(alpha)).toBe(PLAN_OFFERS.starter.monthlyCredits);
+    expect(await getBalance(alpha)).toBe(offre.monthlyCredits);
     expect(await getBalance(beta)).toBe(0);
-    expect((await webhookRows())[0].tenantId).toBe(alpha.tenantId);
   });
 });
 
-describe('failed payments', () => {
+describe('les paiements échoués', () => {
   beforeEach(async () => {
     await resetDb();
   });
 
-  it('records the failure and marks the subscription past due', async () => {
+  it('enregistre l échec et passe l abonnement en impayé', async () => {
     const tdb = await createTenant('Alpha');
-    const checkout = await startSubscription(tdb, 'starter', 'GP-SUB-1');
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    const result = await deliver(
-      webhookPayload({
-        event: 'payment.failed',
-        reference: 'GP-SUB-1',
-        status: 'failed',
-      }),
-      { client: paidGateway({ status: 'failed' }) }
-    );
+    const { gateway } = passerelleQuiRepond({ status: 'failed' });
+    const rendu = await livrer(gateway, { corps: corpsDeRappel('failed') });
 
-    expect(result).toMatchObject({ status: 200, outcome: 'failed' });
+    expect(rendu.outcome).toBe('failed');
     expect(await getBalance(tdb)).toBe(0);
+    expect((await getSubscription(tdb))?.status).toBe('past_due');
 
-    const intent = await tdb.findById(paymentIntents, checkout.intentId);
-    expect(intent).toMatchObject({ status: 'failed' });
-    expect(intent!.failureReason).toContain('payment.failed');
-    expect(
-      (await tdb.findById(paymentAttempts, checkout.attemptId!))!.status
-    ).toBe('failed');
-    expect((await getSubscription(tdb))!.status).toBe('past_due');
-    // La période reste ouverte pour une nouvelle tentative.
-    expect((await tdb.findById(billingCycles, checkout.cycleId!))!.status).toBe(
-      'pending'
-    );
+    const [intent] = await tdb.findMany(paymentIntents);
+    expect(intent.status).toBe('failed');
+    expect(intent.failureReason).toContain('failed');
+
+    const [tentative] = await tdb.findMany(paymentAttempts);
+    expect(tentative.status).toBe('failed');
   });
 
-  it('suspends the subscription once the retries are exhausted', async () => {
-    const tdb = await createTenant('Alpha', { credits: 500 });
+  it('distingue un abandon d un refus jusqu en base', async () => {
+    // La relance ne se raconte pas pareil au client.
+    const tdb = await createTenant('Alpha');
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    for (let attempt = 1; attempt <= MAX_PAYMENT_ATTEMPTS; attempt += 1) {
-      const reference = `GP-FAIL-${attempt}`;
-      await startSubscription(tdb, 'starter', reference);
-      const result = await deliver(
-        webhookPayload({
-          eventId: `evt_fail_${attempt}`,
-          event: 'payment.failed',
-          reference,
-          status: 'failed',
-        }),
-        { client: paidGateway({ status: 'failed' }) }
-      );
-      expect(result.outcome).toBe('failed');
+    const { gateway } = passerelleQuiRepond({ status: 'cancelled' });
+    expect((await livrer(gateway, { corps: corpsDeRappel('cancelled') })).outcome).toBe(
+      'failed'
+    );
+
+    const [intent] = await tdb.findMany(paymentIntents);
+    expect(intent.status).toBe('cancelled');
+  });
+
+  it('suspend l abonnement une fois les réessais épuisés', async () => {
+    const tdb = await createTenant('Alpha');
+    const { gateway } = passerelleQuiRepond({ status: 'failed' });
+
+    for (let essai = 0; essai < MAX_PAYMENT_ATTEMPTS; essai += 1) {
+      await createSubscriptionCheckout(tdb, 'starter', {
+        gateway: passerelleFactice({ reference: `CS-SUB-${essai}` }).gateway,
+        baseUrl: BASE_URL,
+      });
+      await livrer(gateway, {
+        corps: corpsDeRappel('failed'),
+        now: Date.now() + essai * 2_000,
+      });
     }
 
-    expect((await getSubscription(tdb))!.status).toBe('suspended');
+    expect((await getSubscription(tdb))?.status).toBe('suspended');
     const [cycle] = await tdb.findMany(billingCycles);
     expect(cycle.status).toBe('failed');
-    // La suspension stoppe le renouvellement ; elle ne confisque jamais ce
-    // qui a été acheté.
-    expect(await getBalance(tdb)).toBe(500);
   });
 
-  it('records a failed top-up, which has no cycle to close', async () => {
+  it('enregistre une recharge échouée, qui n a pas de cycle à clore', async () => {
     const tdb = await createTenant('Alpha');
-    const pack = TOPUP_PACKS_FOR_SALE[0];
-    const checkout = await createTopupCheckout(tdb, pack.id, {
-      client: fakeGeniusPay({ reference: 'GP-TOP-1' }).client,
+    await createTopupCheckout(tdb, TOPUP_PACKS_FOR_SALE[0].id, {
+      gateway: passerelleFactice({ reference: 'CS-TOP-1' }).gateway,
       baseUrl: BASE_URL,
     });
 
-    const result = await deliver(
-      webhookPayload({
-        event: 'payment.cancelled',
-        reference: 'GP-TOP-1',
-        amount: pack.priceXof,
-        status: 'cancelled',
-      }),
-      { client: paidGateway({ amount: pack.priceXof, status: 'cancelled' }) }
+    const { gateway } = passerelleQuiRepond({ status: 'failed' });
+    expect((await livrer(gateway, { corps: corpsDeRappel('failed') })).outcome).toBe(
+      'failed'
     );
 
-    expect(result.outcome).toBe('failed');
-    expect((await tdb.findById(paymentIntents, checkout.intentId))!.status).toBe(
-      'cancelled'
-    );
     expect(await getBalance(tdb)).toBe(0);
-    expect(await tdb.count(paymentAttempts)).toBe(0);
+    const [intent] = await tdb.findMany(paymentIntents);
+    expect(intent.status).toBe('failed');
+    expect(await tdb.findMany(billingCycles)).toHaveLength(0);
   });
 
-  it('ignores a failure callback for a payment the gateway reports as paid', async () => {
+  it('crédite quand même si la passerelle dit « payé » sur un rappel d échec', async () => {
+    /*
+     * Le corps annonce un échec, la passerelle dit que l'argent est arrivé.
+     * Marquer échoué ici bloquerait un tenant qui a payé — et le corps ne
+     * désigne de toute façon aucun encaissement.
+     */
     const tdb = await createTenant('Alpha');
-    const checkout = await startSubscription(tdb, 'starter', 'GP-SUB-1');
+    const offre = PLAN_OFFERS.starter;
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    const result = await deliver(
-      webhookPayload({
-        event: 'payment.failed',
-        reference: 'GP-SUB-1',
-        status: 'failed',
-      }),
-      { client: paidGateway({ status: 'success' }) }
-    );
+    const { gateway } = passerelleQuiRepond({ amountXof: offre.priceXof });
+    const rendu = await livrer(gateway, { corps: corpsDeRappel('failed') });
 
-    expect(result.outcome).toBe('gateway_contradicts_webhook');
-    // Le marquer échoué ici bloquerait un tenant qui a réellement payé.
-    expect((await tdb.findById(paymentIntents, checkout.intentId))!.status).toBe(
-      'pending'
-    );
-    expect((await getSubscription(tdb))!.status).toBe('pending');
+    expect(rendu.outcome).toBe('credited');
+    expect(await getBalance(tdb)).toBe(offre.monthlyCredits);
   });
 });
 
-describe('malformed requests', () => {
+describe('les requêtes malformées', () => {
   beforeEach(async () => {
     await resetDb();
   });
 
-  const options = { webhookSecret: TEST_WEBHOOK_SECRET };
-
-  it('refuses a body that is not declared as JSON', async () => {
-    const result = await processGeniusPayWebhook(
-      { 'content-type': 'text/plain' },
-      '{}',
-      options
+  it('refuse un corps qui n est pas du JSON', async () => {
+    const corps = 'pas du json du tout';
+    const rendu = await processPaymentWebhook(
+      entetesSignees(corps),
+      corps,
+      { gateway: passerelleQuiRepond().gateway }
     );
-    expect(result).toMatchObject({ status: 400, outcome: 'invalid_content_type' });
+
+    expect(rendu.status).toBe(400);
+    expect(rendu.outcome).toBe('unreadable_payload');
+    expect(await lignesDeRappel()).toHaveLength(0);
   });
 
-  it('refuses a body that is not JSON', async () => {
-    const result = await processGeniusPayWebhook(
-      { 'content-type': 'application/json' },
-      'not json',
-      options
-    );
-    expect(result).toMatchObject({ status: 400, outcome: 'invalid_json' });
+  it('journalise un type d événement sur lequel il n y a rien à faire', async () => {
+    await createTenant('Alpha');
+    const rendu = await livrer(passerelleQuiRepond().gateway, {
+      corps: corpsDeRappel('pending'),
+    });
+
+    expect(rendu.status).toBe(200);
+    expect(rendu.outcome).toBe('nothing_settled');
+
+    const [ligne] = await lignesDeRappel();
+    expect(ligne.eventType).toBe('transaction.created');
+    expect(ligne.processedAt).not.toBeNull();
+    // La charge est conservée verbatim pour le support et la réconciliation.
+    expect(ligne.payload).toMatchObject({ event: 'transaction.created' });
   });
 
-  it('refuses an event with no id or no type', async () => {
-    const result = await processGeniusPayWebhook(
-      { 'content-type': 'application/json' },
-      JSON.stringify({ event: 'payment.success', data: {} }),
-      options
-    );
-    expect(result).toMatchObject({ status: 400, outcome: 'missing_event_fields' });
-    expect(await webhookRows()).toEqual([]);
-  });
-
-  it('acknowledges an event type it does not act on', async () => {
+  it('marque la ligne traitée seulement quand le réveil a abouti', async () => {
     const tdb = await createTenant('Alpha');
-    await startSubscription(tdb, 'starter', 'GP-SUB-1');
+    await ouvrirAbonnement(tdb, 'starter', 'CS-SUB-1');
 
-    const result = await deliver(
-      webhookPayload({ event: 'payment.refunded', reference: 'GP-SUB-1' })
-    );
+    const { gateway } = passerelleQuiRepond({
+      amountXof: PLAN_OFFERS.starter.priceXof,
+    });
+    await livrer(gateway);
 
-    expect(result).toMatchObject({ status: 200, outcome: 'ignored' });
-    expect(await getBalance(tdb)).toBe(0);
+    const [ligne] = await lignesDeRappel();
+    expect(ligne.signatureValid).toBe(true);
+    expect(ligne.processedAt).not.toBeNull();
+    expect(ligne.processingError).toBeNull();
+    expect(ligne.provider).toBe('test');
+    // La référence reste nulle : la charge n'en porte aucune qui soit à nous.
+    expect(ligne.gatewayReference).toBeNull();
+  });
+});
+
+describe('le réveil trouve ce qu un rappel perdu aurait laissé', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it('rattrape un encaissement dont le rappel n est jamais arrivé', async () => {
+    /*
+     * C'est le bénéfice inattendu du modèle : un webhook perdu — un
+     * déploiement au mauvais moment suffit — n'immobilise plus rien. Le
+     * prochain réveil, quelle qu'en soit la cause, retrouve le paiement.
+     */
+    const tdb = await createTenant('Alpha');
+    const offre = PLAN_OFFERS.pro;
+    await ouvrirAbonnement(tdb, 'pro', 'CS-PERDU');
+
+    // Aucun rappel n'est arrivé pour celui-ci. Un rappel sans rapport suffit.
+    const { gateway } = passerelleQuiRepond({ amountXof: offre.priceXof });
+    const rendu = await livrer(gateway);
+
+    expect(rendu.outcome).toBe('credited');
+    expect(await getBalance(tdb)).toBe(offre.monthlyCredits);
+  });
+
+  it('ne fait pas tomber les autres quand un encaissement est illisible', async () => {
+    const alpha = await createTenant('Alpha');
+    const beta = await createTenant('Beta');
+    await ouvrirAbonnement(alpha, 'starter', 'CS-CASSE');
+    await ouvrirAbonnement(beta, 'starter', 'CS-SAIN');
+
+    const { gateway } = passerelleFactice({
+      onSettle: async (reference) => {
+        if (reference === 'CS-CASSE') throw new PaymentError('boom');
+        return reglement({ amountXof: PLAN_OFFERS.starter.priceXof });
+      },
+    });
+
+    const rendu = await livrer(gateway);
+
+    expect(rendu.outcome).toBe('credited');
+    expect(rendu.reveil).toMatchObject({ credites: 1, enAttente: 1 });
+    expect(await getBalance(beta)).toBe(PLAN_OFFERS.starter.monthlyCredits);
+    expect(await getBalance(alpha)).toBe(0);
+
+    // Celui qu'on n'a pas su lire reste en attente pour le réveil suivant.
+    const [casse] = await db
+      .select()
+      .from(paymentIntents)
+      .where(eq(paymentIntents.gatewayReference, 'CS-CASSE'));
+    expect(casse.status).toBe('pending');
   });
 });

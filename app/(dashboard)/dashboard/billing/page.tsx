@@ -85,20 +85,19 @@ export default async function BillingPage({
         </p>
       </div>
 
-      {payment === 'success' && (
-        <p className="mb-6 rounded-md border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-400">
-          Paiement reçu. Les crédits apparaissent dès que GeniusPay confirme — généralement en quelques secondes.
-        </p>
-      )}
-      {payment === 'failed' && (
-        <p className="mb-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-          Le paiement n&apos;a pas abouti. Rien n&apos;a été débité — vous pouvez réessayer ci-dessous.
+      {payment === 'return' && (
+        <p className="mb-6 rounded-md border border-blue-500/30 bg-blue-500/10 p-4 text-sm text-blue-400">
+          Retour du paiement. Les crédits apparaissent dès que SasPay confirme —
+          généralement en quelques secondes. Si rien ne bouge, c&apos;est que le
+          paiement n&apos;a pas abouti : rien n&apos;a été débité et vous pouvez
+          réessayer ci-dessous.
         </p>
       )}
       {!overview.billingConfigured && (
         <p className="mb-6 rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-400">
-          Les clés GeniusPay manquent sur cette instance : le paiement est désactivé. Renseignez les trois variables{' '}
-          <code>GENIUS_SANDBOX_*</code> (ou <code>GENIUS_LIVE_*</code> avec <code>GENIUS_ENV=live</code>).
+          Les clés SasPay manquent sur cette instance : le paiement est désactivé. Renseignez{' '}
+          <code>SASPAY_SANDBOX_API_KEY</code> et <code>SASPAY_SANDBOX_WEBHOOK_SECRET</code>{' '}
+          (ou leurs jumelles <code>SASPAY_LIVE_*</code> avec <code>SASPAY_ENV=live</code>).
         </p>
       )}
 
@@ -236,7 +235,7 @@ export default async function BillingPage({
             })}
           </ul>
           <p className="mt-4 text-xs text-muted-foreground">
-            Mobile money ou carte, en XOF, via GeniusPay. Les plans Business sont sur devis.
+            Mobile money en XOF via SasPay — MTN, Moov et Celtiis Cash. Les plans Business sont sur devis.
           </p>
         </CardContent>
       </Card>

@@ -25,7 +25,10 @@ export async function POST(request: NextRequest) {
     assertCanManageBilling(user);
     const checkout = await createSubscriptionCheckout(
       tenantDb(user.tenantId),
-      plan
+      plan,
+      // Le payeur vient de la session, jamais du corps de la requête : c'est
+      // ce nom-là que le client verra sur son relevé.
+      { payer: { name: user.name ?? user.email, email: user.email } }
     );
     return Response.json(checkout, { status: 201 });
   } catch (error) {

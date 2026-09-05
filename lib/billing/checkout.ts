@@ -12,11 +12,12 @@ import {
 } from '@/lib/db/schema';
 import { getBalance } from '@/lib/credits';
 import {
-  GeniusPayClient,
-  createGeniusPayClient,
-  type CreatedPayment,
-} from '@/lib/payments/geniuspay';
-import { appBaseUrl, isBillingConfigured } from './config';
+  createPaymentGateway,
+  isBillingConfigured,
+  type OpenedCheckout,
+  type PaymentGateway,
+} from '@/lib/payments';
+import { appBaseUrl } from './config';
 import {
   MAX_PAYMENT_ATTEMPTS,
   PLAN_OFFERS,
@@ -58,9 +59,18 @@ export type CheckoutResult = {
 };
 
 type CheckoutOptions = {
-  /** Injectable pour les tests ; la production en construit un depuis l'environnement. */
-  client?: GeniusPayClient;
+  /** Injectable pour les tests ; la production en construit une depuis l'environnement. */
+  gateway?: PaymentGateway;
   baseUrl?: string;
+  /**
+   * Qui paie, tel que le prestataire l'exige sur sa page hébergée.
+   *
+   * Vient de l'appelant, qui tient la session — jamais d'une entrée du
+   * navigateur. Un défaut existe pour les tests et les instances sans session,
+   * mais un vrai encaissement doit porter un vrai payeur : c'est ce que le
+   * client verra sur son relevé.
+   */
+  payer?: { name: string; email: string; phone?: string };
 };
 
 /** Seul un owner ou un admin peut changer la facturation du workspace. */
@@ -73,15 +83,22 @@ export function assertCanManageBilling(user: { role: string }): void {
   }
 }
 
-function resolveClient(options: CheckoutOptions): GeniusPayClient {
-  return options.client ?? createGeniusPayClient();
+function resolveGateway(options: CheckoutOptions): PaymentGateway {
+  return options.gateway ?? createPaymentGateway();
 }
 
-function returnUrls(baseUrl: string, intentId: number) {
-  return {
-    successUrl: `${baseUrl}/dashboard/billing?payment=success&intent=${intentId}`,
-    errorUrl: `${baseUrl}/dashboard/billing?payment=failed&intent=${intentId}`,
-  };
+const PAYEUR_PAR_DEFAUT = { name: 'GenTube', email: 'billing@gentube.app' };
+
+/**
+ * Où le payeur revient — une seule URL, quel que soit ce qu'il a fait.
+ *
+ * SasPay n'accepte qu'un `return_url` là où GeniusPay en prenait deux. Ce
+ * n'est pas une perte : un retour n'a jamais prouvé un paiement, et deux URLs
+ * laissaient croire le contraire. La page d'arrivée dit « en cours de
+ * confirmation » et c'est le réveil qui tranche.
+ */
+function returnUrl(baseUrl: string, intentId: number): string {
+  return `${baseUrl}/dashboard/billing?payment=return&intent=${intentId}`;
 }
 
 /** La ligne d'abonnement du tenant, créée au premier checkout. */
@@ -169,7 +186,7 @@ async function attachGatewayResult(
   tdb: TenantDb,
   intent: PaymentIntent,
   attemptId: number | undefined,
-  created: CreatedPayment
+  created: OpenedCheckout
 ): Promise<void> {
   await tdb.update(
     paymentIntents,
@@ -177,7 +194,6 @@ async function attachGatewayResult(
       gatewayReference: created.reference,
       checkoutUrl: created.checkoutUrl,
       status: 'pending',
-      gatewayStatus: created.payment.status ?? null,
       updatedAt: new Date(),
     },
     eq(paymentIntents.id, intent.id)
@@ -233,7 +249,7 @@ export async function createSubscriptionCheckout(
   // La configuration est vérifiée avant la première écriture, pour qu'une
   // instance mal configurée réponde « non configuré » au lieu de laisser des
   // lignes orphelines derrière elle.
-  const client = resolveClient(options);
+  const gateway = resolveGateway(options);
   const baseUrl = options.baseUrl ?? appBaseUrl();
 
   const subscription = await getOrCreateSubscription(tdb, offer);
@@ -262,15 +278,14 @@ export async function createSubscriptionCheckout(
     status: 'pending',
   });
 
-  const { successUrl, errorUrl } = returnUrls(baseUrl, intent.id);
 
-  let created: CreatedPayment;
+  let created: OpenedCheckout;
   try {
-    created = await client.createPayment({
+    created = await gateway.openCheckout({
       amountXof: offer.priceXof,
       description: `GenTube — abonnement ${offer.name} (30 jours)`,
-      successUrl,
-      errorUrl,
+      returnUrl: returnUrl(baseUrl, intent.id),
+      customer: options.payer ?? PAYEUR_PAR_DEFAUT,
       // Informatives seulement. Le webhook résout le tenant depuis la
       // référence passerelle qu'il trouve dans notre propre ligne
       // payment_intents, jamais depuis ceci — les métadonnées sont fournies
@@ -313,7 +328,7 @@ export async function createTopupCheckout(
   options: CheckoutOptions = {}
 ): Promise<CheckoutResult> {
   const pack: TopupPack = getTopupPack(packId);
-  const client = resolveClient(options);
+  const gateway = resolveGateway(options);
   const baseUrl = options.baseUrl ?? appBaseUrl();
 
   const [intent] = await tdb.insert(paymentIntents, {
@@ -324,15 +339,14 @@ export async function createTopupCheckout(
     metadata: { pack_id: pack.id },
   });
 
-  const { successUrl, errorUrl } = returnUrls(baseUrl, intent.id);
 
-  let created: CreatedPayment;
+  let created: OpenedCheckout;
   try {
-    created = await client.createPayment({
+    created = await gateway.openCheckout({
       amountXof: pack.priceXof,
       description: `GenTube — recharge de ${pack.credits.toLocaleString('fr-FR')} crédits`,
-      successUrl,
-      errorUrl,
+      returnUrl: returnUrl(baseUrl, intent.id),
+      customer: options.payer ?? PAYEUR_PAR_DEFAUT,
       metadata: {
         kind: 'topup',
         tenant_id: tdb.tenantId,

@@ -1,4 +1,4 @@
-import { BillingNotConfiguredError } from './config';
+import { PaymentError, PaymentNotConfiguredError } from '@/lib/payments';
 import { InvalidAmountError, UnknownOfferError } from './plans';
 import { BillingError } from './checkout';
 
@@ -16,7 +16,8 @@ export function billingErrorResponse(error: unknown): {
   if (
     error instanceof BillingError ||
     error instanceof UnknownOfferError ||
-    error instanceof BillingNotConfiguredError
+    error instanceof PaymentNotConfiguredError ||
+    error instanceof PaymentError
   ) {
     return { status: error.statusCode, message: error.message };
   }

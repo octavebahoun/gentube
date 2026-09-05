@@ -117,7 +117,7 @@ export function isEncrypted(value: string): boolean {
   return value.startsWith(`${VERSION}:`);
 }
 
-/** Comparaison en temps constant pour les signatures webhook (Replicate, GeniusPay). */
+/** Comparaison en temps constant pour les signatures webhook (Replicate, SasPay). */
 export function safeEqual(a: string, b: string): boolean {
   const left = Buffer.from(a);
   const right = Buffer.from(b);

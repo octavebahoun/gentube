@@ -105,7 +105,7 @@
       <rect x="104" width="96" height="64" rx="8" fill="url(#thumb2)"/>
       <rect x="208" width="96" height="64" rx="8" fill="url(#thumb)"/>
     </g>
-    <text x="360" y="50" class="name">Actu tech Abidjan</text>
+    <text x="360" y="50" class="name">Actu tech Porto-Novo</text>
     <text x="360" y="74" class="mut">Neon cyberpunk newsroom, dynamic camera moves.</text>
     <text x="360" y="98" class="tiny">Créé le 22 août 2026</text>
     <text x="920" y="52" text-anchor="end" class="val">Vidéo</text><text x="920" y="72" text-anchor="end" class="tiny">pipeline</text>

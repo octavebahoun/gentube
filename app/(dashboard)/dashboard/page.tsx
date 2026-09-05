@@ -58,7 +58,7 @@ function PlanAndCredits() {
               Plan: {tenant?.plan ?? '—'}
             </p>
             <p className="text-sm text-muted-foreground">
-              Billed in XOF through GeniusPay —{' '}
+              Billed in XOF through SasPay —{' '}
               <a href="/dashboard/billing" className="underline">
                 manage your plan and credits
               </a>

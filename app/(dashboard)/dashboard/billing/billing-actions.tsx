@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 /**
- * Starts a checkout and hands the payer over to GeniusPay.
+ * Starts a checkout and hands the payer over to the payment gateway.
  *
  * The button never computes a price: it posts an offer id and follows the URL
  * the server got from the gateway. Amounts shown next to it come from the same

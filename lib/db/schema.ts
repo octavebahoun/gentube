@@ -548,7 +548,7 @@ export const creditLedger = pgTable(
     pocket: creditPocketEnum('pocket').notNull().default('plan'),
     videoId: integer('video_id').references(() => videos.id),
     balanceAfter: integer('balance_after').notNull(),
-    // Posé par les écritures pilotées par webhook (GeniusPay, Replicate) pour
+    // Posé par les écritures pilotées par webhook (SasPay, Replicate) pour
     // qu'un replay soit un no-op plutôt qu'un double crédit.
     idempotencyKey: varchar('idempotency_key', { length: 120 }),
     createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -615,7 +615,7 @@ export const soundAssets = pgTable(
 );
 
 // ---------------------------------------------------------------------------
-// Facturation (GeniusPay — mobile money + carte, XOF)
+// Facturation (mobile money en XOF ; SasPay depuis septembre 2026)
 //
 // La plateforme détient UN compte marchand : ses clés vivent dans
 // l'environnement, pas dans la base. Il n'y a volontairement pas de table de
@@ -730,9 +730,10 @@ export const paymentIntents = pgTable(
     ),
     amountXof: integer('amount_xof').notNull(),
     creditsGranted: integer('credits_granted').notNull(),
-    // Id propre de GeniusPay pour la transaction. Unique car c'est ce qui
-    // permet au webhook de résoudre un tenant — une référence, une intention,
-    // un tenant.
+    // Notre clé chez le prestataire : une session de checkout chez SasPay.
+    // Unique car c'est elle qui relie un encaissement à un tenant — une
+    // référence, une intention, un tenant. Le rappel SasPay ne la porte pas :
+    // c'est le réveil (`lib/billing/reveil.ts`) qui la relit une par une.
     gatewayReference: varchar('gateway_reference', { length: 120 }),
     checkoutUrl: text('checkout_url'),
     status: paymentStatusEnum('status').notNull().default('created'),

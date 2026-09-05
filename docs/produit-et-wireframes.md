@@ -416,7 +416,7 @@ Liste de cartes cliquables, une par projet, en pleine largeur. Chaque carte :
 Survol : la bordure de la carte passe en orange clair.
 
 Données d'exemple : "Histoires du Bénin" (mixte, 4 vidéos), "Recettes rapides"
-(images, 12 vidéos), "Actu tech Abidjan" (vidéo, 0 vidéo).
+(images, 12 vidéos), "Actu tech Porto-Novo" (vidéo, 0 vidéo).
 
 Montre aussi l'état vide : une carte centrée avec un pictogramme de pellicule,
 le titre "Aucun projet", un paragraphe expliquant qu'un projet porte un style,

@@ -10,8 +10,8 @@ import {
 import { getBalance } from '@/lib/credits';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import { closeDb, createTenant, resetDb } from '@/lib/test/fixtures';
-import { fakeGeniusPay } from '@/lib/test/geniuspay';
-import { GeniusPayError } from '@/lib/payments/geniuspay';
+import { passerelleFactice } from '@/lib/test/paiement';
+import { PaymentError } from '@/lib/payments';
 import {
   BillingError,
   assertCanManageBilling,
@@ -35,9 +35,9 @@ const BASE_URL = 'https://app.test';
 
 /** Un checkout dont l'appel passerelle échoue toujours. */
 function refusingGateway() {
-  return fakeGeniusPay({
-    onCreate: async () => {
-      throw new GeniusPayError('Gateway unavailable');
+  return passerelleFactice({
+    onOpen: async () => {
+      throw new PaymentError('Gateway unavailable');
     },
   });
 }
@@ -45,7 +45,7 @@ function refusingGateway() {
 async function failingCheckout(tdb: TenantDb, plan = 'starter') {
   await expect(
     createSubscriptionCheckout(tdb, plan, {
-      client: refusingGateway().client,
+      gateway: refusingGateway().gateway,
       baseUrl: BASE_URL,
     })
   ).rejects.toThrow(BillingError);
@@ -58,14 +58,14 @@ describe('subscription checkout', () => {
 
   it('creates the rows a confirmation will be matched against, and charges nothing', async () => {
     const tdb = await createTenant('Alpha');
-    const fake = fakeGeniusPay({ reference: 'GP-SUB-1' });
+    const fake = passerelleFactice({ reference: 'GP-SUB-1' });
 
     const checkout = await createSubscriptionCheckout(tdb, 'pro', {
-      client: fake.client,
+      gateway: fake.gateway,
       baseUrl: BASE_URL,
     });
 
-    expect(checkout.checkoutUrl).toBe('https://geniuspay.ci/checkout/GP-SUB-1');
+    expect(checkout.checkoutUrl).toBe('https://pay.test/checkout/GP-SUB-1');
     expect(checkout.gatewayReference).toBe('GP-SUB-1');
 
     const intent = await tdb.findById(paymentIntents, checkout.intentId);
@@ -107,7 +107,7 @@ describe('subscription checkout', () => {
     const tdb = await createTenant('Alpha');
 
     await createSubscriptionCheckout(tdb, 'pro', {
-      client: fakeGeniusPay().client,
+      gateway: passerelleFactice().gateway,
       baseUrl: BASE_URL,
     });
 
@@ -121,18 +121,19 @@ describe('subscription checkout', () => {
 
   it('sends the amount, the return URLs and the ids the webhook will carry', async () => {
     const tdb = await createTenant('Alpha');
-    const fake = fakeGeniusPay({ reference: 'GP-SUB-2' });
+    const fake = passerelleFactice({ reference: 'GP-SUB-2' });
 
     const checkout = await createSubscriptionCheckout(tdb, 'starter', {
-      client: fake.client,
+      gateway: fake.gateway,
       baseUrl: BASE_URL,
     });
 
-    expect(fake.created).toHaveLength(1);
-    expect(fake.created[0]).toMatchObject({
+    expect(fake.ouverts).toHaveLength(1);
+    expect(fake.ouverts[0]).toMatchObject({
       amountXof: PLAN_OFFERS.starter.priceXof,
-      successUrl: `${BASE_URL}/dashboard/billing?payment=success&intent=${checkout.intentId}`,
-      errorUrl: `${BASE_URL}/dashboard/billing?payment=failed&intent=${checkout.intentId}`,
+      // Une seule URL de retour : un retour n'a jamais prouvé un paiement, et
+      // deux URLs laissaient croire le contraire. C'est le réveil qui tranche.
+      returnUrl: `${BASE_URL}/dashboard/billing?payment=return&intent=${checkout.intentId}`,
       metadata: {
         kind: 'subscription',
         tenant_id: tdb.tenantId,
@@ -146,12 +147,12 @@ describe('subscription checkout', () => {
 
   it('refuses a plan that is not sold online, before writing anything', async () => {
     const tdb = await createTenant('Alpha');
-    const fake = fakeGeniusPay();
+    const fake = passerelleFactice();
 
     for (const plan of ['business', 'enterprise', undefined]) {
       await expect(
         createSubscriptionCheckout(tdb, plan, {
-          client: fake.client,
+          gateway: fake.gateway,
           baseUrl: BASE_URL,
         })
       ).rejects.toThrow(UnknownOfferError);
@@ -159,7 +160,7 @@ describe('subscription checkout', () => {
 
     expect(await tdb.count(paymentIntents)).toBe(0);
     expect(await tdb.count(subscriptions)).toBe(0);
-    expect(fake.created).toHaveLength(0);
+    expect(fake.ouverts).toHaveLength(0);
   });
 
   it('closes the intent and the attempt when the gateway refuses the call', async () => {
@@ -185,7 +186,7 @@ describe('subscription checkout', () => {
 
     await failingCheckout(tdb);
     const retry = await createSubscriptionCheckout(tdb, 'starter', {
-      client: fakeGeniusPay({ reference: 'GP-SUB-RETRY' }).client,
+      gateway: passerelleFactice({ reference: 'GP-SUB-RETRY' }).gateway,
       baseUrl: BASE_URL,
     });
 
@@ -204,7 +205,7 @@ describe('subscription checkout', () => {
     const [firstCycle] = await tdb.findMany(billingCycles);
 
     const fresh = await createSubscriptionCheckout(tdb, 'starter', {
-      client: fakeGeniusPay({ reference: 'GP-SUB-FRESH' }).client,
+      gateway: passerelleFactice({ reference: 'GP-SUB-FRESH' }).gateway,
       baseUrl: BASE_URL,
     });
 
@@ -222,10 +223,10 @@ describe('top-up checkout', () => {
   it('creates a standalone intent, with no cycle and no subscription', async () => {
     const tdb = await createTenant('Alpha');
     const pack = TOPUP_PACKS_FOR_SALE[0];
-    const fake = fakeGeniusPay({ reference: 'GP-TOP-1' });
+    const fake = passerelleFactice({ reference: 'GP-TOP-1' });
 
     const checkout = await createTopupCheckout(tdb, pack.id, {
-      client: fake.client,
+      gateway: fake.gateway,
       baseUrl: BASE_URL,
     });
 
@@ -238,7 +239,7 @@ describe('top-up checkout', () => {
       amountXof: pack.priceXof,
       creditsGranted: pack.credits,
     });
-    expect(fake.created[0]).toMatchObject({
+    expect(fake.ouverts[0]).toMatchObject({
       amountXof: pack.priceXof,
       metadata: { kind: 'topup', tenant_id: tdb.tenantId, pack_id: pack.id },
     });
@@ -253,7 +254,7 @@ describe('top-up checkout', () => {
 
     await expect(
       createTopupCheckout(tdb, 'topup-999', {
-        client: fakeGeniusPay().client,
+        gateway: passerelleFactice().gateway,
         baseUrl: BASE_URL,
       })
     ).rejects.toThrow(UnknownOfferError);
@@ -284,7 +285,7 @@ describe('billing access', () => {
     const beta = await createTenant('Beta');
 
     const checkout = await createSubscriptionCheckout(alpha, 'starter', {
-      client: fakeGeniusPay({ reference: 'GP-SUB-ALPHA' }).client,
+      gateway: passerelleFactice({ reference: 'GP-SUB-ALPHA' }).gateway,
       baseUrl: BASE_URL,
     });
 

@@ -307,8 +307,8 @@ export default function HomePage() {
           </Card>
         </div>
         <p className="mx-auto mt-4 max-w-2xl text-center text-xs text-muted-foreground">
-          Recharge : 5 000 FCFA = 720 crédits (n’expire jamais). Plafond GeniusPay 500 kF/mois pour toute la
-          plateforme.
+          Recharge : 5 000 FCFA = 720 crédits (n’expire jamais). Paiement mobile
+          money — MTN, Moov, Celtiis Cash.
         </p>
       </section>
 

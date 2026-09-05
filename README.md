@@ -554,11 +554,12 @@ seconde ne ponctue plus ce qu'il devait ponctuer.
 
 ---
 
-## Facturation — GeniusPay
+## Facturation — SasPay
 
 Abonnements mensuels (Starter 15 000 / Pro 30 000 FCFA) et recharges ponctuelles,
-en XOF, par mobile money ou carte. Tout est dans `lib/billing/` et
-`lib/payments/geniuspay.ts`.
+en XOF, par mobile money. Le métier est dans `lib/billing/` ; le prestataire est
+derrière une passerelle, `lib/payments/`, sur le modèle de la voix et de la
+vidéo — `createPaymentGateway()` est la seule entrée que le métier connaisse.
 
 ### La configuration est écrite à la main
 
@@ -583,18 +584,20 @@ configuré » au lieu de laisser des lignes orphelines derrière elle.
 
 ### Le webhook, dans cet ordre
 
-`lib/billing/webhook.ts`, appelé par `POST /api/webhooks/geniuspay` :
+`lib/billing/webhook.ts`, appelé par `POST /api/webhooks/saspay` :
 
 | Étape | Effet d'un échec |
 |---|---|
-| 1. corps JSON valide | `400`, rien écrit |
-| 2. horodatage dans ±300 s | `400`, rien écrit |
-| 3. **signature HMAC** | `401`, **rien écrit** |
-| 4. journalisation, unique sur `event_id` | rejeu déjà traité → `200` sans effet |
-| 5. tenant résolu depuis **notre** `payment_intents` | référence inconnue → `200` |
-| 6. **re-fetch** du paiement chez GeniusPay | `502`, la passerelle rejouera |
-| 7. statut, montant et devise comparés à l'intent | `200`, aucun crédit |
-| 8. crédit + cycle + plan, en une transaction | — |
+| 1. **signature HMAC et horodatage à ±300 s** | `401`, **rien écrit** |
+| 2. lecture de l'événement | `400`, rien écrit |
+| 3. journalisation, unique sur `(provider, event_id)` | rejeu déjà traité → `200` sans effet |
+| 4. **réveil** : relecture des encaissements en attente | `502`, le prestataire rejouera |
+| 5. statut, montant et devise comparés à l'intent | `200`, aucun crédit |
+| 6. crédit + cycle + plan, en une transaction | — |
+
+L'étape 4 remplace le couple « résoudre par référence puis re-lire » : la charge
+de SasPay ne porte aucune de nos clés, donc c'est notre propre file d'attente
+qui dit quoi relire. Voir plus bas, « Pourquoi le rappel ne suffit pas ».
 
 Deux écarts assumés par rapport au pipeline Contravo :
 
@@ -733,32 +736,48 @@ paraît plafonné sans raison.
 
 ### Facturation
 
-Les clés sandbox et live cohabitent sous leurs propres noms, et `GENIUS_ENV`
-(`sandbox` par défaut) désigne le jeu actif :
+**SasPay** encaisse depuis le 5 septembre 2026, en remplacement de GeniusPay.
+Mobile money au Bénin : MTN, Moov, Celtiis Cash.
+
+Les clés bac à sable et production cohabitent sous leurs propres noms, et
+`SASPAY_ENV` (`sandbox` par défaut) désigne le jeu actif :
 
 ```
-GENIUS_ENV=sandbox|live
-GENIUS_URL_ENDPOINT=https://geniuspay.ci/api/v1/merchant
-GENIUS_SANDBOX_API_KEY / _SECRET_KEY / _WEBHOOK_SECRET
-GENIUS_LIVE_API_KEY    / _SECRET_KEY / _WEBHOOK_SECRET
+PAYMENT_PROVIDER=              # vide = saspay, le seul branché
+SASPAY_ENV=sandbox|live
+SASPAY_SANDBOX_API_KEY / _WEBHOOK_SECRET
+SASPAY_LIVE_API_KEY    / _WEBHOOK_SECRET
 ```
 
-Passer en production, c'est **ajouter** trois variables et basculer `GENIUS_ENV`
-— aucun renommage, les clés sandbox restent en place. Un jeu ne peut pas
-satisfaire l'autre : en `live`, les clés sandbox ne sont même pas lues, et
-l'erreur nomme les variables de l'environnement actif.
-
-Les trois secrets d'un jeu sont exigés **ensemble**. Sans le secret de webhook,
-un checkout aboutirait, le client paierait, et rien ne créditerait jamais son
-solde faute de pouvoir vérifier la confirmation.
-
-Toute valeur de `GENIUS_ENV` autre que très exactement `live` vaut `sandbox` :
+Toute valeur de `SASPAY_ENV` autre que très exactement `live` vaut `sandbox` :
 passer en réel est un acte explicite, jamais une faute de frappe. Et c'est la
-**clé** qui décide du bac à sable, pas la variable — une clé `live` rangée sous
-un nom `GENIUS_SANDBOX_*` lève une erreur à la construction du client plutôt que
+**clé** qui décide, pas la variable — une clé `sk_live_` rangée sous un nom
+`SASPAY_SANDBOX_*` lève une erreur à la construction du client plutôt que
 d'encaisser pour de vrai dans ce que tout le reste appelle une simulation.
 
-Webhook à déclarer côté GeniusPay : `${BASE_URL}/api/webhooks/geniuspay`.
+Les deux secrets d'un jeu sont exigés **ensemble**. Sans le secret de webhook,
+un checkout aboutirait, le client paierait, et rien ne créditerait jamais son
+solde faute de pouvoir vérifier le rappel.
+
+Webhook à déclarer dans `app.saspay.me` > Webhooks :
+`${BASE_URL}/api/webhooks/saspay`. **Saisis ton propre secret de signature**
+dans leur formulaire plutôt que de le laisser générer : une valeur générée
+n'est affichée qu'une fois et n'est plus jamais consultable.
+
+#### Pourquoi le rappel ne suffit pas
+
+La charge de rappel de SasPay ne porte **aucun identifiant venant de nous** —
+ni métadonnées, ni id de session de checkout, seulement une référence de
+transaction qu'il a générée et que nous n'avons jamais vue. Elle ne permet donc
+pas d'aller au compte à créditer.
+
+Le rappel sert donc de **réveil** : à sa réception, `lib/billing/reveil.ts`
+relit nos propres encaissements en attente auprès de la passerelle, et
+`settle()` dit lequel a abouti. C'est la règle du pipeline poussée jusqu'au
+bout — la passerelle fait autorité, jamais un corps de webhook.
+
+Effet de bord bienvenu : un rappel perdu n'immobilise plus rien. Le prochain
+réveil, quelle qu'en soit la cause, retrouve le paiement.
 
 ---
 
