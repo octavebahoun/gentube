@@ -47,6 +47,15 @@ export type Effet = {
    * la scène a une illustration.
    */
   fond?: boolean;
+  /**
+   * Ce que la nappe fait, en une phrase, pour le prompt système.
+   *
+   * Elle est ici et pas dans `prompt.ts` pour la raison qui gouverne toutes
+   * les listes du dépôt : écrite à la main ailleurs, elle s'arrête sans
+   * prévenir. Le 5 septembre, 34 des 43 nappes n'avaient aucune ligne de
+   * prompt — le rendu les dessinait, et le modèle ne pouvait pas les demander.
+   */
+  phrase: string;
   /** Les réglages, avec leur variable CSS et leur valeur par défaut. */
   reglages: Record<string, { css?: string; defaut: number | string | boolean }>;
 };
@@ -56,6 +65,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'vignette',
     id: 'vg',
     minutage: 'etat',
+    phrase: 'darkens the edges to pull focus inward.',
     reglages: { strength: { css: '--vg-strength', defaut: 0.55 } },
   },
   shockRing: {
@@ -65,12 +75,14 @@ export const EFFETS: Record<string, Effet> = {
     depart: 0.3,
     duree: 0.6,
     surLeTemps: true,
+    phrase: 'expands one accent ring, for a name that lands.',
     reglages: { color: { css: '--ring-color', defaut: '#ce1f20' } },
   },
   featherSpot: {
     classe: 'feather-spot',
     id: 'fs',
     minutage: 'ambiance',
+    phrase: 'dims all but one soft area.',
     reglages: {
       x: { css: '--spot-x', defaut: 50 },
       y: { css: '--spot-y', defaut: 42 },
@@ -82,6 +94,7 @@ export const EFFETS: Record<string, Effet> = {
     id: 'gd',
     minutage: 'ambiance',
     fond: true,
+    phrase: 'drifts a faint technical grid behind the shot.',
     reglages: { opacity: { defaut: 0.5 } },
   },
   auroraDrift: {
@@ -89,6 +102,7 @@ export const EFFETS: Record<string, Effet> = {
     id: 'au',
     minutage: 'ambiance',
     fond: true,
+    phrase: 'drifts three soft colour fields behind it.',
     reglages: { opacity: { defaut: 0.8 } },
   },
   scanGate: {
@@ -98,6 +112,7 @@ export const EFFETS: Record<string, Effet> = {
     depart: 0.4,
     duree: 1.2,
     surLeTemps: true,
+    phrase: 'brackets the frame and sweeps a line: verifying.',
     reglages: { color: { css: '--gate-color', defaut: '#4ad9ff' } },
   },
   outlineDraw: {
@@ -107,6 +122,7 @@ export const EFFETS: Record<string, Effet> = {
     depart: 0.4,
     duree: 1,
     surLeTemps: true,
+    phrase: 'draws an outline around the frame to prove a callout.',
     reglages: { color: { css: '--trace-color', defaut: '#ffd9a0' } },
   },
   toggleFlip: {
@@ -115,6 +131,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.5,
     duree: 0.7,
+    phrase: 'flips an oversized UI switch: enable, turn on.',
     reglages: { on: { defaut: true } },
   },
   /*
@@ -131,6 +148,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.5,
     duree: 0.9,
+    phrase: 'glides a cursor across the frame and clicks.',
     reglages: {
       x: { defaut: 62 },
       y: { defaut: 55 },
@@ -143,6 +161,7 @@ export const EFFETS: Record<string, Effet> = {
     id: 'mb',
     minutage: 'ambiance',
     fond: true,
+    phrase: 'lays a soft marketing gradient behind the shot.',
     reglages: { opacity: { defaut: 0.9 } },
   },
   ytLcdBackground: {
@@ -150,6 +169,7 @@ export const EFFETS: Record<string, Effet> = {
     id: 'lb',
     minutage: 'ambiance',
     fond: true,
+    phrase: 'lays a hard screen-lit backdrop behind it.',
     reglages: { opacity: { defaut: 0.85 } },
   },
   meshGradientBg: {
@@ -157,6 +177,7 @@ export const EFFETS: Record<string, Effet> = {
     id: 'mg',
     minutage: 'ambiance',
     fond: true,
+    phrase: 'lays a slow mesh of colours behind it.',
     reglages: { opacity: { defaut: 0.8 } },
   },
   beatPulseBackground: {
@@ -164,6 +185,7 @@ export const EFFETS: Record<string, Effet> = {
     id: 'bp',
     minutage: 'ambiance',
     fond: true,
+    phrase: 'pulses the backdrop once per musical hit.',
     reglages: { opacity: { defaut: 0.7 } },
   },
   grainField: {
@@ -171,24 +193,28 @@ export const EFFETS: Record<string, Effet> = {
     id: 'gf',
     minutage: 'ambiance',
     fond: true,
+    phrase: 'floats a field of drifting specks over the shot.',
     reglages: { density: { defaut: 0.5 } },
   },
   camcorderHud: {
     classe: 'camcorder-hud',
     id: 'ch',
     minutage: 'ambiance',
+    phrase: 'frames the shot as a camcorder viewfinder: REC, battery.',
     reglages: { rec: { defaut: true } },
   },
   ytScreenWarp: {
     classe: 'screen-warp',
     id: 'sw',
     minutage: 'ambiance',
+    phrase: 'bends the frame like a curved screen for one beat.',
     reglages: { opacity: { defaut: 0.8 } },
   },
   ytFeatherHighlight: {
     classe: 'feather-highlight',
     id: 'fh',
     minutage: 'ambiance',
+    phrase: 'lifts one soft band of light across the shot.',
     reglages: {
       x: { css: '--fh-x', defaut: 50 },
       y: { css: '--fh-y', defaut: 50 },
@@ -201,6 +227,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.2,
     duree: 1.5,
+    phrase: 'passes one hard glint across the frame.',
     reglages: { opacity: { defaut: 0.7 } },
   },
   glossSweep: {
@@ -209,6 +236,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.3,
     duree: 1.0,
+    phrase: 'passes a wide satin sheen across it, slower.',
     reglages: { opacity: { defaut: 0.6 } },
   },
   inlineHighlight: {
@@ -217,6 +245,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.4,
     duree: 0.8,
+    phrase: 'wipes a marker highlight behind the line of text.',
     reglages: { color: { css: '--hl-color', defaut: '#ffe066' } },
   },
   confetti: {
@@ -226,6 +255,7 @@ export const EFFETS: Record<string, Effet> = {
     depart: 0.2,
     duree: 1.5,
     surLeTemps: true,
+    phrase: 'drops a short burst of confetti: a win, a launch.',
     reglages: { count: { defaut: 30 } },
   },
 
@@ -251,6 +281,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.2,
     duree: 0.6,
+    phrase: 'rules one hairline across the frame, to split it.',
     reglages: {
       orientation: { css: '--sep-dir', defaut: 'horizontal' },
       color: { css: '--sep-color', defaut: 'rgba(255,255,255,0.55)' },
@@ -261,6 +292,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'line-loader',
     id: 'lld',
     minutage: 'ambiance',
+    phrase: 'runs a loading track whose segment travels.',
     reglages: { color: { css: '--loader-color', defaut: '#4ad9ff' } },
   },
   /** Un treillis de cellules qui se découvre en diagonale. */
@@ -269,6 +301,7 @@ export const EFFETS: Record<string, Effet> = {
     id: 'lat',
     minutage: 'ambiance',
     fond: true,
+    phrase: 'uncovers a lattice of cells on the diagonal.',
     reglages: { color: { css: '--lat-color', defaut: 'rgba(255,255,255,0.14)' } },
   },
   /** L'ellipse d'annotation tracée à la volée. */
@@ -278,6 +311,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.4,
     duree: 1,
+    phrase: 'circles one spot by hand, as an annotation.',
     reglages: {
       color: { css: '--cp-color', defaut: '#ffd400' },
       x: { css: 'left', defaut: 50 },
@@ -289,6 +323,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'scroll-feed',
     id: 'sf',
     minutage: 'ambiance',
+    phrase: 'scrolls a column of skeleton cards upward: a feed.',
     reglages: {},
   },
   /** Des bandeaux de notification qui s'empilent en haut. */
@@ -298,6 +333,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.3,
     duree: 1.4,
+    phrase: 'piles notification banners at the top of the frame.',
     reglages: {},
   },
   /** Une carte qui s'ouvre en panneau. */
@@ -307,6 +343,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.3,
     duree: 1,
+    phrase: 'opens a card into a panel: a dialog appearing.',
     reglages: {},
   },
   /** Le cadre d'un téléphone posé au centre. */
@@ -314,6 +351,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'device-frame',
     id: 'df',
     minutage: 'etat',
+    phrase: 'stands a phone frame at the centre of the shot.',
     reglages: {},
   },
   /** Un trait de feutre sur un tableau blanc. */
@@ -323,6 +361,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.3,
     duree: 1.2,
+    phrase: 'strokes a marker line across a whiteboard.',
     reglages: { color: { css: '--ink-color', defaut: '#1f6feb' } },
   },
   /** Une liste tirée vers le bas, et son ressort. */
@@ -332,6 +371,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.3,
     duree: 1.2,
+    phrase: 'pulls a list down and springs it back.',
     reglages: {},
   },
   /** Un rail d'étapes franchies l'une après l'autre. */
@@ -339,6 +379,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'stepper-flow',
     id: 'osf',
     minutage: 'ambiance',
+    phrase: 'walks a rail of steps, one cleared after another.',
     reglages: { color: { css: '--step-color', defaut: '#4ad9ff' } },
   },
   /** Des interrupteurs de réglages, dont un basculé. */
@@ -346,6 +387,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'settings-flow',
     id: 'stf',
     minutage: 'ambiance',
+    phrase: 'shows a settings list with one switch flipping.',
     reglages: {},
   },
   /** Un formulaire d'inscription, en squelette. */
@@ -353,6 +395,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'signup-flow',
     id: 'sgf',
     minutage: 'ambiance',
+    phrase: 'fills a skeleton sign-up form, field by field.',
     reglages: { color: { css: '--form-accent', defaut: '#ce1f20' } },
   },
   /** La barre d'outils d'un éditeur vectoriel, et son tracé. */
@@ -360,6 +403,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'vector-rig',
     id: 'vr',
     minutage: 'ambiance',
+    phrase: 'shows a vector editor toolbar and the path it draws.',
     reglages: {},
   },
   /** Une pile de cartes décalées, comme une piste de montage. */
@@ -367,6 +411,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'scrub-stack',
     id: 'kss',
     minutage: 'ambiance',
+    phrase: 'stacks offset cards like an edit track being scrubbed.',
     reglages: {},
   },
   /** Trois cartes en profondeur, vues de biais. */
@@ -374,6 +419,7 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'depth-stack',
     id: 'drs',
     minutage: 'ambiance',
+    phrase: 'sets three cards in depth, seen at an angle.',
     reglages: {},
   },
   /** Un point qui suit un arc, et l'arc derrière lui. */
@@ -383,6 +429,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.3,
     duree: 1.2,
+    phrase: 'sends a dot along an arc, with the arc behind it.',
     reglages: { color: { css: '--arc-color', defaut: '#ffd9a0' } },
   },
   /** Le rond de contact d'un doigt sur l'écran. */
@@ -392,6 +439,7 @@ export const EFFETS: Record<string, Effet> = {
     minutage: 'ponctuel',
     depart: 0.4,
     duree: 0.9,
+    phrase: 'puts a finger-contact ring on the screen.',
     reglages: {
       x: { css: 'left', defaut: 50 },
       y: { css: 'top', defaut: 55 },
@@ -402,7 +450,59 @@ export const EFFETS: Record<string, Effet> = {
     classe: 'glyph-trail',
     id: 'gt',
     minutage: 'ambiance',
+    phrase: 'trails glyphs behind a moving cursor.',
     reglages: { color: { css: '--trail-color', defaut: 'rgba(255,255,255,0.5)' } },
+  },
+  /**
+   * L'habillage d'arrêt sur image : un papier, du ruban adhésif, un liseré.
+   *
+   * Les deux réglages sont des interrupteurs, portés en variable CSS comme des
+   * nombres — `1` ou `0` — parce qu'une opacité se lit dans la feuille de style
+   * sans qu'aucune règle n'ait à connaître le mot « vrai ».
+   */
+  freezeFrameDressing: {
+    classe: 'freeze-dressing',
+    id: 'ffd',
+    minutage: 'ambiance',
+    phrase: 'dresses the shot as a freeze-frame: paper, tape, edge.',
+    reglages: {
+      paperTexture: { css: '--ffd-paper', defaut: true },
+      tapeStickers: { css: '--ffd-tape', defaut: true },
+    },
+  },
+  /**
+   * Le volet en chevron qui découvre le média.
+   *
+   * La demande parlait d'un masque en forme de logotype. Le logo du client
+   * n'existe nulle part dans le produit — même raison que `logoUrl` — donc la
+   * forme est un chevron, écrite dans la feuille. Elle se découvre par
+   * `clip-path` et non par `mask` : un masque plein cadre est une passe de
+   * rastérisation par image, un `clip-path` n'en est pas une.
+   */
+  svgMaskReveal: {
+    classe: 'mask-reveal',
+    id: 'smr',
+    minutage: 'ponctuel',
+    duree: 1.1,
+    phrase: 'wipes a chevron shutter off the media.',
+    reglages: { color: { css: '--smr-color', defaut: '#0b0b0d' } },
+  },
+  /**
+   * Le cadre éclairé, et la lumière qui le parcourt.
+   *
+   * `featherSpot` assombrit hors d'une tache ; celui-ci fait l'inverse — il
+   * pose un cadre et promène une lueur dessus. La lueur est une variable CSS
+   * animée : la nappe n'a pas d'enfant à qui donner un tween.
+   */
+  spotlightCard: {
+    classe: 'spotlight-card',
+    id: 'spc',
+    minutage: 'ambiance',
+    phrase: 'lights a frame and walks a glow along it.',
+    reglages: {
+      color: { css: '--spc-color', defaut: 'rgba(255,255,255,0.85)' },
+      inset: { css: '--spc-inset', defaut: 8 },
+    },
   },
 };
 

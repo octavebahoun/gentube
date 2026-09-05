@@ -133,7 +133,6 @@ export const TITRES_JS = `
         "micro-transitions": { de: { opacity: 0, y: "0.2em", scale: 0.95 }, vers: { opacity: 1, y: "0em", scale: 1 }, ease: "power2.out" },
         "panel-reveal": { de: { opacity: 0, scaleY: 0.2, transformOrigin: "top" }, vers: { opacity: 1, scaleY: 1 }, ease: "power3.out" },
         "tabs-slide-indicator": { de: { opacity: 0, x: "-0.5em" }, vers: { opacity: 1, x: "0em" }, ease: "power2.out" },
-        "avatar-group-hover": { de: { opacity: 0, y: "0.4em", scale: 0.85 }, vers: { opacity: 1, y: "0em", scale: 1 }, ease: "back.out(1.6)" },
         callout: { de: { opacity: 0, scale: 0.9, y: "0.2em" }, vers: { opacity: 1, scale: 1, y: "0em" }, ease: "power2.out" },
         morphtext: { de: { opacity: 0, filter: "blur(12px)" }, vers: { opacity: 1, filter: "blur(0px)" }, ease: "power3.inOut" },
         "logo-outro": { de: { opacity: 0, scale: 0.7 }, vers: { opacity: 1, scale: 1 }, ease: "back.out(1.8)" },

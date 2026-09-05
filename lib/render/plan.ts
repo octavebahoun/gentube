@@ -232,6 +232,23 @@ export function buildTimeline(
           ? null
           : kenBurns(scene.effects?.zoom),
         rate: isVideoPath(scene.mediaPath) ? (scene.playbackRate ?? 1) : null,
+        /*
+         * Le mouvement de caméra, composé avec le Ken Burns.
+         *
+         * Il ne touche ni l'échelle ni l'opacité : le zoom porte la première,
+         * le fondu la seconde. Une translation et une inclinaison, rien de
+         * plus, et bornées par la scène comme toutes les nappes d'ambiance.
+         */
+        cameraMove: scene.effects?.ytCameraMove
+          ? {
+              mode: scene.effects.ytCameraMove.mode ?? 'slide',
+              at: ms(scene.startInSeconds),
+              duration: Math.min(
+                scene.effects.ytCameraMove.durationInSeconds ?? scene.durationInSeconds,
+                scene.durationInSeconds
+              ),
+            }
+          : null,
         shake: scene.effects?.shake === true,
         // Un tremblement calé démarre sur la frappe plutôt qu'avec la scène.
         shakeAt: scene.effects?.shake

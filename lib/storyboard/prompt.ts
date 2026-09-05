@@ -1,4 +1,5 @@
 import { TRANSITIONS } from './render';
+import { EFFETS } from './effets';
 import { MAX_SHOTS } from './service';
 
 /**
@@ -13,6 +14,27 @@ import { MAX_SHOTS } from './service';
  * compteur a passé des semaines dans ce texte sans jamais arriver jusqu'à la
  * base, et chaque scène chiffrée rendait une image ordinaire — facturée.
  */
+
+/**
+ * Les nappes, dites au modèle depuis la table.
+ *
+ * La liste était écrite à la main juste en dessous, et elle s'était arrêtée à
+ * neuf entrées sur quarante-trois : trente-quatre nappes existaient dans le
+ * rendu, sous garde visuelle, et le modèle ne pouvait pas les demander. C'est
+ * la même panne que les jeux de références écrits à la main, au même endroit
+ * du raisonnement — une liste parallèle à une table finit toujours par mentir.
+ *
+ * Elle se lit donc dans `EFFETS`, comme le schéma, le balisage et les
+ * instants. Ajouter une nappe reste une ligne, et sa ligne de prompt vient
+ * avec elle.
+ */
+function lignesDesNappes(): string[] {
+  return Object.entries(EFFETS).map(([nom, effet]) => {
+    const reglages = Object.keys(effet.reglages);
+    const forme = reglages.length ? ` { ${reglages.map((r) => `${r}?`).join(', ')} }` : '';
+    return `    \`${nom}\`${forme} ${effet.phrase}`;
+  });
+}
 
 export const SYSTEM_PROMPT = [
   'You write storyboards for short videos assembled from AI-generated visuals',
@@ -54,16 +76,7 @@ export const SYSTEM_PROMPT = [
   '- These overlays are optional, one line each, all `{ startInSeconds?,',
   '  durationInSeconds? }` unless said otherwise. At most two per scene —',
   '  stacked, they fight each other and none reads:',
-  '    `vignette` { strength? } darkens the edges to pull focus inward.',
-  '    `shockRing` { color? } expands one accent ring, for a name that lands.',
-  '    `featherSpot` { x?, y?, size? } dims all but one soft area.',
-  '    `gridDrift` { opacity? } drifts a faint technical grid behind the shot.',
-  '    `auroraDrift` { opacity? } drifts three soft colour fields behind it.',
-  '    `scanGate` { color? } brackets the frame and sweeps a line: verifying.',
-  '    `outlineDraw` { color? } draws an outline around the frame to prove a',
-  '      callout.',
-  '    `toggleFlip` { on? } flips an oversized UI switch: enable, turn on.',
-  '    `cursorClick` { x?, y?, fromX?, fromY? } glides a cursor and clicks.',
+  ...lignesDesNappes(),
   '  `gridDrift` and `auroraDrift` are backdrops: an image covers them, so use',
   '  them on scenes that draw themselves.',
   '- The handwritten marks draw themselves over the shot, ink on film. Use at',

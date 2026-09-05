@@ -5,6 +5,7 @@ import {
   MOVE_TRANSITIONS,
   TRANSITION_DURATIONS,
   rendersOwnContent,
+  sceneRenderSchema,
   toHyperframesStoryboard,
 } from '@/lib/storyboard/render';
 import {
@@ -319,18 +320,12 @@ describe('the composition HyperFrames renders', () => {
       const script = titled('reveal').slice(titled('reveal').lastIndexOf('<script>'));
       // Une variante déclarée au contrat mais absente de la table retomberait
       // en `reveal` sans que rien ne le signale.
-      const declarees = [
-        'reveal', 'neon', 'icon', 'pin', 'typewriter', 'tracking', 'cascade',
-        'slam', 'rise', 'glitch', 'blur-out', 'explode', 'focus', 'lines',
-        'lockup', 'decode', 'crossfade', 'scan', 'axis-y', 'axis-z', 'reel',
-        'fade-up', 'strike', 'ticker', 'calm', 'split', 'weight', 'wave',
-        'backdrop', 'drop', 'handwritten', 'marker', 'marquee', 'brand',
-        'stagger', 'stateswap', 'prism', 'tiles', 'emphasis', 'popin',
-        'badge-pop', 'card-resize', 'icon-swap', 'menu-morph', 'skeleton-reveal',
-        'success-check', 'tilt-card', 'input-feedback', 'micro-transitions',
-        'panel-reveal', 'tabs-slide-indicator', 'avatar-group-hover',
-        'callout', 'morphtext', 'logo-outro',
-      ];
+      // Lue dans l'énumération, jamais écrite à côté d'elle. Cette liste-ci
+      // était manuscrite et s'était arrêtée à 55 variantes sur 65 : les dix
+      // dernières pouvaient n'avoir aucun geste sans que rien n'échoue.
+      const declarees = (sceneRenderSchema.shape.kineticTitle as any)
+        .unwrap()
+        .shape.variant.unwrap().options as string[];
       for (const v of declarees) {
         const cle = /^[a-z]+$/.test(v) ? `${v}: {` : `"${v}": {`;
         expect(script, v).toContain(cle);
@@ -1214,8 +1209,12 @@ describe('the palier-2 effects', () => {
     // et stretch ont rendu une scene immobile a cause de ca. Le cadre fait
     // exception : chaque bord n anime qu un axe, jamais les deux.
     const coupe = SCENES_JS.indexOf('if (scene.outlineDraw)');
+    // Le bloc du cadre s arrete au if suivant. La garde disait « tout ce qui
+    // vient apres », et le 5 septembre une nappe posee derriere lui l a fait
+    // echouer sans rien avoir a voir avec le cadre.
+    const suite = SCENES_JS.indexOf('if (scene.', coupe + 20);
     const avant = SCENES_JS.slice(0, coupe);
-    const cadre = SCENES_JS.slice(coupe);
+    const cadre = SCENES_JS.slice(coupe, suite === -1 ? undefined : suite);
     expect(avant).not.toContain('scaleX');
     expect(avant).not.toContain('scaleY');
     expect(cadre).not.toMatch(/(?<![XY])scale\s*:/);

@@ -1903,6 +1903,694 @@ video.media {
   text-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
 }
 
+/* --- Variantes de titre palier 1 : signatures visuelles ------------------ */
+
+/*
+ * Ces variantes avaient deja un geste complet. Elles recoivent ici une
+ * signature d'apparence, assez legere pour ne pas voler le mouvement mais
+ * assez nette pour qu'une capture fixe dise encore quelle variante est rendue.
+ */
+
+/* `blur-out` : bord doux, comme une image qui va quitter le net. */
+.kt-blur-out .kt-word {
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow:
+    0 0 0.22em rgba(255, 255, 255, 0.3),
+    0 0.18em 0.9em rgba(0, 0, 0, 0.82);
+}
+
+/* `explode` : petits fragments autour du mot. */
+.kt-explode .kt-word {
+  position: relative;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.78);
+}
+
+.kt-explode .kt-word::before,
+.kt-explode .kt-word::after {
+  content: "";
+  position: absolute;
+  width: 0.16em;
+  height: 0.16em;
+  background: var(--kt-accent);
+  box-shadow:
+    0.44em -0.34em 0 rgba(255, 255, 255, 0.82),
+    -0.38em 0.42em 0 rgba(255, 255, 255, 0.62);
+}
+
+.kt-explode .kt-word::before {
+  left: -0.32em;
+  top: -0.12em;
+  transform: rotate(18deg);
+}
+
+.kt-explode .kt-word::after {
+  right: -0.24em;
+  bottom: 0.02em;
+  transform: rotate(-24deg);
+}
+
+/* `focus` : viseur de mise au point autour du mot. */
+.kt-focus .kt-word {
+  padding: 0.06em 0.18em;
+  border-left: 0.05em solid rgba(255, 255, 255, 0.72);
+  border-right: 0.05em solid rgba(255, 255, 255, 0.72);
+  color: #fff;
+  text-shadow:
+    0 0 0.16em rgba(255, 255, 255, 0.36),
+    0 4px 18px rgba(0, 0, 0, 0.82);
+}
+
+/* `lines` : chaque mot s'appuie sur une ligne verticale. */
+.kt-lines {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.kt-lines .kt-word {
+  padding-left: 0.24em;
+  border-left: 0.07em solid var(--kt-accent);
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.78);
+}
+
+/* `lockup` : mot compacte, encadre comme une marque. */
+.kt-lockup {
+  gap: 0.12em 0.32em;
+  padding: 0.2em 0.34em;
+  border: 0.06em solid rgba(255, 255, 255, 0.5);
+  font-size: 2.1em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.kt-lockup .kt-word {
+  color: #fff;
+  text-shadow: none;
+}
+
+/* `decode` : terminal lisible, vert froid. */
+.kt-decode {
+  font-family: "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+.kt-decode .kt-word {
+  color: #d7ffe7;
+  text-shadow:
+    0 0 0.32em rgba(96, 255, 156, 0.45),
+    0 4px 18px rgba(0, 0, 0, 0.8);
+}
+
+/* `crossfade` : fondu editorial, blanc doux et chasse calme. */
+.kt-crossfade {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 600;
+}
+
+.kt-crossfade .kt-word {
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.82);
+}
+
+/* `scan` : trame de balayage dans le glyphe. */
+.kt-scan .kt-word {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #ffffff 0 0.08em,
+      rgba(255, 255, 255, 0.58) 0.08em 0.14em
+    );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+/* `axis-y` : plaque verticale, charniere visible. */
+.kt-axis-y {
+  perspective: 680px;
+}
+
+.kt-axis-y .kt-word {
+  padding: 0.08em 0.22em;
+  border-left: 0.08em solid var(--kt-accent);
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  transform-style: preserve-3d;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.76);
+}
+
+/* `axis-z` : profondeur par ombres empilees. */
+.kt-axis-z .kt-word {
+  color: #fff;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.26),
+    0 0.1em 0 rgba(255, 255, 255, 0.13),
+    0 0.26em 0.8em rgba(0, 0, 0, 0.82);
+}
+
+/* `reel` : chiffres de rouleau, dans une fenetre sombre. */
+.kt-reel {
+  overflow: hidden;
+  padding: 0.18em 0.28em;
+  border-top: 0.05em solid rgba(255, 255, 255, 0.42);
+  border-bottom: 0.05em solid rgba(255, 255, 255, 0.42);
+  background: rgba(7, 8, 10, 0.72);
+  font-family: "JetBrains Mono", "Courier New", ui-monospace, monospace;
+}
+
+.kt-reel .kt-word {
+  color: #fff;
+  text-shadow: none;
+}
+
+/* `fade-up` : sous-ligne basse, une arrivee simple mais marquee. */
+.kt-fade-up .kt-word {
+  padding-bottom: 0.08em;
+  border-bottom: 0.04em solid rgba(255, 255, 255, 0.52);
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.78);
+}
+
+/* `calm` : ton doux, sans contour agressif. */
+.kt-calm {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.35em;
+  font-weight: 500;
+}
+
+.kt-calm .kt-word {
+  color: rgba(255, 250, 236, 0.92);
+  text-shadow: 0 0.22em 1em rgba(0, 0, 0, 0.7);
+}
+
+/* `weight` : contraste de graisse assume dans le mot. */
+.kt-weight {
+  font-weight: 950;
+}
+
+.kt-weight .kt-word {
+  color: #fff;
+  -webkit-text-stroke: 0.025em rgba(255, 255, 255, 0.18);
+  text-shadow:
+    0.04em 0.04em 0 var(--kt-accent),
+    0 0.2em 0.8em rgba(0, 0, 0, 0.76);
+}
+
+/* `wave` : ligne ondulante sous le titre. */
+.kt-wave .kt-word {
+  padding-bottom: 0.18em;
+  color: #fff;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--kt-accent);
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.12em;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.76);
+}
+
+/* `drop` : impact sous chaque mot. */
+.kt-drop .kt-word {
+  position: relative;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.78);
+}
+
+.kt-drop .kt-word::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -0.14em;
+  height: 0.08em;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  filter: blur(1px);
+}
+
+/* `stagger` : chaque mot est une marche lisible. */
+.kt-stagger {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.kt-stagger .kt-word {
+  padding: 0.04em 0.18em;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.72);
+}
+
+/* `popin` : bulle simple, distincte de la pastille badge. */
+.kt-popin .kt-word {
+  padding: 0.08em 0.28em;
+  border-radius: 0.22em;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111318;
+  box-shadow: 0 0.26em 0.9em rgba(0, 0, 0, 0.42);
+  text-shadow: none;
+}
+
+/* `micro-transitions` : petits repères d'interface. */
+.kt-micro-transitions {
+  gap: 0.16em 0.3em;
+  font-size: 1.8em;
+}
+
+.kt-micro-transitions .kt-word {
+  padding: 0.12em 0.24em;
+  border: 0.05em solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  text-shadow: none;
+}
+
+/* `morphtext` : matiere liquide par degrade, sans changer le texte. */
+.kt-morphtext .kt-word {
+  background:
+    radial-gradient(circle at 20% 30%, #ffffff 0 16%, transparent 17%),
+    linear-gradient(105deg, #ffffff, var(--kt-accent), #ffffff);
+  background-size: 180% 140%, 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+/* --- Variantes de titre palier 1 : objets visuels ------------------------ */
+
+/*
+ * Ces variantes promettent un objet plus explicite : surligneur, panneau,
+ * pastille, onglets, carte. Elles portent donc une boite ou un signe annexe.
+ */
+
+/* `strike` : le trait traverse le mot, pas seulement son mouvement. */
+.kt-strike .kt-word {
+  position: relative;
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.kt-strike .kt-word::after {
+  content: "";
+  position: absolute;
+  left: -0.08em;
+  right: -0.08em;
+  top: 53%;
+  height: 0.08em;
+  border-radius: 999px;
+  background: var(--kt-accent);
+  box-shadow: 0 0 14px rgba(206, 31, 32, 0.55);
+}
+
+/* `ticker` : une ligne de bandeau d'info. */
+.kt-ticker {
+  justify-content: flex-start;
+  padding: 0.22em 0.34em;
+  border-top: 0.06em solid rgba(255, 255, 255, 0.45);
+  border-bottom: 0.06em solid rgba(255, 255, 255, 0.45);
+  background: rgba(5, 8, 12, 0.74);
+  font-family: "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  font-size: 1.45em;
+  font-weight: 700;
+  text-align: left;
+}
+
+.kt-ticker .kt-word {
+  color: #fff;
+  text-shadow: none;
+}
+
+/* `backdrop` : un titre de fond qui devient lui-même décor. */
+.kt-backdrop .kt-word {
+  color: rgba(255, 255, 255, 0.16);
+  text-shadow:
+    0 0 1px rgba(255, 255, 255, 0.8),
+    0 18px 55px rgba(0, 0, 0, 0.85);
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.28);
+}
+
+/* `handwritten` : le mot prend une main, sans SVG de tracé. */
+.kt-handwritten {
+  font-family: "Comic Sans MS", "Bradley Hand", "Segoe Print", cursive;
+  font-size: 2.9em;
+  font-weight: 700;
+}
+
+.kt-handwritten .kt-word {
+  color: #fff9ed;
+  text-shadow: 0 5px 18px rgba(0, 0, 0, 0.75);
+}
+
+/* `marker` : un vrai passage de surligneur derrière chaque mot. */
+.kt-marker .kt-word {
+  position: relative;
+  z-index: 0;
+  padding: 0 0.08em;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.72);
+}
+
+.kt-marker .kt-word::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -0.06em;
+  right: -0.06em;
+  bottom: 0.02em;
+  height: 0.44em;
+  border-radius: 0.08em 0.18em 0.12em 0.04em;
+  background: color-mix(in srgb, var(--kt-accent) 78%, #ffd66b);
+  opacity: 0.86;
+  transform: rotate(-1.2deg);
+}
+
+/* `marquee` : la phrase vit sur un rail de façade. */
+.kt-marquee {
+  overflow: hidden;
+  justify-content: flex-start;
+  padding: 0.18em 0.3em;
+  border-left: 0.12em solid var(--kt-accent);
+  background: rgba(255, 255, 255, 0.1);
+  perspective: 700px;
+  text-align: left;
+}
+
+.kt-marquee .kt-word {
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.8);
+}
+
+/* `brand` : lockup plus sobre, lettres capitales et accent net. */
+.kt-brand {
+  gap: 0.18em 0.42em;
+  font-size: 2.25em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.kt-brand .kt-word {
+  padding-bottom: 0.08em;
+  border-bottom: 0.05em solid var(--kt-accent);
+  color: #fff;
+  text-shadow: 0 5px 24px rgba(0, 0, 0, 0.8);
+}
+
+/* `stateswap` : deux états superposés, l'ancien en retrait. */
+.kt-stateswap .kt-word {
+  position: relative;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.8);
+}
+
+.kt-stateswap .kt-word::before {
+  content: "OLD";
+  position: absolute;
+  inset: -0.78em auto auto 0;
+  width: 100%;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.28);
+  font-family: "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  font-size: 0.34em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+/* `prism` : trois franges chromatiques sur le même glyphe. */
+.kt-prism .kt-word {
+  color: #fff;
+  text-shadow:
+    0.055em 0 0 rgba(255, 54, 121, 0.72),
+    -0.055em 0 0 rgba(37, 220, 255, 0.72),
+    0 0.055em 0 rgba(255, 226, 88, 0.45),
+    0 5px 20px rgba(0, 0, 0, 0.72);
+}
+
+/* `tiles` : chaque mot devient une dalle. */
+.kt-tiles .kt-word {
+  padding: 0.18em 0.26em;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06)),
+    rgba(10, 12, 16, 0.68);
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+  text-shadow: none;
+}
+
+/* `emphasis` : le mot est une marque basse, volontairement peu opaque. */
+.kt-emphasis .kt-word {
+  padding: 0 0.12em;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--kt-accent) 70%, #ffffff) 0 34%,
+    transparent 34% 100%
+  );
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.82);
+}
+
+/* `badge-pop` : pastille courte, presque UI. */
+.kt-badge-pop .kt-word {
+  padding: 0.2em 0.42em;
+  border: 0.06em solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  background: var(--kt-accent);
+  color: #fff;
+  box-shadow:
+    inset 0 0.08em 0 rgba(255, 255, 255, 0.22),
+    0 0.32em 1em rgba(0, 0, 0, 0.5);
+  text-shadow: none;
+}
+
+/* `card-resize` : un panneau porte le titre. */
+.kt-card-resize {
+  padding: 0.38em 0.48em;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06)),
+    rgba(8, 10, 14, 0.78);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.46);
+}
+
+.kt-card-resize .kt-word {
+  color: #fff;
+  text-shadow: none;
+}
+
+/* `icon-swap` : un emplacement d'icône accompagne chaque mot. */
+.kt-icon-swap .kt-word {
+  position: relative;
+  padding-left: 0.82em;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.76);
+}
+
+.kt-icon-swap .kt-word::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.18em;
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 35%, #ffffff 0 12%, transparent 13%),
+    var(--kt-accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--kt-accent) 55%, transparent);
+}
+
+/* `menu-morph` : le mot s'aligne sur une icône de menu. */
+.kt-menu-morph .kt-word {
+  position: relative;
+  padding-left: 0.92em;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.76);
+}
+
+.kt-menu-morph .kt-word::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.24em;
+  width: 0.56em;
+  height: 0.42em;
+  border-top: 0.07em solid currentColor;
+  border-bottom: 0.07em solid currentColor;
+  box-shadow: inset 0 0.17em 0 -0.1em currentColor;
+  opacity: 0.86;
+}
+
+/* `skeleton-reveal` : barres de chargement sous le texte. */
+.kt-skeleton-reveal .kt-word {
+  position: relative;
+  z-index: 0;
+  min-width: 2.2em;
+  padding: 0.08em 0.14em;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.76);
+}
+
+.kt-skeleton-reveal .kt-word::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: 0.18em;
+  bottom: 0.18em;
+  border-radius: 0.16em;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent),
+    rgba(255, 255, 255, 0.16);
+  background-size: 220% 100%, 100% 100%;
+}
+
+/* `success-check` : coche de validation avant le libellé. */
+.kt-success-check .kt-word {
+  position: relative;
+  padding-left: 0.9em;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.76);
+}
+
+.kt-success-check .kt-word::before {
+  content: "";
+  position: absolute;
+  left: 0.06em;
+  top: 0.18em;
+  width: 0.42em;
+  height: 0.72em;
+  border-right: 0.1em solid #54e38e;
+  border-bottom: 0.1em solid #54e38e;
+  transform: rotate(42deg);
+  filter: drop-shadow(0 0 8px rgba(84, 227, 142, 0.55));
+}
+
+/* `tilt-card` : panneau en perspective. */
+.kt-tilt-card {
+  padding: 0.42em 0.54em;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04)),
+    rgba(12, 14, 18, 0.72);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.48);
+  perspective: 750px;
+}
+
+.kt-tilt-card .kt-word {
+  color: #fff;
+  text-shadow: none;
+}
+
+/* `input-feedback` : champ validé et curseur accent. */
+.kt-input-feedback {
+  justify-content: flex-start;
+  padding: 0.24em 0.36em;
+  border: 0.06em solid rgba(255, 255, 255, 0.32);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  font-size: 1.55em;
+  text-align: left;
+}
+
+.kt-input-feedback .kt-word {
+  color: #fff;
+  text-shadow: none;
+}
+
+.kt-input-feedback .kt-word:last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.08em;
+  height: 0.9em;
+  margin-left: 0.1em;
+  background: var(--kt-accent);
+  vertical-align: -0.12em;
+}
+
+/* `panel-reveal` : panneau ouvert depuis le haut. */
+.kt-panel-reveal {
+  align-items: flex-start;
+  justify-content: flex-start;
+  max-width: min(86%, 12em);
+  padding: 0.46em 0.52em;
+  border-top: 0.09em solid var(--kt-accent);
+  border-radius: 8px;
+  background: rgba(9, 11, 15, 0.8);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.48);
+  text-align: left;
+}
+
+.kt-panel-reveal .kt-word {
+  color: #fff;
+  text-shadow: none;
+}
+
+/* `tabs-slide-indicator` : onglets et curseur actif. */
+.kt-tabs-slide-indicator {
+  gap: 0.1em;
+  padding: 0.12em;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.kt-tabs-slide-indicator .kt-word {
+  padding: 0.18em 0.34em;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.78);
+  text-shadow: none;
+}
+
+.kt-tabs-slide-indicator .kt-word:first-child {
+  background: #fff;
+  color: #101216;
+}
+
+/* `callout` : étiquette et amorce de trait. */
+.kt-callout .kt-word {
+  position: relative;
+  padding: 0.16em 0.32em;
+  border: 0.06em solid rgba(255, 255, 255, 0.55);
+  background: rgba(8, 10, 14, 0.72);
+  color: #fff;
+  text-shadow: none;
+}
+
+.kt-callout .kt-word:first-child::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: 0.85em;
+  border-top: 0.06em solid var(--kt-accent);
+}
+
+/* `logo-outro` : verrou final de marque. */
+.kt-logo-outro {
+  flex-direction: column;
+  gap: 0.16em;
+  text-transform: uppercase;
+}
+
+.kt-logo-outro .kt-word {
+  color: #fff;
+  text-shadow:
+    0 0 18px color-mix(in srgb, var(--kt-glow) 70%, transparent),
+    0 8px 28px rgba(0, 0, 0, 0.8);
+}
+
+.kt-logo-outro .kt-word:first-child {
+  padding: 0.14em 0.28em;
+  border: 0.08em solid var(--kt-accent);
+  border-radius: 8px;
+}
+
 /* --- Effets palier 2 ------------------------------------------------------ */
 
 /*
@@ -3522,4 +4210,92 @@ video.media {
   color: var(--cta-accent);
   font-size: 0.95em;
   letter-spacing: 0.14em;
+}
+
+/*
+ * L'habillage d'arret sur image.
+ *
+ * Le papier est un degrade repete plus un voile de fibres ; le ruban, quatre
+ * plaques posees aux coins. Les deux interrupteurs arrivent en 1 ou 0 et
+ * pilotent l'opacite, ce qui evite une classe par combinaison.
+ */
+.freeze-dressing {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*
+ * Le papier est un CADRE, pas un voile.
+ *
+ * Premiere version : une feuille pleine trame a 22 % en `screen`. Elle
+ * delavait l image entiere et les sous-titres avec — vu a la planche, pas au
+ * test. Un arret sur image colle sur du papier montre le papier AUTOUR de la
+ * photo, et le grain seulement par-dessus.
+ */
+.freeze-dressing::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--ffd-paper, 1);
+  box-shadow:
+    inset 0 0 0 2.2vh #f2e8d2,
+    inset 0 0 0 2.5vh rgba(120, 104, 76, 0.45);
+}
+.freeze-dressing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  /* Quatre bouts de ruban, un par coin, poses en degrades plutot qu en
+     elements : la nappe n a pas d enfant. */
+  background-image:
+    linear-gradient(38deg, rgba(236, 226, 196, 0.82) 0 100%),
+    linear-gradient(-38deg, rgba(236, 226, 196, 0.82) 0 100%),
+    linear-gradient(-38deg, rgba(236, 226, 196, 0.82) 0 100%),
+    linear-gradient(38deg, rgba(236, 226, 196, 0.82) 0 100%);
+  background-size: 13% 5.5%;
+  background-position: 2% 3%, 98% 3%, 2% 97%, 98% 97%;
+  opacity: var(--ffd-tape, 1);
+}
+
+/*
+ * Le volet en chevron.
+ *
+ * Une plaque pleine qui couvre le cadre, et qu'un clip-path ouvre. Le chevron
+ * est ecrit en polygone : sept sommets, calcules une fois ici et jamais dans
+ * la page. Le geste tween le clip-path lui-meme, d'un polygone ferme a gauche
+ * vers le meme polygone sorti a droite.
+ */
+.mask-reveal {
+  position: absolute;
+  inset: 0;
+  background: var(--smr-color, #0b0b0d);
+  pointer-events: none;
+  will-change: clip-path;
+}
+
+/*
+ * Le cadre eclaire.
+ *
+ * Le liseré est une bordure, et la lueur un degre radial dont le centre est
+ * une variable. Aucun filtre, aucun backdrop : une ombre est composee, un flou
+ * est rasterise, et Lambda rasterise en logiciel.
+ */
+.spotlight-card {
+  position: absolute;
+  inset: calc(var(--spc-inset, 8) * 1%);
+  border: 1.5px solid var(--spc-color, rgba(255, 255, 255, 0.85));
+  border-radius: 14px;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 0 22px -6px var(--spc-color, rgba(255, 255, 255, 0.85));
+  background: radial-gradient(
+    circle 26% at var(--spc-x, 12%) 50%,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
 }

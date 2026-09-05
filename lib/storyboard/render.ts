@@ -312,9 +312,17 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
+  /**
+   * Un mouvement de caméra sur le média, en plus du Ken Burns.
+   *
+   * Le mode `zoom` demandé par le palier 2 n'est pas ici : il vise la même
+   * propriété que `effects.zoom`, et deux tweens sur la même échelle au même
+   * instant, c'est le dernier qui gagne en silence. Le zoom se demande par
+   * `effects.zoom`, qui existe depuis le début.
+   */
   ytCameraMove: z
     .object({
-      mode: z.enum(['zoom', 'slide', 'tilt']).optional(),
+      mode: z.enum(['slide', 'tilt']).optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -409,16 +417,6 @@ export const sceneEffectsSchema = z.object({
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
-  spotlightCard: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  svgMaskReveal: z
-    .object({
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
   ytScreenWarp: z
     .object({
       durationInSeconds: z.number().positive().optional(),
@@ -439,13 +437,6 @@ export const sceneEffectsSchema = z.object({
   staggerCascade: z
     .object({
       columns: z.number().int().min(2).max(6).optional(),
-      durationInSeconds: z.number().positive().optional(),
-    })
-    .optional(),
-  freezeFrameDressing: z
-    .object({
-      paperTexture: z.boolean().optional(),
-      tapeStickers: z.boolean().optional(),
       durationInSeconds: z.number().positive().optional(),
     })
     .optional(),
@@ -1019,7 +1010,6 @@ export const sceneRenderSchema = z.object({
           'micro-transitions',
           'panel-reveal',
           'tabs-slide-indicator',
-          'avatar-group-hover',
           'callout',
           'morphtext',
           'logo-outro',

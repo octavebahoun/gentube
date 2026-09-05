@@ -778,3 +778,114 @@ Elles sont closes, avec leur raison en clair, entrée par entrée, dans le
 catalogue. Deux d'entre elles redeviennent faisables si la forme change :
 `lineSwap` et `kineticTypeSwap` sous la forme `{ before, after, word }`, trois
 champs et aucune phrase à redécouper.
+
+---
+
+## palier 2 · les six mouvements de caméra — le 5 septembre
+
+Le premier des six tas. Ce qui suit est ce qui a été écrit, et ce qui ne l'a pas
+été.
+
+### Une qui existait déjà
+
+`cameraDollyZoom { direction }` **est une coupe, pas une nappe.** Elle est dans
+`MOVE_TRANSITIONS` depuis le palier 1, avec son geste — `out: scale 1.5`,
+`in: scale 0.6 → 1` — et sa durée. Demandez-la par `effects.transition:
+'camera-dolly-zoom'`. Elle passe de « reste » à « disponible autrement ».
+
+### Trois nappes écrites
+
+`freezeFrameDressing { paperTexture, tapeStickers }` — un papier, quatre bouts
+de ruban aux coins, un liseré. Les deux interrupteurs arrivent en variable CSS,
+`1` ou `0`, et pilotent une opacité : une classe par combinaison aurait fait
+quatre classes pour deux booléens.
+
+`svgMaskReveal` — la demande parlait d'un masque en forme de **logotype**. Le
+logo du client n'existe nulle part dans le produit, pour la même raison que
+`logoUrl` : le jour où il existera, ce sera un champ de la vidéo et non de la
+scène. La forme est donc un chevron, écrit dans la feuille. Et il se découvre
+par `clip-path`, pas par `mask` : un masque plein cadre est une passe de
+rastérisation par image, un `clip-path` n'en est pas une.
+
+`spotlightCard` — un cadre éclairé et une lueur qui le parcourt. `featherSpot`
+assombrit hors d'une tache ; celui-ci fait l'inverse. La lueur est une variable
+CSS animée, parce qu'une nappe n'a pas d'enfant à qui donner un tween. Aucun
+filtre : le halo est une ombre portée, et une ombre est composée là où un flou
+est rastérisé.
+
+### Une réduite, et pourquoi
+
+`ytCameraMove { mode }` perd son mode `zoom`. Il visait la même propriété que
+`effects.zoom` — l'échelle du média — et **deux tweens sur la même propriété au
+même instant, c'est le dernier qui gagne, en silence.** Le zoom se demande par
+`effects.zoom`, qui existe depuis le début. Restent `slide` et `tilt`, une
+translation et une inclinaison, qui se composent avec le Ken Burns au lieu de
+le remplacer.
+
+### Une refusée
+
+`focusSwap { targetCard: 'left' | 'right' }` — « bascule de mise au point entre
+deux cartes ». Il n'y a **pas de cartes**. Le champ nomme une cible qui n'existe
+que si la scène porte déjà deux objets, et une scène qui porte deux objets
+nommés est un plan : `comparison`, ou `list` disposition `splay`. C'est la même
+réponse qu'à `splitTiltCards`. Un effet ne peut pas désigner un contenu qu'il
+ne pose pas lui-même.
+
+### Ce que ça a coûté ailleurs, et qui n'était pas prévu
+
+**Trente-quatre nappes sur quarante-trois n'avaient aucune ligne de prompt.**
+Le rendu les dessinait, la garde visuelle les surveillait, et le modèle ne
+pouvait pas les demander : la liste du prompt était écrite à la main à côté de
+la table, et elle s'était arrêtée à neuf. C'est exactement la panne des jeux de
+références manuscrits, au même endroit du raisonnement — **toute liste
+parallèle à une table finit par mentir.**
+
+Chaque nappe porte donc maintenant sa phrase dans `effets.ts`, et le prompt se
+lit dans la table comme le schéma, le balisage et les instants. Ajouter une
+nappe reste une ligne, et sa ligne de prompt vient avec elle.
+
+Et `animations.ts` touchait 609 lignes : les tweens de nappes sont sortis dans
+`lib/render/nappes.ts` **avant** d'en ajouter trois, jamais après. 304 et 404.
+
+---
+
+## palier 1 · les 44 apparences écrites le 5 septembre — regardées à l'image
+
+Les 65 variantes ont été recapturées et lues une par une. **Quarante-trois des
+quarante-quatre tiennent :** `marker` a son surligneur, `input-feedback` son
+champ et son curseur, `stateswap` son fantôme « OLD », `tabs-slide-indicator`
+son onglet allumé, `prism` sa frange chromatique. Aucune ne se confond avec une
+autre, et aucune n'emploie de `@keyframes`, de `backdrop-filter` ni de marge en
+pourcentage. Les deux `filter` posés sont sur un trait sous un mot et sur une
+coche : quelques centaines de pixels, pas la trame.
+
+### Une retirée : `avatar-group-hover`
+
+La règle posait `color: transparent` sur `.kt-word`. Chaque mot devenait une
+pastille, et **le titre n'affichait plus aucun texte** — l'image ne montrait que
+deux ronds.
+
+Ce n'est pas un réglage à corriger, c'est un désaccord de nature. Une rangée
+d'avatars porte un **contenu** — combien, et qui — là où une variante de titre
+n'est qu'une manière d'afficher une phrase. Un titre qui n'affiche pas son titre
+ne peut pas rester dans l'énumération : le storyboard le demanderait pour son
+texte et perdrait son texte.
+
+Retirée du contrat, de `TITRES` et de la feuille. **Rangée comme plan de
+palier 3** : un objet `avatars: [{ label? }]`, avec le nombre porté par la liste
+et non par un compte — même forme que `hwPipeline` et `list`.
+
+`split` reste la seule variante sans règle de style, et c'est juste : elle ne
+promet qu'un mouvement.
+
+### Et une garde qui s'était arrêtée, encore
+
+Le test « un geste pour chaque variante du contrat » portait sa propre liste
+écrite à la main, et elle s'était arrêtée à **55 variantes sur 65**. Les dix
+dernières pouvaient n'avoir aucun geste sans que rien n'échoue. Elle se lit
+maintenant dans l'énumération.
+
+C'est la troisième liste parallèle trouvée en deux jours — les jeux de
+références, les lignes de prompt, et celle-ci. Le motif est toujours le même :
+**une liste écrite à côté d'une table finit par mentir, et personne ne le voit
+puisque rien ne casse.**
