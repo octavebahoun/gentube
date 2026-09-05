@@ -66,3 +66,7 @@ render/regression/echec-*.png
 # reproductibles par leur script. Rien à versionner.
 render/demo/gentube/
 render/demo/reel/
+openmontage/
+
+# Cas 4 : audio extrait et transcript, dérivés du fichier du client
+render/demo/imports/

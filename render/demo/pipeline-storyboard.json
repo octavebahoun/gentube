@@ -1,0 +1,95 @@
+[
+  {
+    "order": 1,
+    "type": "video",
+    "narration": "À Cotonou, presque chaque étal du marché fonctionne désormais avec le mobile money.",
+    "brouillon": "Slow tracking shot through a lively outdoor market in Cotonou, vendors behind wooden stalls, a customer stops and pulls out a phone, low golden sunlight.",
+    "prompt": "Wide tracking shot through an open-air market lined with narrow wooden stalls, rusted corrugated-metal roofs, stacked sacks of spices and grain, and bolts of indigo and ochre fabric; ochre earth underfoot. A young Beninese customer in her early twenties with dark braids tied in a low bun, wearing a coral-patterned blouse and small hoop earrings stops at a wooden stall and pulls a black smartphone with a scratched screen and a faded blue protective case from her bag; vendors stand behind their stalls. Low golden sunlight slants between the stalls.",
+    "render": {
+      "effects": {
+        "transition": "none",
+        "zoom": "in",
+        "cameraMotion": "dolly"
+      }
+    },
+    "ton": "pose"
+  },
+  {
+    "order": 2,
+    "type": "video",
+    "narration": "La cliente compose son code, et la vendeuse reçoit l’alerte dans la seconde.",
+    "brouillon": "Medium close-up of two women at a narrow market table, the customer tapping her phone, the vendor watching, tiny bags of spices and peanuts in the foreground, warm daylight.",
+    "prompt": "Medium close-up at a narrow wooden stall in an open-air market lined with narrow wooden stalls, rusted corrugated-metal roofs, stacked sacks of spices and grain, and bolts of indigo and ochre fabric; ochre earth underfoot. A young Beninese customer in her early twenties with dark braids tied in a low bun, wearing a coral-patterned blouse and small hoop earrings taps a black smartphone with a scratched screen and a faded blue protective case, while a Beninese market vendor in her late forties, sturdy build, close-cropped black hair, a yellow headwrap and gold stud earrings, wearing a blue cotton dress watches. Tiny bags of spices and peanuts sit in the foreground. Warm daylight softens the scene.",
+    "render": {
+      "effects": {
+        "transition": "fade",
+        "zoom": "out",
+        "cameraMotion": "static"
+      }
+    },
+    "ton": "pose"
+  },
+  {
+    "order": 3,
+    "type": "video",
+    "narration": "Fini les problèmes de monnaie : même un petit achat se règle sans billets ni centimes perdus.",
+    "brouillon": "Still of weathered hands passing a smartphone over a market stall, a single green pepper in the other hand, no cash in sight, side light rakes the wood.",
+    "prompt": "Close-up of weathered hands passing a black smartphone with a scratched screen and a faded blue protective case over the wooden counter of a market stall in an open-air market lined with narrow wooden stalls, rusted corrugated-metal roofs, stacked sacks of spices and grain, and bolts of indigo and ochre fabric; ochre earth underfoot, a single green pepper in the other hand, no cash in sight. Side light rakes the wood.",
+    "render": {
+      "effects": {
+        "transition": "fade",
+        "zoom": "in",
+        "cameraMotion": "static"
+      }
+    },
+    "ton": "pose"
+  },
+  {
+    "order": 4,
+    "type": "image",
+    "narration": "Le soir, la vendeuse ne compte plus ses pièces une à une : elle retrouve tout son chiffre dans l’historique.",
+    "brouillon": "A market woman in a blue dress sits on a wooden stool at dusk, head bent over her phone, the last trays of fruit in front of her, a hanging bulb glowing warm.",
+    "prompt": "At dusk in an open-air market lined with narrow wooden stalls, rusted corrugated-metal roofs, stacked sacks of spices and grain, and bolts of indigo and ochre fabric; ochre earth underfoot, a Beninese market vendor in her late forties, sturdy build, close-cropped black hair, a yellow headwrap and gold stud earrings, wearing a blue cotton dress sits on a wooden stool, head bent over a black smartphone with a scratched screen and a faded blue protective case; last trays of fruit sit in front of her. Medium shot, warm glow from a single hanging bulb.",
+    "render": {
+      "effects": {
+        "transition": "fade",
+        "zoom": "out",
+        "cameraMotion": "static"
+      }
+    },
+    "ton": "pose"
+  },
+  {
+    "order": 5,
+    "type": "image",
+    "narration": "Et elle n’a plus peur de traverser la ville avec une grosse somme dans son sac.",
+    "brouillon": "Woman closing her cloth bag at a market stall, phone slipped in her pocket, her face relaxed, streets dimming behind her and market stalls in shadow, warm sunset.",
+    "prompt": "Wide shot in an open-air market lined with narrow wooden stalls, rusted corrugated-metal roofs, stacked sacks of spices and grain, and bolts of indigo and ochre fabric; ochre earth underfoot. A Beninese market vendor in her late forties, sturdy build, close-cropped black hair, a yellow headwrap and gold stud earrings, wearing a blue cotton dress closes her cloth bag at her stall and slips a black smartphone with a scratched screen and a faded blue protective case into her pocket, her face relaxed. Warm sunset light catches her as streets dim and market stalls fall into shadow behind her.",
+    "render": {
+      "effects": {
+        "transition": "fade",
+        "zoom": "in",
+        "cameraMotion": "dolly",
+        "beatAccent": {
+          "strength": 0.05
+        }
+      }
+    },
+    "ton": "appui"
+  },
+  {
+    "order": 6,
+    "type": "image",
+    "narration": "Le relevé sur le téléphone crée même une preuve : utile pour emprunter, épargner ou acheter à crédit.",
+    "brouillon": "Close-up of a woman’s hands holding a smartphone, thumb scrolling a transaction history, colorful fabrics folded around, soft daylight through a stand roof.",
+    "prompt": "Close-up of a Beninese market vendor in her late forties, sturdy build, close-cropped black hair, a yellow headwrap and gold stud earrings, wearing a blue cotton dress, her hands holding a black smartphone with a scratched screen and a faded blue protective case; her thumb scrolls through blurred rows of payment alerts. Folded colorful fabrics surround her hands. Soft daylight filters through a stall roof in an open-air market lined with narrow wooden stalls, rusted corrugated-metal roofs, stacked sacks of spices and grain, and bolts of indigo and ochre fabric; ochre earth underfoot.",
+    "render": {
+      "effects": {
+        "transition": "black",
+        "zoom": "out",
+        "cameraMotion": "orbit"
+      }
+    },
+    "ton": "pose"
+  }
+]
