@@ -8,6 +8,7 @@ import {
   AnimationNotConfiguredError,
   createAnimator,
   maxClipSeconds,
+  minClipSeconds,
   type AnimationJobPayload,
   type VideoAnimator,
 } from '@/lib/video';
@@ -159,6 +160,29 @@ export async function submitClips(
       throw new StoryboardError(
         `Scene ${shot.order} has no still to animate: generate the images first.`,
         409
+      );
+    }
+
+    /*
+     * Le plancher du fournisseur, dit à voix haute — et pas levé.
+     *
+     * Le prompt demande au modèle de ne pas écrire de scène animée trop
+     * courte, mais il désobéit et l'utilisateur peut raccourcir une narration
+     * à la main. Wan ne descend pas sous 81 images : la scène reçoit alors un
+     * clip plus long qu'elle et la composition n'en montre que le début.
+     *
+     * Refuser serait pire que le défaut. Le storyboard est déjà payé quand on
+     * arrive ici, le clip fonctionne, et la scène s'affichera correctement —
+     * elle aura simplement coûté du mouvement qu'on ne voit pas. Même contrat
+     * que les contrôles de registre : ça se journalise et ça passe.
+     */
+    const floor = minClipSeconds(video.resolution);
+    if (shot.durationS < floor) {
+      console.warn(
+        `[clips] scene ${shot.order} lasts ${shot.durationS}s but a ` +
+          `${video.resolution} clip cannot be shorter than ${floor.toFixed(2)}s: ` +
+          `${(floor - shot.durationS).toFixed(2)}s of motion will be generated, ` +
+          'billed, and never shown. Lengthen the line or make it an image scene.'
       );
     }
 

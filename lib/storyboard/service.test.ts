@@ -29,6 +29,8 @@ import {
   updateShot,
   validateStoryboard,
 } from './service';
+import { CARACTERES_PAR_SECONDE } from './registres';
+import { minClipSeconds } from '@/lib/video/provider';
 
 afterAll(async () => {
   await closeDb();
@@ -143,6 +145,29 @@ describe('estimating a duration from the text', () => {
 });
 
 describe('storyboard prompting', () => {
+  it('dit au modèle le plancher d une scène animée', () => {
+    /*
+     * Le modèle n'écrit pas de durée — elle est mesurée sur la voix off — donc
+     * la contrainte doit lui arriver en caractères. Sans elle, il écrivait des
+     * scènes animées de trois secondes : Wan ne descend pas sous 81 images, la
+     * scène recevait un clip de 5,06 s et la composition n'en montrait que la
+     * moitié. Du mouvement payé et jeté.
+     */
+    const messages = buildStoryboardMessages({
+      theme: 'Amazones du Dahomey',
+      pipeline: 'mixed',
+      targetSeconds: 90,
+      library: LIBRARY,
+    });
+
+    const plancher = Math.ceil(minClipSeconds('480p') * CARACTERES_PAR_SECONDE);
+    expect(messages[0].content).toContain(
+      `A \`video\` scene needs at least ${plancher} characters`
+    );
+    // Calculé, pas écrit : la borne doit suivre le modèle d'animation.
+    expect(plancher).toBeGreaterThan(70);
+  });
+
   it('asks for narration and forbids durations', () => {
     const messages = buildStoryboardMessages({
       theme: 'Amazones du Dahomey',

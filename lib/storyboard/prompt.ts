@@ -1,4 +1,17 @@
-import { lignesDesRegistres } from './registres';
+import { CARACTERES_PAR_SECONDE, lignesDesRegistres } from './registres';
+import { minClipSeconds } from '@/lib/video/provider';
+
+/**
+ * Le plancher d'une scène animée, en caractères de narration.
+ *
+ * Calculé et pas écrit : le jour où le modèle d'animation change, la borne
+ * suit sans qu'on ait à se souvenir de ce chiffre-là. On prend la 480p, la
+ * résolution par défaut où passe l'essentiel du volume — et son plancher est
+ * le plus haut des deux, donc la règle vaut aussi en 720p.
+ */
+function planchAnimeEnCaracteres(): number {
+  return Math.ceil(minClipSeconds('480p') * CARACTERES_PAR_SECONDE);
+}
 
 /**
  * Le plafond de scènes d'un storyboard.
@@ -41,6 +54,23 @@ export const SYSTEM_PROMPT = [
   '- `type` is `video` or `image`, and you write it on EVERY scene. It is the',
   '  first thing a scene needs and the easiest to forget: a scene without it',
   '  falls back to `image`, and a shot that needed movement comes out still.',
+  /*
+   * Le plancher du fournisseur, dit au modèle plutôt que subi.
+   *
+   * Le modèle n'écrit pas de durée — elle est mesurée après coup par la voix
+   * off — donc on lui parle en caractères, au débit de `docs/providers.md`.
+   * Wan ne descend pas sous 81 images : une scène animée de trois secondes
+   * reçoit un clip de 5,06 s dont on ne montre que la moitié. Le mouvement
+   * généré au-delà de la scène est payé et jeté.
+   *
+   * C'est une contrainte **sur les scènes animées seulement**, plus serrée que
+   * le rythme du registre : une scène fixe reste libre de faire une ligne
+   * courte, et c'est même là qu'il faut la mettre.
+   */
+  `- A \`video\` scene needs at least ${planchAnimeEnCaracteres()} characters` +
+    ' of narration. The animation model cannot render a shorter clip, so a' +
+    ' short moving scene pays for motion nobody sees. If a line is shorter' +
+    ' than that, it is an `image` scene — which is also cheaper.',
   '- Do NOT write any duration. The duration of a scene is the real length of',
   '  its voice-over, measured after the audio is generated.',
   '- Do not restate the project style in each prompt: it is applied separately.',

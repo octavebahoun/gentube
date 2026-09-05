@@ -60,6 +60,22 @@ export function maxClipSeconds(resolution: Resolution): number {
 }
 
 /**
+ * La scène animée la plus courte qui ne gaspille rien.
+ *
+ * Le miroir de `maxClipSeconds`, et il manquait. Le plafond était tenu — le
+ * storyboard refuse une scène plus longue qu'un clip — mais rien ne tenait le
+ * plancher : Wan ne descend pas sous 81 images, donc une scène animée de 3 s
+ * reçoit un clip de 5,06 s dont la composition ne montre que les trois
+ * premières secondes. Deux secondes de mouvement générées, payées, jetées.
+ *
+ * p-video n'a pas de plancher : sa durée part en entier de secondes, et il
+ * accepte la plus petite. Une seconde est donc la borne, c'est-à-dire aucune.
+ */
+export function minClipSeconds(resolution: Resolution): number {
+  return modelFor(resolution) === MODELS.wan ? WAN_MIN_SECONDS : 1;
+}
+
+/**
  * Le nombre d'images à demander à Wan pour couvrir cette narration.
  *
  * Sans ce calcul, Wan applique ses 81 images d'usine et rend 5,06 s quelle que

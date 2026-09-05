@@ -28,6 +28,7 @@ export {
   billedSeconds,
   clipCostUsd,
   maxClipSeconds,
+  minClipSeconds,
   modelFor,
   wanFrames,
 } from './provider';

@@ -8,6 +8,7 @@ import {
   billedSeconds,
   clipCostUsd,
   maxClipSeconds,
+  minClipSeconds,
   modelFor,
   wanFrames,
 } from './provider';
@@ -40,6 +41,26 @@ describe('wanFrames', () => {
   it('couvre exactement la scène la plus longue admise', () => {
     expect(wanFrames(WAN_MAX_SECONDS)).toBe(121);
     expect(wanFrames(WAN_MIN_SECONDS)).toBe(81);
+  });
+});
+
+describe('minClipSeconds', () => {
+  it('tient le plancher de Wan, et n en invente pas pour p-video', () => {
+    // Le miroir de maxClipSeconds, et il manquait : le plafond était tenu, le
+    // plancher pas. Une scène animée de 3 s recevait un clip de 5,06 s dont la
+    // composition ne montrait que le début.
+    expect(minClipSeconds('480p')).toBeCloseTo(WAN_MIN_SECONDS, 4);
+    // p-video prend un entier de secondes et accepte le plus petit : sa borne
+    // est donc l'absence de borne.
+    expect(minClipSeconds('720p')).toBe(1);
+  });
+
+  it('reste sous le plafond de la même résolution', () => {
+    // Un plancher au-dessus du plafond rendrait toute scène animée illégale
+    // et personne ne le verrait avant la première génération.
+    for (const resolution of ['480p', '720p'] as const) {
+      expect(minClipSeconds(resolution)).toBeLessThan(maxClipSeconds(resolution));
+    }
   });
 });
 
