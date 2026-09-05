@@ -285,9 +285,16 @@ export class SasPayGateway implements PaymentGateway {
     };
   }
 
-  /** Lit le solde du marchand : ne facture rien, prouve que les clés vivent. */
+  /**
+   * Lit les soldes du marchand : ne facture rien, prouve que les clés vivent.
+   *
+   * `/merchant-balances/` et non `/wallet/` — vérifié contre l'API réelle le
+   * 5 septembre 2026. Un wallet par (marchand, pays), en lecture seule stricte :
+   * les retraits et transferts ne passent pas par l'API, seulement par leur
+   * tableau de bord.
+   */
   async ping(): Promise<Record<string, unknown>> {
-    return await this.call<Record<string, unknown>>('/wallet/');
+    return await this.call<Record<string, unknown>>('/merchant-balances/');
   }
 
   private async call<T>(path: string, init: RequestInit = {}): Promise<T> {

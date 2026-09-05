@@ -340,6 +340,32 @@ describe('lire un rappel', () => {
   });
 });
 
+describe('l appel qui prouve que les clés vivent', () => {
+  it('lit les soldes, sans rien facturer', async () => {
+    /*
+     * Chemin vérifié contre l'API réelle, pas déduit de la barre latérale de
+     * leur tableau de bord : `/wallet/` rend un 404. Une route devinée qui
+     * échoue ferait croire à une clé morte.
+     */
+    const appel = repond({
+      body: {
+        success: true,
+        data: { count: 1, results: [{ country: 'BJ', currency: 'XOF' }] },
+      },
+    });
+    globalThis.fetch = appel;
+
+    const soldes = await new SasPayGateway(CONFIG).ping();
+
+    expect(appel.mock.calls[0][0]).toBe(
+      'https://api.saspay.me/api/v1/merchant-balances/'
+    );
+    // L'enveloppe { success, data } est bien celle de cette route : la réponse
+    // rendue est le contenu de `data`, pas l'enveloppe.
+    expect(soldes).toMatchObject({ count: 1 });
+  });
+});
+
 describe('la configuration', () => {
   it('exige la clé et le secret de l environnement choisi', () => {
     expect(() => sasPayConfig()).toThrow(PaymentNotConfiguredError);
