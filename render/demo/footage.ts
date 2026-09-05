@@ -7,6 +7,7 @@ import { MAX_AUDIO_BYTES, createTranscriber } from '@/lib/transcribe/whisper';
 import { toHyperframesStoryboard } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
 import { habille } from '@/lib/storyboard/registres';
+import { decouperLimport } from '@/lib/storyboard/decoupage';
 
 /**
  * Le cas d'usage 4 : le client apporte sa vidéo, on l'habille.
@@ -24,23 +25,18 @@ import { habille } from '@/lib/storyboard/registres';
  * transcription, et elle sert à une chose : caler les sous-titres au mot sur
  * une bande son que personne n'a écrite.
  *
- * **Pourquoi une seule scène, pour le moment.** Cette démonstration ne pose
- * qu'un plan, et ce n'est plus une contrainte du moteur : c'est simplement ce
- * qui est branché.
+ * **C'est un vrai montage, pas un plan habillé.** La vidéo est découpée en
+ * plusieurs plans qui entrent dans le même fichier à des endroits différents,
+ * et `habille()` leur donne transitions et zooms selon leur place dans le
+ * film — une ouverture s'ouvre, une fermeture ferme.
  *
- * On a longtemps écrit ici qu'aucun décalage n'existait dans le fichier —
- * qu'une scène jouait toujours son média depuis zéro — et c'était faux.
- * Vérifié le 5 septembre 2026 dans la source de HyperFrames, sur les deux
- * chemins : le runtime cale le média par
+ * On a longtemps écrit ici qu'aucun décalage n'existait dans le fichier, qu'une
+ * scène jouait toujours son média depuis zéro, et que l'import devait donc
+ * rester un plan unique. C'était faux. Vérifié le 5 septembre 2026 dans la
+ * source de HyperFrames, sur ses deux chemins : le runtime cale le média par
  * `(temps - data-start) * data-playback-rate + data-media-start`, et le rendu
  * extrait les images comme la piste son avec un `-ss` construit sur ce même
- * `data-media-start`. Rien dans le moteur n'empêche de découper un import en
- * plusieurs plans.
- *
- * Ce qui manque est de notre côté : `markup.ts` n'émet pas l'attribut, et
- * aucun champ du contrat de rendu ne le porte. Tant que c'est le cas, la vidéo
- * est **un seul plan** et ce sont les lignes de sous-titre qui se succèdent
- * au-dessus — ce que `wordLines()` découpe.
+ * décalage. Il ne manquait que l'attribut, que nous n'émettions pas.
  */
 
 /** Où vivent l'audio extrait et le transcript : hors du dépôt, ils sont dérivés. */
@@ -194,8 +190,17 @@ async function main() {
   } as unknown as Video;
 
   /*
-   * Un plan unique, et c'est la vidéo du client.
+   * Les plans, taillés dans le fichier du client.
    *
+   * `decouperLimport` coupe dans les silences de la bande son, dans les bornes
+   * de rythme du registre. Chaque plan entre dans le même fichier à son propre
+   * `mediaStart`, et `habille()` lui donne sa transition et son zoom selon sa
+   * place — c'est là que le montage devient un montage.
+   */
+  const plans = decouperLimport(transcript.words, duree, 'explainer');
+  log(`        ${plans.length} plans taillés dans les silences`);
+
+  /*
    * `assetUrl` porte le fichier : `submitClips` et `generateImages` n'ont rien
    * à faire ici, et en production c'est exactement ce que `bindAssetToShot`
    * écrit. `sourceImageUrl` reste vide — une vidéo ne sert pas d'image de
@@ -205,29 +210,46 @@ async function main() {
    * un clip généré arrive muet et la voix off passe par-dessus, alors qu'ici
    * la bande son **est** celle du client. La couper serait livrer une vidéo
    * muette.
+   *
+   * `zoom: 'none'` sur chaque plan : l'image bouge déjà d'elle-même, et un
+   * zoom par-dessus se battrait avec son propre mouvement.
+   *
+   * **Et `transition: 'none'` — des coupes franches, pas des fondus.** Une
+   * transition fait reculer la scène suivante de sa propre durée, pour que le
+   * chevauchement tombe dans le fondu : c'est juste quand chaque plan est muet
+   * et que la voix off passe au-dessus. Ici chaque plan porte la bande son du
+   * client, et deux plans qui se chevauchent font jouer **deux fois** la même
+   * bande, décalée d'une demi-seconde. Un écho.
+   *
+   * Ce n'est pas une privation : sur une source continue, le rythme du montage
+   * vient de l'endroit où tombent les coupes, pas de l'effet posé entre elles.
+   * `habille()` reste appelé pour ce qu'il décide d'autre.
    */
-  const shot = {
-    id: 1,
-    order: 1,
+  const shots = plans.map((plan, index) => ({
+    id: index + 1,
+    order: index + 1,
     type: 'video',
     prompt: '',
-    narration: transcript.text,
+    narration: plan.words.map((mot) => mot.text).join(' '),
     subtitle: null,
     audioUrl: null,
     assetUrl: media,
     sourceImageUrl: null,
-    durationS: duree,
+    durationS: plan.durationS,
     durationSource: 'measured',
-    words: transcript.words,
+    words: plan.words,
     render: {
       mediaVolume: 1,
-      // Une seule scène : ni transition à jouer, ni zoom à poser sur un plan
-      // qui porte déjà son propre mouvement.
-      effects: { ...habille('explainer', 'pose', 0, 1), zoom: 'none' },
+      mediaStart: plan.mediaStart,
+      effects: {
+        ...habille('explainer', 'pose', index, plans.length),
+        zoom: 'none',
+        transition: 'none',
+      },
     },
-  } as unknown as Shot;
+  })) as unknown as Shot[];
 
-  const storyboard = toHyperframesStoryboard(video, [shot]);
+  const storyboard = toHyperframesStoryboard(video, shots);
   const page = composeHtml({ storyboard, watermark: true });
   const target = join(COMPOSITION_DIR, 'index.html');
   writeFileSync(target, page);
@@ -235,17 +257,19 @@ async function main() {
   const lignes = (page.match(/class="captions /g) ?? []).length;
 
   /*
-   * La composition dure une seconde de plus que le fichier.
+   * La composition dure plus longtemps que le fichier, et d'une seconde par
+   * plan.
    *
    * `POST_NARRATION_PAUSE_SECONDS` : une respiration prévue pour une voix de
-   * synthèse, qui s'applique à toute scène sans carte. Sur un clip importé
-   * elle laisse la dernière image figée — et c'est exactement le temps qu'il
-   * faut pour finir de lire la dernière ligne de sous-titre. Gardée pour ça.
+   * synthèse, appliquée à toute scène sans carte. Sur un import découpé, elle
+   * fige la dernière image de chaque plan avant la coupe — un temps de lecture
+   * en fin de plan, ce qui tombe bien, mais aussi un arrêt sur image au milieu
+   * du montage, ce qui se voit. C'est le prochain point à traiter.
    */
   log(
     `\n${target}\n` +
-      `1 plan importé · ${storyboard.durationInSeconds.toFixed(1)}s ` +
-      `(dont 1s de lecture en fin) · ${storyboard.width}×${storyboard.height} · ` +
+      `${storyboard.scenes.length} plans · ${storyboard.durationInSeconds.toFixed(1)}s ` +
+      `pour ${duree.toFixed(1)}s de source · ${storyboard.width}×${storyboard.height} · ` +
       `${lignes} lignes de sous-titre\n\n` +
       `  npx tsx render/demo/render.ts render/demo/${nom}-habille.mp4`
   );

@@ -638,6 +638,28 @@ export const sceneRenderSchema = z.object({
   mediaVolume: z.number().min(0).max(1).optional(),
   /** Ralentit un clip court pour remplir la scène sans boucle visible. */
   playbackRate: z.number().positive().optional(),
+  /**
+   * Où commencer dans le fichier, en secondes.
+   *
+   * **Ce que ça débloque.** Plusieurs plans peuvent partager un même fichier
+   * en y entrant à des endroits différents : une vidéo apportée par le client
+   * devient un vrai montage — des plans coupés dedans, avec des transitions
+   * entre eux — au lieu d'un plan unique de trente secondes qu'on habille de
+   * sous-titres.
+   *
+   * **Pourquoi ça n'existait pas.** On a écrit ici qu'aucun décalage n'était
+   * possible, qu'une scène jouait toujours son média depuis zéro. C'était
+   * faux, et vérifié comme tel dans la source de HyperFrames le 5 septembre
+   * 2026, sur ses deux chemins : le runtime cale le média par
+   * `(temps - data-start) * data-playback-rate + data-media-start`, et le
+   * rendu extrait images et piste son avec un `-ss` construit sur ce même
+   * décalage. Il ne manquait que l'attribut, que nous n'émettions pas.
+   *
+   * Le moteur borne lui-même un décalage qui dépasserait le fichier ; on ne
+   * le redit pas ici, faute de connaître la durée du média au moment où le
+   * contrat est validé.
+   */
+  mediaStart: z.number().min(0).optional(),
   showSubtitles: z.boolean().optional(),
   /**
    * Les sons de la scène, bornés.
@@ -801,16 +823,32 @@ export function transitionDurationSeconds(transition?: string): number {
 export function sceneDurationSeconds(scene: {
   durationInSeconds?: number;
   card?: unknown;
+  mediaVolume?: number;
 }): number {
   const narration = scene.durationInSeconds ?? 2;
-  // Une carte de fin n'a ni voix ni son : rien à digérer.
-  const pause = scene.card ? 0 : POST_NARRATION_PAUSE_SECONDS;
+  /*
+   * Deux scènes n'ont rien à digérer.
+   *
+   * Une carte de fin, qui n'a ni voix ni son. Et **une scène dont le média
+   * porte son propre son** : sa durée est celle d'un passage du fichier, pas
+   * celle d'une phrase prononcée par-dessus. Lui ajouter une seconde ne pose
+   * pas un silence, elle fait jouer une seconde de plus du média — donc
+   * rejouer, à la coupe suivante, une seconde qu'on vient de voir.
+   *
+   * C'était invisible tant qu'un import était un plan unique : la seconde
+   * tombait à la fin, sur la dernière image, et servait de temps de lecture.
+   * Découpé en sept plans, l'import rejouait sept fois une seconde.
+   */
+  const digere = !scene.card && !(scene.mediaVolume && scene.mediaVolume > 0);
+  const pause = digere ? POST_NARRATION_PAUSE_SECONDS : 0;
   return ms(Math.max(MIN_SCENE_ON_SCREEN_SECONDS, narration + pause));
 }
 
 type TimedScene = {
   durationInSeconds?: number;
   card?: unknown;
+  /** Le son du média : quand il y en a, la scène n'a pas de pause à tenir. */
+  mediaVolume?: number;
   effects?: { transition?: string };
 };
 
@@ -1012,6 +1050,9 @@ export function toHyperframesStoryboard(
       durationInSeconds: shot.durationS,
       card: render.success ? render.data.card : undefined,
       effects: render.success ? render.data.effects : undefined,
+      // Lu ici parce que le calcul de durée en dépend : une scène dont le
+      // média porte le son ne tient aucune pause après sa fin.
+      mediaVolume: render.success ? render.data.mediaVolume : undefined,
     };
   });
 

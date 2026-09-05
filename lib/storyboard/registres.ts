@@ -262,6 +262,18 @@ function ficheDe(registre: string | undefined): Fiche {
   return FICHES[(registre ?? '') as Registre] ?? EXPLAINER;
 }
 
+/**
+ * Le rythme du registre, en secondes.
+ *
+ * `bornesDeNarration` juste en dessous dit la même chose en caractères, parce
+ * que le modèle n'écrit pas de durée. Ici on parle en secondes, pour ce qui en
+ * connaît déjà : le découpage d'une vidéo apportée par le client, dont les
+ * plans se mesurent sur une bande son qui existe.
+ */
+export function ficheRythme(registre?: string): { min: number; max: number } {
+  return { ...ficheDe(registre).rythme };
+}
+
 export function bornesDeNarration(registre?: string): { min: number; max: number } {
   const { rythme } = ficheDe(registre);
   return {

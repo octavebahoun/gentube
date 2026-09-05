@@ -264,6 +264,20 @@ export function videoMarkup(
 
   const volume = scene.mediaVolume ?? 0;
   const rate = scene.playbackRate ?? 1;
+  /*
+   * Où entrer dans le fichier.
+   *
+   * Émis seulement quand il y a un décalage : le moteur le lit comme zéro par
+   * défaut, et un attribut à zéro sur chaque plan généré n'apprendrait rien à
+   * personne.
+   *
+   * C'est lui qui permet à plusieurs plans de partager un même fichier — une
+   * vidéo apportée par le client découpée en scènes, au lieu d'un plan unique.
+   * Le runtime cale le média par
+   * `(temps - data-start) * data-playback-rate + data-media-start`, et le rendu
+   * extrait images et son avec un `-ss` construit dessus.
+   */
+  const decalage = scene.mediaStart ?? 0;
 
   return (
     `<video class="media clip" id="m${index}" src="${escapeHtml(
@@ -271,6 +285,7 @@ export function videoMarkup(
     )}" data-start="${scene.startInSeconds}" ` +
     `data-duration="${scene.durationInSeconds}" data-track-index="${trackIndex}" ` +
     `data-volume="${volume}" data-playback-rate="${rate}" ` +
+    (decalage > 0 ? `data-media-start="${decalage}" ` : '') +
     `preload="auto" playsinline${volume === 0 ? ' muted' : ''}></video>`
   );
 }
