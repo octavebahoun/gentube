@@ -340,11 +340,11 @@ describe('le fournisseur qui ne rappelle pas', () => {
 
   it('refuse aussi celui qui rappelle sans route pour l entendre', async () => {
     /*
-     * Le piège d'un pas : Atlas rappelle, donc `resolution` est `webhook` et le
-     * premier garde-fou le laisse passer. Mais chaque fournisseur signe et met
-     * en forme sa charge à sa façon, et `app/api/webhooks/replicate` ne lit que
-     * Replicate. Sans ce second refus, les clips partiraient, seraient
-     * facturés, et se feraient rejeter à l'arrivée.
+     * Le piège d'un pas : le prochain fournisseur qui rappelle aura
+     * `resolution: 'webhook'` et le premier garde-fou le laissera passer. Mais
+     * chacun signe et met en forme sa charge à sa façon, et une route ne lit
+     * que celui pour lequel elle est écrite. Sans ce second refus, ses clips
+     * partiraient, seraient facturés, et se feraient rejeter à l'arrivée.
      */
     const tdb = await createTenant('Alpha', { credits: 1_000 });
     const video = await readyForClips(tdb, ['video']);
@@ -352,7 +352,7 @@ describe('le fournisseur qui ne rappelle pas', () => {
 
     await expect(
       submitClips(tdb, video.id, {
-        animator: { ...client, callbackPath: null, provider: 'atlas' },
+        animator: { ...client, callbackPath: null, provider: 'nouveau' },
         store: store().assets,
       })
     ).rejects.toThrow(/no route here reads/);

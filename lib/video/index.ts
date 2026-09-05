@@ -23,9 +23,11 @@ import { createReplicateAnimator, isAnimationConfigured } from './replicate';
  * range sous le tapis. Elle est donc **déclarée** sur le contrat
  * (`resolution`), et c'est l'orchestrateur qui la lit.
  *
- * **Ce qu'un fournisseur qui rappelle doit encore avoir.** Sa propre route de
- * rappel : la charge d'Atlas n'est pas celle de Replicate, et sa signature non
- * plus. `app/api/webhooks/replicate` ne sait lire que Replicate.
+ * **Ce qu'un fournisseur qui rappelle doit avoir en plus.** Sa propre route :
+ * la charge d'Atlas n'est pas celle de Replicate, et sa signature non plus —
+ * Ed25519 sur un JWKS contre HMAC sur un secret partagé. Les deux existent
+ * (`app/api/webhooks/{replicate,atlas}`) et `callbackPath` dit laquelle est la
+ * sienne. Un fournisseur qui rappelle sans route déclarée est refusé.
  */
 
 export {

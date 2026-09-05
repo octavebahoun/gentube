@@ -20,18 +20,11 @@ import {
  * `webhook` chez Replicate — donc `resolution: 'webhook'`. C'était la question
  * qui pouvait le disqualifier, et la réponse est bonne.
  *
- * **Mais `submitClips` le refuse encore**, et c'est voulu. Deux choses manquent :
+ * Sa route de rappel existe — `app/api/webhooks/atlas`, signature Ed25519
+ * vérifiée contre leur JWKS — donc `submitClips` l'accepte.
  *
- * 1. **La route de rappel.** `app/api/webhooks/replicate` lit une charge
- *    Replicate ; Atlas envoie la sienne (`payload.status`, `payload.outputs`)
- *    signée en Ed25519, clés publiques sur `/webhooks/jwks.json`. D'où
- *    `callbackPath = null` : sans route, les clips partiraient, seraient
- *    facturés, et aucun ne reviendrait. Un webhook non vérifié serait pire
- *    encore — une porte ouverte pour poser n'importe quelle URL sur un plan.
- * 2. **Le prix.** Voir `TARIF_INCONNU` plus bas.
- *
- * Le client, lui, est complet et testé : `outcome()` interroge déjà Atlas, ce
- * qui suffit à essayer un modèle à la main.
+ * **Ce qui manque encore : le prix.** Voir `TARIF_INCONNU` plus bas. Tant
+ * qu'il n'est pas lu, un clip Atlas est compté à zéro et sort de la marge.
  *
  * Contrat vérifié sur la doc le 05/09/2026 : `https://www.atlascloud.ai/docs`.
  */
@@ -135,13 +128,8 @@ export class AtlasAnimator implements VideoAnimator {
   readonly provider = 'atlas';
   /** `webhook_url` dans le corps : Atlas rappelle, comme Replicate. */
   readonly resolution = 'webhook' as const;
-  /**
-   * Aucune route ne lit encore les rappels d'Atlas : sa charge et sa
-   * signature ne sont pas celles de Replicate. `submitClips` refusera donc
-   * Atlas tant que cette route n'existe pas — plutôt que d'envoyer des clips
-   * payés vers une adresse qui les rejettera.
-   */
-  readonly callbackPath = null;
+  /** Sa route existe et vérifie sa signature Ed25519 : `atlas-webhook.ts`. */
+  readonly callbackPath = '/api/webhooks/atlas';
 
   constructor(private readonly config: AtlasConfig = atlasConfig()) {}
 
