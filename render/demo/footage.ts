@@ -24,12 +24,23 @@ import { habille } from '@/lib/storyboard/registres';
  * transcription, et elle sert à une chose : caler les sous-titres au mot sur
  * une bande son que personne n'a écrite.
  *
- * **Pourquoi une seule scène.** Le moteur cale un média par
- * `currentTime = tempsGlobal - data-start` : il n'existe aucun décalage dans
- * le fichier. Une scène joue toujours son média depuis zéro, donc découper
- * l'import en plusieurs scènes ferait redémarrer la vidéo à chaque coupe. La
- * vidéo est donc **un seul plan**, et ce sont les lignes de sous-titre qui se
- * succèdent au-dessus — ce que `wordLines()` découpe.
+ * **Pourquoi une seule scène, pour le moment.** Cette démonstration ne pose
+ * qu'un plan, et ce n'est plus une contrainte du moteur : c'est simplement ce
+ * qui est branché.
+ *
+ * On a longtemps écrit ici qu'aucun décalage n'existait dans le fichier —
+ * qu'une scène jouait toujours son média depuis zéro — et c'était faux.
+ * Vérifié le 5 septembre 2026 dans la source de HyperFrames, sur les deux
+ * chemins : le runtime cale le média par
+ * `(temps - data-start) * data-playback-rate + data-media-start`, et le rendu
+ * extrait les images comme la piste son avec un `-ss` construit sur ce même
+ * `data-media-start`. Rien dans le moteur n'empêche de découper un import en
+ * plusieurs plans.
+ *
+ * Ce qui manque est de notre côté : `markup.ts` n'émet pas l'attribut, et
+ * aucun champ du contrat de rendu ne le porte. Tant que c'est le cas, la vidéo
+ * est **un seul plan** et ce sont les lignes de sous-titre qui se succèdent
+ * au-dessus — ce que `wordLines()` découpe.
  */
 
 /** Où vivent l'audio extrait et le transcript : hors du dépôt, ils sont dérivés. */
