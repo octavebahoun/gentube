@@ -1,6 +1,7 @@
 import type { HyperframesStoryboard } from '@/lib/storyboard/render';
 import { apparenceDe, echelleEnPx, texteDesVariables } from '@/lib/storyboard/apparence';
 import { SCENES_JS } from './animations';
+import { MUSIQUE_JS, enveloppeMusicale } from './ducking';
 import { CONTENUS_JS } from './contenus';
 import { MOTS_JS, MOVES_JS, TITRES_JS } from './gestures';
 import {
@@ -159,6 +160,22 @@ export function composeHtml({
     ? (apparence.echelle.sousTitre * 2.6 * 100)
     : 5;
 
+  /*
+   * Le ducking, en points de volume sur la piste musique.
+   *
+   * Un tableau vide veut dire « garde le volume constant », ce que la piste a
+   * toujours fait — pas un repli, le bon comportement quand aucun registre ne
+   * demande de ducking. Les points partent dans la timeline et c'est
+   * `MUSIQUE_JS` qui les applique ; le pourquoi est dans `ducking.ts`.
+   */
+  const enveloppe = storyboard.music
+    ? enveloppeMusicale(scenes, {
+        volume: storyboard.musicVolume,
+        ducking: storyboard.musicDucking ?? 0,
+        dureeTotale: durationInSeconds,
+      })
+    : [];
+
   const music = storyboard.music
     ? `<audio id="music" src="${escapeHtml(encodeURI(storyboard.music))}" data-start="0" ` +
       `data-duration="${durationInSeconds}" data-track-index="${audioTrackBase - 1}" ` +
@@ -282,7 +299,13 @@ export function composeHtml({
       // Tout en fromTo, jamais en to : c'est la seule forme qui survit à un
       // seek arrière, donc la seule sûre quand le moteur cherche chaque image
       // au lieu de jouer.
-      const T = ${js(timeline)};
+      const T = ${js({
+        ...timeline,
+        musicEnvelope: enveloppe,
+        // La durée totale, pour que le tween de l'enveloppe couvre toute
+        // la vidéo : `timeline` ne porte que les scènes.
+        musicDuration: durationInSeconds,
+      })};
       const tl = gsap.timeline({ paused: true });
 
       /*
@@ -303,6 +326,7 @@ ${MOTS_JS}
 
 ${CONTENUS_JS}
 ${SCENES_JS}
+${MUSIQUE_JS}
 
       /*
        * Les fondus des sons, posés sur la propriété volume de l'élément.

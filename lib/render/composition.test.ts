@@ -1506,3 +1506,95 @@ describe('les lignes de sous-titre d une scène longue', () => {
     expect(script).toContain('"lines":[]');
   });
 });
+
+describe('le ducking de la piste musique', () => {
+  const avecMusique = (surcouche: Record<string, unknown> = {}) =>
+    ({ ...video, musicUrl: 'sounds/music/bed.mp3', ...surcouche }) as unknown as Video;
+
+  const script = (page: string) => page.slice(page.lastIndexOf('<script>'));
+
+  /** L'enveloppe, relue dans la timeline transportée. */
+  function enveloppe(page: string) {
+    const brut = /"musicEnvelope":(\[[^\]]*\])/.exec(script(page))?.[1];
+    return brut ? (JSON.parse(brut) as { time: number; volume: number }[]) : null;
+  }
+
+  it('porte une enveloppe dans la timeline', () => {
+    // La fiche du registre porte `ducking` depuis le début et personne ne le
+    // lisait : la composition posait un volume constant. Un lit assez bas pour
+    // ne pas gêner la voix est aussi assez bas pour ne pas s'entendre là où il
+    // n'y a personne.
+    const page = html([shot(), shot({ id: 2, order: 2 })], { video: avecMusique() });
+    const points = enveloppe(page);
+
+    expect(points).not.toBeNull();
+    expect(points!.length).toBeGreaterThan(1);
+    // `explainer` baisse de moitié : 0,09 devient 0,045 sous la voix.
+    expect(Math.min(...points!.map((p) => p.volume))).toBeCloseTo(0.045, 5);
+    expect(Math.max(...points!.map((p) => p.volume))).toBeCloseTo(0.09, 5);
+  });
+
+  it('anime le volume au lieu de l écrire dans un attribut', () => {
+    /*
+     * Le moteur découvre l'automation en SONDANT la page : il cherche la
+     * timeline pas à pas et lit `element.volume`. Un attribut `data-keyframes`
+     * ne serait pas lu pour l'audio — un non-effet silencieux, vérifié en
+     * lisant le moteur et non sa documentation, qui ne mentionne ni l'un ni
+     * l'autre.
+     */
+    const page = html([shot()], { video: avecMusique() });
+
+    expect(page).not.toContain('data-keyframes');
+    expect(script(page)).toContain('piste.volume = volumeA(');
+    // Un seul tween, sur un objet porteur : plusieurs fromTo sur la même
+    // propriété du même élément se battraient, comme l'ont fait les lignes de
+    // sous-titre.
+    expect(script(page)).toContain('tl.fromTo(\n            horloge');
+  });
+
+  it('ne touche à rien quand il n y a pas de musique', () => {
+    const page = html([shot()]);
+    expect(enveloppe(page)).toEqual([]);
+  });
+
+  it('garde le data-volume sur la piste', () => {
+    // C'est la valeur que le moteur pose avant de sonder, et celle qui sert
+    // s'il n'y a aucune automation à découvrir.
+    const balise =
+      /<audio id="music"[^>]*>/.exec(
+        html([shot()], { video: avecMusique() })
+      )?.[0] ?? '';
+
+    expect(balise).toContain('data-volume="0.09"');
+    expect(balise).toContain('loop');
+  });
+});
+
+describe('le script transporté', () => {
+  it('est du JavaScript qui se parse', () => {
+    /*
+     * Tout le moteur d'animation voyage en chaîne de caractères, assemblé
+     * depuis six fichiers. Une erreur de syntaxe n'y est donc rattrapée par
+     * personne : ni TypeScript, qui ne voit qu'une chaîne, ni les autres
+     * tests, qui cherchent des sous-chaînes dedans. Elle ne se verrait qu'au
+     * rendu, sur une vidéo payée.
+     *
+     * C'est déjà arrivé : un accent grave dans un commentaire refermait le
+     * littéral de gabarit, et l'erreur était rapportée sur une ligne qui
+     * n'avait rien à voir.
+     *
+     * `new Function` parse sans exécuter — il n'y a ni `gsap` ni `document`
+     * ici, et il n'en faut pas pour vérifier la syntaxe.
+     */
+    const page = html([shot(), shot({ id: 2, order: 2 })], {
+      video: { ...video, musicUrl: 'sounds/music/bed.mp3' } as unknown as Video,
+    });
+    const script = page.slice(
+      page.lastIndexOf('<script>') + '<script>'.length,
+      page.lastIndexOf('</script>')
+    );
+
+    expect(script.length).toBeGreaterThan(1000);
+    expect(() => new Function(script)).not.toThrow();
+  });
+});

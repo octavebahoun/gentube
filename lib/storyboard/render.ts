@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { EFFETS_SCHEMA, MANUSCRIT_SCHEMA } from './effets';
+import { audioDe } from './registres';
 import {
   callToActionSchema,
   chartSchema,
@@ -910,6 +911,13 @@ export type HyperframesStoryboard = {
   /** Longueur du morceau, pour retrouver ses pics quand il boucle. */
   musicDurationS?: number;
   musicVolume: number;
+  /**
+   * De combien le lit sonore baisse quand quelqu'un parle, de 0 à 1.
+   *
+   * Vient du registre, comme `musicVolume`. Zéro veut dire « pas de ducking » —
+   * la piste garde son volume constant, ce qu'elle a toujours fait.
+   */
+  musicDucking?: number;
   sfxVolume: number;
   /** Durée totale, calculée une fois ici pour que personne ne la recalcule. */
   durationInSeconds: number;
@@ -976,6 +984,8 @@ export function toHyperframesStoryboard(
     | 'musicUrl'
     | 'musicVolume'
     | 'sfxVolume'
+    // Le registre décide du ducking, comme il décide du lit sonore.
+    | 'registre'
   >,
   shots: Shot[],
   {
@@ -1018,6 +1028,11 @@ export function toHyperframesStoryboard(
     musicImpacts: music?.impacts?.length ? music.impacts : undefined,
     musicDurationS: music?.durationS ?? undefined,
     musicVolume: video.musicVolume,
+    // Le registre porte le ducking depuis le début et personne ne le lisait :
+    // la composition posait un volume constant, choisi une fois pour toute la
+    // vidéo. Un lit assez bas pour ne pas gêner la voix est aussi assez bas
+    // pour ne pas s'entendre là où il n'y a personne.
+    musicDucking: audioDe(video.registre).ducking,
     sfxVolume: video.sfxVolume,
     durationInSeconds: totalDurationSeconds(parsed),
     fps: FPS,
