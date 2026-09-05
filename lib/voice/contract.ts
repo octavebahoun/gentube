@@ -22,8 +22,23 @@ export type Voiceover = {
 };
 
 export interface VoiceSynthesizer {
-  synthesize(text: string, voice?: string | null): Promise<Voiceover>;
+  synthesize(
+    text: string,
+    voice?: string | null,
+    options?: VoiceOptions
+  ): Promise<Voiceover>;
 }
+
+/**
+ * Comment la phrase doit être dite, en plus de qui la dit.
+ *
+ * `style` est l'intention de diction du registre, traduite en nombre de 0 à
+ * 1 — posée vers 0, habitée vers 1. Ne la lit qu'ElevenLabs
+ * (`voice_settings.style`) : Edge et Polly ne l'écoutent pas.
+ */
+export type VoiceOptions = {
+  style?: number;
+};
 
 export class VoiceNotConfiguredError extends Error {
   readonly statusCode = 503;

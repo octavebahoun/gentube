@@ -149,6 +149,40 @@ describe('synthesising a scene', () => {
     });
   });
 
+  it('lit la diction du registre quand on la lui donne', async () => {
+    // Seul ElevenLabs écoute le style : il part en `voice_settings`, et son
+    // absence ne change rien à la forme habituelle.
+    const fetchMock = stubFetch({
+      audio_base64: Buffer.from('mp3-bytes').toString('base64'),
+      alignment: alignmentOf('Salut'),
+    });
+
+    await client().synthesize('Salut', 'anais', { style: 0.2 });
+
+    const [, init] = fetchMock.mock.calls[0];
+    if (!init) throw new Error('fetch called without options');
+    expect(JSON.parse(init.body as string)).toMatchObject({
+      text: 'Salut',
+      voice_settings: { style: 0.2 },
+    });
+  });
+
+  it('tait un style hors bornes plutôt que d inventer', async () => {
+    const fetchMock = stubFetch({
+      audio_base64: Buffer.from('mp3-bytes').toString('base64'),
+      alignment: alignmentOf('Salut'),
+    });
+
+    await client().synthesize('Salut', 'anais', { style: 7 });
+
+    const [, init] = fetchMock.mock.calls[0];
+    if (!init) throw new Error('fetch called without options');
+    expect(JSON.parse(init.body as string)).toEqual({
+      text: 'Salut',
+      model_id: 'eleven_multilingual_v2',
+    });
+  });
+
   it('refuses an empty line before spending anything', async () => {
     const fetchMock = stubFetch({});
     await expect(client().synthesize('   ')).rejects.toThrow(VoiceError);

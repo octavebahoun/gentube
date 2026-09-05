@@ -8,6 +8,7 @@ import { videos, type Shot, type Video } from '@/lib/db/schema';
 import { getVideo } from '@/lib/videos';
 import { assetKey, createAssetStore, type AssetStore } from '@/lib/storage';
 import { StoryboardError, listShots } from '@/lib/storyboard/service';
+import { controlerStoryboard, signalerLesRefus } from '@/lib/storyboard/controles';
 import { rendersOwnContent, toHyperframesStoryboard } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from './composition';
 
@@ -172,6 +173,11 @@ export async function renderVideo(
 
   const storyboard = await listShots(tdb, videoId);
   assertShotsReady(storyboard);
+
+  // Les règles du registre, avant le rendu et jamais après : ce qui saute se
+  // journalise et laisse passer — le storyboard est déjà payé, et perdre la
+  // vidéo coûterait plus cher que le défaut.
+  signalerLesRefus(controlerStoryboard(storyboard));
 
   const assets = store ?? createAssetStore();
   const dir = mkdtempSync(join(tmpdir(), `gentube-rendu-${videoId}-`));

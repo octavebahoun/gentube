@@ -285,6 +285,28 @@ describe('delivering the paid voice', () => {
     expect(calls).toHaveLength(2);
   });
 
+  it('donne le ton à la livraison, jamais à la mesure', async () => {
+    // Le style part chez le fournisseur qui sait le lire ; la passe de mesure
+    // parle Edge sans rien de plus. Sans style, l'appel garde sa forme.
+    const { tdb, video, assets } = await paid();
+    const recues: Array<{ style?: number }> = [];
+    const espion: VoiceSynthesizer = {
+      async synthesize(text, _voix, options) {
+        recues.push({ style: options?.style });
+        return {
+          audio: Buffer.from('mp3'),
+          contentType: 'audio/mpeg',
+          words: [{ text, start: 0, duration: 5 }],
+          durationS: 5,
+        };
+      },
+    };
+
+    await finalizeVoiceover(tdb, video.id, { client: espion, store: assets, style: 0.2 });
+    expect(recues).toHaveLength(2);
+    expect(recues.every((appel) => appel.style === 0.2)).toBe(true);
+  });
+
   it('leaves the invoice alone when the paid voice runs long', async () => {
     // Le montant du bouton est le montant débité. La scène s'allonge pour que
     // le renderer ne coupe pas un mot ; l'écart est pour nous.

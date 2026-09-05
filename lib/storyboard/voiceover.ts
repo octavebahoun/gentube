@@ -176,7 +176,8 @@ export async function finalizeVoiceover(
   {
     client,
     store,
-  }: { client?: VoiceSynthesizer; store?: AssetStore } = {}
+    style,
+  }: { client?: VoiceSynthesizer; store?: AssetStore; style?: number } = {}
 ): Promise<VoiceoverResult> {
   const video = await getVideo(tdb, videoId);
   assertPaid(video);
@@ -210,9 +211,14 @@ export async function finalizeVoiceover(
     synthesizer ??= createDeliveryVoiceClient(plan);
     assets ??= createAssetStore();
 
+    // Le ton s'applique à la livraison, jamais à la mesure : la passe de
+    // mesure parle Edge sans style, et MEASURING_PROVIDER ne change pas de
+    // main. Seul ElevenLabs lit le style ; les autres l'ignorent.
+    const options = style === undefined ? undefined : { style };
     const voiceover = await synthesizer.synthesize(
       shot.narration!,
-      video.voice ?? project.voiceId
+      video.voice ?? project.voiceId,
+      options
     );
 
     const key = await assets.put(

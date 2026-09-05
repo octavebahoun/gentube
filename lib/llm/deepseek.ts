@@ -27,7 +27,24 @@ export type DeepSeekConfig = {
 
 const DEFAULT_BASE_URL = 'https://api.deepseek.com';
 const DEFAULT_MODEL = 'deepseek-v4-flash';
-const DEFAULT_MAX_TOKENS = 8_000;
+/**
+ * Le budget d'écriture, raisonnement compris.
+ *
+ * **Rien à voir avec le contexte.** Le million de jetons de `deepseek-v4` est
+ * ce que le modèle peut *lire* ; celui-ci est ce qu'il a le droit d'*écrire*,
+ * et sur un modèle à raisonnement la réflexion le mange en premier. Le
+ * plafond de sortie du modèle est de 384 000 jetons : 8 000 était un choix de
+ * ce dépôt, pas une contrainte.
+ *
+ * Il était trop serré. Le 5 septembre 2026, une génération sur trois revenait
+ * vide — tout le budget passé en raisonnement — et l'écran ne montrait rien.
+ * Le prompt avait grossi le matin même : 43 nappes proposées au lieu de 9,
+ * soit un quart du texte, donc un espace de choix bien plus large à peser.
+ *
+ * Large ne veut pas dire cher : seuls les jetons réellement écrits sont
+ * facturés. Un plafond haut ne coûte que le jour où il sert.
+ */
+const DEFAULT_MAX_TOKENS = 32_000;
 
 export class LlmNotConfiguredError extends Error {
   readonly statusCode = 503;

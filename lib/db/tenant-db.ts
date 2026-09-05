@@ -8,6 +8,7 @@ import { db } from './drizzle';
 import {
   activityLogs,
   billingCycles,
+  clientAssets,
   creditLedger,
   invitations,
   jobs,
@@ -58,6 +59,7 @@ export const TENANT_SCOPED_TABLES = [
   projects,
   videos,
   shots,
+  clientAssets,
   jobs,
   creditLedger,
   youtubeTokens,

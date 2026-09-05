@@ -1,4 +1,5 @@
 import type { HyperframesStoryboard } from '@/lib/storyboard/render';
+import { apparenceDe, echelleEnPx, texteDesVariables } from '@/lib/storyboard/apparence';
 import { SCENES_JS } from './animations';
 import { CONTENUS_JS } from './contenus';
 import { MOTS_JS, MOVES_JS, TITRES_JS } from './gestures';
@@ -50,13 +51,14 @@ import {
  */
 export const COMPOSITION_DIR = 'render/gentube-v1';
 
-/** Taille de police des sous-titres, en fraction de la hauteur de trame. */
-const SUBTITLE_HEIGHT_RATIO = 0.058;
-const WATERMARK_HEIGHT_RATIO = 0.032;
-/** Taille de base des plans structurés — citation, fil — en fraction de trame. */
-const STRUCTURED_HEIGHT_RATIO = 0.042;
-/** Hauteur d'un chiffre de la roue, en fraction de trame. */
-const WHEEL_HEIGHT_RATIO = 0.16;
+/**
+ * L'échelle typographique vient du registre (`lib/storyboard/apparence.ts`),
+ * pas d'ici : `apparenceDe()` la porte, `echelleEnPx()` la met en pixels.
+ *
+ * Reste ici ce qui n'est pas du style mais une contrainte de plateforme :
+ * `SUBTITLE_BOTTOM` vaut 18 % en 9:16 parce que TikTok, Reels et Shorts posent
+ * leur interface sur le bas du cadre. Un registre ne la règle pas.
+ */
 
 /**
  * À quelle hauteur du bas les sous-titres s'arrêtent, par format.
@@ -80,6 +82,11 @@ export type CompositionInput = {
   storyboard: HyperframesStoryboard;
   /** Pose la marque GenTube. Décidé au débit, pas ici. */
   watermark?: boolean;
+  /**
+   * Le registre dont l'apparence habille la page. Optionnel : sans lui la
+   * page rend l'apparence `explainer`, c'est-à-dire les valeurs d'hier.
+   */
+  registre?: string;
 };
 
 /**
@@ -119,8 +126,15 @@ export {
 export function composeHtml({
   storyboard,
   watermark = false,
+  registre,
 }: CompositionInput): string {
   const { width, height, durationInSeconds, scenes } = storyboard;
+
+  // La palette et l'échelle du registre, posées en variables sur `#root`.
+  // Les règles les lisent avec un repli à la valeur calculée ici : une page
+  // composée sans variable rend exactement pareil.
+  const apparence = apparenceDe(registre);
+  const taille = echelleEnPx(apparence, height);
 
   // Les clips prennent des pistes en plus des scènes : la base audio se calcule
   // sur le plan réel, pas sur le nombre de scènes.
@@ -132,17 +146,17 @@ export function composeHtml({
   // sur la même piste, et deux sons d'une même scène se chevauchent souvent.
   const sfxTrackBase = audioTrackBase + scenes.length + 10;
 
-  const subtitleSize = Math.round(height * SUBTITLE_HEIGHT_RATIO);
-  const watermarkSize = Math.round(height * WATERMARK_HEIGHT_RATIO);
-  const structuredSize = Math.round(height * STRUCTURED_HEIGHT_RATIO);
-  const wheelSize = Math.round(height * WHEEL_HEIGHT_RATIO);
+  const subtitleSize = taille.sousTitre;
+  const watermarkSize = taille.filigrane;
+  const structuredSize = taille.structure;
+  const wheelSize = taille.roue;
   const subtitleBottom = (SUBTITLE_BOTTOM[storyboard.ratio] ?? 0.09) * 100;
   /*
    * Ce qu'il faut laisser au-dessus de la bande pour qu'un bandeau ne la
    * touche pas : deux lignes de sous-titre, en pourcents de la hauteur.
    */
   const subtitleRelief = storyboard.subtitles
-    ? (SUBTITLE_HEIGHT_RATIO * 2.6 * 100)
+    ? (apparence.echelle.sousTitre * 2.6 * 100)
     : 5;
 
   const music = storyboard.music
@@ -187,7 +201,7 @@ export function composeHtml({
     <link rel="stylesheet" href="style.css" />
     <style>
       html, body { width: ${width}px; height: ${height}px; }
-      .captions { font-size: ${subtitleSize}px; bottom: ${subtitleBottom}%; }
+      .captions { font-size: var(--gt-sous-titre, ${subtitleSize}px); bottom: ${subtitleBottom}%; }
       /*
        * Le tiers inférieur se pose AU-DESSUS de la bande de sous-titres.
        *
@@ -209,8 +223,8 @@ export function composeHtml({
        * de fil doit tenir dans le cadre en 16:9 comme en 9:16, et c est la
        * hauteur qui commande.
        */
-      .quote, .thread, .list, .face, .social-card, .cta { font-size: ${structuredSize}px; }
-      .counter-wheel { font-size: ${wheelSize}px; }
+      .quote, .thread, .list, .face, .social-card, .cta { font-size: var(--gt-structure, ${structuredSize}px); }
+      .counter-wheel { font-size: var(--gt-roue, ${wheelSize}px); }
       .veil {
         --veil-start: ${Math.round(100 - subtitleBottom - 36)}%;
         --veil-mid: ${Math.round(100 - subtitleBottom - 3)}%;
@@ -218,7 +232,7 @@ export function composeHtml({
       /* Même raison que les sous-titres : un filigrane couvert par l'interface
          de la plateforme ne défend plus la marque. */
       .watermark { bottom: ${(subtitleBottom / 9) * 3.5}%; }
-      .watermark { font-size: ${watermarkSize}px; }
+      .watermark { font-size: var(--gt-filigrane, ${watermarkSize}px); }
     </style>
   </head>
   <body>
@@ -229,6 +243,7 @@ export function composeHtml({
       data-duration="${durationInSeconds}"
       data-width="${width}"
       data-height="${height}"
+      style="${texteDesVariables(registre, height)}"
     >
       <div id="bg" class="clip" data-start="0" data-duration="${durationInSeconds}" data-track-index="0"></div>
       ${scenes

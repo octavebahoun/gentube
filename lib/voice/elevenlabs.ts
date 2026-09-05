@@ -5,6 +5,7 @@ import {
   VoiceNotConfiguredError,
   read,
   round,
+  type VoiceOptions,
   type Voiceover,
   type VoiceSynthesizer,
 } from './contract';
@@ -139,9 +140,22 @@ export function wordsFromAlignment(
 export class ElevenLabsClient implements VoiceSynthesizer {
   constructor(private readonly config: VoiceConfig = voiceConfig()) {}
 
-  async synthesize(text: string, voice?: string | null): Promise<Voiceover> {
+  async synthesize(
+    text: string,
+    voice?: string | null,
+    options?: VoiceOptions
+  ): Promise<Voiceover> {
     const spoken = text.trim();
     if (!spoken) throw new VoiceError('Nothing to read: the narration is empty.', 400);
+
+    // L'intention de diction du registre, lue ici et nulle part ailleurs :
+    // Edge et Polly ne l'écoutent pas. Hors de 0..1, on tait plutôt qu'on
+    // invente — un style deviné sur une voix payée serait une surprise facturée.
+    const style = options?.style;
+    const dictee =
+      typeof style === 'number' && Number.isFinite(style) && style >= 0 && style <= 1
+        ? { voice_settings: { style } }
+        : {};
 
     const voiceId = resolveVoiceId(voice ?? this.config.defaultVoice);
     const response = await fetch(
@@ -153,7 +167,7 @@ export class ElevenLabsClient implements VoiceSynthesizer {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify({ text: spoken, model_id: this.config.model }),
+        body: JSON.stringify({ text: spoken, model_id: this.config.model, ...dictee }),
       }
     );
 

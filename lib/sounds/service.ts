@@ -109,3 +109,32 @@ export function keepKnownSounds<T extends { src?: unknown }>(
     (candidate) => typeof candidate.src === 'string' && known.has(candidate.src)
   );
 }
+
+/**
+ * L'humeur du registre, appliquée au catalogue.
+ *
+ * Seule la musique est filtrée : l'humeur est musicale, et un whoosh n'a pas
+ * d'humeur — les bruitages et les ambiances passent toujours. Une musique
+ * passe quand son `mood` partage au moins un mot avec l'humeur demandée, ou
+ * quand elle n'en déclare aucun : sans humeur déclarée, on ne refuse pas.
+ *
+ * Si le filtre vide l'étagère, l'entrée revient intacte : mieux vaut une
+ * musique imparfaite à bas volume qu'un film muet, et le repli est explicite
+ * plutôt que silencieux.
+ */
+export function filtrerLeCatalogue(
+  sounds: SoundChoice[],
+  humeurs: readonly string[]
+): SoundChoice[] {
+  const demandees = new Set(humeurs.map((humeur) => humeur.trim().toLowerCase()));
+  const partageUneHumeur = (sound: SoundChoice): boolean => {
+    if (sound.kind !== 'music') return true;
+    if (!sound.mood) return true;
+    return sound.mood
+      .split(',')
+      .some((mot) => demandees.has(mot.trim().toLowerCase()));
+  };
+  const gardees = sounds.filter(partageUneHumeur);
+  if (gardees.some((sound) => sound.kind === 'music')) return gardees;
+  return sounds;
+}

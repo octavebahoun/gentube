@@ -3,7 +3,13 @@ import { db } from '@/lib/db/drizzle';
 import { soundAssets } from '@/lib/db/schema';
 import { closeDb, resetDb } from '@/lib/test/fixtures';
 import { parseCatalogue } from './import-catalog';
-import { keepKnownSounds, listSounds, renderSoundCatalogue } from './service';
+import {
+  filtrerLeCatalogue,
+  keepKnownSounds,
+  listSounds,
+  renderSoundCatalogue,
+  type SoundChoice,
+} from './service';
 
 afterAll(async () => {
   await closeDb();
@@ -124,6 +130,45 @@ describe('filtering what the model picked', () => {
     expect(keepKnownSounds(undefined, library)).toEqual([]);
     expect(keepKnownSounds([], library)).toEqual([]);
     expect(keepKnownSounds([{ src: 'sounds/sfx/pop.mp3' }], [])).toEqual([]);
+  });
+});
+
+describe('filtering the catalogue by the registre mood', () => {
+  const son = (
+    surcouche: Partial<SoundChoice> & { src: string }
+  ): SoundChoice => ({
+    name: surcouche.src,
+    kind: 'sfx',
+    mood: null,
+    loopable: false,
+    durationS: null,
+    impacts: [],
+    usage: null,
+    ...surcouche,
+  });
+
+  const library = [
+    son({ src: 'sounds/music/douce.mp3', kind: 'music', mood: 'paisible, planant' }),
+    son({ src: 'sounds/music/forte.mp3', kind: 'music', mood: 'énergique, moderne' }),
+    son({ src: 'sounds/music/sans-humeur.mp3', kind: 'music', mood: null }),
+    son({ src: 'sounds/sfx/pop.mp3', kind: 'sfx', mood: 'sec, dynamique' }),
+  ];
+
+  it('ne garde que les musiques qui partagent l humeur, jamais moins que rien', () => {
+    // L'humeur est musicale : un whoosh n'en a pas, et passe toujours.
+    const gardees = filtrerLeCatalogue(library, ['paisible', 'planant', 'chaleureux']);
+    expect(gardees.map((s) => s.src).sort()).toEqual([
+      'sounds/music/douce.mp3',
+      'sounds/music/sans-humeur.mp3',
+      'sounds/sfx/pop.mp3',
+    ]);
+  });
+
+  it('rend l étagère intacte plutôt qu un film muet', () => {
+    // Aucune musique ne partage l'humeur et aucune n'est sans humeur : repli
+    // explicite, pas de silence.
+    const sansRepli = library.filter((s) => s.src !== 'sounds/music/sans-humeur.mp3');
+    expect(filtrerLeCatalogue(sansRepli, ['médiéval'])).toBe(sansRepli);
   });
 });
 
