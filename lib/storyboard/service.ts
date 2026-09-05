@@ -352,7 +352,14 @@ export async function getStoryboard(
  * Exécute `mutate`, puis re-facture la vidéo dans la même transaction : un
  * storyboard et le prix affiché à côté ne doivent jamais être en désaccord.
  */
-async function editStoryboard(
+/**
+ * Rejoue une mutation du storyboard sous les mêmes garanties que les autres.
+ *
+ * Exporté pour `apport.ts`, qui remplace les plans d'une vidéo par ceux
+ * taillés dans un fichier importé : il lui faut le même refus hors brouillon
+ * et la même transaction, et les dupliquer les ferait diverger.
+ */
+export async function editStoryboard(
   tdb: TenantDb,
   videoId: number,
   mutate: (tx: TenantDb) => Promise<void>

@@ -28,6 +28,7 @@ import { PriceStrip } from '@/components/storyboard/price-strip';
 import { SortableShotCard } from '@/components/storyboard/shot-card';
 import {
   AddShotForm,
+  ApportForm,
   GenerateButton,
   NovitaForm,
   RenderForm,
@@ -61,6 +62,19 @@ export function StoryboardEditor({
   assets: ClientAsset[];
 }) {
   const editable = video.status === 'draft';
+  /*
+   * Les vidéos déposées, les seules qui se découpent.
+   *
+   * Une image est une scène : elle s'attache à un plan depuis sa carte. Une
+   * vidéo n'en est pas une — elle se taille en plans, et c'est un autre geste.
+   */
+  const videosApportees = assets
+    .filter((asset) => asset.kind === 'video')
+    .map((asset) => ({
+      id: asset.id,
+      label: asset.originalName ?? `Fichier ${asset.id}`,
+      words: Array.isArray(asset.words) ? asset.words.length : 0,
+    }));
   const spokenSeconds = shots.reduce((t, s) => t + s.durationS, 0);
 
   // Les visuels s'ouvrent une fois les crédits débités : `validated` au premier
@@ -139,6 +153,19 @@ export function StoryboardEditor({
             que rien ne pouvait être demandé.
           */}
           {editable && <GenerateButton videoId={video.id} hasShots={items.length > 0} />}
+          {/*
+            Le montage d'un import, posé à côté de l'écriture du storyboard
+            plutôt que sur une carte de scène : les deux partent d'un thème ou
+            d'un fichier et produisent TOUS les plans. Le sélecteur des cartes,
+            lui, sert un plan à la fois.
+          */}
+          {editable && videosApportees.length > 0 && (
+            <ApportForm
+              videoId={video.id}
+              videos={videosApportees}
+              hasShots={items.length > 0}
+            />
+          )}
           {editable &&
             items.length > 0 &&
             (durationsMeasured ? (

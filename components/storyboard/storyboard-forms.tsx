@@ -8,6 +8,7 @@ import {
   Image as ImageIcon,
   Loader2,
   Mic,
+  Scissors,
   Video as VideoIcon,
   Wand2,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ import {
   generateStoryboardAction,
   generateVisualsAction,
   generateVoiceoverAction,
+  monterApportAction,
   renderVideoAction,
   validateVideoAction,
 } from '@/app/(dashboard)/dashboard/videos/actions';
@@ -314,6 +316,80 @@ export function AddShotForm({ videoId }: { videoId: number }) {
           'Ajouter la scène'
         )}
       </Button>
+    </form>
+  );
+}
+
+/**
+ * Le montage d'une vidéo apportée par le client.
+ *
+ * **Séparé du sélecteur de fichier des cartes de scène, et pour une raison.**
+ * Là-bas, attacher un fichier sert un plan : une capture, une photo de
+ * produit. Ici, une vidéo se **découpe** — le montage remplace tous les plans
+ * de la vidéo. Un geste destructeur ne partage pas un bouton avec un geste qui
+ * ne l'est pas.
+ *
+ * Le découpage tombe dans les silences de la bande son, dans les bornes de
+ * rythme du registre, et alterne le cadrage d'un plan à l'autre : c'est ce
+ * recadrage qui rend la coupe visible sur une source continue.
+ */
+export function ApportForm({
+  videoId,
+  videos,
+  hasShots,
+}: {
+  videoId: number;
+  /** Les vidéos déposées sur le projet. Le composant n'est posé que s'il y en a. */
+  videos: { id: number; label: string; words: number }[];
+  hasShots: boolean;
+}) {
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    monterApportAction,
+    {}
+  );
+
+  return (
+    <form action={formAction} className="space-y-2">
+      <input type="hidden" name="videoId" value={videoId} />
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          name="assetId"
+          defaultValue={String(videos[0]?.id ?? '')}
+          disabled={isPending}
+          className="h-9 min-w-0 max-w-sm flex-1 rounded-md border bg-transparent px-2 text-sm"
+        >
+          {videos.map((video) => (
+            <option key={video.id} value={video.id}>
+              {video.label}
+              {video.words > 0 ? ` · ${video.words} mots` : ' · non transcrite'}
+            </option>
+          ))}
+        </select>
+        <Button type="submit" variant="outline" disabled={isPending}>
+          {isPending ? (
+            <>
+              <Loader2 className="animate-spin" />
+              Découpage…
+            </>
+          ) : (
+            <>
+              <Scissors />
+              Monter cette vidéo
+            </>
+          )}
+        </Button>
+      </div>
+      <p className="max-w-xl text-xs text-muted-foreground">
+        Les coupes tombent dans les silences, et le cadrage alterne d&apos;un
+        plan à l&apos;autre pour qu&apos;elles se voient.{' '}
+        {hasShots
+          ? 'Cela remplace toutes les scènes actuelles.'
+          : 'Aucune étape payante ne touchera ces plans.'}{' '}
+        {videos.every((video) => video.words === 0) &&
+          'Sans transcription, la vidéo reste un plan unique : il n’y a aucun silence où couper.'}
+      </p>
+      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
+      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
     </form>
   );
 }

@@ -9,6 +9,7 @@ import { InsufficientCreditsError } from '@/lib/credits';
 import { LlmError, LlmNotConfiguredError } from '@/lib/llm/deepseek';
 import { StorageNotConfiguredError } from '@/lib/storage';
 import { AssetError, bindAssetToShot } from '@/lib/assets';
+import { monterLapport } from '@/lib/storyboard/apport';
 import { VoiceError, VoiceNotConfiguredError } from '@/lib/voice/elevenlabs';
 import { ImageError, ImageNotConfiguredError } from '@/lib/images/flux';
 import { AnimationError, AnimationNotConfiguredError } from '@/lib/video';
@@ -202,6 +203,33 @@ export const shotFormAction = validatedActionWithUser(
     if (data.intent === 'save') return { success: 'Shot saved.' };
     if (data.intent === 'bind') return { success: 'File attached to this scene.' };
     return {};
+  }
+);
+
+/**
+ * Le montage d'une vidéo apportée par le client.
+ *
+ * **Pourquoi une action à part de `bind`.** Lier attache un fichier à **un**
+ * plan, ce qui est juste pour une capture ou une photo. Une vidéo de trente
+ * secondes n'est pas un plan : elle se découpe, et le découpage remplace tous
+ * les plans de la vidéo. Deux gestes trop différents pour un même bouton — et
+ * l'un est destructeur, l'autre pas.
+ */
+const monterApportSchema = videoIdentity.extend({
+  assetId: z.coerce.number().int().positive(),
+});
+
+export const monterApportAction = validatedActionWithUser(
+  monterApportSchema,
+  async (data, _formData, user) => {
+    try {
+      await monterLapport(tenantDb(user.tenantId), data.videoId, data.assetId);
+    } catch (error) {
+      return formError(error);
+    }
+
+    revalidatePath(`/dashboard/videos/${data.videoId}`);
+    return { success: 'Video cut into shots.' };
   }
 );
 
