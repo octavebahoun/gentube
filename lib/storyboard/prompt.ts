@@ -1,5 +1,4 @@
-import { TRANSITIONS } from './render';
-import { EFFETS } from './effets';
+import { lignesDesRegistres } from './registres';
 
 /**
  * Le plafond de scènes d'un storyboard.
@@ -24,34 +23,13 @@ export const MAX_SHOTS = 30;
  * base, et chaque scène chiffrée rendait une image ordinaire — facturée.
  */
 
-/**
- * Les nappes, dites au modèle depuis la table.
- *
- * La liste était écrite à la main juste en dessous, et elle s'était arrêtée à
- * neuf entrées sur quarante-trois : trente-quatre nappes existaient dans le
- * rendu, sous garde visuelle, et le modèle ne pouvait pas les demander. C'est
- * la même panne que les jeux de références écrits à la main, au même endroit
- * du raisonnement — une liste parallèle à une table finit toujours par mentir.
- *
- * Elle se lit donc dans `EFFETS`, comme le schéma, le balisage et les
- * instants. Ajouter une nappe reste une ligne, et sa ligne de prompt vient
- * avec elle.
- */
-function lignesDesNappes(): string[] {
-  return Object.entries(EFFETS).map(([nom, effet]) => {
-    const reglages = Object.keys(effet.reglages);
-    const forme = reglages.length ? ` { ${reglages.map((r) => `${r}?`).join(', ')} }` : '';
-    return `    \`${nom}\`${forme} ${effet.phrase}`;
-  });
-}
-
 export const SYSTEM_PROMPT = [
   'You write storyboards for short videos assembled from AI-generated visuals',
   'and an AI voice-over.',
   '',
   'Answer with ONLY a JSON object of this exact shape:',
-  '{"scenes":[{"narration":"...","type":"image","prompt":"...",',
-  '"effects":{"zoom":"in","transition":"fade"},"sounds":[{"src":"..."}]}]}',
+  '{"registre":"explainer","scenes":[{"narration":"...","type":"image",',
+  '"prompt":"...","ton":"pose","sounds":[{"src":"..."}]}]}',
   '',
   'Rules:',
   '- `narration` is the line the voice reads out loud. Write it in the SAME',
@@ -60,42 +38,26 @@ export const SYSTEM_PROMPT = [
   '- `prompt` is the visual, in ENGLISH whatever the narration language: the',
   '  image and video models are trained on English captions. Describe one',
   '  continuous shot — subject, action, framing, light. No on-screen text.',
+  '- `type` is `video` or `image`, and you write it on EVERY scene. It is the',
+  '  first thing a scene needs and the easiest to forget: a scene without it',
+  '  falls back to `image`, and a shot that needed movement comes out still.',
   '- Do NOT write any duration. The duration of a scene is the real length of',
   '  its voice-over, measured after the audio is generated.',
   '- Do not restate the project style in each prompt: it is applied separately.',
-  '- `effects` is optional: zoom in/out/none, shake true/false, onBeat',
-  '  true/false — onBeat snaps this scene\'s flash and shake onto the nearest',
-  '  musical impact, so use it when the line lands on something,',
-  '  cameraMotion orbit/dolly/pan/static, and transition — one of:',
-  `  ${TRANSITIONS.join('/')}.`,
-  '  Pick by intent, not by variety. `fade` carries continuity, `black` marks',
-  '  a chapter, `push-*` and `zoom-*` mean the story moved somewhere else,',
-  '  `wipe-*`, `iris-in`, `barn-doors`, `curtain` and `clock-wipe` open onto',
-  '  something rather than replacing it, `flip-*` and `spin` turn a page over,',
-  '  and the named shaders are loud — at most two or three in a whole video.',
-  '- `lightSweep` is optional: a soft diagonal band of light crosses the frame',
-  '  once. { color?, startInSeconds?, durationInSeconds? }. Use it when the',
-  '  line turns hopeful or premium. It snaps to the beat when `onBeat` is true.',
-  '- `grain` is optional: a faint animated film grain over the whole scene,',
-  '  for warmth and analog character. { opacity? }. Use it on memory, archive',
-  '  or intimacy — never on a scene that must read as crisp and modern.',
-  '- `beatAccent` is optional: the frame breathes once on a musical hit and',
-  '  settles. { strength? }. Put it on the word that lands hardest. It always',
-  '  snaps to the nearest beat, so it needs no `onBeat`.',
-  '- These overlays are optional, one line each, all `{ startInSeconds?,',
-  '  durationInSeconds? }` unless said otherwise. At most two per scene —',
-  '  stacked, they fight each other and none reads:',
-  ...lignesDesNappes(),
-  '  `gridDrift` and `auroraDrift` are backdrops: an image covers them, so use',
-  '  them on scenes that draw themselves.',
-  '- The handwritten marks draw themselves over the shot, ink on film. Use at',
-  '  most one per scene, and only when the line points at something:',
-  '    `hwBoxLabel` { label?, color?, boil? } boxes a spot and names it.',
-  '    `hwCalloutCircle` { label?, x?, y?, size? } circles one area.',
-  '    `hwFrame` { caption? } frames the whole shot and captions it.',
-  '    `hwPipeline` { nodes: [\'Sow\', \'Harvest\', \'Sell\'] } chains 2 to 5 named',
-  '      boxes. Write the NAMES, never a count — an empty box says nothing.',
-  '    `hwBoil` { amount? } is the tremble alone, for a whole scene.',
+  '- You do NOT choose visual effects. Transitions, zooms, overlays, accents:',
+  '  the renderer decides all of them, from two words you write instead.',
+  '- `registre` is written ONCE, at the top level of the object, and holds for',
+  '  the whole video. It says what kind of video this is:',
+  ...lignesDesRegistres(),
+  '- `ton` is written on EACH scene and says what the sentence does, not what',
+  '  it says. Exactly one of:',
+  '    `pose` — the line moves forward without relief. The default, and most',
+  '      scenes are this. When unsure, write `pose`.',
+  '    `appui` — the line carries the point of the video. One or two per video',
+  '      at the very most; a video where everything is stressed stresses',
+  '      nothing.',
+  '    `bascule` — the line leaves the previous subject for another one. It is',
+  '      a cut, not an emphasis: use it where a chapter would start.',
   '- `counter` is optional and turns the scene into a number that climbs:',
   '  { value, label, from?, prefix?, suffix?, decimals?, variant: count|ring|wheel }.',
   '  Such a scene needs NO `prompt` — it draws itself, so it costs nothing to',

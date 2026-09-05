@@ -1,8 +1,10 @@
 import { and, asc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { MAX_SHOTS, SYSTEM_PROMPT } from './prompt';
+import { REGISTRES, TONS, audioDe, habille, voixDe } from './registres';
+import { cadre } from './cadrage';
 import type { TenantDb } from '@/lib/db/tenant-db';
-import { shots, type Pipeline, type Shot, type Video } from '@/lib/db/schema';
+import { shots, videos, projects, type Pipeline, type Shot, type Video } from '@/lib/db/schema';
 import {
   estimateVideo,
   getBalance,
@@ -12,6 +14,7 @@ import { getProject } from '@/lib/projects';
 import { getEntitlements } from '@/lib/billing/entitlements';
 import { VideoError, assertDraft, getVideo } from '@/lib/videos';
 import {
+  filtrerLeCatalogue,
   keepKnownSounds,
   listSounds,
   renderSoundCatalogue,
@@ -34,7 +37,6 @@ import {
   socialCardSchema,
   sceneCounterSchema,
   threadSchema,
-  sceneEffectsSchema,
   sceneSoundSchema,
 } from './render';
 
@@ -148,7 +150,19 @@ const llmSceneSchema = z.object({
     (value) => (typeof value === 'string' ? value.trim() : value),
     z.string().min(2).max(2_000)
   ),
-  type: z.enum(['image', 'video']),
+  /*
+   * Optionnel, et c'est un choix.
+   *
+   * `normalizeStoryboard` le **jette** dès que le pipeline n'est pas `mixed` :
+   * un projet image-only rend des images quoi que le modèle écrive. Refuser
+   * un storyboard entier sur un champ qu'on allait remplacer était une perte
+   * sèche — trois scènes sans `type` ont tué la génération du 5 septembre
+   * 2026, alors que la seule qui pouvait en tenir compte l'aurait ignoré.
+   *
+   * Absent, il vaut `image` : la scène la moins chère. Un défaut à `video`
+   * quadruplerait ce que le client paie sur la foi d'un oubli du modèle.
+   */
+  type: z.enum(['image', 'video']).optional(),
   /*
    * Optionnel ici, exigé plus bas.
    *
@@ -164,7 +178,15 @@ const llmSceneSchema = z.object({
       z.string().max(1_000)
     )
     .optional(),
-  effects: sceneEffectsSchema.optional(),
+  /*
+   * Le ton, à la place des effets.
+   *
+   * Le modèle écrivait `effects` en choisissant dans un catalogue de trois
+   * cents entrées, sans jamais voir un rendu : il choisissait par variété, et
+   * la vidéo sortait en catalogue. Il ne dit plus que ce qu'une phrase fait —
+   * `registres.ts` traduit.
+   */
+  ton: z.enum(TONS).optional(),
   /*
    * Le contenu structuré que le modèle a le droit d'écrire.
    *
@@ -202,6 +224,12 @@ const llmSceneSchema = z.object({
   );
 
 export const llmStoryboardSchema = z.object({
+  /*
+   * Le registre vaut pour toute la vidéo, donc il vit ici et non sur la scène.
+   * Optionnel : un modèle qui l'oublie ne doit pas faire échouer un storyboard
+   * déjà payé — `habille` retombe alors sur `explainer`.
+   */
+  registre: z.enum(REGISTRES).optional(),
   scenes: z.array(llmSceneSchema).min(1),
 });
 
@@ -230,16 +258,36 @@ export function normalizeStoryboard(
   let parsed: z.infer<typeof llmStoryboardSchema>;
   try {
     parsed = llmStoryboardSchema.parse(data);
-  } catch {
+  } catch (error) {
+    // Dire **où** ça coince. Le message d'avant ne nommait ni le champ ni la
+    // scène : un storyboard refusé était un mur, et la seule façon de savoir
+    // était de rappeler le modèle à la main.
+    const causes =
+      error instanceof z.ZodError
+        ? error.issues
+            .slice(0, 4)
+            .map((issue) => `${issue.path.join('.') || '(racine)'}: ${issue.message}`)
+            .join(' | ')
+        : String(error);
     throw new LlmError(
-      'The model returned a storyboard in a shape we cannot use. Try again.'
+      `The model returned a storyboard in a shape we cannot use — ${causes}`
     );
   }
 
-  return parsed.scenes.slice(0, MAX_SHOTS).map((scene, index) => {
-    const sounds = keepKnownSounds(scene.sounds, library);
+  // Coupé avant la boucle : `habille` a besoin du compte final pour savoir
+  // laquelle est la dernière, et une scène retirée par le plafond ne doit pas
+  // emporter la fermeture avec elle.
+  const retenues = parsed.scenes.slice(0, MAX_SHOTS);
+
+  return retenues.map((scene, index) => {
+    // L'humeur du registre filtre le catalogue : une musique qui jure avec le
+    // registre ne passe pas, même si le modèle l'a choisie. Le registre est
+    // choisi par le modèle dans cette même réponse, donc le filtre s'applique
+    // ici à la sortie — et la demande d'humeur part dans le prompt, à l'entrée.
+    const catalogue = filtrerLeCatalogue(library, audioDe(parsed.registre).humeur);
+    const sounds = keepKnownSounds(scene.sounds, catalogue);
     const render: Record<string, unknown> = {};
-    if (scene.effects) render.effects = scene.effects;
+    render.effects = habille(parsed.registre, scene.ton, index, retenues.length);
     if (scene.counter) render.counter = scene.counter;
     if (scene.chart) render.chart = scene.chart;
     if (scene.thread) render.thread = scene.thread;
@@ -253,7 +301,7 @@ export function normalizeStoryboard(
 
     return {
       order: index + 1,
-      type: pipeline === 'mixed' ? scene.type : pipeline,
+      type: pipeline === 'mixed' ? (scene.type ?? 'image') : pipeline,
       // Une scène qui se dessine seule n'a pas de visuel à décrire, et la
       // colonne est `notNull` : la chaîne vide dit « rien à illustrer ».
       prompt: scene.prompt ?? '',
@@ -363,7 +411,8 @@ export async function generateStoryboard(
   const theme = video.theme?.trim() || video.title;
   const sounds = library ?? (await listSounds());
 
-  const completion = await (client ?? createDeepSeekClient()).completeJson(
+  const llm = client ?? createDeepSeekClient();
+  const completion = await llm.completeJson(
     buildStoryboardMessages({
       theme,
       stylePrompt: project.stylePrompt,
@@ -374,6 +423,24 @@ export async function generateStoryboard(
   );
 
   const generated = normalizeStoryboard(completion.data, pipeline, sounds);
+
+  /*
+   * La deuxième passe : le cadreur réécrit les visuels.
+   *
+   * Elle coûte un appel de plus, et c'est le seul endroit de la chaîne où un
+   * appel supplémentaire change les pixels : le `prompt` d'un plan est ce que
+   * Wan reçoit. `cadre` ne lève jamais — le storyboard est déjà écrit, un
+   * cadreur en panne doit coûter un rendu plus terne, pas la génération.
+   */
+  const registre = llmStoryboardSchema.safeParse(completion.data).data?.registre;
+  const cadrages = await cadre(
+    generated.map((scene) => ({
+      order: scene.order,
+      narration: scene.narration,
+      prompt: scene.prompt,
+    })),
+    { client: llm, theme, stylePrompt: project.stylePrompt, registre }
+  );
 
   return await editStoryboard(tdb, videoId, async (tx) => {
     // Une régénération remplace le brouillon en bloc — c'est ce que le bouton
@@ -386,13 +453,29 @@ export async function generateStoryboard(
         videoId,
         order: scene.order,
         type: scene.type,
-        prompt: scene.prompt,
+        prompt: cadrages.get(scene.order) ?? scene.prompt,
         narration: scene.narration,
         durationS: scene.durationS,
         durationSource: 'estimated' as const,
         render: scene.render,
       }))
     );
+    // Le lit sonore du registre, choisi et expliqué — pas le défaut du schéma.
+    // Personne ne le règle à la main : aucune valeur à écraser.
+    await tx.update(
+      videos,
+      { musicVolume: audioDe(registre).litSonore, updatedAt: new Date() },
+      eq(videos.id, videoId)
+    );
+    // La voix par défaut du projet, si personne ne l'a choisie : le registre
+    // la porte, et un nom court que chaque fournisseur résout ou remplace.
+    if (!project.voiceId) {
+      await tx.update(
+        projects,
+        { voiceId: voixDe(registre).voix, updatedAt: new Date() },
+        eq(projects.id, project.id)
+      );
+    }
   });
 }
 

@@ -85,7 +85,7 @@ describe('deepSeekConfig', () => {
       baseUrl: 'https://api.deepseek.com',
       // Confirmé auprès du compte : il n'y a pas de `deepseek-chat` ici.
       model: 'deepseek-v4-flash',
-      maxTokens: 8_000,
+      maxTokens: 32_000,
     });
   });
 
@@ -106,7 +106,7 @@ describe('deepSeekConfig', () => {
     process.env.DEEPSEEK_API_KEY = 'sk-abc';
     for (const value of ['zero', '0', '-5', '1.5']) {
       process.env.DEEPSEEK_MAX_TOKENS = value;
-      expect(deepSeekConfig().maxTokens).toBe(8_000);
+      expect(deepSeekConfig().maxTokens).toBe(32_000);
     }
   });
 

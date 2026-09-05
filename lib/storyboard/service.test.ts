@@ -1,11 +1,12 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { shots, videos, type Pipeline } from '@/lib/db/schema';
-import { createProject } from '@/lib/projects';
+import { createProject, getProject } from '@/lib/projects';
 import { createVideo } from '@/lib/videos';
 import { LlmError, type JsonCompleter } from '@/lib/llm/deepseek';
 import type { SoundChoice } from '@/lib/sounds';
 import type { TenantDb } from '@/lib/db/tenant-db';
+import { habille } from '@/lib/storyboard/registres';
 import {
   closeDb,
   createTenant,
@@ -208,15 +209,35 @@ describe('normalising what the model returns', () => {
     ]);
   });
 
-  it('keeps the effects and drops sounds that do not exist', () => {
+  it('retombe sur image quand le modèle oublie le type', () => {
     const normalised = normalizeStoryboard(
       {
+        scenes: [
+          { narration: line(3), prompt: 'Warriors at dawn' },
+          { narration: line(3), type: 'video', prompt: 'A king watching' },
+        ],
+      },
+      'mixed'
+    );
+
+    // Le moins cher, jamais le plus cher : un oubli du modèle ne doit pas
+    // quadrupler ce que le client paie.
+    expect(normalised.map((scene) => scene.type)).toEqual(['image', 'video']);
+  });
+
+  it('habille depuis le ton et ignore les effets que le modèle invente', () => {
+    const normalised = normalizeStoryboard(
+      {
+        registre: 'explainer',
         scenes: [
           {
             narration: line(3),
             type: 'video',
             prompt: 'Warriors in formation at dawn',
-            effects: { zoom: 'in', transition: 'whip-pan', cameraMotion: 'dolly' },
+            ton: 'appui',
+            // Le modèle n'a plus le droit de choisir : le catalogue lui coûtait
+            // la cohérence. Ce qu'il écrit ici doit être jeté, pas rendu.
+            effects: { zoom: 'out', transition: 'whip-pan', cameraMotion: 'dolly' },
             sounds: [
               { src: 'sounds/sfx/pop.mp3', startInSeconds: 0.5 },
               // Inventé par le modèle : échouerait quelques minutes plus tard dans Lambda.
@@ -230,9 +251,80 @@ describe('normalising what the model returns', () => {
     );
 
     expect(normalised[0].render).toEqual({
-      effects: { zoom: 'in', transition: 'whip-pan', cameraMotion: 'dolly' },
+      effects: habille('explainer', 'appui', 0, 1),
       sounds: [{ src: 'sounds/sfx/pop.mp3', startInSeconds: 0.5 }],
     });
+    expect(normalised[0].render.effects).not.toMatchObject({ transition: 'whip-pan' });
+  });
+
+  it('jette la musique qui jure avec l humeur du registre, pas le bruitage', () => {
+    const biblio: SoundChoice[] = [
+      ...LIBRARY,
+      {
+        src: 'sounds/music/douce.mp3',
+        name: 'douce',
+        kind: 'music',
+        mood: 'paisible, planant',
+        loopable: true,
+        durationS: 31,
+        impacts: [],
+        usage: 'nappe discrète',
+      },
+      {
+        src: 'sounds/music/forte.mp3',
+        name: 'forte',
+        kind: 'music',
+        mood: 'énergique, moderne',
+        loopable: false,
+        durationS: 142,
+        impacts: [],
+        usage: 'générique dynamique',
+      },
+    ];
+    const normalised = normalizeStoryboard(
+      {
+        registre: 'explainer',
+        scenes: [
+          {
+            narration: line(3),
+            type: 'image',
+            prompt: 'A quiet street',
+            sounds: [
+              { src: 'sounds/music/douce.mp3' },
+              { src: 'sounds/music/forte.mp3' },
+              { src: 'sounds/sfx/pop.mp3' },
+            ],
+          },
+        ],
+      },
+      'image',
+      biblio
+    );
+
+    expect(normalised[0].render.sounds).toEqual([
+      { src: 'sounds/music/douce.mp3' },
+      { src: 'sounds/sfx/pop.mp3' },
+    ]);
+  });
+
+  it('retombe sur explainer et pose quand le modèle n\'écrit ni registre ni ton', () => {
+    const normalised = normalizeStoryboard(
+      { scenes: [{ narration: line(3), type: 'image', prompt: 'A quiet street' }] },
+      'image'
+    );
+
+    expect(normalised[0].render.effects).toEqual(habille('explainer', 'pose', 0, 1));
+  });
+
+  it('alterne le zoom entre deux scènes posées', () => {
+    const normalised = normalizeStoryboard(scenesOf(2), 'image');
+    const zooms = normalised.map(
+      (s) => (s.render.effects as { zoom?: string }).zoom
+    );
+
+    // Sept zooms avant d'affilée se lisent comme une seule scène qui n'en
+    // finit pas. L'alternance est ce qui fait compter les plans.
+    expect(zooms).toEqual(['in', 'out']);
   });
 
   it('caps a runaway storyboard', () => {
@@ -284,6 +376,38 @@ describe('storyboard generation', () => {
     expect(result.video.creditsConsumed).toBe(0);
   });
 
+  it('pose le lit sonore du registre à la génération, pas le défaut du schéma', async () => {
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const { video } = await draftVideo(tdb);
+
+    const result = await generateStoryboard(tdb, video.id, {
+      client: answering(scenesOf(3, { seconds: 5 })),
+      library: LIBRARY,
+    });
+
+    // `explainer` veut une musique qu'on n'entend pas : autour de 0,08.
+    expect(result.video.musicVolume).toBe(0.08);
+  });
+
+  it('donne au projet sans voix celle du registre, sans toucher aux autres', async () => {
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const { video, project } = await draftVideo(tdb);
+
+    await generateStoryboard(tdb, video.id, {
+      client: answering(scenesOf(3, { seconds: 5 })),
+      library: LIBRARY,
+    });
+    expect((await getProject(tdb, project.id)).voiceId).toBe('anais');
+
+    const choisi = await createProject(tdb, { name: 'Choisi', voiceId: 'lea' });
+    const autre = await createVideo(tdb, { projectId: choisi.id, title: 'Autre' });
+    await generateStoryboard(tdb, autre.id, {
+      client: answering(scenesOf(2, { seconds: 5 })),
+      library: LIBRARY,
+    });
+    expect((await getProject(tdb, choisi.id)).voiceId).toBe('lea');
+  });
+
   it('prices 720p three times the 480p rate', async () => {
     const tdb = await createTenant('Alpha', { credits: 1_000 });
     await subscribe(tdb); // le 720p demande un abonnement actif
@@ -319,7 +443,11 @@ describe('storyboard generation', () => {
     const asked: string[] = [];
     const spy: JsonCompleter = {
       async completeJson(messages) {
-        asked.push(messages[1].content);
+        // Le cadreur passe par le même client. Sans ce filtre les index
+        // glissent d'un appel sur deux, et le test lit la mauvaise demande.
+        if (!messages[0].content.startsWith('You are a director of photography')) {
+          asked.push(messages[1].content);
+        }
         return {
           data: scenesOf(1),
           usage: { promptTokens: 1, completionTokens: 1, reasoningTokens: 0 },
