@@ -33,6 +33,54 @@ describe('ce que la table produit', () => {
     }
   });
 
+  it('ne produit que des transitions que la fiche s autorise', () => {
+    /*
+     * C'est ce test qui donne sa valeur à la liste blanche.
+     *
+     * Sans lui, `transitions` n'est que de la documentation : rien n'empêche
+     * une fiche d'écrire une transition qui jure avec son registre, ni une
+     * branche de `habille()` d'en poser une que la fiche n'annonce pas. Et
+     * `TRANSITIONS` en compte trente-cinq.
+     *
+     * Exhaustif sur les trois axes exprès — registre, ton, place. La place
+     * prime sur le ton, donc l'ouverture et la fermeture prennent des chemins
+     * que le milieu ne prend jamais : les tester au milieu seulement laisserait
+     * deux branches sur quatre sans surveillance. `total` varie aussi, parce
+     * qu'une vidéo d'une scène est à la fois son ouverture et sa fermeture.
+     */
+    for (const registre of REGISTRES) {
+      const autorisees = transitionsDe(registre);
+      for (const ton of TONS) {
+        for (const total of [1, 2, TOTAL]) {
+          for (let index = 0; index < total; index += 1) {
+            const { transition } = habille(registre, ton, index, total);
+            expect(
+              autorisees,
+              `${registre}/${ton} en ${index + 1}/${total} pose « ${transition} »`
+            ).toContain(transition);
+          }
+        }
+      }
+    }
+  });
+
+  it('n annonce aucune transition qu elle ne pose jamais', () => {
+    // L'autre sens : une liste qui promet plus qu'elle ne produit est une
+    // fausse contrainte, et elle laisserait croire qu'un registre a un
+    // vocabulaire qu'il n'utilise pas.
+    for (const registre of REGISTRES) {
+      const posees = new Set<string>();
+      for (const ton of TONS) {
+        for (const total of [1, 2, TOTAL]) {
+          for (let index = 0; index < total; index += 1) {
+            posees.add(habille(registre, ton, index, total).transition as string);
+          }
+        }
+      }
+      expect([...transitionsDe(registre)].sort()).toEqual([...posees].sort());
+    }
+  });
+
   it('alterne le zoom au milieu et ne pose un accent que sur un appui', () => {
     expect(habille('explainer', 'pose', 2, TOTAL).zoom).toBe('in');
     expect(habille('explainer', 'pose', 3, TOTAL).zoom).toBe('out');

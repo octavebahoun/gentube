@@ -174,10 +174,18 @@ export async function renderVideo(
   const storyboard = await listShots(tdb, videoId);
   assertShotsReady(storyboard);
 
-  // Les règles du registre, avant le rendu et jamais après : ce qui saute se
-  // journalise et laisse passer — le storyboard est déjà payé, et perdre la
-  // vidéo coûterait plus cher que le défaut.
-  signalerLesRefus(controlerStoryboard(storyboard));
+  /*
+   * Les règles du registre, avant le rendu et jamais après.
+   *
+   * Ce qui saute se journalise et laisse passer : le storyboard est déjà payé,
+   * et perdre la vidéo coûterait plus cher que le défaut.
+   *
+   * **Le registre est passé.** Il ne l'était pas, faute d'exister en base : les
+   * contrôles retombaient donc tous sur `explainer`, et un autre registre était
+   * mesuré à l'aune de celui-là — silencieusement, puisque le repli est un
+   * repli et pas une erreur.
+   */
+  signalerLesRefus(controlerStoryboard(storyboard, { registre: video.registre }));
 
   const assets = store ?? createAssetStore();
   const dir = mkdtempSync(join(tmpdir(), `gentube-rendu-${videoId}-`));

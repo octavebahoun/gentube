@@ -53,6 +53,43 @@ describe('la durée minimale', () => {
   });
 });
 
+describe('la liste blanche de transitions', () => {
+  const transitionDe = (surcouche: Partial<PlanAControler> = {}) =>
+    verdictsDe(surcouche).find((v) => v.regle === 'transition');
+
+  it('laisse passer une transition du registre', () => {
+    expect(transitionDe({ render: { effects: { transition: 'push-left' } } })?.statut).toBe(
+      'ok'
+    );
+  });
+
+  it('refuse une des trente-cinq autres, et la nomme', () => {
+    // Le modèle ne choisit plus, mais un plan peut porter des effets rédigés
+    // à la main — et la liste ne refusait rien tant qu'elle n'avait pas
+    // d'appelant.
+    const verdict = transitionDe({ render: { effects: { transition: 'whip-pan' } } });
+
+    expect(verdict?.statut).toBe('ko');
+    expect(verdict?.recu).toBe('whip-pan');
+    expect(verdict?.attendu).toContain('push-left');
+  });
+
+  it('juge le fondu par défaut quand le plan ne dit rien', () => {
+    // L'absence de transition n'est pas hors la loi : la composition joue
+    // `fade`, et c'est cette valeur-là qui doit être dans la liste.
+    expect(transitionDe()?.statut).toBe('ok');
+    expect(transitionDe()?.recu).toBe('fade');
+  });
+
+  it('ne juge pas un contrat de rendu illisible', () => {
+    // Déjà signalé ailleurs par `signalerLeRejet` : le redire en refus de
+    // transition serait un second reproche pour la même faute.
+    expect(
+      transitionDe({ render: { effects: { zoom: 'vers-la-lune' } } })?.statut
+    ).toBe('horsDePortee');
+  });
+});
+
 describe('le plafond de couleurs', () => {
   it('tient dans la palette tant que le plan ne déclare rien', () => {
     const verdict = verdictsDe().find((v) => v.regle === 'couleurs');

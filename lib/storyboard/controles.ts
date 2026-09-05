@@ -1,6 +1,6 @@
 import type { Shot } from '@/lib/db/schema';
 import { apparenceDe } from './apparence';
-import { dureeMinDe, qualiteDe } from './registres';
+import { dureeMinDe, qualiteDe, transitionsDe } from './registres';
 import { rendersOwnContent, sceneRenderSchema } from './render';
 
 /**
@@ -10,21 +10,22 @@ import { rendersOwnContent, sceneRenderSchema } from './render';
  * contraste minimum, un plafond de couleurs, une durée minimale — et ce fichier
  * le vérifie **avant** le rendu, jamais après.
  *
- * Trois règles, qui valent le coup :
+ * Quatre règles, qui valent le coup :
  *
  * - `contraste` : 4,5:1 au moins entre un texte et son fond ;
  * - `couleurs` : trois couleurs à l'écran en même temps au plus, fond exclu ;
- * - `duree` : la borne basse du rythme, sous laquelle un plan ne tient pas.
+ * - `duree` : la borne basse du rythme, sous laquelle un plan ne tient pas ;
+ * - `transition` : celles que le registre s'autorise, et pas les trente-cinq.
  *
  * Chaque règle rend un verdict nommé, jamais un booléen nu : un rendu refusé
- * dit laquelle des trois a sauté et sur quelle scène. Et le refus n'est pas
+ * dit laquelle des quatre a sauté et sur quelle scène. Et le refus n'est pas
  * une exception qui remonte — le storyboard est déjà payé quand on arrive là :
  * la règle qui saute se journalise et laisse passer, comme le fait déjà le
  * contrat de rendu par plan (`signalerLeRejet` dans `render.ts`).
  */
 
-/** Les trois règles, par leur nom. C'est ce nom qui part dans le journal. */
-export type Regle = 'contraste' | 'couleurs' | 'duree';
+/** Les quatre règles, par leur nom. C'est ce nom qui part dans le journal. */
+export type Regle = 'contraste' | 'couleurs' | 'duree' | 'transition';
 
 export type StatutDeControle = 'ok' | 'ko' | 'horsDePortee';
 
@@ -184,6 +185,56 @@ function controlerLaDuree(plan: PlanAControler, plancher: number): Verdict {
   };
 }
 
+/**
+ * La transition du plan est-elle une de celles que ce registre s'autorise ?
+ *
+ * `TRANSITIONS` en compte trente-cinq et le modèle ne choisit plus — mais rien
+ * n'empêchait une fiche d'en écrire une qui jure avec son registre, ni un plan
+ * de porter des effets rédigés à la main. La liste blanche de la fiche était
+ * de la documentation : sans appelant, elle ne refusait rien.
+ *
+ * Un plan sans transition explicite n'est pas hors la loi : `habille()` en pose
+ * toujours une, et un plan qui n'en porte aucune joue le `fade` par défaut de
+ * la composition. C'est cette valeur-là qu'on juge, pas l'absence.
+ */
+function controlerLaTransition(
+  plan: PlanAControler,
+  autorisees: readonly string[]
+): Verdict {
+  const base = { regle: 'transition' as const, scene: plan.order ?? 0 };
+  const attendu = autorisees.join(', ');
+  const contrat = sceneRenderSchema.safeParse(plan.render ?? {});
+
+  if (!contrat.success) {
+    return {
+      ...base,
+      statut: 'horsDePortee',
+      attendu,
+      recu: 'contrat de rendu illisible',
+      detail: 'le plan porte des effets que le contrat refuse, déjà signalés',
+    };
+  }
+
+  // Le défaut de la composition quand le plan ne dit rien.
+  const transition = contrat.data.effects?.transition ?? 'fade';
+
+  return autorisees.includes(transition)
+    ? {
+        ...base,
+        statut: 'ok',
+        attendu,
+        recu: transition,
+        detail: 'la transition appartient au registre',
+      }
+    : {
+        ...base,
+        statut: 'ko',
+        attendu,
+        recu: transition,
+        detail: 'la transition ne fait pas partie de celles que ce registre s autorise',
+      };
+}
+
 function controlerLesCouleurs(
   plan: PlanAControler,
   palette: string[],
@@ -257,7 +308,7 @@ function controlerLeContraste(
 }
 
 /**
- * Les trois règles, sur chaque plan.
+ * Les quatre règles, sur chaque plan.
  *
  * Ne lève jamais : une ligne surprenante rend un verdict `horsDePortee`, pas
  * une exception — le storyboard est déjà payé, et un contrôle ne doit pas
@@ -269,6 +320,7 @@ export function controlerStoryboard(
 ): Verdict[] {
   const { contrasteMin, couleursMax } = qualiteDe(registre);
   const plancher = dureeMinDe(registre);
+  const transitions = transitionsDe(registre);
   const palette = Object.values(apparenceDe(registre).palette).map(normaliserCouleur);
   const accent = normaliserCouleur(apparenceDe(registre).palette.accent);
 
@@ -278,6 +330,7 @@ export function controlerStoryboard(
         ...controlerLeContraste(plan, accent, contrasteMin),
         controlerLesCouleurs(plan, palette, couleursMax),
         controlerLaDuree(plan, plancher),
+        controlerLaTransition(plan, transitions),
       ];
     } catch {
       return [
