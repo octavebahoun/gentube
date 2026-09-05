@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
-import { CircleIcon, Home, LogOut, Clapperboard, Film, FolderKanban, Wallet } from 'lucide-react';
+import { CircleIcon, Home, LogOut, Clapperboard, Film, FolderKanban, Wallet, Settings, Shield, Activity } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,7 +72,25 @@ function UserMenu() {
         <DropdownMenuItem className="cursor-pointer">
           <Link href="/dashboard" className="flex w-full items-center">
             <Home className="mr-2 h-4 w-4" />
-            <span>Tableau de bord</span>
+            <span>Espace de travail</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer">
+          <Link href="/dashboard/general" className="flex w-full items-center">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Mon compte</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer">
+          <Link href="/dashboard/security" className="flex w-full items-center">
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Sécurité</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer">
+          <Link href="/dashboard/activity" className="flex w-full items-center">
+            <Activity className="mr-2 h-4 w-4" />
+            <span>Activité</span>
           </Link>
         </DropdownMenuItem>
         <form action={handleSignOut} className="w-full">
@@ -88,9 +106,27 @@ function UserMenu() {
   );
 }
 
-function AuthedNav() {
+function AuthedNav({ mobile = false }: { mobile?: boolean }) {
   const { data: user } = useSWR<User>('/api/user', fetcher);
   if (!user) return null;
+  if (mobile) {
+    return (
+      <nav className="flex items-center gap-1 overflow-x-auto pb-1 md:hidden">
+        <NavLink href="/dashboard/projects">
+          <span className="inline-flex items-center gap-1.5"><FolderKanban className="size-3.5" /> Projets</span>
+        </NavLink>
+        <NavLink href="/dashboard/videos">
+          <span className="inline-flex items-center gap-1.5"><Film className="size-3.5" /> Vidéos</span>
+        </NavLink>
+        <NavLink href="/dashboard/fabrication">
+          <span className="inline-flex items-center gap-1.5"><Clapperboard className="size-3.5" /> Fabrication</span>
+        </NavLink>
+        <NavLink href="/dashboard/billing">
+          <span className="inline-flex items-center gap-1.5"><Wallet className="size-3.5" /> Facturation</span>
+        </NavLink>
+      </nav>
+    );
+  }
   return (
     <nav className="hidden items-center gap-1 md:flex">
       <NavLink href="/dashboard/projects">
@@ -125,6 +161,11 @@ function Header() {
             <UserMenu />
           </Suspense>
         </div>
+      </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <Suspense fallback={null}>
+          <AuthedNav mobile />
+        </Suspense>
       </div>
     </header>
   );
