@@ -163,6 +163,10 @@ const EXPLAINER: Fiche = {
     'the same soft daylight in every shot, no dramatic or coloured lighting',
     'the same muted palette throughout, nothing saturated',
     'photographic, never illustrated, never 3D',
+    // Le cadrage par défaut, jusque-là écrit en dur dans `visualPrompt()`.
+    // C'est bien une décision de registre : un registre plus nerveux
+    // demanderait des gros plans.
+    'medium shot or wide shot unless the prompt explicitly asks for a close-up',
   ],
   // 4,5:1 est le seuil AA du texte courant ; trois couleurs, fond exclu, c'est
   // la palette — tout plan qui en pose une quatrième la pose contre le registre.

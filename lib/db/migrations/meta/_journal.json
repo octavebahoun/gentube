@@ -92,6 +92,13 @@
       "when": 1788617075821,
       "tag": "0012_light_human_cannonball",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788618867020,
+      "tag": "0013_lovely_silhouette",
+      "breakpoints": true
     }
   ]
 }

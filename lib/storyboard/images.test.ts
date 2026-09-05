@@ -16,6 +16,7 @@ import {
 import { generateVoiceover } from './voiceover';
 import { listShots } from './service';
 import { generateImages, visualPrompt } from './images';
+import { styleDe } from './registres';
 
 afterAll(async () => {
   await closeDb();
@@ -213,9 +214,55 @@ describe('generating the stills', () => {
   it('adds a directing brief to avoid weak generated stills', () => {
     const prompt = visualPrompt('a baobab at sunrise', null);
 
+    // Ce qui reste dans la fonction : des interdits techniques, indépendants
+    // de tout registre. Le regard, lui, vient de la fiche — voir plus bas.
     expect(prompt).toContain('clear readable composition');
-    expect(prompt).toContain('cinematic documentary frame');
     expect(prompt).toContain('no on-screen text');
+  });
+
+  it('recolle le regard du registre, pas celui de la fonction', () => {
+    // « cinematic documentary frame, natural light, realistic textures » et le
+    // cadrage moyen étaient écrits en dur ici : c'était le regard d'explainer
+    // imposé à tous les registres à venir.
+    const prompt = visualPrompt('a baobab at sunrise', null, 'explainer');
+
+    expect(prompt).toContain(styleDe('explainer'));
+    expect(prompt).toContain('the same muted palette throughout');
+    expect(prompt).toContain('medium shot or wide shot');
+  });
+
+  it('met le sujet avant l ambiance', () => {
+    // Un modèle d'image pondère le début plus fort : le plan dit ce qu'on
+    // voit, le registre seulement comment c'est photographié.
+    const prompt = visualPrompt('a baobab at sunrise', 'gouache', 'explainer');
+
+    expect(prompt.indexOf('a baobab at sunrise')).toBeLessThan(
+      prompt.indexOf('gouache')
+    );
+    expect(prompt.indexOf('gouache')).toBeLessThan(
+      prompt.indexOf('documentary photography')
+    );
+  });
+
+  it('retombe sur explainer plutôt que de perdre le style', () => {
+    // `ficheDe()` ne connaît pas ce nom : un registre retiré du code ne doit
+    // pas rendre un prompt nu.
+    expect(visualPrompt('a baobab', null, 'registre-disparu')).toContain(
+      styleDe('explainer')
+    );
+  });
+
+  it('illustre avec le registre que la vidéo a gardé', async () => {
+    // Le registre était lu dans la réponse du modèle puis perdu :
+    // `generateImages` tourne dans une autre requête, longtemps après, et
+    // n'avait aucun moyen de savoir dans quel film elle illustrait.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await validatedVideo(tdb, ['image']);
+    const { client, calls } = generator();
+
+    await generateImages(tdb, video.id, { client, store: store().assets });
+
+    expect(calls[0].prompt).toContain(styleDe(video.registre));
   });
 
   it('resumes after a failure without repaying for what landed', async () => {

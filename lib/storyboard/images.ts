@@ -9,6 +9,7 @@ import {
   type ImageGenerator,
 } from '@/lib/images/flux';
 import { rendersOwnContent } from './render';
+import { styleDe } from './registres';
 import { StoryboardError, listShots } from './service';
 
 /**
@@ -71,19 +72,32 @@ export function assertGeneratable(video: Video): void {
  * le prompt système du storyboard interdit au modèle de le répéter dans chaque
  * scène — « it is applied separately ». Ce fichier est ce « separately ». Sans
  * lui, le style du projet ne servait à rien.
+ *
+ * **Trois couches, et l'ordre compte.** Le plan dit ce qu'on voit ; le style du
+ * projet dit ce que le client a demandé ; le registre dit comment ce film est
+ * photographié — sa lumière, sa palette, son rendu. Le registre passe en
+ * dernier des trois parce qu'un modèle d'image pondère le début plus fort : le
+ * sujet doit primer sur l'ambiance.
+ *
+ * **L'esthétique du registre était en dur ici.** « cinematic documentary
+ * frame, natural light, realistic textures » et le cadrage moyen étaient
+ * écrits dans cette fonction : c'était le regard d'`explainer`, imposé à tous
+ * les registres à venir. Ils vivent maintenant dans sa fiche, d'où ils
+ * arrivent par `styleDe()`.
+ *
+ * Le dernier bloc, lui, ne bouge pas et ne dépend d'aucun registre : ce sont
+ * des interdits techniques, pas un goût.
  */
 export function visualPrompt(
   shotPrompt: string,
-  stylePrompt?: string | null
+  stylePrompt?: string | null,
+  registre?: string | null
 ): string {
-  const style = stylePrompt?.trim();
-  const visual = shotPrompt.trim();
   const direction = [
-    visual,
-    style,
+    shotPrompt.trim(),
+    stylePrompt?.trim(),
+    styleDe(registre ?? undefined),
     'single coherent subject, clear readable composition',
-    'cinematic documentary frame, natural light, realistic textures',
-    'medium shot or wide shot unless the prompt explicitly asks for a close-up',
     'no on-screen text, no logos, no watermark, no distorted hands',
   ].filter(Boolean);
 
@@ -151,7 +165,7 @@ export async function generateImages(
     assets ??= createAssetStore();
 
     const image = await generator.generate({
-      prompt: visualPrompt(shot.prompt, project.stylePrompt),
+      prompt: visualPrompt(shot.prompt, project.stylePrompt, video.registre),
       ratio: video.ratio,
       resolution: video.resolution,
     });

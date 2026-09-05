@@ -281,6 +281,23 @@ export const videos = pgTable(
      * `generated` par défaut, donc toutes les vidéos existantes gardent leur
      * comportement : la colonne s'ajoute sans rien déplacer.
      */
+    /**
+     * Le registre de mise en scène, décidé une fois pour toute la vidéo.
+     *
+     * **Pourquoi il doit être stocké.** Le modèle l'écrit au premier appel, et
+     * tout ce qu'il décide en était aussitôt matérialisé ailleurs — le lit
+     * sonore dans `musicVolume`, la voix sur le projet, les effets dans le
+     * `render` de chaque plan. Le registre lui-même, lui, était perdu : les
+     * étapes suivantes, `generateImages` en tête, n'avaient aucun moyen de
+     * savoir dans quel film elles travaillaient, et le préfixe visuel du
+     * registre ne servait donc qu'aux démonstrations.
+     *
+     * **Du texte et pas un énum**, contrairement à `subtitleStyle` juste
+     * au-dessus : chaque style de sous-titre de plus est une migration, et
+     * c'est déjà noté comme un accident d'histoire. `ficheDe()` retombe sur
+     * `explainer` pour un nom inconnu, donc un registre retiré ne casse rien.
+     */
+    registre: text('registre').notNull().default('explainer'),
     source: videoSourceEnum('source').notNull().default('generated'),
     pipelineOverride: pipelineEnum('pipeline_override'),
     // Détermine la tarification en crédits : 1 crédit/s en 480p,

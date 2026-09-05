@@ -1,0 +1,1 @@
+ALTER TABLE "videos" ADD COLUMN "registre" text DEFAULT 'explainer' NOT NULL;

@@ -389,6 +389,22 @@ describe('storyboard generation', () => {
     expect(result.video.musicVolume).toBe(0.08);
   });
 
+  it('garde le registre sur la vidéo au lieu de le consommer', async () => {
+    // Tout ce que le registre décide était aussitôt matérialisé ailleurs — le
+    // lit sonore, la voix, les effets de chaque plan — et lui-même perdu.
+    // `generateImages` tourne dans une autre requête, longtemps après : sans
+    // cette colonne, son préfixe visuel n'existait que dans les démos.
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const { video } = await draftVideo(tdb);
+
+    const result = await generateStoryboard(tdb, video.id, {
+      client: answering(scenesOf(3, { seconds: 5 })),
+      library: LIBRARY,
+    });
+
+    expect(result.video.registre).toBe('explainer');
+  });
+
   it('donne au projet sans voix celle du registre, sans toucher aux autres', async () => {
     const tdb = await createTenant('Alpha', { credits: 1_000 });
     const { video, project } = await draftVideo(tdb);

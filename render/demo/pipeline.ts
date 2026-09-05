@@ -68,7 +68,7 @@ type ScenePrete = {
  * Les deux appels sont mis en cache ensemble : le cadreur travaille sur ce que
  * DeepSeek a rendu, et rejouer l'un sans l'autre n'aurait aucun sens.
  */
-async function ecrire(): Promise<{ scenes: ScenePrete[]; style: string; registre?: string }> {
+async function ecrire(): Promise<{ scenes: ScenePrete[]; registre?: string }> {
   if (existsSync(CACHE)) {
     log(`storyboard repris de ${CACHE}`);
     const brut = JSON.parse(readFileSync(CACHE, 'utf8')) as
@@ -78,7 +78,7 @@ async function ecrire(): Promise<{ scenes: ScenePrete[]; style: string; registre
     // le style par défaut, sans repayer une écriture.
     const scenes = Array.isArray(brut) ? brut : brut.scenes;
     const registre = Array.isArray(brut) ? undefined : brut.registre;
-    return { scenes, style: styleDe(registre), registre };
+    return { scenes, registre };
   }
 
   const llm = createDeepSeekClient();
@@ -107,8 +107,9 @@ async function ecrire(): Promise<{ scenes: ScenePrete[]; style: string; registre
   log(`  ${brutes.length} scènes · registre ${registre ?? 'explainer (défaut)'}`);
 
   log('cadrage — le chef op réécrit les visuels');
-  // Le style appartient au registre, pas au script : une fois le registre
-  // connu, c'est lui qui habille la suite.
+  // Le style appartient au registre, pas au script. Il ne sort pas d'ici :
+  // seul le cadreur en a besoin comme contexte — `visualPrompt` va le
+  // chercher elle-même à partir du nom du registre.
   const style = styleDe(registre);
   const cadrages = await cadre(
     brutes.map((scene) => ({
@@ -139,7 +140,7 @@ async function ecrire(): Promise<{ scenes: ScenePrete[]; style: string; registre
   });
 
   writeFileSync(CACHE, JSON.stringify({ registre, scenes }, null, 2));
-  return { scenes, style, registre };
+  return { scenes, registre };
 }
 
 /** Le avant/après, ligne à ligne. C'est ce qu'on est venu voir. */
@@ -155,7 +156,7 @@ function montrerLeCadrage(scenes: ScenePrete[]): void {
 }
 
 async function main() {
-  const { scenes, style, registre } = await ecrire();
+  const { scenes, registre } = await ecrire();
   montrerLeCadrage(scenes);
   // Le lit sonore du registre retenu, comme la génération le pose en base.
   VIDEO.musicVolume = audioDe(registre).litSonore;
@@ -196,7 +197,12 @@ async function main() {
     // `visualPrompt` est la fonction de production : c'est elle qui recolle le
     // style du registre, et le cadreur a justement reçu l'ordre de ne pas le
     // répéter.
-    const still = await imageFor(nom, visualPrompt(scene.prompt, style), {
+    //
+    // Le registre passe en troisième argument, pas en deuxième. Le deuxième
+    // est le style que le **client** a écrit sur son projet ; y mettre le
+    // style du registre le ferait recoller deux fois, depuis que
+    // `visualPrompt` va le chercher elle-même.
+    const still = await imageFor(nom, visualPrompt(scene.prompt, null, registre), {
       ratio: VIDEO.ratio,
       resolution: VIDEO.resolution,
       seed: 2_000 + scene.order,

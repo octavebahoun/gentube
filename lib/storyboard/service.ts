@@ -460,11 +460,24 @@ export async function generateStoryboard(
         render: scene.render,
       }))
     );
-    // Le lit sonore du registre, choisi et expliqué — pas le défaut du schéma.
-    // Personne ne le règle à la main : aucune valeur à écraser.
+    /*
+     * Le registre, et le lit sonore qu'il demande.
+     *
+     * Le registre est **gardé** et pas seulement consommé : les étapes
+     * suivantes tournent dans d'autres requêtes, longtemps après, et
+     * `generateImages` a besoin de savoir dans quel film elle illustre. Sans
+     * cette ligne, son préfixe visuel n'existait que dans les démonstrations.
+     *
+     * Le lit sonore, lui, est choisi et expliqué plutôt que laissé au défaut
+     * du schéma. Personne ne le règle à la main : aucune valeur à écraser.
+     */
     await tx.update(
       videos,
-      { musicVolume: audioDe(registre).litSonore, updatedAt: new Date() },
+      {
+        registre: registre ?? 'explainer',
+        musicVolume: audioDe(registre).litSonore,
+        updatedAt: new Date(),
+      },
       eq(videos.id, videoId)
     );
     // La voix par défaut du projet, si personne ne l'a choisie : le registre
