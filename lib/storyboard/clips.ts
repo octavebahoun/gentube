@@ -198,6 +198,29 @@ export async function submitClips(
     }
 
     client ??= createAnimator();
+
+    /*
+     * Ce chemin attend un webhook, et il le dit.
+     *
+     * `submitClips` soumet puis rend la main : c'est le rappel du fournisseur
+     * qui pose le clip et résout le job. Un fournisseur qui ne rappelle pas
+     * laisserait ses jobs `running` pour toujours — sans erreur nulle part,
+     * avec des crédits déjà débités immobilisés, et personne pour savoir
+     * pourquoi.
+     *
+     * On refuse donc franchement plutôt que d'échouer en silence. Le jour où
+     * la reprise périodique existera — `outcome()` est écrit et n'a aucun
+     * appelant — ce refus deviendra une branche.
+     */
+    if (client.resolution !== 'webhook') {
+      throw new StoryboardError(
+        `The ${client.provider} provider does not call back, and nothing here ` +
+          'polls it yet: its clips would never be collected. Set ' +
+          'VIDEO_PROVIDER to a provider that calls back.',
+        503
+      );
+    }
+
     assets ??= createAssetStore();
     base ??= callbackBaseUrl();
 

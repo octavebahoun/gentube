@@ -9,7 +9,15 @@ import { getVideo } from '@/lib/videos';
 import { assetKey, createAssetStore, type AssetStore } from '@/lib/storage';
 import { listShots } from '@/lib/storyboard/service';
 import { rendersOwnContent } from '@/lib/storyboard/render';
-import { AnimationError, AnimationNotConfiguredError, read } from './contract';
+import {
+  AnimationError,
+  AnimationNotConfiguredError,
+  read,
+  type AnimationOutcome,
+  type AnimationRequest,
+  type SubmittedAnimation,
+  type VideoAnimator,
+} from './contract';
 
 /**
  * Novita, en interrogation — un chemin d'essai, à côté de Replicate.
@@ -29,7 +37,16 @@ import { AnimationError, AnimationNotConfiguredError, read } from './contract';
  * L'appel lui-même est repris de `render/demo/build.ts`, qui a déjà servi.
  */
 
-const MODEL = 'seedance-v1-pro-i2v';
+/**
+ * Le modèle, surchargeable sans redéploiement.
+ *
+ * **Le défaut n'est pas un choix, c'est le dernier qui a répondu.** Novita
+ * retire des routes : `seedance-v1-pro-i2v` rendait 404 après avoir marché, et
+ * `wan-2.5-i2v-preview` a coûté 2,20 $ pour trois clips en partant en 1080P.
+ * Minimax Hailuo 2.3 est celui qu'on essaie, à 0,19 $. Comme la liste bouge à
+ * chaque semaine d'essais, elle vit dans l'environnement et pas ici.
+ */
+const MODEL = read('NOVITA_MODEL') ?? 'minimax-hailuo-2.3-i2v';
 const BASE = 'https://api.novita.ai/v3/async';
 const POLL_MS = 6_000;
 const POLL_MAX = 90;
@@ -76,38 +93,91 @@ async function soumettre(
   return taskId;
 }
 
+/**
+ * Une interrogation, et une seule : l'état de la tâche à cet instant.
+ *
+ * Un incident réseau rend `pending` et non `failed` — ne pas savoir n'est pas
+ * la même chose que savoir que c'est raté, et le GPU travaille toujours de son
+ * côté. C'est ce que le contrat demande, et c'est ce qui permet à la boucle
+ * ci-dessous de simplement réessayer.
+ */
+async function interroger(taskId: string): Promise<AnimationOutcome> {
+  let response: Response;
+  try {
+    response = await fetch(`${BASE}/task-result?task_id=${taskId}`, {
+      headers: { Authorization: `Bearer ${key()}` },
+    });
+  } catch {
+    return { status: 'pending' };
+  }
+  if (!response.ok) return { status: 'pending' };
+
+  const data = (await response.json()) as {
+    payload?: { task?: { status?: string; reason?: string }; videos?: { video_url?: string }[] };
+  };
+  const status = data.payload?.task?.status;
+
+  if (status === 'TASK_STATUS_SUCCEED') {
+    const url = data.payload?.videos?.[0]?.video_url;
+    return url
+      ? { status: 'succeeded', videoUrl: url }
+      : { status: 'failed', error: 'Novita succeeded without a video URL.' };
+  }
+  if (status === 'TASK_STATUS_FAILED') {
+    return { status: 'failed', error: data.payload?.task?.reason ?? 'no reason given' };
+  }
+  return { status: 'pending' };
+}
+
 /** Interroge jusqu'à ce que la tâche aboutisse, et rend l'URL du clip. */
 async function attendre(taskId: string): Promise<string> {
   for (let essai = 0; essai < POLL_MAX; essai++) {
     await new Promise((r) => setTimeout(r, POLL_MS));
 
-    // Une interrogation qui casse sur le réseau n'est pas un échec de la
-    // tâche : le GPU travaille toujours de son côté.
-    let response: Response;
-    try {
-      response = await fetch(`${BASE}/task-result?task_id=${taskId}`, {
-        headers: { Authorization: `Bearer ${key()}` },
-      });
-    } catch {
-      continue;
-    }
-    if (!response.ok) continue;
-
-    const data = (await response.json()) as {
-      payload?: { task?: { status?: string; reason?: string }; videos?: { video_url?: string }[] };
-    };
-    const status = data.payload?.task?.status;
-
-    if (status === 'TASK_STATUS_SUCCEED') {
-      const url = data.payload?.videos?.[0]?.video_url;
-      if (!url) throw new AnimationError('Novita succeeded without a video URL.');
-      return url;
-    }
-    if (status === 'TASK_STATUS_FAILED') {
-      throw new AnimationError(`Novita failed: ${data.payload?.task?.reason ?? '?'}`);
+    const etat = await interroger(taskId);
+    if (etat.status === 'succeeded') return etat.videoUrl;
+    if (etat.status === 'failed') {
+      throw new AnimationError(`Novita failed: ${etat.error}`);
     }
   }
   throw new AnimationError('Novita took too long.', 504);
+}
+
+/**
+ * Novita derrière le contrat commun.
+ *
+ * **`resolution: 'poll'` est le point important.** Novita ne rappelle jamais :
+ * le brancher comme Replicate laisserait ses jobs `running` pour toujours, sans
+ * erreur nulle part. Celui qui orchestre lit cette propriété et sait qu'il doit
+ * redemander.
+ *
+ * `costUsd: 0` parce que rien n'est débité sur ce chemin. La table des prix est
+ * celle de Wan chez Replicate : la réutiliser ici ferait mentir la facture, et
+ * un zéro faux serait pire qu'un zéro assumé.
+ */
+export class NovitaAnimator implements VideoAnimator {
+  readonly provider = 'novita';
+  readonly resolution = 'poll' as const;
+
+  get model(): string {
+    return MODEL;
+  }
+
+  async submit(request: AnimationRequest): Promise<SubmittedAnimation> {
+    const image = await fetch(request.imageUrl).then(async (r) =>
+      Buffer.from(await r.arrayBuffer())
+    );
+    const taskId = await soumettre(image, request.prompt, request.durationS);
+    return { externalId: taskId, model: MODEL, costUsd: 0 };
+  }
+
+  async outcome(externalId: string): Promise<AnimationOutcome> {
+    return await interroger(externalId);
+  }
+}
+
+export function createNovitaAnimator(): VideoAnimator {
+  return new NovitaAnimator();
 }
 
 /**

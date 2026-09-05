@@ -97,6 +97,8 @@ function images() {
 function animator({ failOnCall }: { failOnCall?: number } = {}) {
   const calls: AnimationRequest[] = [];
   const client: VideoAnimator = {
+    provider: 'test',
+    resolution: 'webhook',
     async submit(request) {
       calls.push(request);
       if (failOnCall !== undefined && calls.length === failOnCall) {
@@ -304,5 +306,29 @@ describe('submitting the clips', () => {
 
     expect(result.submitted).toBe(1);
     expect(calls).toHaveLength(1);
+  });
+});
+
+describe('le fournisseur qui ne rappelle pas', () => {
+  it('est refusé franchement au lieu d abandonner ses jobs', async () => {
+    /*
+     * `submitClips` soumet puis rend la main : c'est le rappel du fournisseur
+     * qui pose le clip et résout le job. Un fournisseur en `poll` laisserait
+     * les siens `running` pour toujours — sans erreur nulle part, avec des
+     * crédits déjà débités immobilisés.
+     *
+     * Le refus tient tant que la reprise périodique n'existe pas : `outcome()`
+     * est écrit et n'a aucun appelant.
+     */
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await readyForClips(tdb, ['video']);
+    const { client } = animator();
+
+    await expect(
+      submitClips(tdb, video.id, {
+        animator: { ...client, resolution: 'poll', provider: 'novita' },
+        store: store().assets,
+      })
+    ).rejects.toThrow(/does not call back/);
   });
 });

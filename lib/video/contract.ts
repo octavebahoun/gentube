@@ -50,13 +50,41 @@ export type AnimationOutcome =
   | { status: 'succeeded'; videoUrl: string }
   | { status: 'failed'; error: string };
 
+/**
+ * Comment le clip d'un fournisseur finit par arriver.
+ *
+ * **C'est la seule différence entre deux fournisseurs qui casse en silence.**
+ * Replicate rappelle : on soumet, on rend la main, son webhook résout le job.
+ * Novita ne rappelle pas : il faut lui redemander où il en est. Un fournisseur
+ * sans webhook branché comme s'il en avait un laisse ses jobs `running` pour
+ * toujours, sans erreur nulle part — les crédits restent immobilisés et
+ * personne ne sait pourquoi.
+ *
+ * D'où cette propriété sur le contrat plutôt qu'une convention : celui qui
+ * orchestre lit ici ce qu'il doit faire après avoir soumis.
+ */
+export type ResolutionMode = 'webhook' | 'poll';
+
 export interface VideoAnimator {
+  /** Le nom du fournisseur, pour que le journal et la facture s'expliquent. */
+  readonly provider: string;
+  /** Qui résout la tâche : son webhook, ou nous en redemandant. */
+  readonly resolution: ResolutionMode;
   /** Lance la génération et rend de quoi la retrouver. Ne l'attend pas. */
   submit(request: AnimationRequest): Promise<SubmittedAnimation>;
   /**
-   * Filet, pas le chemin normal. Le webhook peut se perdre — un déploiement au
-   * mauvais moment suffit — et un job resté `running` immobilise des crédits
-   * déjà débités. Une reprise périodique redemande ici où en est la tâche.
+   * Où en est la tâche.
+   *
+   * Pour un fournisseur en `webhook`, c'est un filet : le rappel peut se
+   * perdre — un déploiement au mauvais moment suffit — et un job resté
+   * `running` immobilise des crédits déjà débités.
+   *
+   * Pour un fournisseur en `poll`, c'est **le** chemin : il n'y en a pas
+   * d'autre.
+   *
+   * Un incident réseau rend `pending` et non `failed` : ne pas savoir n'est
+   * pas la même chose que savoir que c'est raté, et le GPU travaille toujours
+   * de son côté.
    */
   outcome(externalId: string): Promise<AnimationOutcome>;
 }

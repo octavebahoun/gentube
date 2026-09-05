@@ -100,6 +100,10 @@ function inputFor(
 }
 
 export class ReplicateAnimator implements VideoAnimator {
+  readonly provider = 'replicate';
+  /** Replicate rappelle : `submitClips` rend la main, le webhook pose le clip. */
+  readonly resolution = 'webhook' as const;
+
   constructor(private readonly config: ReplicateConfig = replicateConfig()) {}
 
   async submit(request: AnimationRequest): Promise<SubmittedAnimation> {
