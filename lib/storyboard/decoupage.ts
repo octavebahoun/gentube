@@ -16,10 +16,20 @@ import { ficheRythme } from './registres';
  * donc, dans la fenêtre que le registre autorise, le plus grand blanc entre
  * deux mots — et on coupe là.
  *
- * **Ce que ça ne fait pas.** Aucune décision d'image : le zoom, la transition
- * et le mouvement de caméra restent l'affaire de `habille()`, à qui l'on donne
- * la place de chaque plan. Ce fichier ne dit que « où entrer dans le fichier,
- * combien de temps, et quels mots ».
+ * **Et comment la coupe se voit.** Découper une source contiguë et la rejouer
+ * contiguë donne exactement la vidéo d'origine : rien ne saute. Les deux
+ * effets qui rendraient les coupes visibles sont ceux que ce genre de source
+ * refuse — un fondu ferait jouer deux fois sa bande son décalée d'une
+ * demi-seconde, un zoom se battrait avec le mouvement propre de l'image. Reste
+ * le **recadrage** : immobile, muet, et deux plans consécutifs cadrés
+ * différemment se lisent comme un montage à deux caméras.
+ *
+ * La coupe et le recadrage sont donc le même geste, et c'est pour ça qu'ils
+ * sont décidés ici ensemble.
+ *
+ * **Ce que ça ne fait pas.** Ni transition, ni zoom, ni mouvement de caméra :
+ * ils restent l'affaire de `habille()`, à qui l'on donne la place de chaque
+ * plan.
  */
 
 /** Un plan taillé dans le fichier du client. */
@@ -37,7 +47,47 @@ export type PlanDecoupe = {
    * jamais.
    */
   words: WordTiming[];
+  /**
+   * Le cadrage de ce plan. C'est `render.reframe`.
+   *
+   * Absent sur un plan large : ne rien poser vaut mieux qu'un `scale: 1`, qui
+   * ferait passer une transformation CSS inutile sur chaque plan.
+   */
+  reframe?: { scale: number; y?: number };
 };
+
+/**
+ * Le serrage d'un plan resserré.
+ *
+ * Assez pour que la coupe se lise — sous 1,1 on croit à un défaut d'encodage —
+ * et assez peu pour que le recadrage ne se voie pas comme un recadrage. C'est
+ * la valeur des punch-in de montage.
+ */
+export const SERRAGE = 1.18;
+
+/**
+ * Le décalage vertical d'un plan resserré, en pourcents de la hauteur.
+ *
+ * Positif pour montrer plus du haut : un visage se tient dans le tiers
+ * supérieur, et un serrage centré lui coupe le front avant les pieds.
+ */
+export const RELEVE = 3;
+
+/**
+ * Le cadrage du plan numéro `index`.
+ *
+ * **Un plan sur deux, en alternance.** Une coupe doit changer quelque chose,
+ * sinon elle n'existe pas : deux plans de suite au même cadrage se recollent à
+ * l'œil en un seul. L'alternance garantit que chaque coupe sépare deux
+ * cadrages différents, sans avoir à regarder l'image — ce qu'on ne sait pas
+ * faire.
+ *
+ * Le premier plan est large. Une vidéo s'ouvre sur ce qu'elle montre, pas sur
+ * un détail de ce qu'elle montre.
+ */
+export function cadrageDe(index: number): { scale: number; y?: number } | undefined {
+  return index % 2 === 1 ? { scale: SERRAGE, y: RELEVE } : undefined;
+}
 
 /**
  * Les blancs entre deux mots consécutifs.
@@ -123,8 +173,23 @@ export function decouperLimport(
     })),
   });
 
+  /*
+   * Le cadrage est posé à la fin, sur la liste terminée.
+   *
+   * Il dépend du rang du plan, et le rang n'est connu qu'une fois tous les
+   * plans taillés : le reste de fin peut rejoindre son voisin, ce qui décale
+   * tout ce qui suit. Poser le cadrage au fil de l'eau laisserait alors deux
+   * plans voisins au même cadrage — exactement la coupe invisible qu'on essaie
+   * d'éviter.
+   */
+  const cadrer = (liste: PlanDecoupe[]) =>
+    liste.map((p, index) => {
+      const reframe = cadrageDe(index);
+      return reframe ? { ...p, reframe } : p;
+    });
+
   if (mots.length === 0 || dureeMedia <= max) {
-    return [plan(0, dureeMedia, mots)];
+    return cadrer([plan(0, dureeMedia, mots)]);
   }
 
   const plans: PlanDecoupe[] = [];
@@ -175,9 +240,9 @@ export function decouperLimport(
       })),
       ...mots.slice(premierMot),
     ]);
-    return plans;
+    return cadrer(plans);
   }
 
   plans.push(plan(debut, dureeMedia, mots.slice(premierMot)));
-  return plans;
+  return cadrer(plans);
 }

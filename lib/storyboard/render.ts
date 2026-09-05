@@ -660,6 +660,34 @@ export const sceneRenderSchema = z.object({
    * contrat est validé.
    */
   mediaStart: z.number().min(0).optional(),
+  /**
+   * Un recadrage fixe, pour que la coupe se voie.
+   *
+   * **Pourquoi il fallait autre chose qu'un zoom.** Une vidéo apportée par le
+   * client, découpée en plans contigus, se rejoue exactement comme elle est
+   * arrivée : rien ne saute, aucune coupe ne se voit. Et les deux effets qui
+   * les rendraient visibles sont ceux que ce genre de source refuse — un
+   * fondu ferait jouer deux fois sa bande son décalée d'une demi-seconde, un
+   * zoom se battrait avec le mouvement propre de l'image.
+   *
+   * Un recadrage, lui, est **immobile** : il ne touche pas au son et n'anime
+   * rien. Deux plans consécutifs cadrés différemment se lisent comme un
+   * montage à deux caméras, et c'est la coupe qui devient lisible.
+   *
+   * `scale` est un facteur d'agrandissement — 1 est le cadre d'origine — et
+   * `y` un décalage vertical en pourcents de la hauteur, positif pour montrer
+   * plus du haut : un visage se tient dans le tiers supérieur.
+   *
+   * Le prix est réel : recadrer une source à la résolution de sortie remonte
+   * une image plus petite, donc plus molle. Sur une source plus définie que la
+   * sortie, ça ne se voit pas.
+   */
+  reframe: z
+    .object({
+      scale: z.number().min(1).max(2),
+      y: z.number().min(-20).max(20).optional(),
+    })
+    .optional(),
   showSubtitles: z.boolean().optional(),
   /**
    * Les sons de la scène, bornés.

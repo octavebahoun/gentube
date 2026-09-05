@@ -241,6 +241,7 @@ async function main() {
     render: {
       mediaVolume: 1,
       mediaStart: plan.mediaStart,
+      reframe: plan.reframe,
       effects: {
         ...habille('explainer', 'pose', index, plans.length),
         zoom: 'none',

@@ -279,8 +279,28 @@ export function videoMarkup(
    */
   const decalage = scene.mediaStart ?? 0;
 
+  /*
+   * Le recadrage, posé en CSS et non sur la timeline.
+   *
+   * Il est immobile par définition : l'animer en ferait un zoom, et un zoom
+   * sur un clip se bat avec le mouvement propre de l'image. En CSS, il ne
+   * traverse pas GSAP du tout.
+   *
+   * Les transformations CSS s'appliquent de droite à gauche : `scale` d'abord,
+   * `translate` ensuite, dont le pourcentage se lit sur la taille **non
+   * agrandie** de l'élément. Le décalage reste donc prévisible quel que soit
+   * l'agrandissement.
+   *
+   * `video.media` est déjà en `object-fit: cover` à 112 %, et la racine de la
+   * composition est en `overflow: hidden` : agrandir recadre pour de vrai.
+   */
+  const cadre = scene.reframe;
+  const style = cadre
+    ? ` style="transform: translate(0, ${cadre.y ?? 0}%) scale(${cadre.scale})"`
+    : '';
+
   return (
-    `<video class="media clip" id="m${index}" src="${escapeHtml(
+    `<video class="media clip" id="m${index}"${style} src="${escapeHtml(
       encodeURI(scene.mediaPath)
     )}" data-start="${scene.startInSeconds}" ` +
     `data-duration="${scene.durationInSeconds}" data-track-index="${trackIndex}" ` +

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { WordTiming } from '@/lib/transcribe/whisper';
-import { decouperLimport } from './decoupage';
+import { SERRAGE, decouperLimport } from './decoupage';
 import { ficheRythme } from './registres';
 
 const { min: MIN, max: MAX } = ficheRythme('explainer');
@@ -184,5 +184,45 @@ describe('le reste de fin', () => {
     // clignoter la ligne.
     const debuts = dernier.words.map((mot) => mot.start);
     expect([...debuts].sort((a, b) => a - b)).toEqual(debuts);
+  });
+});
+
+describe('le cadrage', () => {
+  it('alterne, pour qu une coupe change quelque chose', () => {
+    // Une coupe entre deux plans au même cadrage n'existe pas : l'œil les
+    // recolle en un seul plan. C'est tout l'intérêt du recadrage — les deux
+    // effets qui rendraient la coupe visible autrement, fondu et zoom, sont
+    // ceux qu'une source à bande son propre refuse.
+    const plans = decouperLimport(debitRegulier(80), 32);
+
+    for (let i = 1; i < plans.length; i += 1) {
+      expect(Boolean(plans[i].reframe)).not.toBe(Boolean(plans[i - 1].reframe));
+    }
+  });
+
+  it('ouvre en large', () => {
+    // Une vidéo s'ouvre sur ce qu'elle montre, pas sur un détail.
+    expect(decouperLimport(debitRegulier(80), 32)[0].reframe).toBeUndefined();
+  });
+
+  it('remonte le cadre serré, il ne le centre pas', () => {
+    // Un visage se tient dans le tiers supérieur : un serrage centré lui coupe
+    // le front avant les pieds.
+    const serre = decouperLimport(debitRegulier(80), 32)[1].reframe;
+
+    expect(serre?.scale).toBe(SERRAGE);
+    expect(serre?.y).toBeGreaterThan(0);
+  });
+
+  it('reste cohérent après la fusion du reste', () => {
+    // Le rang d'un plan change quand le reste rejoint son voisin. Poser le
+    // cadrage au fil de l'eau laisserait alors deux voisins identiques.
+    const mots = debitRegulier(75, 0.4);
+    const dureeMedia = mots[mots.length - 1].start + mots[mots.length - 1].duration + 0.4;
+    const plans = decouperLimport(mots, dureeMedia);
+
+    for (let i = 1; i < plans.length; i += 1) {
+      expect(Boolean(plans[i].reframe)).not.toBe(Boolean(plans[i - 1].reframe));
+    }
   });
 });
