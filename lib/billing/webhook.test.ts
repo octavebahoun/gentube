@@ -21,6 +21,7 @@ import { PaymentError, type PaymentGateway, type Settlement } from '@/lib/paymen
 import { createSubscriptionCheckout, createTopupCheckout, getSubscription } from './checkout';
 import { MAX_PAYMENT_ATTEMPTS, PLAN_OFFERS, TOPUP_PACKS_FOR_SALE } from './plans';
 import { processPaymentWebhook } from './webhook';
+import { reveillerLeTenant } from './reveil';
 
 afterAll(async () => {
   await closeDb();
@@ -514,5 +515,67 @@ describe('le réveil trouve ce qu un rappel perdu aurait laissé', () => {
       .from(paymentIntents)
       .where(eq(paymentIntents.gatewayReference, 'CS-CASSE'));
     expect(casse.status).toBe('pending');
+  });
+});
+
+describe('le reveil declenche par le retour du payeur', () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it('credite celui qui revient sans attendre aucun rappel', async () => {
+    /*
+     * SasPay ne livre aucun webhook — verifie sur deux transactions reelles le
+     * 5 septembre 2026, journal de livraison vide. Le retour du payeur est
+     * alors le seul declencheur qui reste, et il doit suffire.
+     */
+    const tdb = await createTenant('Alpha');
+    const offre = PLAN_OFFERS.pro;
+    await ouvrirAbonnement(tdb, 'pro', 'CS-RETOUR');
+
+    const { gateway } = passerelleFactice({
+      onSettle: async () => reglement({ amountXof: offre.priceXof }),
+    });
+
+    const rendu = await reveillerLeTenant(gateway, tdb.tenantId);
+
+    expect(rendu).toMatchObject({ relus: 1, credites: 1 });
+    expect(await getBalance(tdb)).toBe(offre.monthlyCredits);
+  });
+
+  it('ne relit que ses propres encaissements', async () => {
+    /*
+     * Contrairement au reveil d'un rappel, qui arrive sans savoir de qui il
+     * parle et doit donc balayer, un retour de paiement sait exactement qui
+     * revient. Balayer quand meme ferait relire les encaissements des autres
+     * clients a chaque affichage d'une page — invisible, mais c'est une
+     * requete chez le prestataire par paiement d'autrui.
+     */
+    const alpha = await createTenant('Alpha');
+    const beta = await createTenant('Beta');
+    await ouvrirAbonnement(alpha, 'starter', 'CS-ALPHA');
+    await ouvrirAbonnement(beta, 'starter', 'CS-BETA');
+
+    const { gateway, relus } = passerelleFactice({
+      onSettle: async () => reglement({ amountXof: PLAN_OFFERS.starter.priceXof }),
+    });
+
+    await reveillerLeTenant(gateway, alpha.tenantId);
+
+    expect(relus).toEqual(['CS-ALPHA']);
+    expect(await getBalance(beta)).toBe(0);
+  });
+
+  it('ne va pas chercher la passerelle quand il n y a rien en attente', async () => {
+    // La page de facturation s'affiche a chaque visite : sans ce court-circuit,
+    // chaque retour deja traite couterait une requete pour rien.
+    const tdb = await createTenant('Alpha');
+    const { gateway, relus } = passerelleFactice();
+
+    expect(await reveillerLeTenant(gateway, tdb.tenantId)).toMatchObject({
+      relus: 0,
+      credites: 0,
+    });
+    expect(relus).toEqual([]);
   });
 });

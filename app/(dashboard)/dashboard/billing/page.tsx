@@ -5,6 +5,8 @@ import { Separator } from '@/components/ui/separator';
 import { getUser } from '@/lib/db/queries';
 import { tenantDb } from '@/lib/db/tenant-db';
 import { getBillingOverview } from '@/lib/billing/checkout';
+import { createPaymentGateway, isBillingConfigured } from '@/lib/payments';
+import { reveillerLeTenant } from '@/lib/billing/reveil';
 import { secondsAffordable } from '@/lib/credits/pricing';
 import type { PaymentStatus } from '@/lib/db/schema';
 import { CheckoutButton } from './billing-actions';
@@ -57,6 +59,29 @@ function PocketBadge({ pocket }: { pocket: string }) {
   );
 }
 
+/**
+ * Crédite le retour d'un paiement sans attendre le rappel du prestataire.
+ *
+ * SasPay ne livre aucun webhook aujourd'hui — vérifié sur deux transactions
+ * réelles le 5 septembre 2026, journal de livraison vide. Sans ce déclencheur,
+ * un client paie et ne voit rien arriver.
+ *
+ * Il ne remplace pas le rappel : il le double. Le même règlement passé deux
+ * fois est arrêté par la clé d'idempotence, donc rien n'est crédité deux fois.
+ *
+ * Rien ici ne doit faire tomber la page. Un client qui vient de payer a le
+ * droit de voir sa facturation même si la passerelle est injoignable — son
+ * paiement sera repris au réveil suivant.
+ */
+async function rattraper(tenantId: number): Promise<void> {
+  if (!isBillingConfigured()) return;
+  try {
+    await reveillerLeTenant(createPaymentGateway(), tenantId);
+  } catch (error) {
+    console.error('Rattrapage au retour de paiement impossible:', error);
+  }
+}
+
 export default async function BillingPage({
   searchParams,
 }: {
@@ -66,8 +91,13 @@ export default async function BillingPage({
   if (!user) redirect('/sign-in');
 
   const tdb = tenantDb(user.tenantId);
-  const [overview, tenant] = await Promise.all([getBillingOverview(tdb), tdb.getTenant()]);
   const { payment } = await searchParams;
+
+  // Le payeur revient : on relit ses encaissements AVANT d'afficher le solde,
+  // sinon la page montrerait l'ancien et il croirait avoir payé pour rien.
+  if (payment === 'return') await rattraper(user.tenantId);
+
+  const [overview, tenant] = await Promise.all([getBillingOverview(tdb), tdb.getTenant()]);
   const canManage = user.role === 'owner' || user.role === 'admin';
 
   const creditsPlan = tenant?.creditsPlan ?? 0;
@@ -87,10 +117,10 @@ export default async function BillingPage({
 
       {payment === 'return' && (
         <p className="mb-6 rounded-md border border-blue-500/30 bg-blue-500/10 p-4 text-sm text-blue-400">
-          Retour du paiement. Les crédits apparaissent dès que SasPay confirme —
-          généralement en quelques secondes. Si rien ne bouge, c&apos;est que le
-          paiement n&apos;a pas abouti : rien n&apos;a été débité et vous pouvez
-          réessayer ci-dessous.
+          Retour du paiement. Votre encaissement vient d&apos;être relu auprès de
+          SasPay&nbsp;: le solde ci-dessous est à jour. S&apos;il n&apos;a pas bougé,
+          c&apos;est que le paiement n&apos;a pas abouti — rien n&apos;a été débité et
+          vous pouvez réessayer ci-dessous.
         </p>
       )}
       {!overview.billingConfigured && (

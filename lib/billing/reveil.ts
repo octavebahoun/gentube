@@ -199,3 +199,39 @@ export async function reveillerUn(
   if (!intent) return { relus: 0, credites: 0, echoues: 0, enAttente: 0 };
   return await reveiller(gateway, { intents: [intent] });
 }
+
+/**
+ * Le réveil déclenché par le retour du payeur.
+ *
+ * Le `return_url` ramène le client sur sa page de facturation quelques
+ * secondes après qu'il a validé : c'est le déclencheur le plus rapide dont on
+ * dispose, et il ne coûte rien. Il rend le crédit immédiat pour le cas normal
+ * — celui où le client revient — sans rien attendre du prestataire.
+ *
+ * Restreint à **son** tenant, contrairement au réveil d'un rappel. Un rappel
+ * arrive sans savoir de qui il parle et doit donc balayer ; un retour de
+ * paiement, lui, sait exactement qui revient. Balayer quand même ferait relire
+ * les encaissements d'autres clients à chaque affichage d'une page.
+ */
+export async function reveillerLeTenant(
+  gateway: PaymentGateway,
+  tenantId: number
+): Promise<ReveilResult> {
+  const intents = await db
+    .select()
+    .from(paymentIntents)
+    .where(
+      and(
+        eq(paymentIntents.tenantId, tenantId),
+        inArray(paymentIntents.status, ['created', 'pending']),
+        isNotNull(paymentIntents.gatewayReference)
+      )
+    )
+    .orderBy(paymentIntents.id)
+    .limit(PLAFOND);
+
+  if (intents.length === 0) {
+    return { relus: 0, credites: 0, echoues: 0, enAttente: 0 };
+  }
+  return await reveiller(gateway, { intents });
+}
