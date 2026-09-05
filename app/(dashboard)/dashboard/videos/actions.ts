@@ -8,6 +8,7 @@ import { tenantDb } from '@/lib/db/tenant-db';
 import { InsufficientCreditsError } from '@/lib/credits';
 import { LlmError, LlmNotConfiguredError } from '@/lib/llm/deepseek';
 import { StorageNotConfiguredError } from '@/lib/storage';
+import { AssetError, bindAssetToShot } from '@/lib/assets';
 import { VoiceError, VoiceNotConfiguredError } from '@/lib/voice/elevenlabs';
 import { ImageError, ImageNotConfiguredError } from '@/lib/images/flux';
 import { AnimationError, AnimationNotConfiguredError } from '@/lib/video';
@@ -65,8 +66,12 @@ function formError(error: unknown): { error: string } {
     error instanceof ImageNotConfiguredError ||
     error instanceof AnimationError ||
     error instanceof AnimationNotConfiguredError ||
-    error instanceof StorageNotConfiguredError
+    error instanceof StorageNotConfiguredError ||
+    error instanceof AssetError
   ) {
+    // Dit aussi côté serveur. Une erreur métier ne partait que dans la page,
+    // et un écran qui ne bouge pas ne laissait aucune trace à lire.
+    console.warn(`[action] ${error.name}: ${error.message}`);
     return { error: error.message };
   }
 
@@ -138,10 +143,19 @@ export const addShotAction = validatedActionWithUser(
  * supprimer le plan.
  */
 const shotFormSchema = shotIdentity.extend({
-  intent: z.enum(['save', 'delete', 'up', 'down']),
+  intent: z.enum(['save', 'delete', 'up', 'down', 'bind']),
   type: z.string().optional(),
   prompt: z.string().optional(),
   narration: z.string().optional(),
+  /**
+   * Le fichier du client à servir sur ce plan.
+   *
+   * Seul `bind` le lit, et il ne lit rien d'autre : lier ne doit pas
+   * enregistrer au passage un prompt que l'utilisateur n'a pas fini d'écrire.
+   * Une chaîne vide arrive quand le sélecteur est sur « aucun » — c'est un
+   * geste sans effet, pas une erreur.
+   */
+  assetId: z.coerce.number().int().positive().optional(),
 });
 
 export const shotFormAction = validatedActionWithUser(
@@ -152,6 +166,21 @@ export const shotFormAction = validatedActionWithUser(
     try {
       if (data.intent === 'delete') {
         await deleteShot(tdb, data.videoId, data.shotId);
+      } else if (data.intent === 'bind') {
+        /*
+         * Lier un fichier déposé, et c'est le geste qui définit trois des
+         * quatre cas d'usage.
+         *
+         * Après ça, aucune étape payante ne touche ce plan : `generateImages`
+         * saute ce qui a un `sourceImageUrl`, `submitClips` ce qui a un
+         * `assetUrl`. Une capture d'écran, une photo de produit ou une vidéo
+         * tournée deviennent la scène sans passer par un fournisseur.
+         *
+         * Rien à faire quand le sélecteur est resté sur « aucun » : un
+         * formulaire posté sans choix ne doit pas être une erreur.
+         */
+        if (!data.assetId) return {};
+        await bindAssetToShot(tdb, data.shotId, data.assetId);
       } else if (data.intent === 'save') {
         const shot = shotInputSchema.parse({
           type: data.type,
@@ -170,7 +199,9 @@ export const shotFormAction = validatedActionWithUser(
     }
 
     revalidatePath(`/dashboard/videos/${data.videoId}`);
-    return data.intent === 'save' ? { success: 'Shot saved.' } : {};
+    if (data.intent === 'save') return { success: 'Shot saved.' };
+    if (data.intent === 'bind') return { success: 'File attached to this scene.' };
+    return {};
   }
 );
 

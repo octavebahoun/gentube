@@ -3,7 +3,15 @@
 import { useActionState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Image as ImageIcon, Loader2, Trash2, Video as VideoIcon } from 'lucide-react';
+import {
+  FileVideo,
+  GripVertical,
+  Image as ImageIcon,
+  Loader2,
+  Paperclip,
+  Trash2,
+  Video as VideoIcon,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { creditsForShot } from '@/lib/credits/pricing';
-import type { Shot, Video } from '@/lib/db/schema';
+import type { ClientAsset, Shot, Video } from '@/lib/db/schema';
 import { shotFormAction } from '@/app/(dashboard)/dashboard/videos/actions';
 import { type ActionState, frenchCredits, seconds } from './utils';
 
@@ -76,19 +84,102 @@ function TypeChoice({
  * Les clés R2 ne sont pas des URLs : sans route de signature, aucun visuel
  * n'est affichable. Le cadre reste honnête — plein quand la scène a son
  * asset, pointillé sinon.
+ *
+ * **Il dit aussi d'où vient le visuel.** « Visuel généré » sur un fichier que
+ * le client a lui-même déposé serait faux, et c'est exactement la distinction
+ * qui décide s'il sera facturé : un plan servi par un apport ne repasse chez
+ * aucun fournisseur.
  */
 function VisualFrame({ shot }: { shot: Shot }) {
   const ready = Boolean(shot.assetUrl ?? shot.sourceImageUrl);
+  const depose = Boolean(shot.sourceAssetId);
+  const Icone = depose && shot.type === 'video' ? FileVideo : ImageIcon;
+
   return (
     <div
       className={`flex aspect-video w-full shrink-0 items-center justify-center gap-2 rounded-md lg:w-44 ${
         ready ? 'border border-primary/30' : 'border border-dashed'
       }`}
     >
-      <ImageIcon className={`h-4 w-4 ${ready ? 'text-primary' : 'text-muted-foreground/60'}`} />
+      <Icone className={`h-4 w-4 ${ready ? 'text-primary' : 'text-muted-foreground/60'}`} />
       <span className={`text-xs ${ready ? 'text-muted-foreground' : 'text-muted-foreground/60'}`}>
-        {ready ? 'Visuel généré' : 'Pas encore de visuel'}
+        {depose
+          ? 'Fichier du client'
+          : ready
+            ? 'Visuel généré'
+            : 'Pas encore de visuel'}
       </span>
+    </div>
+  );
+}
+
+/**
+ * Le choix du fichier déposé qui sert ce plan.
+ *
+ * **C'est le geste qui définit trois des quatre cas d'usage** — des captures
+ * d'écran à commenter, une photo de produit à animer, une vidéo tournée à
+ * habiller. Lier, c'est écrire dans `sourceImageUrl` et `assetUrl`, les deux
+ * colonnes que les étapes payantes regardent avant de générer : après ça, le
+ * plan ne repasse chez aucun fournisseur.
+ *
+ * **Il poste dans le formulaire de la carte, avec son propre `intent`.** HTML
+ * interdit les formulaires imbriqués, et la carte en a déjà un ; c'est la même
+ * grammaire que « Enregistrer » et « Supprimer ». `bind` ne lit que
+ * `assetId` : lier ne doit pas enregistrer au passage un prompt en cours
+ * d'écriture.
+ */
+function AssetPicker({
+  shot,
+  assets,
+  disabled,
+}: {
+  shot: Shot;
+  assets: ClientAsset[];
+  disabled?: boolean;
+}) {
+  const lie = assets.find((asset) => asset.id === shot.sourceAssetId);
+
+  return (
+    <div className="space-y-2 rounded-md border border-dashed p-3">
+      <Label htmlFor={`asset-${shot.id}`} className="gap-1">
+        <Paperclip className="h-3.5 w-3.5" />
+        Servir cette scène avec un fichier déposé
+      </Label>
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          id={`asset-${shot.id}`}
+          name="assetId"
+          defaultValue={shot.sourceAssetId ? String(shot.sourceAssetId) : ''}
+          disabled={disabled}
+          className="h-9 min-w-0 flex-1 rounded-md border bg-transparent px-2 text-sm"
+        >
+          <option value="">Aucun — générer le visuel</option>
+          {assets.map((asset) => (
+            <option key={asset.id} value={asset.id}>
+              {asset.kind === 'video' ? '🎬' : '🖼'}{' '}
+              {asset.originalName ?? `Fichier ${asset.id}`}
+              {asset.durationS ? ` · ${asset.durationS.toFixed(1)} s` : ''}
+            </option>
+          ))}
+        </select>
+        <Button
+          type="submit"
+          name="intent"
+          value="bind"
+          variant="outline"
+          size="sm"
+          disabled={disabled}
+        >
+          Attacher
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {lie
+          ? `Servie par « ${lie.originalName ?? `Fichier ${lie.id}`} » : ` +
+            'aucun visuel ne sera généré pour cette scène.'
+          : 'Une vidéo remplace la scène entière, avec sa bande son. Une image ' +
+            'devient la scène, ou sert de départ au plan animé.'}
+      </p>
     </div>
   );
 }
@@ -103,11 +194,14 @@ export function SortableShotCard({
   index,
   editable,
   video,
+  assets = [],
 }: {
   shot: Shot;
   index: number;
   editable: boolean;
   video: Video;
+  /** Les fichiers déposés sur le projet. Vide hors brouillon. */
+  assets?: ClientAsset[];
 }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(shotFormAction, {});
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -199,6 +293,14 @@ export function SortableShotCard({
                     En anglais : les modèles d&apos;image et de vidéo sont entraînés en anglais.
                   </p>
                 </div>
+                {/*
+                  Caché quand rien n'a été déposé : un sélecteur vide n'aurait
+                  rien à dire, et il occuperait la place sur le chemin normal
+                  d'une vidéo entièrement générée.
+                */}
+                {editable && assets.length > 0 && (
+                  <AssetPicker shot={shot} assets={assets} disabled={isPending} />
+                )}
               </div>
             </div>
 

@@ -91,6 +91,26 @@ export const durationSourceEnum = pgEnum('duration_source', [
 export const soundKindEnum = pgEnum('sound_kind', ['sfx', 'ambient', 'music']);
 
 export const shotTypeEnum = pgEnum('shot_type', ['image', 'video']);
+
+/**
+ * Ce que le client apporte, et donc ce qu'on n'a pas à générer.
+ *
+ * `generated` est le cas d'origine : le client écrit un thème et tout sort des
+ * modèles. Les trois autres partent d'un fichier qu'il dépose — des captures
+ * d'écran à commenter, une photo de produit à animer, une vidéo déjà tournée à
+ * habiller. Ce n'est pas un style, c'est une **entrée** : une même vidéo de
+ * présentation peut être sobre ou nerveuse, mais elle part toujours de
+ * captures.
+ */
+export const videoSourceEnum = pgEnum('video_source', [
+  'generated',
+  'screens',
+  'product',
+  'footage',
+]);
+
+/** Ce qu'un fichier déposé par le client contient. */
+export const assetKindEnum = pgEnum('asset_kind', ['image', 'video']);
 export const shotStatusEnum = pgEnum('shot_status', [
   'pending',
   'generating',
@@ -255,6 +275,13 @@ export const videos = pgTable(
     // au lieu de le redériver du titre modifié depuis par quelqu'un.
     theme: text('theme'),
     status: videoStatusEnum('status').notNull().default('draft'),
+    /**
+     * D'où part cette vidéo. Voir `videoSourceEnum`.
+     *
+     * `generated` par défaut, donc toutes les vidéos existantes gardent leur
+     * comportement : la colonne s'ajoute sans rien déplacer.
+     */
+    source: videoSourceEnum('source').notNull().default('generated'),
     pipelineOverride: pipelineEnum('pipeline_override'),
     // Détermine la tarification en crédits : 1 crédit/s en 480p,
     // 3 crédits/s en 720p (docs/tarifs.md).
@@ -296,6 +323,75 @@ export const videos = pgTable(
   (t) => [
     index('videos_tenant_id_idx').on(t.tenantId),
     index('videos_project_id_idx').on(t.projectId),
+  ]
+);
+
+/**
+ * Les fichiers déposés par le client.
+ *
+ * **Pourquoi une table et pas une colonne.** Une vidéo de présentation part de
+ * quinze captures d'écran, et chacune devient un plan : il faut pouvoir les
+ * ranger, les réordonner et en supprimer une sans toucher au storyboard. Une
+ * colonne `jsonb` sur la vidéo aurait fait l'affaire pour la photo unique du
+ * cas produit, pas pour les quinze.
+ *
+ * **Pourquoi liée au projet et non à la vidéo.** Un client qui présente sa
+ * plateforme refait sa vidéo trois fois avec les mêmes captures. Les rattacher
+ * à la vidéo obligerait à les redéposer à chaque essai — et à les repayer en
+ * stockage.
+ *
+ * Les octets vivent dans R2, sous `key`. Cette table ne porte que ce qu'il
+ * faut pour les retrouver et les afficher sans les télécharger.
+ */
+export const clientAssets = pgTable(
+  'client_assets',
+  {
+    id: serial('id').primaryKey(),
+    tenantId: integer('tenant_id')
+      .notNull()
+      .references(() => tenants.id),
+    projectId: integer('project_id')
+      .notNull()
+      .references(() => projects.id),
+    kind: assetKindEnum('kind').notNull(),
+    /** Clé R2. La seule colonne sans laquelle la ligne ne vaut rien. */
+    key: text('key').notNull(),
+    /**
+     * Le nom que le fichier avait chez le client.
+     *
+     * Gardé pour l'afficher : « capture-tableau-de-bord.png » dit au client
+     * lequel de ses quinze fichiers il regarde, là où la clé R2 ne dit rien.
+     */
+    originalName: text('original_name'),
+    mimeType: varchar('mime_type', { length: 100 }).notNull(),
+    bytes: integer('bytes').notNull(),
+    /** Mesurés à l'import : le cadrage du rendu en dépend. */
+    width: integer('width'),
+    height: integer('height'),
+    /** Secondes, pour une vidéo. Null pour une image. */
+    durationS: real('duration_s'),
+    /**
+     * Ce que la bande son dit, transcrit une fois au dépôt.
+     *
+     * **Pourquoi sur l'apport et pas sur le plan.** L'audio n'existe que dans
+     * le navigateur du client, au moment où il dépose : c'est le seul endroit
+     * de la chaîne qui sache extraire une piste d'un MP4, faute de ffmpeg en
+     * serverless. Le plan qui utilisera ce fichier, lui, est lié plus tard —
+     * parfois jamais. On transcrit donc quand on peut, et on recopie quand on
+     * lie.
+     *
+     * Nulles pour une image, et nulles aussi pour une vidéo dont le navigateur
+     * n'a pas su décoder la piste : le montage marche sans, il perd seulement
+     * les sous-titres calés au mot.
+     */
+    transcript: text('transcript'),
+    /** `{ text, start, duration }` par mot, la forme que `shots.words` porte. */
+    words: jsonb('words'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('client_assets_tenant_id_idx').on(t.tenantId),
+    index('client_assets_project_id_idx').on(t.projectId),
   ]
 );
 
@@ -368,6 +464,18 @@ export const shots = pgTable(
     sourceImageUrl: text('source_image_url'),
     /** Ce que le rendu consomme : l'image fixe, ou le clip pour un plan animé. */
     assetUrl: text('asset_url'),
+    /**
+     * Le fichier du client qui remplace la génération de ce plan.
+     *
+     * Renseigné, il **interdit** de payer un fournisseur pour cette scène :
+     * `generateImages` et `submitClips` la sautent, et le rendu consomme le
+     * fichier déposé. C'est la seule chose qui sépare une vidéo de captures
+     * d'écran d'une vidéo générée — le reste du moteur ne voit pas la
+     * différence.
+     *
+     * Nullable, donc les plans existants restent des plans générés.
+     */
+    sourceAssetId: integer('source_asset_id').references(() => clientAssets.id),
     status: shotStatusEnum('status').notNull().default('pending'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -835,6 +943,17 @@ export const shotsRelations = relations(shots, ({ one }) => ({
     fields: [shots.videoId],
     references: [videos.id],
   }),
+  sourceAsset: one(clientAssets, {
+    fields: [shots.sourceAssetId],
+    references: [clientAssets.id],
+  }),
+}));
+
+export const clientAssetsRelations = relations(clientAssets, ({ one }) => ({
+  project: one(projects, {
+    fields: [clientAssets.projectId],
+    references: [projects.id],
+  }),
 }));
 
 export const jobsRelations = relations(jobs, ({ one }) => ({
@@ -944,6 +1063,7 @@ export type NewProject = typeof projects.$inferInsert;
 export type Video = typeof videos.$inferSelect;
 export type NewVideo = typeof videos.$inferInsert;
 export type Shot = typeof shots.$inferSelect;
+export type ClientAsset = typeof clientAssets.$inferSelect;
 export type NewShot = typeof shots.$inferInsert;
 export type Job = typeof jobs.$inferSelect;
 export type NewJob = typeof jobs.$inferInsert;

@@ -22,7 +22,7 @@ import { Loader2, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Shot, Video } from '@/lib/db/schema';
+import type { ClientAsset, Shot, Video } from '@/lib/db/schema';
 import { deleteVideoAction, reorderShotsAction } from '../actions';
 import { PriceStrip } from '@/components/storyboard/price-strip';
 import { SortableShotCard } from '@/components/storyboard/shot-card';
@@ -44,6 +44,7 @@ export function StoryboardEditor({
   balance,
   canAfford,
   durationsMeasured,
+  assets,
 }: {
   video: Video;
   shots: Shot[];
@@ -51,6 +52,13 @@ export function StoryboardEditor({
   balance: number;
   canAfford: boolean;
   durationsMeasured: boolean;
+  /**
+   * Les fichiers déposés sur le projet, servables sur un plan.
+   *
+   * Vide hors brouillon : la page ne les charge pas, et lier après le débit
+   * ne rembourserait rien.
+   */
+  assets: ClientAsset[];
 }) {
   const editable = video.status === 'draft';
   const spokenSeconds = shots.reduce((t, s) => t + s.durationS, 0);
@@ -124,6 +132,13 @@ export function StoryboardEditor({
             sceneCount={items.length}
             resolution={video.resolution}
           />
+          {/*
+            Le bouton d'écriture du storyboard était **importé et jamais posé**.
+            La page offrait la voix, la validation, les images et le montage, et
+            aucun moyen de faire écrire les scènes : rien ne s'affichait parce
+            que rien ne pouvait être demandé.
+          */}
+          {editable && <GenerateButton videoId={video.id} hasShots={items.length > 0} />}
           {editable &&
             items.length > 0 &&
             (durationsMeasured ? (
@@ -172,7 +187,14 @@ export function StoryboardEditor({
           <SortableContext items={items.map((s) => s.id)} strategy={verticalListSortingStrategy}>
             <ul className="space-y-4">
               {items.map((shot, index) => (
-                <SortableShotCard key={shot.id} shot={shot} index={index} editable={editable} video={video} />
+                <SortableShotCard
+                  key={shot.id}
+                  shot={shot}
+                  index={index}
+                  editable={editable}
+                  video={video}
+                  assets={assets}
+                />
               ))}
             </ul>
           </SortableContext>

@@ -12,6 +12,7 @@ import { isVoiceConfigured } from '@/lib/voice/elevenlabs';
 import { DeleteVideoButton, StoryboardEditor } from './storyboard';
 import { VideoSettings } from '@/components/storyboard/video-settings';
 import { listSounds } from '@/lib/sounds';
+import { listClientAssets } from '@/lib/assets';
 import { createAssetStore } from '@/lib/storage';
 
 /** Le temps qu'une lecture tient : assez pour regarder, pas pour partager. */
@@ -77,6 +78,17 @@ export default async function VideoPage({
         }))
       : [];
   const pipeline = board.video.pipelineOverride ?? project.defaultPipeline;
+
+  /*
+   * Les fichiers déposés sur le projet, pour pouvoir les servir sur un plan.
+   *
+   * Ils vivent sur le **projet** et pas sur la vidéo : un client dépose ses
+   * quinze captures une fois et en tire plusieurs montages. Chargés seulement
+   * pour un brouillon — après validation les crédits sont débités, et lier un
+   * fichier ne rembourserait rien.
+   */
+  const apports =
+    board.video.status === 'draft' ? await listClientAssets(tdb, project.id) : [];
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -154,6 +166,7 @@ export default async function VideoPage({
         balance={board.balance}
         canAfford={board.canAfford}
         durationsMeasured={board.durationsMeasured}
+        assets={apports}
       />
 
       {board.video.status === 'draft' && (

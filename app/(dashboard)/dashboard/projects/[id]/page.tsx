@@ -7,7 +7,9 @@ import { getUser } from '@/lib/db/queries';
 import { tenantDb } from '@/lib/db/tenant-db';
 import { ProjectError, getProject } from '@/lib/projects';
 import { listVideos } from '@/lib/videos';
+import { listClientAssets } from '@/lib/assets';
 import { DeleteProjectButton, EditProjectForm } from '../project-form';
+import { AssetUploader } from './asset-uploader';
 
 const VIDEO_STATUS_STYLE: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -41,6 +43,7 @@ export default async function ProjectPage({
 
   const canDelete = user.role === 'owner' || user.role === 'admin';
   const videos = await listVideos(tenantDb(user.tenantId), project.id);
+  const assets = await listClientAssets(tenantDb(user.tenantId), project.id);
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -59,6 +62,15 @@ export default async function ProjectPage({
         </CardHeader>
         <CardContent>
           <EditProjectForm project={project} />
+        </CardContent>
+      </Card>
+
+      <Card className="mb-8 max-w-2xl">
+        <CardHeader>
+          <CardTitle>Vos fichiers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AssetUploader projectId={project.id} assets={assets} />
         </CardContent>
       </Card>
 
