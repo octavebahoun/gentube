@@ -70,6 +70,18 @@ export interface VideoAnimator {
   readonly provider: string;
   /** Qui résout la tâche : son webhook, ou nous en redemandant. */
   readonly resolution: ResolutionMode;
+  /**
+   * La route qui lit les rappels de CE fournisseur, ou `null` s'il n'y en a
+   * pas encore.
+   *
+   * Déclarer `resolution: 'webhook'` dit qu'un fournisseur rappelle ; ça ne dit
+   * pas qu'on sait l'écouter. Chaque fournisseur signe et met en forme sa
+   * charge à sa façon — Replicate son HMAC, Atlas de l'Ed25519 sur un JWKS —
+   * et une route ne sait lire que celui pour lequel elle est écrite. Sans ce
+   * champ, un nouveau fournisseur qui rappelle recevrait l'adresse de la route
+   * d'un autre : les clips partent, sont facturés, et aucun ne revient.
+   */
+  readonly callbackPath: string | null;
   /** Lance la génération et rend de quoi la retrouver. Ne l'attend pas. */
   submit(request: AnimationRequest): Promise<SubmittedAnimation>;
   /**

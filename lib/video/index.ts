@@ -1,4 +1,5 @@
 import { AnimationNotConfiguredError, read, type VideoAnimator } from './contract';
+import { createAtlasAnimator, isAtlasConfigured } from './atlas';
 import { createNovitaAnimator, isNovitaConfigured } from './novita';
 import { createReplicateAnimator, isAnimationConfigured } from './replicate';
 
@@ -17,10 +18,14 @@ import { createReplicateAnimator, isAnimationConfigured } from './replicate';
  * quand on passe ses semaines à comparer des modèles.
  *
  * **Ce que la passerelle ne cache pas.** Elle ne prétend pas que les
- * fournisseurs sont interchangeables : ils ne le sont pas. Replicate rappelle,
- * Novita non, et cette différence-là casse en silence si on la range sous le
- * tapis. Elle est donc **déclarée** sur le contrat (`resolution`), et c'est
- * l'orchestrateur qui la lit.
+ * fournisseurs sont interchangeables : ils ne le sont pas. Replicate et Atlas
+ * rappellent, Novita non, et cette différence-là casse en silence si on la
+ * range sous le tapis. Elle est donc **déclarée** sur le contrat
+ * (`resolution`), et c'est l'orchestrateur qui la lit.
+ *
+ * **Ce qu'un fournisseur qui rappelle doit encore avoir.** Sa propre route de
+ * rappel : la charge d'Atlas n'est pas celle de Replicate, et sa signature non
+ * plus. `app/api/webhooks/replicate` ne sait lire que Replicate.
  */
 
 export {
@@ -50,10 +55,15 @@ export {
 
 export { isAnimationConfigured } from './replicate';
 export { isNovitaConfigured } from './novita';
+export { isAtlasConfigured } from './atlas';
 
-export type VideoProvider = 'replicate' | 'novita';
+export type VideoProvider = 'replicate' | 'atlas' | 'novita';
 
-export const VIDEO_PROVIDERS: readonly VideoProvider[] = ['replicate', 'novita'];
+export const VIDEO_PROVIDERS: readonly VideoProvider[] = [
+  'replicate',
+  'atlas',
+  'novita',
+];
 
 /**
  * Le fournisseur du produit, tant que rien ne dit le contraire.
@@ -81,6 +91,13 @@ export function videoProviderFor(): VideoProvider {
 
 /** Construit le client d'un fournisseur nommé, ou dit ce qui lui manque. */
 export function createClientFor(provider: VideoProvider): VideoAnimator {
+  if (provider === 'atlas') {
+    if (!isAtlasConfigured()) {
+      throw new AnimationNotConfiguredError('ATLAS_API_KEY');
+    }
+    return createAtlasAnimator();
+  }
+
   if (provider === 'novita') {
     if (!isNovitaConfigured()) {
       throw new AnimationNotConfiguredError('NOVITA_API_KEY');

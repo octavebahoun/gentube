@@ -94,18 +94,24 @@ function images() {
 }
 
 /** Un animateur qui note ce qu'on lui demande, et peut refuser la Nième scène. */
-function animator({ failOnCall }: { failOnCall?: number } = {}) {
+function animator({
+  failOnCall,
+  prefix = 'pred',
+}: { failOnCall?: number; prefix?: string } = {}) {
   const calls: AnimationRequest[] = [];
   const client: VideoAnimator = {
     provider: 'test',
     resolution: 'webhook',
+    callbackPath: '/api/webhooks/replicate',
     async submit(request) {
       calls.push(request);
       if (failOnCall !== undefined && calls.length === failOnCall) {
         throw new AnimationError('Replicate 402: payment required', 402);
       }
       return {
-        externalId: `pred_${calls.length}`,
+        // `jobs.external_id` est unique dans toute la base : deux tests qui
+        // soumettent avec le même préfixe se marchent dessus.
+        externalId: `${prefix}_${calls.length}`,
         model: 'wan-video/wan-2.2-i2v-fast',
         costUsd: 0.05,
       };
@@ -330,5 +336,38 @@ describe('le fournisseur qui ne rappelle pas', () => {
         store: store().assets,
       })
     ).rejects.toThrow(/does not call back/);
+  });
+
+  it('refuse aussi celui qui rappelle sans route pour l entendre', async () => {
+    /*
+     * Le piège d'un pas : Atlas rappelle, donc `resolution` est `webhook` et le
+     * premier garde-fou le laisse passer. Mais chaque fournisseur signe et met
+     * en forme sa charge à sa façon, et `app/api/webhooks/replicate` ne lit que
+     * Replicate. Sans ce second refus, les clips partiraient, seraient
+     * facturés, et se feraient rejeter à l'arrivée.
+     */
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await readyForClips(tdb, ['video']);
+    const { client } = animator();
+
+    await expect(
+      submitClips(tdb, video.id, {
+        animator: { ...client, callbackPath: null, provider: 'atlas' },
+        store: store().assets,
+      })
+    ).rejects.toThrow(/no route here reads/);
+  });
+
+  it('adresse le rappel à la route du fournisseur, pas à celle d un autre', async () => {
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const video = await readyForClips(tdb, ['video']);
+    const { client, calls } = animator({ prefix: 'atl' });
+
+    await submitClips(tdb, video.id, {
+      animator: { ...client, callbackPath: '/api/webhooks/atlas' },
+      store: store().assets,
+    });
+
+    expect(calls[0].webhookUrl).toContain('/api/webhooks/atlas?job=');
   });
 });

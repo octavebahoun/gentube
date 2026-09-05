@@ -8,7 +8,12 @@ import {
   videoProviderFor,
 } from './index';
 
-const VARS = ['VIDEO_PROVIDER', 'REPLICATE_API_TOKEN', 'NOVITA_API_KEY'] as const;
+const VARS = [
+  'VIDEO_PROVIDER',
+  'REPLICATE_API_TOKEN',
+  'ATLAS_API_KEY',
+  'NOVITA_API_KEY',
+] as const;
 
 afterEach(() => {
   for (const name of VARS) process.env[name] = '';
@@ -40,6 +45,7 @@ describe('la construction d un client', () => {
   it('dit ce qui manque, par fournisseur', () => {
     expect(() => createClientFor('replicate')).toThrow(AnimationNotConfiguredError);
     expect(() => createClientFor('replicate')).toThrow(/REPLICATE_API_TOKEN/);
+    expect(() => createClientFor('atlas')).toThrow(/ATLAS_API_KEY/);
     expect(() => createClientFor('novita')).toThrow(/NOVITA_API_KEY/);
   });
 
@@ -50,9 +56,13 @@ describe('la construction d un client', () => {
      * laisserait ses jobs `running` pour toujours, sans erreur nulle part.
      */
     process.env.REPLICATE_API_TOKEN = 'r8_test';
+    process.env.ATLAS_API_KEY = 'atl_test';
     process.env.NOVITA_API_KEY = 'nv_test';
 
     expect(createClientFor('replicate').resolution).toBe('webhook');
+    // Atlas prend `webhook_url` dans le corps de la soumission, comme
+    // Replicate prend `webhook` : rien à surveiller de notre côté.
+    expect(createClientFor('atlas').resolution).toBe('webhook');
     expect(createClientFor('novita').resolution).toBe('poll');
   });
 

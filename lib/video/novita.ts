@@ -158,6 +158,8 @@ async function attendre(taskId: string): Promise<string> {
 export class NovitaAnimator implements VideoAnimator {
   readonly provider = 'novita';
   readonly resolution = 'poll' as const;
+  /** Novita ne rappelle pas : il n'y a rien à écouter. */
+  readonly callbackPath = null;
 
   get model(): string {
     return MODEL;

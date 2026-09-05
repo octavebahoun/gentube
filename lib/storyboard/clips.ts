@@ -221,6 +221,21 @@ export async function submitClips(
       );
     }
 
+    /*
+     * Rappeler ne suffit pas : encore faut-il qu'une route sache lire CE
+     * fournisseur. Chacun signe et met en forme sa charge à sa façon, et une
+     * route ne lit que celui pour lequel elle est écrite. Envoyer à un nouveau
+     * fournisseur l'adresse de la route d'un autre ferait partir des clips
+     * facturés vers un point qui les rejette.
+     */
+    if (!client.callbackPath) {
+      throw new StoryboardError(
+        `The ${client.provider} provider calls back, but no route here reads ` +
+          'its callbacks yet: its clips would be paid for and never collected.',
+        503
+      );
+    }
+
     assets ??= createAssetStore();
     base ??= callbackBaseUrl();
 
@@ -242,7 +257,7 @@ export async function submitClips(
         durationS: shot.durationS,
         resolution: video.resolution,
         ratio: video.ratio,
-        webhookUrl: `${base}/api/webhooks/replicate?job=${job.id}`,
+        webhookUrl: `${base}${client.callbackPath}?job=${job.id}`,
       });
 
       // `eq(status, 'queued')` ferme l'autre moitié de la course. Écrire le

@@ -103,6 +103,8 @@ export class ReplicateAnimator implements VideoAnimator {
   readonly provider = 'replicate';
   /** Replicate rappelle : `submitClips` rend la main, le webhook pose le clip. */
   readonly resolution = 'webhook' as const;
+  /** Sa route existe et vérifie sa signature : `lib/video/webhook.ts`. */
+  readonly callbackPath = '/api/webhooks/replicate';
 
   constructor(private readonly config: ReplicateConfig = replicateConfig()) {}
 

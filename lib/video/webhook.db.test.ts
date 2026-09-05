@@ -120,6 +120,7 @@ const images = {
 const animator: VideoAnimator = {
   provider: 'test',
   resolution: 'webhook',
+  callbackPath: '/api/webhooks/replicate',
   async submit() {
     return {
       externalId: 'pred_1',
