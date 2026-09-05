@@ -200,6 +200,36 @@ describe('relire un encaissement', () => {
     expect((await new SasPayGateway(CONFIG).settle('s')).status).toBe('pending');
   });
 
+  it('ne compte la commission qu une fois', async () => {
+    /*
+     * Leurs trois champs ne sont pas trois commissions : c'est une seule,
+     * détaillée. Relevé sur une transaction réelle — client_fee 163 =
+     * gateway_fee 88 + platform_fee 75. Les additionner donnait 326, le double
+     * du vrai coût, et faussait la marge d'autant.
+     */
+    globalThis.fetch = repond(
+      { body: { ...SESSION, transaction: 't' } },
+      {
+        body: {
+          status: 'SUCCESS',
+          requested_amount: '5000.00',
+          client_fee: '163.00',
+          gateway_fee: '88.00',
+          platform_fee: '75.00',
+          debited_amount: '5163.00',
+          net_amount: '5000.00',
+          currency: 'XOF',
+          amounts: { fee: '163.00', charged: '5163.00', net: '5000.00' },
+        },
+      }
+    );
+
+    const reglement = await new SasPayGateway(CONFIG).settle('s');
+    expect(reglement.feeXof).toBe(163);
+    // Et le compte doit tomber juste : débité = demandé + commission.
+    expect(reglement.chargedXof).toBe(reglement.amountXof! + reglement.feeXof!);
+  });
+
   it('accepte les deux formes de réponse de leur API', async () => {
     // Leur introduction décrit une enveloppe { success, data }, leurs exemples
     // de paiement rendent l'objet à plat. Parier sur l'une rendrait undefined
@@ -224,6 +254,43 @@ describe('les erreurs de la passerelle', () => {
     await expect(new SasPayGateway(CONFIG).settle('s')).rejects.toThrow(
       /unreachable/
     );
+  });
+
+  it('rejoue une lecture dont la connexion n a pas abouti', async () => {
+    /*
+     * Observé en vrai : la première connexion sortante d'un processus peut
+     * expirer. Sans reprise, un paiement encaissé restait non crédité alors
+     * que SasPay le donnait pour payé.
+     */
+    const appel = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('ETIMEDOUT'))
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify(SESSION),
+      } as unknown as Response);
+    globalThis.fetch = appel;
+
+    expect((await new SasPayGateway(CONFIG).settle('s')).amountXof).toBe(15_000);
+    expect(appel).toHaveBeenCalledTimes(2);
+  });
+
+  it('ne rejoue pas une ouverture de checkout', async () => {
+    // Un POST rejeté a pu partir et ne perdre que sa réponse : le rejouer
+    // ouvrirait une seconde session, donc un second paiement possible.
+    const appel = vi.fn().mockRejectedValue(new Error('ETIMEDOUT'));
+    globalThis.fetch = appel;
+
+    await expect(
+      new SasPayGateway(CONFIG).openCheckout({
+        amountXof: 15_000,
+        description: 'test',
+        returnUrl: 'https://x.test/r',
+        customer: CLIENT,
+      })
+    ).rejects.toThrow(/unreachable/);
+    expect(appel).toHaveBeenCalledTimes(1);
   });
 });
 

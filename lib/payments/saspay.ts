@@ -42,6 +42,18 @@ import {
 
 const DEFAULT_BASE_URL = 'https://api.saspay.me/api/v1';
 
+/**
+ * Combien de fois une *lecture* est rejouee quand la connexion ne s'etablit
+ * pas. Trois suffit : au-dela, ce n'est plus un incident reseau mais une
+ * panne, et le reveil suivant reprendra le paiement de toute facon.
+ */
+const RELECTURES_RESEAU = 3;
+
+/** Attente entre deux essais, multipliee par le numero d'essai. */
+const ATTENTE_RESEAU_MS = 300;
+
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 /** Le Bénin, en ISO 3166-1 alpha-2 — ce que leur API attend dans `country`. */
 const COUNTRY = 'BJ';
 
@@ -192,23 +204,27 @@ export class SasPayGateway implements PaymentGateway {
     );
 
     /*
-     * Trois commissions distinctes chez eux — passerelle, plateforme, client.
-     * Ce qui nous intéresse est ce que l'opération a coûté au total, donc leur
-     * somme. `client_fee` est ce que le payeur a supporté en mode ADD_ON ; le
-     * garder dans le total dit le vrai prix du flux, pas seulement notre part.
+     * Les trois champs de commission ne sont **pas** trois commissions : c'est
+     * une seule, detaillee. Verifie sur une transaction reelle le 5 septembre
+     * 2026 — client_fee 163 = gateway_fee 88 + platform_fee 75, pour 5 000
+     * demandes et 5 163 debites. Les additionner donnait 326, soit le double
+     * du vrai cout, et faussait d'autant l'etude de marge.
+     *
+     * `amounts.fee` est la version que SasPay presente comme faisant foi ;
+     * `client_fee` est la meme valeur, gardee en second recours au cas ou
+     * l'objet `amounts` manquerait sur une reponse plus ancienne.
      */
-    const fee = ['client_fee', 'gateway_fee', 'platform_fee']
-      .map((champ) => parseXof(paiement[champ]))
-      .filter((valeur): valeur is number => valeur !== null)
-      .reduce((total, valeur) => total + valeur, 0);
+    const montants = (paiement.amounts ?? {}) as Record<string, unknown>;
+    const fee = parseXof(montants.fee) ?? parseXof(paiement.client_fee);
 
     return {
       status: toStatus(paiement.status),
       amountXof: parseXof(paiement.requested_amount) ?? parseXof(session.amount),
       currency: typeof paiement.currency === 'string' ? paiement.currency : null,
       feeXof: fee,
-      chargedXof: parseXof(paiement.debited_amount),
-      netXof: parseXof(paiement.net_amount),
+      chargedXof:
+        parseXof(paiement.debited_amount) ?? parseXof(montants.charged),
+      netXof: parseXof(paiement.net_amount) ?? parseXof(montants.net),
       transactionId,
     };
   }
@@ -298,9 +314,8 @@ export class SasPayGateway implements PaymentGateway {
   }
 
   private async call<T>(path: string, init: RequestInit = {}): Promise<T> {
-    let reponse: Response;
-    try {
-      reponse = await fetch(`${this.config.baseUrl}${path}`, {
+    const requete = () =>
+      fetch(`${this.config.baseUrl}${path}`, {
         ...init,
         headers: {
           Authorization: `Bearer ${this.config.apiKey}`,
@@ -309,8 +324,37 @@ export class SasPayGateway implements PaymentGateway {
           ...init.headers,
         },
       });
-    } catch (cause) {
-      throw new PaymentError(`SasPay is unreachable: ${cause}`, { status: 504 });
+
+    /*
+     * Une panne de connexion n'est pas une reponse : `fetch` ne rejette que si
+     * rien n'a abouti, donc la requete n'a jamais atteint SasPay et la rejouer
+     * ne peut rien encaisser deux fois.
+     *
+     * Seules les lectures sont rejouees. Un POST rejete a pu, lui, partir et
+     * voir seulement sa reponse se perdre : le rejouer creerait une seconde
+     * session de checkout. Une lecture qui echoue coute un paiement non
+     * credite ; une ecriture rejouee couterait un doublon.
+     */
+    const methode = (init.method ?? 'GET').toUpperCase();
+    const tentatives = methode === 'GET' ? RELECTURES_RESEAU : 1;
+
+    let reponse: Response | null = null;
+    let derniere: unknown = null;
+
+    for (let essai = 1; essai <= tentatives; essai += 1) {
+      try {
+        reponse = await requete();
+        break;
+      } catch (cause) {
+        derniere = cause;
+        if (essai < tentatives) await pause(ATTENTE_RESEAU_MS * essai);
+      }
+    }
+
+    if (!reponse) {
+      throw new PaymentError(`SasPay is unreachable: ${derniere}`, {
+        status: 504,
+      });
     }
 
     const texte = await reponse.text();
