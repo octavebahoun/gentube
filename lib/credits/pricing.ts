@@ -88,11 +88,6 @@ export const RENDER_HEIGHT = 1080;
  * Starter reste en Full HD : à 7 crédits la seconde, un quota Starter
  * intégralement dépensé en Cinéma coûterait plus que l'abonnement ne rapporte
  * une fois le reste des postes comptés.
- *
- * ⚠️ Le plafond Pro — 200 crédits de Cinéma par cycle — n'est **pas** applique
- * ici : il demande un compteur par cycle de facturation, pas une constante.
- * Tant qu'il n'existe pas, un client Pro peut dépenser tout son quota en
- * Cinéma. La marge reste positive, mais elle tombe à ~69 %.
  */
 export const QUALITY_BY_PLAN: Record<Plan, Quality[]> = {
   starter: ['draft'],
@@ -100,8 +95,27 @@ export const QUALITY_BY_PLAN: Record<Plan, Quality[]> = {
   business: ['draft', 'standard'],
 };
 
-/** Plafond mensuel de Cinéma sur Pro, en crédits. Pas encore applique. */
-export const STANDARD_MONTHLY_CAP_CREDITS = 200;
+/**
+ * Combien de crédits de Cinéma un plan autorise par cycle de facturation.
+ *
+ * L'accès au palier ne suffit pas à tenir la marge : à 7 crédits la seconde
+ * vendus 140 FCFA pour 25 FCFA de coût, le Cinéma reste bénéficiaire à
+ * l'unité, mais un quota Pro entièrement dépensé là fait tomber la marge du
+ * plan de 84 % à 69 % — et c'est le plan, pas la seconde, qui est vendu à prix
+ * fixe. Le plafond borne cette dérive.
+ *
+ * `null` = pas de plafond. Business est négocié par contrat : lui poser une
+ * limite ici la rendrait invisible dans la négociation.
+ *
+ * Starter vaut zéro et non `null` : il n'a pas accès au palier de toute façon
+ * (`QUALITY_BY_PLAN`), et deux verrous valent mieux qu'un sur un chemin qui
+ * débite de l'argent.
+ */
+export const STANDARD_CAP_BY_PLAN: Record<Plan, number | null> = {
+  starter: 0,
+  pro: 200,
+  business: null,
+};
 
 /**
  * Dotations mensuelles, grille v1.

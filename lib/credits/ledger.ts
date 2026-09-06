@@ -11,6 +11,7 @@ import {
   type Video,
 } from '@/lib/db/schema';
 import { estimateVideoCredits } from './pricing';
+import { assertSousLePlafond } from '@/lib/billing/plafond';
 
 export class InsufficientCreditsError extends Error {
   constructor(
@@ -291,6 +292,16 @@ export async function validateAndChargeVideo(
     }
 
     const charged = estimateVideoCredits(storyboard, video.quality);
+
+    /*
+     * Le plafond de Cinéma se compte ici, dans la transaction du débit, et pas
+     * à la création de la vidéo : hors transaction, deux validations
+     * simultanées passeraient toutes deux le contrôle avant que l'une ait
+     * écrit sa ligne. Et le Full HD n'a pas de plafond, donc rien à compter.
+     */
+    if (video.quality === 'standard') {
+      await assertSousLePlafond(tx, charged);
+    }
 
     const { balance } = await debitCredits(tx, {
       amount: charged,

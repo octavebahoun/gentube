@@ -2,6 +2,7 @@ import { client, db } from '@/lib/db/drizzle';
 import { resetDatabase } from '@/lib/db/reset';
 import { tenantDb, type TenantDb } from '@/lib/db/tenant-db';
 import {
+  billingCycles,
   type CreditPocket,
   projects,
   subscriptions,
@@ -10,6 +11,8 @@ import {
   type Plan,
   type Quality,
 } from '@/lib/db/schema';
+import { PLAN_MONTHLY_CREDITS, PLAN_PRICE_FCFA } from '@/lib/credits/pricing';
+import { cyclePeriodEnd } from '@/lib/billing/plans';
 
 export async function resetDb() {
   await resetDatabase();
@@ -45,17 +48,38 @@ export async function createTenant(
 }
 
 /**
- * Donne au tenant un abonnement actif, ce qui débloque le 720p et retire le
- * filigrane. Sans lui, un tenant de test est en essai.
+ * Donne au tenant un abonnement actif : le palier Cinéma se débloque et le
+ * filigrane tombe. Sans lui, un tenant de test est en essai.
+ *
+ * Le **cycle de facturation** vient avec, parce qu'il vient avec en
+ * production : `createSubscriptionCheckout` en ouvre un à chaque encaissement.
+ * Sans lui, le plafond de Cinéma n'aurait rien sur quoi compter et les tests
+ * auraient certifié un garde-fou qui ne s'applique jamais.
+ *
+ * `cycle: false` pour le cas où on veut précisément un abonné sans cycle.
  */
 export async function subscribe(
   tdb: TenantDb,
-  plan: Plan = 'pro'
+  plan: Plan = 'pro',
+  { cycle = true, debutIlYaJours = 0 }: { cycle?: boolean; debutIlYaJours?: number } = {}
 ): Promise<void> {
-  await db.insert(subscriptions).values({
+  const [subscription] = await db
+    .insert(subscriptions)
+    .values({ tenantId: tdb.tenantId, plan, status: 'active' })
+    .returning();
+
+  if (!cycle) return;
+
+  const periodStart = new Date(Date.now() - debutIlYaJours * 24 * 60 * 60 * 1000);
+  await db.insert(billingCycles).values({
     tenantId: tdb.tenantId,
+    subscriptionId: subscription.id,
     plan,
-    status: 'active',
+    periodStart,
+    periodEnd: cyclePeriodEnd(periodStart),
+    amountXof: PLAN_PRICE_FCFA[plan] ?? 0,
+    creditsGranted: PLAN_MONTHLY_CREDITS[plan],
+    status: 'paid',
   });
 }
 

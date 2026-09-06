@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { validatedActionWithUser } from '@/lib/auth/middleware';
 import { tenantDb } from '@/lib/db/tenant-db';
 import { InsufficientCreditsError } from '@/lib/credits';
+import { StandardCapReachedError } from '@/lib/billing/plafond';
+import { QUALITY_LABEL } from '@/lib/credits/pricing';
 import { LlmError, LlmNotConfiguredError } from '@/lib/llm/deepseek';
 import { StorageNotConfiguredError } from '@/lib/storage';
 import { AssetError, bindAssetToShot } from '@/lib/assets';
@@ -74,6 +76,20 @@ function formError(error: unknown): { error: string } {
     // et un écran qui ne bouge pas ne laissait aucune trace à lire.
     console.warn(`[action] ${error.name}: ${error.message}`);
     return { error: error.message };
+  }
+
+  if (error instanceof StandardCapReachedError) {
+    /*
+     * Un « something went wrong » ici serait le pire des messages : le client
+     * a les crédits, la vidéo est prête, et rien ne lui dirait que c'est le
+     * palier — donc qu'il lui suffit de repasser en Full HD.
+     */
+    console.warn(`[action] ${error.name}: ${error.message}`);
+    return {
+      error:
+        `${error.message} Repassez cette vidéo en ${QUALITY_LABEL.draft}, ` +
+        `ou attendez le prochain cycle.`,
+    };
   }
 
   if (error instanceof InsufficientCreditsError) {
