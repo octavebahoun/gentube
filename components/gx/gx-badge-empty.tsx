@@ -1,21 +1,35 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-type Tone = 'neutre' | 'jaune' | 'cyan' | 'vert' | 'magenta' | 'rouge' | 'bleu';
+type Tone =
+  | 'neutre'
+  | 'orange'
+  | 'purple'
+  | 'success'
+  | 'error'
+  | 'cyan'
+  | 'jaune'
+  | 'vert'
+  | 'magenta'
+  | 'rouge'
+  | 'bleu';
 
 const tones: Record<Tone, string> = {
-  neutre: 'border-line bg-ink-3 text-paper-2 [--dot:var(--color-paper-3)]',
-  jaune: 'border-jaune/40 bg-jaune/10 text-marque [--dot:var(--color-jaune)]',
-  cyan: 'border-cyan/40 bg-cyan/10 text-info [--dot:var(--color-cyan)]',
-  vert: 'border-vert/40 bg-vert/10 text-ok [--dot:var(--color-vert)]',
-  magenta: 'border-magenta/40 bg-magenta/10 text-alerte [--dot:var(--color-magenta)]',
-  rouge: 'border-rouge/40 bg-rouge/10 text-danger [--dot:var(--color-rouge)]',
-  bleu: 'border-bleu/40 bg-bleu/10 text-lien [--dot:var(--color-bleu)]',
+  neutre: 'border-[#292D35] bg-[#171A20] text-[#A5A7AD] [--dot:#A5A7AD]',
+  orange: 'border-[#FF7A18]/30 bg-[#FF7A18]/10 text-[#FF7A18] [--dot:#FF7A18]',
+  purple: 'border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] [--dot:#A855F7]',
+  success: 'border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F] [--dot:#35D07F]',
+  error: 'border-[#FF4D5A]/30 bg-[#FF4D5A]/10 text-[#FF4D5A] [--dot:#FF4D5A]',
+  cyan: 'border-[#FFB45C]/30 bg-[#FFB45C]/10 text-[#FFB45C] [--dot:#FFB45C]',
+  jaune: 'border-[#FF7A18]/30 bg-[#FF7A18]/10 text-[#FF7A18] [--dot:#FF7A18]',
+  vert: 'border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F] [--dot:#35D07F]',
+  magenta: 'border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] [--dot:#A855F7]',
+  rouge: 'border-[#FF4D5A]/30 bg-[#FF4D5A]/10 text-[#FF4D5A] [--dot:#FF4D5A]',
+  bleu: 'border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] [--dot:#A855F7]',
 };
 
 /*
- * GX Badge — la pastille d'état. Le point clignote quand ça travaille :
- * c'est le seul badge qui bouge, pour que « en cours » se voie de loin.
+ * GenTube Badge Component
  */
 export function GxBadge({
   className,
@@ -28,7 +42,7 @@ export function GxBadge({
   return (
     <span
       className={cn(
-        't-label inline-flex items-center gap-2 rounded-pill border px-2.5 py-1.5',
+        't-label inline-flex items-center gap-2 rounded-full border px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider',
         tones[tone],
         className
       )}
@@ -37,7 +51,7 @@ export function GxBadge({
       {dot && (
         <span
           aria-hidden="true"
-          className={cn('size-1.5 rounded-full bg-(--dot)', live && 'a-live')}
+          className={cn('size-1.5 rounded-full bg-(--dot)', live && 'animate-pulse')}
         />
       )}
       {children}
@@ -45,7 +59,7 @@ export function GxBadge({
   );
 }
 
-/* GX Empty — un écran vide est une invitation, pas un mur. */
+/* GenTube Empty State Component */
 export function GxEmpty({
   icon,
   title,
@@ -60,14 +74,13 @@ export function GxEmpty({
   className?: string;
 }) {
   return (
-    <div className={cn('flex flex-col items-center gap-4 px-6 py-16 text-center', className)}>
-      <span className="relative flex size-16 items-center justify-center overflow-hidden rounded-lg border border-line bg-ink-2 text-marque [&_svg]:size-7">
-        <span aria-hidden="true" className="mire absolute inset-x-0 top-0 h-[3px] opacity-60" />
+    <div className={cn('flex flex-col items-center gap-4 px-6 py-16 text-center rounded-xl border border-[#292D35] bg-[#111419]', className)}>
+      <span className="relative flex size-14 items-center justify-center overflow-hidden rounded-xl border border-[#292D35] bg-[#171A20] text-[#FF7A18] [&_svg]:size-7">
         {icon}
       </span>
-      <p className="t-h3">{title}</p>
-      <p className="max-w-md text-sm leading-relaxed text-paper-3">{hint}</p>
-      {action && <div className="mt-1">{action}</div>}
+      <p className="t-h3 text-[#F5F5F5]">{title}</p>
+      <p className="max-w-md text-sm leading-relaxed text-[#A5A7AD]">{hint}</p>
+      {action && <div className="mt-2">{action}</div>}
     </div>
   );
 }

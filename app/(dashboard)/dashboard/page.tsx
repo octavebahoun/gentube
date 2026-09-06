@@ -2,11 +2,11 @@
 
 import { Suspense, useActionState } from 'react';
 import useSWR from 'swr';
-import { Loader2, PlusCircle, Users } from 'lucide-react';
+import { Loader2, PlusCircle, Users, Film, Clapperboard, Sparkles, FolderKanban } from 'lucide-react';
 import type { TenantDataWithMembers, User } from '@/lib/db/schema';
 import { removeTenantMember, inviteTenantMember } from '@/app/(login)/actions';
 import { GxButton } from '@/components/gx/gx-button';
-import { GxCard, GxStat } from '@/components/gx/gx-card';
+import { GxCard, GxStat, GxPerfCard } from '@/components/gx/gx-card';
 import { GxBadge } from '@/components/gx/gx-badge-empty';
 import { GxField, GxInput } from '@/components/gx/gx-field';
 import { GxPage, GxPageHeader, GxSection, GxNotice, GxRadio } from '@/components/gx/gx-page';
@@ -29,7 +29,35 @@ function formatMinutes(seconds: number) {
 }
 
 function Squelette({ hauteur }: { hauteur: string }) {
-  return <div className={`scan plate ${hauteur}`} aria-hidden="true" />;
+  return <div className={`animate-pulse rounded-xl border border-[#292D35] bg-[#111419] ${hauteur}`} aria-hidden="true" />;
+}
+
+function ActionsRapides() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <GxPerfCard title="Nouveau Projet IA" timecode="Studio Assistant">
+        <div className="space-y-3">
+          <p className="text-sm text-[#A5A7AD]">
+            Laisse l'assistant IA de GenTube générer le script, la voix, les visuels et le sous-titrage.
+          </p>
+          <GxButton href="/dashboard/projects/new" variant="primary" glow className="w-full">
+            <PlusCircle className="size-4" /> Créer une nouvelle vidéo IA
+          </GxButton>
+        </div>
+      </GxPerfCard>
+
+      <GxPerfCard title="Studio de Montage" timecode="Multi-Tracks Timeline">
+        <div className="space-y-3">
+          <p className="text-sm text-[#A5A7AD]">
+            Reprends l'édition de tes vidéos, ajuste les pistes voix, audio et sous-titres karaoké.
+          </p>
+          <GxButton href="/dashboard/videos" variant="secondary" className="w-full">
+            <Film className="size-4 text-[#FF7A18]" /> Ouvrir la liste des vidéos
+          </GxButton>
+        </div>
+      </GxPerfCard>
+    </div>
+  );
 }
 
 function OffreEtCredits() {
@@ -40,47 +68,43 @@ function OffreEtCredits() {
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <GxStat
-          label="Solde"
+          label="Solde Crédits"
           value={balance.toLocaleString('fr-FR')}
           hint="crédits disponibles"
+          tone="orange"
         />
         <GxStat
-          label="En Full HD"
+          label="Vidéo Full HD"
           value={formatMinutes(secondsAffordable(balance, 'draft'))}
-          hint={`${CREDITS_PER_SECOND.draft} crédits la seconde`}
+          hint={`${CREDITS_PER_SECOND.draft} cr / seconde`}
           tone="cyan"
         />
         <GxStat
-          label="En images fixes"
+          label="Visuels Fixes"
           value={imagesAffordable(balance).toLocaleString('fr-FR')}
-          hint={`${CREDITS_PER_IMAGE} crédits l'image`}
-          tone="magenta"
+          hint={`${CREDITS_PER_IMAGE} cr / image`}
+          tone="purple"
         />
       </div>
 
       <GxCard className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="t-label text-paper-3">Offre en cours</p>
+          <p className="t-label text-[#A5A7AD]">Offre en cours</p>
           <p className="mt-2 flex items-center gap-3">
-            <span className="font-display text-lg font-bold capitalize">{tenant?.plan ?? '—'}</span>
-            <GxBadge tone="cyan">payé en FCFA</GxBadge>
+            <span className="font-display text-lg font-bold capitalize text-[#F5F5F5]">{tenant?.plan ?? '—'}</span>
+            <GxBadge tone="orange">Paiement Mobile Money XOF</GxBadge>
           </p>
         </div>
-        <GxButton href="/dashboard/billing" variant="secondary" size="sm">
-          Gérer l'offre et les crédits
+        <GxButton href="/dashboard/billing" variant="primary" size="sm" glow>
+          Recharger mes crédits
         </GxButton>
       </GxCard>
 
       {balance === 0 && (
         <GxNotice tone="erreur">
-          Solde vide. La génération reste bloquée jusqu'à la prochaine recharge.
+          Solde vide. La génération IA reste bloquée jusqu'à la prochaine recharge.
         </GxNotice>
       )}
-
-      <p className="t-data text-xs text-paper-3">
-        1 crédit = {CREDIT_FCFA} FCFA · image {CREDITS_PER_IMAGE} cr · Full HD{' '}
-        {CREDITS_PER_SECOND.draft} cr/s · Cinéma {CREDITS_PER_SECOND.standard} cr/s
-      </p>
     </div>
   );
 }
@@ -99,7 +123,7 @@ function Membres() {
   if (!tenant?.users?.length) {
     return (
       <GxSection titre="Membres de l'espace">
-        <p className="flex items-center gap-2 text-sm text-paper-3">
+        <p className="flex items-center gap-2 text-sm text-[#A5A7AD]">
           <Users className="size-4" aria-hidden="true" />
           Personne d'autre ici pour l'instant. Invitez quelqu'un ci-dessous.
         </p>
@@ -108,17 +132,17 @@ function Membres() {
   }
 
   return (
-    <GxSection titre="Membres de l'espace" aide={`${tenant.users.length} personne(s) dans cet espace.`}>
-      <ul className="divide-y divide-line">
+    <GxSection titre="Membres du Creative Studio" aide={`${tenant.users.length} personne(s) avec accès à l'espace.`}>
+      <ul className="divide-y divide-[#292D35]">
         {tenant.users.map((member) => (
           <li key={member.id} className="flex items-center justify-between gap-3 py-3 first:pt-0">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-pill border border-line-hi bg-ink-3 font-mono text-xs font-bold">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#292D35] bg-[#171A20] font-mono text-xs font-bold text-[#F5F5F5]">
                 {nom(member).slice(0, 2).toUpperCase()}
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{nom(member)}</p>
-                <p className="t-label mt-1 text-paper-3">{member.role}</p>
+                <p className="truncate text-sm font-semibold text-[#F5F5F5]">{nom(member)}</p>
+                <p className="t-label mt-0.5 text-[#A5A7AD]">{member.role}</p>
               </div>
             </div>
             {peutGerer && member.id !== currentUser?.id && (
@@ -151,7 +175,7 @@ function Inviter() {
 
   return (
     <GxSection
-      titre="Inviter quelqu'un"
+      titre="Inviter un collaborateur"
       aide={
         peutInviter
           ? "La personne reçoit un accès à cet espace et à ses crédits."
@@ -160,7 +184,7 @@ function Inviter() {
     >
       <form action={inviteAction} className="space-y-5">
         <GxField
-          label="E-mail"
+          label="E-mail du collaborateur"
           htmlFor="email"
           hint="L'adresse reçoit l'invitation à rejoindre l'espace."
           error={inviteState?.error}
@@ -169,7 +193,7 @@ function Inviter() {
           <GxInput
             name="email"
             type="email"
-            placeholder="membre@exemple.fr"
+            placeholder="collab@gentube.ai"
             autoComplete="email"
             required
             disabled={!peutInviter}
@@ -177,20 +201,20 @@ function Inviter() {
         </GxField>
 
         <GxRadio
-          legend="Rôle"
+          legend="Rôle d'accès"
           name="role"
           defaultValue="member"
           disabled={!peutInviter}
           options={[
-            { value: 'member', label: 'Membre' },
-            { value: 'admin', label: 'Admin' },
+            { value: 'member', label: 'Membre (Monteur)' },
+            { value: 'admin', label: 'Admin (Gestionnaire)' },
             { value: 'owner', label: 'Propriétaire' },
           ]}
         />
 
         {inviteState?.success && <GxNotice tone="ok">{inviteState.success}</GxNotice>}
 
-        <GxButton type="submit" disabled={isInvitePending || !peutInviter}>
+        <GxButton type="submit" variant="primary" disabled={isInvitePending || !peutInviter}>
           {isInvitePending ? (
             <>
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -212,11 +236,11 @@ export default function EspacePage() {
   return (
     <GxPage>
       <GxPageHeader
-        eyebrow="Espace"
-        titre="Espace de travail"
-        intro="Ce que votre espace peut dépenser, et qui y a accès."
+        eyebrow="Creative Studio"
+        titre="Espace de travail GenTube"
+        intro="Gère tes projets vidéo IA, le solde de crédits et l'accès de ton équipe."
         action={
-          <GxButton href="/dashboard/projects/new" size="sm">
+          <GxButton href="/dashboard/projects/new" variant="primary" size="sm" glow>
             <PlusCircle className="size-4" aria-hidden="true" />
             Nouveau projet
           </GxButton>
@@ -224,6 +248,7 @@ export default function EspacePage() {
       />
 
       <div className="space-y-6">
+        <ActionsRapides />
         <Suspense fallback={<Squelette hauteur="h-40" />}>
           <OffreEtCredits />
         </Suspense>

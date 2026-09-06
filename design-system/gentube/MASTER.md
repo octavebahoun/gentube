@@ -1,214 +1,73 @@
-# Design System Master File
+# GenTube — Design System Master File
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
-
----
-
-**Project:** GenTube
-**Generated:** 2026-09-06 01:31:36
-**Category:** AI Photo & Avatar Generator
+## Artistic Direction
+- **Universe**: AI × Cinema × Motion × Creative Studio
+- **Style**: Cinematic, premium, dark, immersive, technological (not cyberpunk)
+- **Concept**: Professional video editing software aesthetic, avoiding generic violet/white SaaS templates.
+- **Inspirations**: Cinema studios, motion design tools, professional video editing software (Premiere Pro, DaVinci Resolve, After Effects).
 
 ---
 
-## Global Rules
+## Palette & Color Tokens
 
-### Color Palette
+| Role | Hex Code | CSS Variable | Description / Usage |
+|------|----------|--------------|---------------------|
+| Main Background | `#050608` | `--color-bg-primary` | Deep obsidian canvas |
+| Secondary Background | `#0B0D10` | `--color-bg-secondary` | Dark panel background & sidebar |
+| Surface | `#111419` | `--color-surface` | Cards, panels, timeline tracks |
+| Surface Elevated | `#171A20` | `--color-surface-elevated` | Floating dialogs, tooltips, modals |
+| Border | `#292D35` | `--color-border-subtle` | Fine subtle dividers |
+| Primary Text | `#F5F5F5` | `--color-text-primary` | High-contrast headers & body |
+| Secondary Text | `#A5A7AD` | `--color-text-secondary` | Muted labels, metadata & timecodes |
+| Primary Action Accent | `#FF7A18` | `--color-accent-orange` | Primary buttons, playheads, key actions |
+| AI Accent | `#A855F7` | `--color-accent-purple` | AI generation buttons, AI tags, AI assistant |
+| Luminous Accent | `#FFB45C` | `--color-accent-light` | Hover glows, active highlights |
+| Success Status | `#35D07F` | `--color-status-success` | Render complete, active tracks, green indicators |
+| Error Status | `#FF4D5A` | `--color-status-error` | Validation errors, failed renders, alerts |
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#7C3AED` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#6366F1` | `--color-secondary` |
-| On Secondary | `#000000` | `--color-on-secondary` |
-| Accent/CTA | `#EC4899` | `--color-accent` |
-| On Accent/CTA | `#000000` | `--color-on-accent` |
-| Background | `#FAF5FF` | `--color-background` |
-| Foreground | `#0F172A` | `--color-foreground` |
-| Card | `#FFFFFF` | `--color-card` |
-| Card Foreground | `#0F172A` | `--color-card-foreground` |
-| Muted | `#F7F3FD` | `--color-muted` |
-| Muted Foreground | `#475569` | `--color-muted-foreground` |
-| Border | `#EFE7FC` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| On Destructive | `#FFFFFF` | `--color-on-destructive` |
-| Ring | `#7C3AED` | `--color-ring` |
-
-**Color Notes:** AI purple + generation pink
-
-### Typography
-
-- **Heading Font:** Inter
-- **Body Font:** Inter
-- **Mood:** dark, cinematic, technical, precision, clean, premium, developer, professional, high-end utility
-- **Google Fonts:** [Inter + Inter](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap)
-
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-```
-
-### Spacing Variables
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
-
-### Shadow Depths
-
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+### Color Rules
+- **Orange (`#FF7A18`)** is the primary action color across the UI.
+- **Purple (`#A855F7`)** is specifically reserved for AI features (Script generation, Voice generation, Scene AI, Prompt-to-video).
+- **Gradients**: Kept subtle and elegant, transitioning from Orange (`#FF7A18`) to Purple (`#A855F7`).
 
 ---
 
-## Component Specs
+## Typography
 
-### Buttons
+- **Font Family**: Modern font stack (`Inter`, `Geist`, `Manrope` / `Space Grotesk` display + `Space Mono` for timecodes/data).
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #EC4899;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #7C3AED;
-  border: 2px solid #7C3AED;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
-
-### Cards
-
-```css
-.card {
-  background: #FAF5FF;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
-
-### Inputs
-
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
-
-.input:focus {
-  border-color: #7C3AED;
-  outline: none;
-  box-shadow: 0 0 0 3px #7C3AED20;
-}
-```
-
-### Modals
-
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
+| Level | Size Range | Weight | Line Height | Usage |
+|-------|------------|--------|-------------|-------|
+| **Display** | 56–72px | 700–800 | 1.02 | Hero titles, major showcases |
+| **H1** | 48–64px | 700 | 1.05 | Page headers, main section titles |
+| **H2** | 36–48px | 700 | 1.10 | Card section titles, modal headers |
+| **H3** | 22–28px | 600 | 1.20 | Component headings, panel titles |
+| **Body** | 16–18px | 400–500 | 1.60 | Paragraphs, descriptions |
+| **Small / Label** | 12–14px | 500–700 | 1.50 | Monospace labels, timecodes, metadata |
 
 ---
 
-## Style Guidelines
+## Component System Specs
 
-**Style:** AI-Native UI
-
-**Keywords:** Chatbot, conversational, voice, assistant, agentic, ambient, minimal chrome, streaming text, AI interactions
-
-**Best For:** AI products, chatbots, voice assistants, copilots, AI-powered tools, conversational interfaces
-
-**Key Effects:** Typing indicators (3-dot pulse), streaming text animations, pulse animations, context cards, smooth reveals
-
-### Page Pattern
-
-**Pattern Name:** Hero + Testimonials + CTA
-
-- **Conversion Strategy:** Social proof before CTA. Use a concise set of verified testimonials with photo, name, and role. CTA after social proof. Provide previous/next and pause controls; stop rotation on focus, hover, and reduced motion; announce slide position. Previous/next buttons and keyboard controls must expose every slide without dragging.
-- **CTA Placement:** Hero (sticky) + Post-testimonials
-- **Section Order:** Hero > Problem statement > Solution overview > Testimonials carousel > CTA
+### General Style Rules
+- **Border Radius**: 10px – 16px (`rounded-xl` to `rounded-2xl`).
+- **Borders**: Fine 1px subtle borders (`#292D35`).
+- **Shadows**: Deep, low-visibility dark drop shadows (`0 20px 50px -15px rgba(0,0,0,0.8)`).
+- **Glows**: Subtle orange/purple glows on hover and active states (`box-shadow: 0 0 20px -5px rgba(255, 122, 24, 0.3)`).
+- **Glassmorphism**: Minimal and restrained, limited to floating Navbars and Studio Toolbars with dark backdrop blur.
+- **Transitions**: 150ms – 250ms smooth cubic-bezier easing.
 
 ---
 
-## Anti-Patterns (Do NOT Use)
+## Component Catalog
 
-- ❌ Inconsistent styling
-- ❌ Poor contrast ratios
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
-
----
-
-## Pre-Delivery Checklist
-
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+1. **Button**: Primary (Orange), AI (Purple), Secondary (Dark Surface), Ghost.
+2. **Badge**: Status indicators (Success, AI, Draft, Rendering).
+3. **Card / VideoCard / FeatureCard / PricingCard / MediaCard**: Dark surface cards with fine borders & subtle hover elevation.
+4. **Input & Select**: Studio-style inputs with `#171A20` fill, fine `#292D35` border, and orange/purple focus ring.
+5. **Modal / Tooltip**: High-contrast floating panels with backdrop blur.
+6. **Navbar**: Sleek, sticky dark header with logo, links, balance meter, and CTA.
+7. **Tabs & ProgressBar**: Studio-grade track switchers and rendering progress gauges.
+8. **Timeline**: Video, audio, and caption tracks with timecodes, playhead, and keyframe handles.
+9. **AIAction**: Specialized purple-accented triggers for AI prompt execution.
+10. **Toast**: Floating alert notifications for system feedback.

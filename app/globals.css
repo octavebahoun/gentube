@@ -1,191 +1,126 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════════════════
-   GenTube — « LA MIRE »
-   Le vocabulaire vient de la salle d'étalonnage : la mire SMPTE (six barres
-   de couleur), le timecode, la tête de lecture. Six barres = le système
-   entier, pas un accent unique posé sur du noir.
-
-   Deux ambiances : la régie (sombre, par défaut) et le jour (clair).
-   Les six barres NE bougent PAS d'une ambiance à l'autre — une mire est une
-   mire. Ce qui bascule, c'est le fond, l'encre, et les couleurs quand elles
-   servent de TEXTE (le jaune vif est illisible sur blanc).
+   GenTube — Design System & Visual Engine
+   Univers : AI × Cinema × Motion × Creative Studio
+   Style : Cinématique, premium, sombre, immersif, technologique.
    ═══════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ── LA MIRE : les six barres, identiques dans les deux ambiances ──── */
-  --color-jaune: #ffe14d;
-  --color-cyan: #46e5e0;
-  --color-vert: #7bee6b;
-  --color-magenta: #ff4fc3;
-  --color-rouge: #ff5a4d;
-  --color-bleu: #7c7cff;
+  /* Palette officielle GenTube */
+  --color-bg-primary: #050608;
+  --color-bg-secondary: #0B0D10;
+  --color-surface: #111419;
+  --color-surface-elevated: #171A20;
+  --color-border-subtle: #292D35;
 
-  /* ── Rôles qui basculent (définis plus bas, par ambiance) ──────────── */
-  --color-ink: var(--gx-ink);
-  --color-ink-2: var(--gx-ink-2);
-  --color-ink-3: var(--gx-ink-3);
-  --color-ink-4: var(--gx-ink-4);
-  --color-line: var(--gx-line);
-  --color-line-hi: var(--gx-line-hi);
-  --color-paper: var(--gx-paper);
-  --color-paper-2: var(--gx-paper-2);
-  --color-paper-3: var(--gx-paper-3);
+  --color-text-primary: #F5F5F5;
+  --color-text-secondary: #A5A7AD;
 
-  /* Les couleurs quand elles portent du TEXTE : elles s'assombrissent en
-     ambiance claire pour rester lisibles (4.5:1 minimum). */
-  --color-marque: var(--gx-marque);
-  --color-info: var(--gx-info);
-  --color-ok: var(--gx-ok);
-  --color-alerte: var(--gx-alerte);
-  --color-danger: var(--gx-danger);
-  --color-lien: var(--gx-lien);
+  --color-accent-orange: #FF7A18;
+  --color-accent-purple: #A855F7;
+  --color-accent-light: #FFB45C;
 
-  /* ── Rôles sémantiques ──────────────────────────────────────────────── */
-  --color-background: var(--gx-ink);
-  --color-foreground: var(--gx-paper);
-  --color-card: var(--gx-ink-2);
-  --color-card-foreground: var(--gx-paper);
-  --color-popover: var(--gx-ink-3);
-  --color-popover-foreground: var(--gx-paper);
-  --color-primary: #ffe14d;
-  --color-primary-foreground: #09080f;
-  --color-secondary: var(--gx-ink-3);
-  --color-secondary-foreground: var(--gx-paper);
-  --color-muted: var(--gx-ink-2);
-  --color-muted-foreground: var(--gx-paper-3);
-  --color-accent: #ff4fc3;
-  --color-accent-foreground: #09080f;
-  --color-destructive: var(--gx-danger);
-  --color-destructive-foreground: #ffffff;
-  --color-border: var(--gx-line);
-  --color-input: var(--gx-ink-3);
-  --color-ring: var(--gx-info);
-  --color-sidebar: var(--gx-sidebar);
-  --color-sidebar-foreground: var(--gx-paper);
-  --color-sidebar-border: var(--gx-line);
-  --color-chart-1: #ffe14d;
-  --color-chart-2: #46e5e0;
-  --color-chart-3: #ff4fc3;
-  --color-chart-4: #7bee6b;
-  --color-chart-5: #7c7cff;
+  --color-status-success: #35D07F;
+  --color-status-error: #FF4D5A;
 
-  /* ── Rayons : arrondis francs, actions en pilule ────────────────────── */
-  --radius: 0.875rem;
+  /* Alignment for standard Tailwind utility aliases */
+  --color-background: #050608;
+  --color-foreground: #F5F5F5;
+  --color-card: #111419;
+  --color-card-foreground: #F5F5F5;
+  --color-popover: #171A20;
+  --color-popover-foreground: #F5F5F5;
+  --color-primary: #FF7A18;
+  --color-primary-foreground: #050608;
+  --color-secondary: #A855F7;
+  --color-secondary-foreground: #FFFFFF;
+  --color-muted: #171A20;
+  --color-muted-foreground: #A5A7AD;
+  --color-accent: #A855F7;
+  --color-accent-foreground: #FFFFFF;
+  --color-destructive: #FF4D5A;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #292D35;
+  --color-input: #171A20;
+  --color-ring: #FF7A18;
+
+  --color-sidebar: #0B0D10;
+  --color-sidebar-foreground: #F5F5F5;
+  --color-sidebar-border: #292D35;
+
+  /* Custom Palette Roles for GenTube theme */
+  --color-ink: #050608;
+  --color-ink-2: #0B0D10;
+  --color-ink-3: #111419;
+  --color-ink-4: #171A20;
+  --color-line: #292D35;
+  --color-line-hi: #3D434F;
+  --color-paper: #F5F5F5;
+  --color-paper-2: #D1D3D8;
+  --color-paper-3: #A5A7AD;
+  --color-marque: #FF7A18;
+  --color-ai: #A855F7;
+  --color-info: #FFB45C;
+  --color-ok: #35D07F;
+  --color-danger: #FF4D5A;
+
+  /* Rayons : 10px à 16px */
   --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.25rem;
-  --radius-plate: 0.875rem;
+  --radius: 0.75rem;      /* 12px default */
+  --radius-md: 0.75rem;   /* 12px */
+  --radius-lg: 0.875rem;  /* 14px */
+  --radius-xl: 1rem;      /* 16px */
   --radius-pill: 999px;
 
-  /* ── Fontes : Space Grotesk descend de Space Mono. Même sang. ───────── */
-  --font-display: var(--font-grotesk), "Space Grotesk", ui-sans-serif, sans-serif;
-  --font-sans: var(--font-dm), "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-space-mono), "Space Mono", ui-monospace, monospace;
+  /* Typography */
+  --font-sans: var(--font-dm), "Inter", "Geist", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-grotesk), "Inter", "Geist", "Manrope", ui-sans-serif, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
 
-  /* ── Espace ─────────────────────────────────────────────────────────── */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
-  --space-3xl: 4.5rem;
+  /* Gradients & Glows */
+  --shadow-glow-orange: 0 0 25px -5px rgba(255, 122, 24, 0.35);
+  --shadow-glow-purple: 0 0 25px -5px rgba(168, 85, 247, 0.35);
+  --shadow-deep: 0 20px 50px -15px rgba(0, 0, 0, 0.8);
 
-  /* ── Charpente ──────────────────────────────────────────────────────── */
-  --header-h: 4rem;
-  --rail-h: 3rem;
-  --sidebar-w: 15.5rem;
-  --content-max: 84rem;
-  --z-header: 40;
-  --z-sidebar: 30;
-  --z-bottomnav: 40;
-  --z-pop: 50;
-
-  /* ── Mouvement ──────────────────────────────────────────────────────── */
-  --t-tap: 120ms;
-  --t-fast: 200ms;
-  --t-base: 340ms;
-  --t-slow: 620ms;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
-
-  --shadow-lift: var(--gx-shadow-lift);
-
-  /* La mire elle-même. */
-  --mire: linear-gradient(
-    90deg,
-    #ffe14d 0 16.66%,
-    #46e5e0 16.66% 33.33%,
-    #7bee6b 33.33% 50%,
-    #ff4fc3 50% 66.66%,
-    #ff5a4d 66.66% 83.33%,
-    #7c7cff 83.33% 100%
-  );
+  --gradient-orange-purple: linear-gradient(135deg, #FF7A18 0%, #A855F7 100%);
+  --gradient-subtle: linear-gradient(180deg, rgba(23, 26, 32, 0.6) 0%, rgba(11, 13, 16, 0.9) 100%);
 }
 
 @layer base {
-  /* ── LA RÉGIE (par défaut) ─────────────────────────────────────────── */
   :root {
-    --gx-ink: #09080f;
-    --gx-ink-2: #12101d;
-    --gx-ink-3: #1c1930;
-    --gx-ink-4: #272243;
-    --gx-sidebar: #0d0b16;
-    --gx-line: #2a2542;
-    --gx-line-hi: #453d6b;
-    --gx-paper: #f5f3ff;
-    --gx-paper-2: #cfc9ec;
-    --gx-paper-3: #9b93c2;
-    --gx-marque: #ffe14d;
-    --gx-info: #46e5e0;
-    --gx-ok: #7bee6b;
-    --gx-alerte: #ff4fc3;
-    --gx-danger: #ff7a6f;
-    --gx-lien: #9b9bff;
-    --gx-shadow-lift: 0 24px 60px -28px rgba(0, 0, 0, 0.95);
-    --gx-grain: 0.035;
+    --gx-ink: #050608;
+    --gx-ink-2: #0B0D10;
+    --gx-ink-3: #111419;
+    --gx-ink-4: #171A20;
+    --gx-sidebar: #0B0D10;
+    --gx-line: #292D35;
+    --gx-line-hi: #3D434F;
+    --gx-paper: #F5F5F5;
+    --gx-paper-2: #D1D3D8;
+    --gx-paper-3: #A5A7AD;
+    --gx-marque: #FF7A18;
+    --gx-ai: #A855F7;
+    --gx-info: #FFB45C;
+    --gx-ok: #35D07F;
+    --gx-danger: #FF4D5A;
     color-scheme: dark;
   }
 
-  /* ── LE JOUR ───────────────────────────────────────────────────────── */
-  .light {
-    --gx-ink: #f4f3f8;
-    --gx-ink-2: #ffffff;
-    --gx-ink-3: #eceaf4;
-    --gx-ink-4: #dedaec;
-    --gx-sidebar: #efedf6;
-    --gx-line: #ddd9ea;
-    --gx-line-hi: #b4aecd;
-    --gx-paper: #14111f;
-    --gx-paper-2: #3a3454;
-    --gx-paper-3: #625b7e;
-    /* Les mêmes teintes, assez foncées pour porter du texte sur clair. */
-    --gx-marque: #7d5a00;
-    --gx-info: #08706c;
-    --gx-ok: #2b7a1f;
-    --gx-alerte: #a8137c;
-    --gx-danger: #c22a1c;
-    --gx-lien: #3e3ec4;
-    --gx-shadow-lift: 0 20px 50px -26px rgba(20, 17, 31, 0.35);
-    --gx-grain: 0.02;
-    color-scheme: light;
-  }
-
   * {
-    border-color: var(--gx-line);
+    border-color: #292D35;
   }
 
   html {
     scroll-behavior: smooth;
-    background: var(--gx-ink);
+    background: #050608;
+    color: #F5F5F5;
     -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    background: var(--gx-ink);
-    color: var(--gx-paper);
+    background: #050608;
+    color: #F5F5F5;
     font-family: var(--font-sans);
     font-size: 16px;
     line-height: 1.6;
@@ -197,192 +132,108 @@
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.03em;
-    line-height: 1.04;
+    line-height: 1.1;
     text-wrap: balance;
   }
 
   ::selection {
-    background: #ffe14d;
-    color: #09080f;
+    background: #FF7A18;
+    color: #050608;
   }
 
   :focus-visible {
-    outline: 2px solid var(--gx-info);
-    outline-offset: 3px;
+    outline: 2px solid #FF7A18;
+    outline-offset: 2px;
     border-radius: 6px;
   }
 
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: var(--gx-ink); }
-  ::-webkit-scrollbar-thumb { background: var(--gx-ink-4); border-radius: 999px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--gx-line-hi); }
-}
-
-/* ═══════════════════ MOUVEMENT ═══════════════════ */
-@keyframes gt-rise {
-  from { opacity: 0; transform: translate3d(0, 22px, 0); }
-  to { opacity: 1; transform: none; }
-}
-@keyframes gt-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes gt-wipe {
-  from { clip-path: inset(0 100% 0 0); }
-  to { clip-path: inset(0 0 0 0); }
-}
-@keyframes gt-marquee {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-}
-@keyframes gt-scan {
-  0% { transform: translate3d(-100%, 0, 0); }
-  100% { transform: translate3d(200%, 0, 0); }
-}
-@keyframes gt-live {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.82); }
-}
-@keyframes gt-bar {
-  0% { transform: scaleY(0.25); }
-  100% { transform: scaleY(1); }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #050608; }
+  ::-webkit-scrollbar-thumb { background: #292D35; border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3D434F; }
 }
 
 @layer utilities {
-  /* ── La signature : la mire ──────────────────────────────────────── */
-  .mire { background-image: var(--mire); }
-  .mire-rail { background-image: var(--mire); height: 3px; }
-  .mire-live {
-    background-image: var(--mire);
-    background-size: 200% 100%;
-    animation: gt-marquee 2.4s linear infinite;
+  .bg-gradient-gt {
+    background-image: linear-gradient(135deg, #FF7A18 0%, #A855F7 100%);
   }
 
-  /* ── Typo ────────────────────────────────────────────────────────── */
+  .text-gradient-gt {
+    background-image: linear-gradient(135deg, #FF7A18 0%, #FFB45C 50%, #A855F7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 30px -5px rgba(255, 122, 24, 0.3);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 30px -5px rgba(168, 85, 247, 0.3);
+  }
+
+  .glow-orange-subtle {
+    box-shadow: 0 0 15px 0 rgba(255, 122, 24, 0.15);
+  }
+
+  .glow-purple-subtle {
+    box-shadow: 0 0 15px 0 rgba(168, 85, 247, 0.15);
+  }
+
   .t-display {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.045em;
-    line-height: 0.94;
-    font-size: clamp(2.6rem, 7.4vw, 5.6rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.02;
+    font-size: clamp(3rem, 6.5vw, 4.5rem); /* 56-72px */
   }
-  .t-h2 {
+
+  .t-h1 {
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.035em;
-    line-height: 1.04;
-    font-size: clamp(1.9rem, 4.2vw, 3rem);
+    line-height: 1.05;
+    font-size: clamp(2.5rem, 5vw, 3.75rem); /* 48-64px */
   }
-  .t-h3 {
+
+  .t-h2 {
     font-family: var(--font-display);
     font-weight: 700;
-    letter-spacing: -0.02em;
-    font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    font-size: clamp(2rem, 3.5vw, 3rem); /* 36-48px */
   }
+
+  .t-h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.375rem, 2vw, 1.75rem); /* 22-28px */
+  }
+
+  .t-body {
+    font-family: var(--font-sans);
+    font-size: 1.0625rem; /* 17px average (16-18px) */
+    line-height: 1.6;
+  }
+
+  .t-small {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem; /* 13px average (12-14px) */
+    line-height: 1.5;
+  }
+
   .t-label {
     font-family: var(--font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    line-height: 1;
-  }
-  .t-data {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
   }
 
-  /* ── Plaques ─────────────────────────────────────────────────────── */
-  .plate {
-    background: var(--gx-ink-2);
-    border: 1px solid var(--gx-line);
-    border-radius: var(--radius-plate);
+  .glass-studio {
+    background: rgba(17, 20, 25, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(41, 45, 53, 0.8);
   }
-  .plate-hi {
-    background: var(--gx-ink-3);
-    border: 1px solid var(--gx-line-hi);
-    border-radius: var(--radius-plate);
-  }
-  /* Le grain : une salle d'étalonnage n'est jamais parfaitement lisse. */
-  .grain::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: var(--gx-grain);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* ── Entrées animées ─────────────────────────────────────────────── */
-  .a-rise { animation: gt-rise var(--t-slow) var(--ease-out) both; }
-  .a-fade { animation: gt-fade var(--t-base) var(--ease-out) both; }
-  .a-wipe { animation: gt-wipe var(--t-slow) var(--ease-out) both; }
-  .a-live { animation: gt-live 1.4s ease-in-out infinite; }
-  .d-1 { animation-delay: 70ms; }
-  .d-2 { animation-delay: 150ms; }
-  .d-3 { animation-delay: 240ms; }
-  .d-4 { animation-delay: 340ms; }
-  .d-5 { animation-delay: 450ms; }
-
-  .reveal {
-    opacity: 0;
-    transform: translate3d(0, 26px, 0);
-    transition: opacity var(--t-slow) var(--ease-out),
-                transform var(--t-slow) var(--ease-out);
-  }
-  .reveal.seen { opacity: 1; transform: none; }
-
-  /* ── Bandeau défilant ────────────────────────────────────────────── */
-  .marquee {
-    display: flex;
-    width: max-content;
-    animation: gt-marquee var(--marquee-dur, 42s) linear infinite;
-  }
-  .marquee-hold:hover .marquee,
-  .marquee-hold:focus-within .marquee {
-    animation-play-state: paused;
-  }
-
-  /* La tête de lecture qui passe sur la bande : « ça travaille ». */
-  .scan { position: relative; overflow: hidden; }
-  .scan::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 35%;
-    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-cyan) 18%, transparent), transparent);
-    animation: gt-scan 1.8s var(--ease-out) infinite;
-  }
-
-  /* ── Charpente ───────────────────────────────────────────────────── */
-  .gutter {
-    padding-left: max(1.25rem, env(safe-area-inset-left));
-    padding-right: max(1.25rem, env(safe-area-inset-right));
-  }
-  @media (min-width: 768px) {
-    .gutter { padding-left: max(2rem, env(safe-area-inset-left)); padding-right: max(2rem, env(safe-area-inset-right)); }
-  }
-  @media (min-width: 1280px) {
-    .gutter { padding-left: max(3rem, env(safe-area-inset-left)); padding-right: max(3rem, env(safe-area-inset-right)); }
-  }
-  .bottom-safe { padding-bottom: max(6rem, calc(env(safe-area-inset-bottom) + 5rem)); }
-  @media (min-width: 1024px) {
-    .bottom-safe { padding-bottom: 3rem; }
-  }
-  .no-bar::-webkit-scrollbar { display: none; }
-  .no-bar { scrollbar-width: none; }
-}
-
-/* Le silence est une option d'accessibilité, pas une dégradation :
-   tout le contenu reste lisible, seul le mouvement disparaît. */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  .reveal { opacity: 1 !important; transform: none !important; }
-  .scan::before { display: none; }
 }
