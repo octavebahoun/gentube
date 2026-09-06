@@ -1,109 +1,80 @@
-import type { Resolution } from '@/lib/db/schema';
-import { PROVIDER_COST_USD_PER_SECOND } from '@/lib/credits/pricing';
+import type { Quality } from '@/lib/db/schema';
+import {
+  MAX_SHOT_SECONDS,
+  PROVIDER_COST_USD_PER_SECOND,
+} from '@/lib/credits/pricing';
 
 /**
  * Quel modèle anime quel plan, et dans quelles bornes.
  *
- * Deux modèles en service, choisis par la résolution — le raisonnement est
- * dans `docs/providers.md`. Wan est deux fois moins cher en 480p, la
- * résolution par défaut où passera l'essentiel du volume ; en 720p l'avantage
- * s'inverse.
+ * **Un seul modèle en v1 : `prunaai/p-video`, en 1080p.** Ce qui distingue les
+ * deux paliers vendus n'est pas la résolution mais son booléen `draft`, quatre
+ * fois moins cher (docs/tarifs.md).
  *
- * Le troisième modèle du document, `prunaai/p-video-avatar`, n'est pas ici :
- * rien dans le schéma ne distingue encore un plan avatar d'un plan animé
- * ordinaire. Le jour où cette distinction existera en base, elle entrera dans
- * `modelFor` — pas avant, une route que personne ne peut demander est une
- * route qu'on ne peut pas tester.
+ * `wan-video/wan-2.2-i2v-fast` est sorti de la v1. Il facturait au clip, avec
+ * un plancher de 81 images — 5,06 s — qui obligeait le storyboard à refuser
+ * toute scène plus courte, et faisait payer 5 s une scène de 3. p-video
+ * facture à la seconde réelle : ce plancher disparaît, et avec lui l'écart
+ * entre ce qu'on facture au client et ce qu'on paie au fournisseur.
+ *
+ * `prunaai/p-video-avatar` n'est pas ici non plus : rien dans le schéma ne
+ * distingue encore un plan avatar d'un plan animé ordinaire. Une route que
+ * personne ne peut demander est une route qu'on ne peut pas tester.
  */
 
 export const MODELS = {
-  wan: 'wan-video/wan-2.2-i2v-fast',
   pVideo: 'prunaai/p-video',
 } as const;
 
 export type VideoModel = (typeof MODELS)[keyof typeof MODELS];
 
+/** La résolution de rendu, constante en v1 : les deux paliers sont en 1080p. */
+export const P_VIDEO_RESOLUTION = '1080p' as const;
+
 /**
- * Wan génère toutes ses images en un seul bloc, et ce bloc va de **81 à 121
- * images** — le schéma du modèle le borne ainsi, ce n'est pas un réglage de
- * prix. À 16 images par seconde, cela fait un clip de 5,06 s à 7,56 s.
- *
- * Les deux bornes sont dures. En dessous, le modèle refuse ; c'est ce plancher
- * qui justifie qu'une scène animée ne descende pas sous 5 s de narration. Au
- * dessus, il faudrait enchaîner deux clips — et le second aurait lui aussi son
- * plancher de 5 s, donc 12,6 s générées pour 9 s d'audio. Une narration plus
- * longue se découpe en deux scènes ; c'est la grammaire du storyboard.
+ * Plafond du modèle : `duration` est un entier de 1 à 10 secondes. Une scène
+ * plus longue se découpe et s'enchaîne au montage.
  */
-export const WAN_FPS = 16;
-export const WAN_MIN_FRAMES = 81;
-export const WAN_MAX_FRAMES = 121;
-export const WAN_MIN_SECONDS = WAN_MIN_FRAMES / WAN_FPS;
-export const WAN_MAX_SECONDS = WAN_MAX_FRAMES / WAN_FPS;
+export const P_VIDEO_MAX_SECONDS = MAX_SHOT_SECONDS;
 
-/** Plafond de p-video, imposé par le modèle. */
-export const P_VIDEO_MAX_SECONDS = 10;
+/** Aucun plancher : p-video accepte la seconde la plus petite. */
+export const P_VIDEO_MIN_SECONDS = 1;
 
-export function modelFor(resolution: Resolution): VideoModel {
-  return resolution === '720p' ? MODELS.pVideo : MODELS.wan;
+export function modelFor(): VideoModel {
+  return MODELS.pVideo;
 }
 
 /**
- * La scène animée la plus longue que cette résolution sait rendre d'un trait.
+ * La scène animée la plus longue que le modèle sait rendre d'un trait.
  *
  * C'est le plafond que le storyboard doit respecter. Le dépasser obligerait à
  * ralentir le clip pour couvrir la voix off, et un ralenti se voit.
  */
-export function maxClipSeconds(resolution: Resolution): number {
-  return modelFor(resolution) === MODELS.wan
-    ? WAN_MAX_SECONDS
-    : P_VIDEO_MAX_SECONDS;
+export function maxClipSeconds(): number {
+  return P_VIDEO_MAX_SECONDS;
 }
 
 /**
  * La scène animée la plus courte qui ne gaspille rien.
  *
- * Le miroir de `maxClipSeconds`, et il manquait. Le plafond était tenu — le
- * storyboard refuse une scène plus longue qu'un clip — mais rien ne tenait le
- * plancher : Wan ne descend pas sous 81 images, donc une scène animée de 3 s
- * reçoit un clip de 5,06 s dont la composition ne montre que les trois
- * premières secondes. Deux secondes de mouvement générées, payées, jetées.
- *
- * p-video n'a pas de plancher : sa durée part en entier de secondes, et il
- * accepte la plus petite. Une seconde est donc la borne, c'est-à-dire aucune.
+ * Elle vaut une seconde, c'est-à-dire aucune contrainte. Elle reste une
+ * fonction plutôt qu'une constante parce que le jour où un modèle à plancher
+ * revient — Wan en facturait 5,06 — c'est ici que ça se rebranche, et le
+ * storyboard n'a pas à le savoir.
  */
-export function minClipSeconds(resolution: Resolution): number {
-  return modelFor(resolution) === MODELS.wan ? WAN_MIN_SECONDS : 1;
-}
-
-/**
- * Le nombre d'images à demander à Wan pour couvrir cette narration.
- *
- * Sans ce calcul, Wan applique ses 81 images d'usine et rend 5,06 s quelle que
- * soit la scène : une voix off de 7 s jouerait deux secondes sur une image
- * arrêtée.
- */
-export function wanFrames(durationS: number): number {
-  const wanted = Math.round(durationS * WAN_FPS);
-  return Math.min(WAN_MAX_FRAMES, Math.max(WAN_MIN_FRAMES, wanted));
+export function minClipSeconds(): number {
+  return P_VIDEO_MIN_SECONDS;
 }
 
 /**
  * Les secondes réellement facturées, arrondies comme le fournisseur arrondit.
  *
- * Wan facture **à la durée du clip rendu**, ramenée à 16 fps — c'est écrit
- * dans son schéma. Comme il ne descend pas sous 81 images, une scène de 3 s se
- * paie 5,06 s : c'est là, et seulement là, que la marge se perd.
- *
  * p-video prend `duration` en entier : une narration de 6,2 s part à 7, et la
- * seconde entamée est due.
+ * seconde entamée est due. C'est le même arrondi que celui du prix en crédits
+ * — `creditsForShot` arrondit aussi au-dessus — pour qu'ils ne divergent
+ * jamais.
  */
-export function billedSeconds(
-  resolution: Resolution,
-  durationS: number
-): number {
-  if (modelFor(resolution) === MODELS.wan) {
-    return wanFrames(durationS) / WAN_FPS;
-  }
+export function billedSeconds(durationS: number): number {
   return Math.ceil(durationS);
 }
 
@@ -113,9 +84,6 @@ export function billedSeconds(
  * Les taux viennent de `lib/credits/pricing.ts`, qui reste la source unique.
  * Ce qui est propre à ce fichier, c'est la *forme* de la facturation.
  */
-export function clipCostUsd(resolution: Resolution, durationS: number): number {
-  return (
-    billedSeconds(resolution, durationS) *
-    PROVIDER_COST_USD_PER_SECOND.video[resolution]
-  );
+export function clipCostUsd(quality: Quality, durationS: number): number {
+  return billedSeconds(durationS) * PROVIDER_COST_USD_PER_SECOND[quality];
 }

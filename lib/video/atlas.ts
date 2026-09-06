@@ -111,13 +111,19 @@ export function atlasDuration(durationS: number): number {
  */
 function corpsDe(
   model: string,
-  { imageUrl, prompt, durationS, resolution, seed, webhookUrl }: AnimationRequest
+  { imageUrl, prompt, durationS, seed, webhookUrl }: AnimationRequest
 ): Record<string, unknown> {
   return {
     model,
     image: imageUrl,
     prompt,
-    resolution,
+    /*
+     * Atlas attend une resolution, pas un palier. Il est hors v1 — la grille
+     * du 5 septembre 2026 ne vend que p-video — donc les deux paliers partent
+     * en 1080p ici. Le jour ou Atlas revient, c'est cette ligne qui doit
+     * traduire `quality` dans les termes du modele choisi.
+     */
+    resolution: '1080p',
     duration: atlasDuration(durationS),
     ...(seed === undefined ? {} : { seed }),
     webhook_url: webhookUrl,

@@ -8,7 +8,7 @@ import {
   tenants,
   videos,
   type Plan,
-  type Resolution,
+  type Quality,
 } from '@/lib/db/schema';
 
 export async function resetDb() {
@@ -64,14 +64,14 @@ export async function createProjectWithVideo(
   tdb: TenantDb,
   {
     title = 'Test video',
-    resolution = '480p',
-  }: { title?: string; resolution?: Resolution } = {}
+    quality = 'draft',
+  }: { title?: string; quality?: Quality } = {}
 ) {
   const [project] = await tdb.insert(projects, { name: `${title} project` });
   const [video] = await tdb.insert(videos, {
     projectId: project.id,
     title,
-    resolution,
+    quality,
   });
   return { project, video };
 }

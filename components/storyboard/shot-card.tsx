@@ -45,7 +45,7 @@ function DurationBadge({ shot }: { shot: Shot }) {
 
 /** Coût de la scène, calculé sur la source unique de vérité des prix. */
 function ShotCredits({ shot, video }: { shot: Shot; video: Video }) {
-  const credits = creditsForShot(shot.durationS, shot.type, video.resolution);
+  const credits = creditsForShot(shot.durationS, shot.type, video.quality);
   return (
     <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium tabular-nums text-secondary-foreground">
       {frenchCredits(credits)} cr
@@ -151,12 +151,12 @@ function AssetPicker({
           name="assetId"
           defaultValue={shot.sourceAssetId ? String(shot.sourceAssetId) : ''}
           disabled={disabled}
-          className="h-9 min-w-0 flex-1 rounded-md border bg-transparent px-2 text-sm"
+          className="h-11 min-h-11 min-w-0 flex-1 cursor-pointer rounded-md border border-input bg-transparent px-3 text-sm transition-colors duration-(--motion-fast) outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option value="">Aucun — générer le visuel</option>
           {assets.map((asset) => (
             <option key={asset.id} value={asset.id}>
-              {asset.kind === 'video' ? '🎬' : '🖼'}{' '}
+              {asset.kind === 'video' ? '[Vidéo] ' : '[Image] '}
               {asset.originalName ?? `Fichier ${asset.id}`}
               {asset.durationS ? ` · ${asset.durationS.toFixed(1)} s` : ''}
             </option>

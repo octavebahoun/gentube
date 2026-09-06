@@ -21,7 +21,16 @@ import { relations } from 'drizzle-orm';
 export const planEnum = pgEnum('plan', ['starter', 'pro', 'business']);
 export const userRoleEnum = pgEnum('user_role', ['owner', 'admin', 'member']);
 export const pipelineEnum = pgEnum('pipeline', ['image', 'video', 'mixed']);
-export const resolutionEnum = pgEnum('resolution', ['480p', '720p']);
+/**
+ * Le palier de qualite d'une video. Les deux rendent en 1080p : ce qui les
+ * separe est le mode `draft` de `prunaai/p-video`, pas une resolution.
+ *
+ * Nomme comme le parametre du modele, pour que la correspondance soit
+ * evidente en lisant le code. Les noms montres au client — « Full HD » et
+ * « Cinema » — vivent dans lib/credits/pricing.ts et nulle part ailleurs :
+ * le mot « draft » ne doit jamais atteindre une interface.
+ */
+export const qualityEnum = pgEnum('quality', ['draft', 'standard']);
 
 // `failed` n'est pas dans le cahier des charges mais tous les autres états
 // sont non terminaux en cas d'erreur : sans lui, un crash de pipeline
@@ -300,9 +309,10 @@ export const videos = pgTable(
     registre: text('registre').notNull().default('explainer'),
     source: videoSourceEnum('source').notNull().default('generated'),
     pipelineOverride: pipelineEnum('pipeline_override'),
-    // Détermine la tarification en crédits : 1 crédit/s en 480p,
-    // 3 crédits/s en 720p (docs/tarifs.md).
-    resolution: resolutionEnum('resolution').notNull().default('480p'),
+    // Determine la tarification en credits : 2 cr/s en draft, 7 cr/s en
+    // standard (docs/tarifs.md). Le draft par defaut — c'est le palier de
+    // l'essai, et celui que le client choisit s'il ne choisit rien.
+    quality: qualityEnum('quality').notNull().default('draft'),
     // --- Réglages de rendu, sérialisés dans le storyboard Hyperframes -----
     ratio: ratioEnum('ratio').notNull().default('16:9'),
     /** Nom de la voix ou id du fournisseur. Null hérite de la voix du projet. */
@@ -1110,7 +1120,7 @@ export type PaymentWebhookEvent = typeof paymentWebhookEvents.$inferSelect;
 export type NewPaymentWebhookEvent = typeof paymentWebhookEvents.$inferInsert;
 
 export type Plan = (typeof planEnum.enumValues)[number];
-export type Resolution = (typeof resolutionEnum.enumValues)[number];
+export type Quality = (typeof qualityEnum.enumValues)[number];
 export type Pipeline = (typeof pipelineEnum.enumValues)[number];
 export type VideoStatus = (typeof videoStatusEnum.enumValues)[number];
 export type ShotType = (typeof shotTypeEnum.enumValues)[number];

@@ -47,14 +47,14 @@ const SOUS_TITRES: Record<string, { label: string; aide: string }> = {
 
 export function VideoSettings({
   videoId,
-  resolution,
+  quality,
   ratio,
   subtitleStyle,
   musicUrl,
   musics,
 }: {
   videoId: number;
-  resolution: string;
+  quality: string;
   ratio: string;
   subtitleStyle: string;
   musicUrl: string | null;
@@ -72,18 +72,19 @@ export function VideoSettings({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="resolution">Résolution</Label>
+          <Label htmlFor="quality">Qualité</Label>
           <select
-            id="resolution"
-            name="resolution"
-            defaultValue={resolution}
+            id="quality"
+            name="quality"
+            defaultValue={quality}
             className={CHAMP}
           >
-            <option value="480p">480p — 1 crédit la seconde</option>
-            <option value="720p">720p — 3 crédits la seconde</option>
+            <option value="draft">Full HD — 2 crédits la seconde</option>
+            <option value="standard">Cinéma — 7 crédits la seconde</option>
           </select>
           <p className="text-xs text-muted-foreground">
-            Le 720p coûte trois fois plus. C’est l’argent du client, il choisit.
+            Les deux sont en 1080p. Le Cinéma coûte trois fois et demie plus
+            cher&nbsp;: c’est l’argent du client, il choisit.
           </p>
         </div>
 

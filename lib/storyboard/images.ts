@@ -167,7 +167,6 @@ export async function generateImages(
     const image = await generator.generate({
       prompt: visualPrompt(shot.prompt, project.stylePrompt, video.registre),
       ratio: video.ratio,
-      resolution: video.resolution,
     });
 
     // Plan de nommage : docs/contrats.md §3 —

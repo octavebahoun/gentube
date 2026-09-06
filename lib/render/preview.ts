@@ -63,7 +63,7 @@ function previewShots(): Shot[] {
 const video = {
   title: 'Les Amazones du Dahomey',
   ratio: '16:9',
-  resolution: '480p',
+  quality: 'draft',
   voice: null,
   subtitles: true,
   subtitleStyle: 'karaoke',

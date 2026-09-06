@@ -26,7 +26,7 @@ const THEME =
   process.env.THEME ??
   "GenTube, la plateforme qui transforme un texte en video pour les createurs d'Afrique de l'Ouest";
 const RATIO = '16:9' as const;
-const RESOLUTION = '720p' as const;
+const QUALITY = 'standard' as const;
 
 rmSync(DIR, { recursive: true, force: true });
 mkdirSync(join(DIR, 'media'), { recursive: true });
@@ -64,7 +64,6 @@ async function main() {
       const image = await images.generate({
         prompt: scene.prompt,
         ratio: RATIO,
-        resolution: RESOLUTION,
       });
       const nom = `s${n}.${image.contentType.includes('png') ? 'png' : 'jpg'}`;
       writeFileSync(join(DIR, 'media', nom), image.bytes);
@@ -92,7 +91,7 @@ async function main() {
   const video = {
     title: 'GenTube',
     ratio: RATIO,
-    resolution: RESOLUTION,
+    quality: QUALITY,
     voice: null,
     subtitles: true,
     subtitleStyle: 'karaoke',

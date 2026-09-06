@@ -12,7 +12,7 @@ const PLAN: AnimationRequest = {
   imageUrl: 'https://cdn.example.com/plan-1.png',
   prompt: 'un lent travelling avant',
   durationS: 6.2,
-  resolution: '480p',
+  quality: 'draft',
   ratio: '16:9',
   webhookUrl: 'https://gentube.example.com/api/webhooks/atlas',
 };
@@ -58,7 +58,9 @@ describe('la soumission', () => {
       model: 'atlascloud/wan-2.2/image-to-video',
       image: PLAN.imageUrl,
       prompt: PLAN.prompt,
-      resolution: '480p',
+      // Atlas attend une resolution, pas un palier. Il est hors v1 : les deux
+      // paliers y partent en 1080p (lib/video/atlas.ts).
+      resolution: '1080p',
       duration: 7,
       webhook_url: PLAN.webhookUrl,
     });

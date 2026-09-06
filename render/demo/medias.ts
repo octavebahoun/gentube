@@ -107,12 +107,9 @@ export async function voiceFor(nom: string, narration: string): Promise<Mesure> 
 export async function imageFor(
   nom: string,
   prompt: string,
-  {
-    style,
-    ratio,
-    resolution,
-    seed,
-  }: { style?: string; ratio: string; resolution: string; seed: number }
+  // Plus de palier ici : depuis la grille v1 une image fixe se rend a une
+  // seule taille, celle de la trame livree.
+  { style, ratio, seed }: { style?: string; ratio: string; seed: number }
 ): Promise<string> {
   const file = join(MEDIA_DIR, `${nom}.jpg`);
   if (existsSync(file)) return file;
@@ -121,7 +118,6 @@ export async function imageFor(
     createImageClient().generate({
       prompt: style ? `${prompt}, ${style}` : prompt,
       ratio,
-      resolution,
       seed,
     } as Parameters<ReturnType<typeof createImageClient>['generate']>[0])
   );

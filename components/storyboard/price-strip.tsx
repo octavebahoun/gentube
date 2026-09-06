@@ -13,13 +13,13 @@ export function PriceStrip({
   durationsMeasured,
   spokenSeconds,
   sceneCount,
-  resolution,
+  quality,
 }: {
   credits: number;
   durationsMeasured: boolean;
   spokenSeconds: number;
   sceneCount: number;
-  resolution: string;
+  quality: string;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
@@ -42,7 +42,7 @@ export function PriceStrip({
       </p>
       <p className="w-full text-xs tabular-nums text-muted-foreground sm:w-auto">
         {seconds(Math.round(spokenSeconds * 10) / 10)} de narration · {sceneCount} scène
-        {sceneCount === 1 ? '' : 's'} · {resolution}
+        {sceneCount === 1 ? '' : 's'} · {quality}
       </p>
     </div>
   );

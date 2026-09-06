@@ -7,7 +7,7 @@ import { tenantDb } from '@/lib/db/tenant-db';
 import { getBillingOverview } from '@/lib/billing/checkout';
 import { createPaymentGateway, isBillingConfigured } from '@/lib/payments';
 import { reveillerLeTenant } from '@/lib/billing/reveil';
-import { secondsAffordable } from '@/lib/credits/pricing';
+import { imagesAffordable, secondsAffordable } from '@/lib/credits/pricing';
 import type { PaymentStatus } from '@/lib/db/schema';
 import { CheckoutButton } from './billing-actions';
 
@@ -105,7 +105,7 @@ export default async function BillingPage({
   const expireAt = tenant?.planCreditsExpireAt ?? null;
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
+    <section className="shell-gutter mx-auto w-full max-w-(--content-max) flex-1 px-4 py-6 lg:px-8 lg:py-8">
       <div className="mb-2">
         <p className="text-xs font-medium tracking-widest text-brand-accent uppercase">Facturation</p>
         <h1 className="text-2xl font-semibold tracking-tight">Crédits et facturation</h1>
@@ -162,7 +162,7 @@ export default async function BillingPage({
               personne ne perde de valeur qu&apos;il aurait pu consommer.
             </p>
             <p className="mt-2 text-xs tabular-nums text-muted-foreground">
-              ≈ {minutes(secondsAffordable(creditsPlan, 'video', '480p'))} animées à 480p
+              ≈ {minutes(secondsAffordable(creditsPlan, 'draft'))} en Full HD
             </p>
           </CardContent>
         </Card>
@@ -189,7 +189,7 @@ export default async function BillingPage({
               <span className="font-medium text-foreground"> Débités après le quota.</span>
             </p>
             <p className="mt-2 text-xs tabular-nums text-muted-foreground">
-              ≈ {minutes(secondsAffordable(creditsTopup, 'video', '480p'))} animées à 480p
+              ≈ {minutes(secondsAffordable(creditsTopup, 'draft'))} en Full HD
             </p>
           </CardContent>
         </Card>
@@ -214,7 +214,7 @@ export default async function BillingPage({
             <div className="text-right">
               <p className="text-2xl font-semibold tabular-nums">{credits(overview.creditsBalance)}</p>
               <p className="text-sm text-muted-foreground">
-                crédits · ≈ {minutes(secondsAffordable(overview.creditsBalance, 'video', '480p'))} animées à 480p
+                crédits · ≈ {minutes(secondsAffordable(overview.creditsBalance, 'draft'))} en Full HD
               </p>
             </div>
           </div>
@@ -246,8 +246,8 @@ export default async function BillingPage({
                       <span className="text-sm text-muted-foreground"> / mois</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {credits(offer.monthlyCredits)} crédits ≈ {minutes(secondsAffordable(offer.monthlyCredits, 'video', '480p'))} animées, ou{' '}
-                      {minutes(secondsAffordable(offer.monthlyCredits, 'image', '480p'))} en images fixes
+                      {credits(offer.monthlyCredits)} crédits ≈ {minutes(secondsAffordable(offer.monthlyCredits, 'draft'))} en Full HD, ou{' '}
+                      {imagesAffordable(offer.monthlyCredits)} images fixes
                     </p>
                   </div>
                   {current ? (

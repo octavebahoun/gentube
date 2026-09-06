@@ -1,4 +1,4 @@
-import type { Ratio, Resolution } from '@/lib/db/schema';
+import type { Quality, Ratio } from '@/lib/db/schema';
 import {
   AnimationError,
   AnimationNotConfiguredError,
@@ -9,13 +9,11 @@ import {
   type VideoAnimator,
 } from './contract';
 import {
-  MODELS,
-  WAN_FPS,
+  P_VIDEO_RESOLUTION,
   billedSeconds,
   clipCostUsd,
   maxClipSeconds,
   modelFor,
-  wanFrames,
 } from './provider';
 
 /**
@@ -61,41 +59,31 @@ export function isAnimationConfigured(): boolean {
  * connaît. C'est le seul endroit à rouvrir quand un modèle change de signature
  * ou quand un troisième entre en service.
  */
-function inputFor(
-  model: string,
-  { imageUrl, prompt, durationS, resolution, ratio, seed }: AnimationRequest
-): Record<string, unknown> {
-  const common = {
+function inputFor({
+  imageUrl,
+  prompt,
+  durationS,
+  quality,
+  ratio,
+  seed,
+}: AnimationRequest): Record<string, unknown> {
+  return {
     image: imageUrl,
     prompt,
-    resolution,
+    // Constante en v1 : les deux paliers vendus rendent en 1080p.
+    resolution: P_VIDEO_RESOLUTION,
     ...(seed === undefined ? {} : { seed }),
-  };
-
-  if (model === MODELS.pVideo) {
-    return {
-      ...common,
-      // Entier obligatoire côté modèle : `billedSeconds` fait l'arrondi, et
-      // c'est le même que celui du prix, pour qu'ils ne divergent jamais.
-      duration: billedSeconds(resolution, durationS),
-      aspect_ratio: ratio,
-      // Le mode brouillon est à 0,005 $/s. Le prix étant fixé avant la
-      // génération, un client ne peut pas se voir livrer un brouillon.
-      draft: false,
-    };
-  }
-
-  // Wan n'a pas de paramètre de cadrage : il suit l'image d'entrée. Sa durée,
-  // elle, se demande en images — sans quoi il rend ses 5,06 s d'usine et la
-  // voix off finit sur une image arrêtée.
-  return {
-    ...common,
-    num_frames: wanFrames(durationS),
-    frames_per_second: WAN_FPS,
-    // Wan rend en 16 fps quand le reste du montage tourne à 24 : la saccade se
-    // voit. L'interpolation ffmpeg monte la sortie à 30 fps sans toucher ni à
-    // la durée ni au prix, qui se comptent tous deux à 16 fps.
-    interpolate_output: true,
+    // Entier obligatoire côté modèle : `billedSeconds` fait l'arrondi, et
+    // c'est le même que celui du prix, pour qu'ils ne divergent jamais.
+    duration: billedSeconds(durationS),
+    aspect_ratio: ratio,
+    /*
+     * Le palier vendu, et non un réglage technique : `draft` coûte 0,01 $/s
+     * contre 0,04 $/s, et c'est cet écart de quatre qu'on répercute — 2 vs 7
+     * crédits la seconde. Le client a payé l'un ou l'autre avant qu'on
+     * génère, donc ce booléen ne peut pas se décider ici.
+     */
+    draft: quality === 'draft',
   };
 }
 
@@ -109,28 +97,27 @@ export class ReplicateAnimator implements VideoAnimator {
   constructor(private readonly config: ReplicateConfig = replicateConfig()) {}
 
   async submit(request: AnimationRequest): Promise<SubmittedAnimation> {
-    const { durationS, resolution } = request;
+    const { durationS, quality } = request;
 
     if (durationS <= 0) {
       throw new AnimationError('A clip needs a measured duration.', 400);
     }
-    // Le plafond dépend du modèle : 7,56 s pour Wan, 10 s pour p-video. Une
-    // scène plus longue se découpe en deux — la ralentir pour couvrir la voix
-    // se verrait à l'écran.
-    const ceiling = maxClipSeconds(resolution);
+    // 10 s, le plafond du modèle. Une scène plus longue se découpe en deux —
+    // la ralentir pour couvrir la voix se verrait à l'écran.
+    const ceiling = maxClipSeconds();
     if (durationS > ceiling) {
       throw new AnimationError(
-        `A ${resolution} clip cannot exceed ${ceiling}s; got ${durationS}s.`,
+        `A clip cannot exceed ${ceiling}s; got ${durationS}s.`,
         400
       );
     }
 
-    const model = modelFor(resolution);
+    const model = modelFor();
 
     const response = await this.call(`/models/${model}/predictions`, {
       method: 'POST',
       body: JSON.stringify({
-        input: inputFor(model, request),
+        input: inputFor(request),
         webhook: request.webhookUrl,
         // Seul l'état final nous intéresse : les événements intermédiaires
         // multiplieraient les appels sans rien apprendre au job.
@@ -143,7 +130,7 @@ export class ReplicateAnimator implements VideoAnimator {
       throw new AnimationError(`Replicate returned no prediction id.`);
     }
 
-    return { externalId: id, model, costUsd: clipCostUsd(resolution, durationS) };
+    return { externalId: id, model, costUsd: clipCostUsd(quality, durationS) };
   }
 
   async outcome(externalId: string): Promise<AnimationOutcome> {

@@ -14,6 +14,7 @@ import { VideoSettings } from '@/components/storyboard/video-settings';
 import { listSounds } from '@/lib/sounds';
 import { listClientAssets } from '@/lib/assets';
 import { createAssetStore } from '@/lib/storage';
+import { QUALITY_LABEL } from '@/lib/credits/pricing';
 
 /** Le temps qu'une lecture tient : assez pour regarder, pas pour partager. */
 const LECTURE_TTL_S = 60 * 60;
@@ -91,14 +92,18 @@ export default async function VideoPage({
     board.video.status === 'draft' ? await listClientAssets(tdb, project.id) : [];
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <Link
-        href={`/dashboard/projects/${project.id}`}
-        className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="mr-1 h-4 w-4" />
-        {project.name}
-      </Link>
+    <section className="shell-gutter mx-auto w-full max-w-(--content-max) flex-1 px-4 py-6 lg:px-8 lg:py-8">
+      <nav aria-label="Fil d’Ariane" className="mb-4 flex items-center gap-1 text-sm text-muted-foreground">
+        <Link
+          href={`/dashboard/projects/${project.id}`}
+          className="inline-flex min-h-11 items-center hover:text-foreground"
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" aria-hidden="true" />
+          {project.name}
+        </Link>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page" className="truncate text-foreground">{board.video.title}</span>
+      </nav>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <h1 className="text-lg lg:text-2xl font-medium">{board.video.title}</h1>
@@ -110,7 +115,7 @@ export default async function VideoPage({
           {board.video.status}
         </span>
         <span className="text-sm text-muted-foreground">
-          {board.video.resolution} · {pipeline} pipeline
+          {QUALITY_LABEL[board.video.quality]} · {pipeline} pipeline
         </span>
       </div>
 
@@ -177,7 +182,7 @@ export default async function VideoPage({
           <CardContent>
             <VideoSettings
               videoId={board.video.id}
-              resolution={board.video.resolution}
+              quality={QUALITY_LABEL[board.video.quality]}
               ratio={board.video.ratio}
               subtitleStyle={board.video.subtitleStyle}
               musicUrl={board.video.musicUrl}

@@ -7,14 +7,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { CREDITS_PER_SECOND } from '@/lib/credits/pricing';
+import {
+  CREDITS_PER_IMAGE,
+  CREDITS_PER_SECOND,
+  QUALITY_LABEL,
+} from '@/lib/credits/pricing';
 import { createVideoAction } from '../../../../videos/actions';
 
 type ActionState = { error?: string; success?: string };
 
-const RESOLUTIONS = [
-  { value: '480p', label: '480p' },
-  { value: '720p', label: '720p' },
+/*
+ * Les deux paliers vendus. Le mot « draft » est la valeur envoyée au serveur ;
+ * il ne doit jamais s'afficher — le client lit « Full HD » et « Cinéma ».
+ */
+const QUALITIES = [
+  { value: 'draft', label: QUALITY_LABEL.draft },
+  { value: 'standard', label: QUALITY_LABEL.standard },
 ] as const;
 
 const PIPELINES = [
@@ -27,16 +35,16 @@ const PIPELINES = [
 export function NewVideoForm({
   projectId,
   projectPipeline,
-  allowedResolutions,
+  allowedQualities,
   watermark,
 }: {
   projectId: number;
   projectPipeline: string;
-  allowedResolutions: readonly string[];
+  allowedQualities: readonly string[];
   watermark: boolean;
 }) {
-  const resolutions = RESOLUTIONS.filter((option) =>
-    allowedResolutions.includes(option.value)
+  const qualities = QUALITIES.filter((option) =>
+    allowedQualities.includes(option.value)
   );
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     createVideoAction,
@@ -78,20 +86,19 @@ export function NewVideoForm({
 
       <div>
         <Label>Résolution</Label>
-        <RadioGroup name="resolution" defaultValue="480p" className="mt-2 space-y-2">
-          {resolutions.map((option) => (
+        <RadioGroup name="quality" defaultValue="draft" className="mt-2 space-y-2">
+          {qualities.map((option) => (
             <div key={option.value} className="flex items-start gap-2">
               <RadioGroupItem
                 value={option.value}
-                id={`resolution-${option.value}`}
+                id={`quality-${option.value}`}
                 className="mt-1"
               />
               <div>
-                <Label htmlFor={`resolution-${option.value}`}>{option.label}</Label>
+                <Label htmlFor={`quality-${option.value}`}>{option.label}</Label>
                 <p className="text-xs text-muted-foreground">
-                  {CREDITS_PER_SECOND.image[option.value]} crédit
-                  {CREDITS_PER_SECOND.image[option.value] > 1 ? 's' : ''}/s en
-                  fixe · {CREDITS_PER_SECOND.video[option.value]} en animé
+                  {CREDITS_PER_SECOND[option.value]} crédits/s en animé ·{' '}
+                  {CREDITS_PER_IMAGE} crédits l&apos;image fixe
                 </p>
               </div>
             </div>

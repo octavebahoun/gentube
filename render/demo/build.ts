@@ -78,7 +78,6 @@ async function main() {
     const still = await imageFor(`scene-${index + 1}`, scene.prompt, {
       style: STYLE,
       ratio: DEMO_VIDEO.ratio,
-      resolution: DEMO_VIDEO.resolution,
       seed: 1_000 + index,
     });
     const asset =

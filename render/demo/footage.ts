@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
 import 'dotenv/config';
-import type { Ratio, Resolution, Shot, Video } from '@/lib/db/schema';
+import type { Ratio, Quality, Shot, Video } from '@/lib/db/schema';
 import { MAX_AUDIO_BYTES, createTranscriber } from '@/lib/transcribe/whisper';
 import { toHyperframesStoryboard } from '@/lib/storyboard/render';
 import { COMPOSITION_DIR, composeHtml } from '@/lib/render/composition';
@@ -79,17 +79,16 @@ function mesure(video: string) {
  * fichier carré part donc en paysage et sera bordé : c'est visible, mais moins
  * qu'une image étirée, et ça reste la décision du moteur, pas de cette démo.
  *
- * La résolution descend au palier en dessous de la hauteur réelle : remonter
- * un 480p en 720p ne fabrique aucun détail, ça multiplie juste le coût de
- * rendu par trois.
+ * Un import n'est pas généré : aucun modèle vidéo ne le touche, donc le palier
+ * ne décide de rien pour lui. Il part en Full HD, le moins cher, et le cadre
+ * est la seule chose que cette fonction ait à trancher.
  */
 function cadre(largeur: number, hauteur: number): {
   ratio: Ratio;
-  resolution: Resolution;
+  quality: Quality;
 } {
   const ratio: Ratio = largeur >= hauteur ? '16:9' : '9:16';
-  const cote = ratio === '9:16' ? largeur : hauteur;
-  return { ratio, resolution: cote >= 720 ? '720p' : '480p' };
+  return { ratio, quality: 'draft' };
 }
 
 /**
@@ -159,10 +158,10 @@ async function main() {
   mkdirSync(CACHE_DIR, { recursive: true });
   const nom = basename(source, extname(source));
   const { duree, largeur, hauteur } = mesure(source);
-  const { ratio, resolution } = cadre(largeur, hauteur);
+  const { ratio, quality } = cadre(largeur, hauteur);
 
   log(`source  ${source}`);
-  log(`        ${largeur}×${hauteur} · ${duree.toFixed(1)}s → ${ratio} ${resolution}`);
+  log(`        ${largeur}×${hauteur} · ${duree.toFixed(1)}s → ${ratio} ${quality}`);
 
   // Le fichier doit vivre dans le dossier de composition : Chrome le charge
   // par un chemin relatif à la page, pas depuis n'importe où sur le disque.
@@ -180,7 +179,7 @@ async function main() {
   const video = {
     title: nom,
     ratio,
-    resolution,
+    quality,
     voice: null,
     subtitles: true,
     subtitleStyle: 'karaoke',

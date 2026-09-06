@@ -5,12 +5,14 @@ import { minClipSeconds } from '@/lib/video/provider';
  * Le plancher d'une scène animée, en caractères de narration.
  *
  * Calculé et pas écrit : le jour où le modèle d'animation change, la borne
- * suit sans qu'on ait à se souvenir de ce chiffre-là. On prend la 480p, la
- * résolution par défaut où passe l'essentiel du volume — et son plancher est
- * le plus haut des deux, donc la règle vaut aussi en 720p.
+ * suit sans qu'on ait à se souvenir de ce chiffre-là.
+ *
+ * Depuis la grille v1 il vaut une seconde, c'est-à-dire presque rien :
+ * p-video facture à la seconde réelle. Wan imposait 5,06 s et cette contrainte
+ * façonnait tout le storyboard — elle a disparu avec lui.
  */
 function planchAnimeEnCaracteres(): number {
-  return Math.ceil(minClipSeconds('480p') * CARACTERES_PAR_SECONDE);
+  return Math.ceil(minClipSeconds() * CARACTERES_PAR_SECONDE);
 }
 
 /**

@@ -121,8 +121,8 @@ describe('recording the voice-over', () => {
       'measured',
     ]);
     // Chaque scène est arrondie au-dessus individuellement : 11 + 11, pas
-    // ceil(21,12). Deux plans animés de 5,28 s à 2 crédits/s.
-    expect(result.creditsEstimated).toBe(22);
+    // ceil(21,12). Deux plans animés de 5,28 s à 2 crédits/s, plus le montage.
+    expect(result.creditsEstimated).toBe(22 + 25);
     expect(result.shots.every((shot) => Array.isArray(shot.words))).toBe(true);
 
     // L'audio atterrit sous le préfixe du tenant, un objet par scène.
@@ -216,8 +216,9 @@ describe('recording the voice-over', () => {
     await generateVoiceover(tdb, video.id, { client: synthesizer, store: assets });
     const { charged, balance } = await validateStoryboard(tdb, video.id);
 
-    expect(charged).toBe(9); // ceil(4,5 × 2) pour un plan animé en 480p
-    expect(balance).toBe(91);
+    // ceil(4,5 × 2) pour un plan animé en Full HD, plus les 25 du montage.
+    expect(charged).toBe(9 + 25);
+    expect(balance).toBe(66);
   });
 
   it('refuses once the video left draft', async () => {

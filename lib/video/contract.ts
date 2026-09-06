@@ -1,4 +1,4 @@
-import type { Ratio, Resolution } from '@/lib/db/schema';
+import type { Quality, Ratio } from '@/lib/db/schema';
 
 /**
  * Ce que l'étape « plan animé » attend d'un fournisseur, et rien de plus.
@@ -28,7 +28,8 @@ export type AnimationRequest = {
    * durée que le client a payée sur le bouton de validation.
    */
   durationS: number;
-  resolution: Resolution;
+  /** Le palier vendu : `draft` ou `standard`. Les deux rendent en 1080p. */
+  quality: Quality;
   ratio: Ratio;
   /** Fixe le bruit initial : deux appels de même graine rendent le même clip. */
   seed?: number;

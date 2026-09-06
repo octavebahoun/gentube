@@ -506,7 +506,7 @@ function main() {
   if (process.argv.includes('--cartes')) jeux = [...jeux, ...CARTES];
 
   for (const jeu of jeux) {
-    console.log(`\n${jeu.nom} · ${jeu.video.resolution}`);
+    console.log(`\n${jeu.nom} · ${jeu.video.quality}`);
     echecs += passer(jeu);
   }
 

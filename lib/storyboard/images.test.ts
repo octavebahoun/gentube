@@ -167,14 +167,14 @@ describe('generating the stills', () => {
     expect(animated.status).toBe('pending');
   });
 
-  it('asks for the frame size the customer is billed for', async () => {
+  it('ne demande plus de palier au modèle d images', async () => {
     const tdb = await createTenant('Alpha', { credits: 5_000 });
     await subscribe(tdb);
     const project = await createProject(tdb, { name: 'Docs', defaultPipeline: 'image' });
     const video = await createVideo(tdb, {
       projectId: project.id,
       title: 'HD',
-      resolution: '720p',
+      quality: 'standard',
     });
     await generateStoryboard(tdb, video.id, {
       client: answering([{ narration: line(5), type: 'image' }]),
@@ -186,7 +186,13 @@ describe('generating the stills', () => {
     const { client, calls } = generator();
     await generateImages(tdb, video.id, { client, store: store().assets });
 
-    expect(calls[0]).toMatchObject({ resolution: '720p', ratio: '16:9' });
+    /*
+     * Une image se rend a une seule taille depuis la grille v1 : les deux
+     * paliers vendus livrent du 1080p, et ce qui les separe est le mode de
+     * p-video, qui ne concerne pas les fixes. Seul le cadrage reste a dire.
+     */
+    expect(calls[0]).toMatchObject({ ratio: '16:9' });
+    expect(calls[0]).not.toHaveProperty('quality');
   });
 
   it('applies the project style, which nothing else applied', async () => {

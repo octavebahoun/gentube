@@ -1,106 +1,101 @@
 import { describe, expect, it } from 'vitest';
-import { PROVIDER_COST_USD_PER_SECOND } from '@/lib/credits/pricing';
 import {
   MODELS,
   P_VIDEO_MAX_SECONDS,
-  WAN_MAX_SECONDS,
-  WAN_MIN_SECONDS,
+  P_VIDEO_MIN_SECONDS,
+  P_VIDEO_RESOLUTION,
   billedSeconds,
   clipCostUsd,
   maxClipSeconds,
   minClipSeconds,
   modelFor,
-  wanFrames,
 } from './provider';
+import {
+  FCFA_PER_USD,
+  PROVIDER_COST_USD_PER_SECOND,
+} from '@/lib/credits/pricing';
 
 describe('modelFor', () => {
-  it('donne le 480p à Wan et le 720p à p-video', () => {
-    expect(modelFor('480p')).toBe(MODELS.wan);
-    expect(modelFor('720p')).toBe(MODELS.pVideo);
+  it('ne connaît plus qu un modèle', () => {
+    /*
+     * Wan est sorti de la v1. Il facturait au clip, avec un plancher de 81
+     * images — 5,06 s — qui obligeait le storyboard à refuser toute scène plus
+     * courte et faisait payer 5 s une scène de 3.
+     */
+    expect(modelFor()).toBe(MODELS.pVideo);
+    expect(Object.keys(MODELS)).toEqual(['pVideo']);
+  });
+
+  it('rend en 1080p quel que soit le palier vendu', () => {
+    // Ce qui sépare Full HD de Cinéma est le booléen `draft`, pas le nombre de
+    // pixels : les deux clients reçoivent le même cadre.
+    expect(P_VIDEO_RESOLUTION).toBe('1080p');
   });
 });
 
-describe('wanFrames', () => {
-  it('demande le nombre d\'images qui couvre la narration', () => {
-    expect(wanFrames(7)).toBe(112); // 7 s × 16 fps
-    expect(wanFrames(6.5)).toBe(104);
+describe('les bornes d une scène', () => {
+  it('n a plus de plancher', () => {
+    /*
+     * C'est le gain de fond du changement de modèle. Le plancher de Wan
+     * façonnait toute la grammaire du storyboard : une narration de moins de
+     * cinq secondes était interdite, sans quoi deux secondes de mouvement
+     * étaient générées, payées, puis jetées à la composition.
+     */
+    expect(minClipSeconds()).toBe(1);
+    expect(P_VIDEO_MIN_SECONDS).toBe(1);
   });
 
-  it('ne descend jamais sous le bloc minimal du modèle', () => {
-    // 81 images est un plancher dur : en dessous Wan refuse. Une scène de 3 s
-    // se paie donc 5,06 s, et c'est exactement là que la marge se perd.
-    expect(wanFrames(3)).toBe(81);
-    expect(wanFrames(0.1)).toBe(81);
+  it('plafonne à dix secondes, la borne du modèle', () => {
+    expect(maxClipSeconds()).toBe(10);
+    expect(P_VIDEO_MAX_SECONDS).toBe(10);
   });
 
-  it('ne dépasse jamais le bloc maximal du modèle', () => {
-    expect(wanFrames(9)).toBe(121);
-    expect(wanFrames(60)).toBe(121);
-  });
-
-  it('couvre exactement la scène la plus longue admise', () => {
-    expect(wanFrames(WAN_MAX_SECONDS)).toBe(121);
-    expect(wanFrames(WAN_MIN_SECONDS)).toBe(81);
-  });
-});
-
-describe('minClipSeconds', () => {
-  it('tient le plancher de Wan, et n en invente pas pour p-video', () => {
-    // Le miroir de maxClipSeconds, et il manquait : le plafond était tenu, le
-    // plancher pas. Une scène animée de 3 s recevait un clip de 5,06 s dont la
-    // composition ne montrait que le début.
-    expect(minClipSeconds('480p')).toBeCloseTo(WAN_MIN_SECONDS, 4);
-    // p-video prend un entier de secondes et accepte le plus petit : sa borne
-    // est donc l'absence de borne.
-    expect(minClipSeconds('720p')).toBe(1);
-  });
-
-  it('reste sous le plafond de la même résolution', () => {
-    // Un plancher au-dessus du plafond rendrait toute scène animée illégale
-    // et personne ne le verrait avant la première génération.
-    for (const resolution of ['480p', '720p'] as const) {
-      expect(minClipSeconds(resolution)).toBeLessThan(maxClipSeconds(resolution));
-    }
-  });
-});
-
-describe('maxClipSeconds', () => {
-  it('plafonne le 480p au bloc de Wan, pas aux dix secondes de p-video', () => {
-    expect(maxClipSeconds('480p')).toBeCloseTo(7.5625, 4);
-    expect(maxClipSeconds('720p')).toBe(P_VIDEO_MAX_SECONDS);
+  it('garde le plancher sous le plafond', () => {
+    // Une inversion rendrait toute scène impossible, et l'erreur ne se verrait
+    // qu'au premier storyboard refusé sans raison lisible.
+    expect(minClipSeconds()).toBeLessThan(maxClipSeconds());
   });
 });
 
 describe('billedSeconds', () => {
-  it('facture Wan à la durée rendue, pas par paliers de clip', () => {
-    // Wan compte à la seconde ramenée à 16 fps : 7 s coûtent 7 s, pas 10.
-    expect(billedSeconds('480p', 7)).toBeCloseTo(7, 4);
+  it('arrondit à la seconde entamée, comme la requête', () => {
+    // `duration` est un entier chez eux : une narration de 6,2 s part à 7, et
+    // la seconde entamée est due.
+    expect(billedSeconds(6.2)).toBe(7);
+    expect(billedSeconds(3)).toBe(3);
+    expect(billedSeconds(0.4)).toBe(1);
   });
 
-  it('facture le plancher de Wan sur une scène plus courte', () => {
-    expect(billedSeconds('480p', 3)).toBeCloseTo(WAN_MIN_SECONDS, 4);
-  });
-
-  it('arrondit p-video à la seconde entamée, comme sa requête', () => {
-    expect(billedSeconds('720p', 6.2)).toBe(7);
-    expect(billedSeconds('720p', 5)).toBe(5);
+  it('facture la seconde réelle, sans palier de clip', () => {
+    // Wan facturait 5,06 s pour une scène de 3. La différence était perdue.
+    expect(billedSeconds(3)).toBeLessThan(billedSeconds(5));
   });
 });
 
 describe('clipCostUsd', () => {
   it('applique le taux de pricing.ts, source unique', () => {
-    expect(clipCostUsd('480p', 7)).toBeCloseTo(
-      7 * PROVIDER_COST_USD_PER_SECOND.video['480p'],
-      6
-    );
-    expect(clipCostUsd('720p', 6.2)).toBeCloseTo(
-      7 * PROVIDER_COST_USD_PER_SECOND.video['720p'],
-      6
-    );
+    for (const quality of ['draft', 'standard'] as const) {
+      expect(clipCostUsd(quality, 5)).toBeCloseTo(
+        5 * PROVIDER_COST_USD_PER_SECOND[quality],
+        10
+      );
+    }
   });
 
-  it('reste sous le prix du clip de référence annoncé', () => {
-    // docs/providers.md : 0,05 $ le clip de 5 s en 480p.
-    expect(clipCostUsd('480p', 5)).toBeLessThanOrEqual(0.051);
+  it('fait payer le Cinéma quatre fois le Full HD', () => {
+    // C'est l'écart de coût réel, et c'est lui qui justifie l'écart de prix
+    // vendu — 2 crédits contre 7 la seconde.
+    expect(clipCostUsd('standard', 5) / clipCostUsd('draft', 5)).toBeCloseTo(4, 6);
+  });
+
+  it('garde un clip de dix secondes sous les 250 FCFA', () => {
+    /*
+     * Le plan le plus cher possible : dix secondes de Cinéma. À 0,04 $/s cela
+     * fait 0,40 $, soit 250 FCFA — vendus 70 crédits, donc 1 400 FCFA. Un
+     * dépassement ici voudrait dire que le tarif du fournisseur a bougé sans
+     * que la grille suive.
+     */
+    const pireCas = clipCostUsd('standard', P_VIDEO_MAX_SECONDS) * FCFA_PER_USD;
+    expect(pireCas).toBeLessThanOrEqual(250);
   });
 });

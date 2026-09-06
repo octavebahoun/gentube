@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { PROVIDER_COST_USD_PER_SECOND } from '@/lib/credits/pricing';
 import {
   ImageError,
   ImageNotConfiguredError,
@@ -95,7 +96,6 @@ describe('generating a still', () => {
     await client().generate({
       prompt: '  a lone baobab at sunset  ',
       ratio: '16:9',
-      resolution: '720p',
     });
 
     const [url, init] = fetchMock.mock.calls[0];
@@ -106,8 +106,8 @@ describe('generating a still', () => {
 
     const form = init?.body as FormData;
     expect(form.get('prompt')).toBe('a lone baobab at sunset');
-    expect(form.get('width')).toBe('1280');
-    expect(form.get('height')).toBe('720');
+    expect(form.get('width')).toBe('1920');
+    expect(form.get('height')).toBe('1088');
 
     // Poser Content-Type nous-mêmes écraserait la frontière multipart que
     // fetch calcule, et le serveur ne lirait plus le corps.
@@ -116,18 +116,21 @@ describe('generating a still', () => {
     expect(Object.keys(headers)).not.toContain('Content-Type');
   });
 
-  it('asks the frame size the resolution is billed at', async () => {
+  it('demande la trame du modèle, pas celle qu on livre', async () => {
+    /*
+     * 1088 et non 1080 : Workers AI rabote au multiple de 16 inférieur, donc
+     * demander 1080 rendrait 1072. La composition redescend ensuite à 1080.
+     */
     const fetchMock = stubFetch(ok());
 
     const image = await client().generate({
       prompt: 'a market at dawn',
       ratio: '9:16',
-      resolution: '480p',
     });
 
     const form = fetchMock.mock.calls[0][1]?.body as FormData;
-    expect([form.get('width'), form.get('height')]).toEqual(['480', '848']);
-    expect(image).toMatchObject({ width: 480, height: 848, contentType: 'image/jpeg' });
+    expect([form.get('width'), form.get('height')]).toEqual(['1088', '1920']);
+    expect(image.contentType).toBe('image/jpeg');
     expect(image.bytes.toString()).toBe('jpeg-bytes');
   });
 
@@ -137,7 +140,7 @@ describe('generating a still', () => {
     const fetchMock = stubFetch(ok());
 
     await expect(
-      client().generate({ prompt: '   ', ratio: '16:9', resolution: '480p' })
+      client().generate({ prompt: '   ', ratio: '16:9' })
     ).rejects.toThrow(ImageError);
 
     expect(fetchMock).not.toHaveBeenCalled();
@@ -150,7 +153,6 @@ describe('generating a still', () => {
       client().generate({
         prompt: 'a baobab',
         ratio: '16:9',
-        resolution: '480p',
         seed: 1.5,
       })
     ).rejects.toThrow(/Seed must be a non-negative integer/);
@@ -160,7 +162,7 @@ describe('generating a still', () => {
   it('omits the seed when none is asked for', async () => {
     const fetchMock = stubFetch(ok());
 
-    await client().generate({ prompt: 'a baobab', ratio: '16:9', resolution: '480p' });
+    await client().generate({ prompt: 'a baobab', ratio: '16:9' });
 
     const form = fetchMock.mock.calls[0][1]?.body as FormData;
     expect(form.has('seed')).toBe(false);
@@ -173,7 +175,7 @@ describe('generating a still', () => {
     );
 
     await expect(
-      client().generate({ prompt: 'a baobab', ratio: '16:9', resolution: '480p' })
+      client().generate({ prompt: 'a baobab', ratio: '16:9' })
     ).rejects.toThrow(/max width is 2048/);
   });
 
@@ -181,7 +183,7 @@ describe('generating a still', () => {
     stubFetch({ success: false, errors: [{ message: 'too many requests' }] }, { status: 429 });
 
     await expect(
-      client().generate({ prompt: 'a baobab', ratio: '16:9', resolution: '480p' })
+      client().generate({ prompt: 'a baobab', ratio: '16:9' })
     ).rejects.toMatchObject({ statusCode: 429 });
   });
 
@@ -192,7 +194,7 @@ describe('generating a still', () => {
     stubFetch({ success: false, errors: [{ message: 'content filtered' }], result: {} });
 
     await expect(
-      client().generate({ prompt: 'a baobab', ratio: '16:9', resolution: '480p' })
+      client().generate({ prompt: 'a baobab', ratio: '16:9' })
     ).rejects.toThrow(/content filtered/);
   });
 
@@ -200,7 +202,7 @@ describe('generating a still', () => {
     stubFetch({ success: true, result: {}, errors: [] });
 
     await expect(
-      client().generate({ prompt: 'a baobab', ratio: '16:9', resolution: '480p' })
+      client().generate({ prompt: 'a baobab', ratio: '16:9' })
     ).rejects.toThrow(/no image/);
   });
 
@@ -208,28 +210,29 @@ describe('generating a still', () => {
     stubFetch(undefined, { status: 500, raw: 'upstream exploded' });
 
     await expect(
-      client().generate({ prompt: 'a baobab', ratio: '16:9', resolution: '480p' })
+      client().generate({ prompt: 'a baobab', ratio: '16:9' })
     ).rejects.toThrow(/upstream exploded/);
     // Le jeton vit dans l'en-tête ; renvoyer la requête le mettrait dans les logs.
     await expect(
-      client().generate({ prompt: 'a baobab', ratio: '16:9', resolution: '480p' })
+      client().generate({ prompt: 'a baobab', ratio: '16:9' })
     ).rejects.not.toThrow(/cfat-test/);
   });
 });
 
-describe('what an image costs', () => {
-  it('prices 480p well under 720p, as the tariff assumes', () => {
-    const low = imageCostUsd(848, 480);
-    const high = imageCostUsd(1280, 720);
-
-    expect(low).toBeCloseTo(0.000446, 6);
-    expect(high).toBeCloseTo(0.00101, 5);
-    expect(high / low).toBeGreaterThan(2);
+describe('ce que coûte une image', () => {
+  it('facture à la surface, en tuiles de 512', () => {
+    // Doubler chaque côté quadruple le nombre de tuiles, donc le prix.
+    expect(imageCostUsd(1920, 1088) / imageCostUsd(960, 544)).toBeCloseTo(4, 6);
   });
 
-  it('stays three orders of magnitude under an animated shot', () => {
-    // C'est le chiffre qui justifie qu'un plan fixe soit facturé moitié prix :
-    // une seconde de clip coûte ~0,0099 $, une image entière ~0,0004 $.
-    expect(imageCostUsd(848, 480)).toBeLessThan(0.00988 / 10);
+  it('reste deux ordres de grandeur sous une seconde de vidéo', () => {
+    /*
+     * C'est le chiffre qui justifie qu'une image soit un forfait de 3 crédits
+     * plutôt qu'un tarif à la seconde : une image entière en 1080p coûte
+     * ~0,0035 $, une seconde de Full HD 0,01 $ et une de Cinéma 0,04 $.
+     */
+    expect(imageCostUsd(1920, 1088)).toBeLessThan(
+      PROVIDER_COST_USD_PER_SECOND.standard
+    );
   });
 });

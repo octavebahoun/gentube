@@ -45,14 +45,13 @@ export {
 export {
   MODELS,
   P_VIDEO_MAX_SECONDS,
-  WAN_MAX_SECONDS,
-  WAN_MIN_SECONDS,
+  P_VIDEO_MIN_SECONDS,
+  P_VIDEO_RESOLUTION,
   billedSeconds,
   clipCostUsd,
   maxClipSeconds,
   minClipSeconds,
   modelFor,
-  wanFrames,
 } from './provider';
 
 export { isAnimationConfigured } from './replicate';

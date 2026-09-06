@@ -6,6 +6,7 @@ import {
   SHADER_TRANSITIONS,
   TRANSITION_DURATIONS,
   dimensionsFor,
+  modelFrameFor,
   isShaderTransition,
   sceneDurationSeconds,
   sceneStartTimes,
@@ -96,29 +97,27 @@ describe('timing', () => {
     expect(totalDurationSeconds([])).toBe(MIN_SCENE_ON_SCREEN_SECONDS);
   });
 
-  it('sizes the canvas from the ratio', () => {
-    expect(dimensionsFor('16:9', '720p')).toEqual({ width: 1280, height: 720 });
-    expect(dimensionsFor('9:16', '720p')).toEqual({ width: 720, height: 1280 });
+  it('livre du 1080p, dans les deux cadrages', () => {
+    // Les deux paliers vendus rendent en 1080p depuis la grille v1 : ce qui
+    // les sépare est le mode `draft` de p-video, pas le nombre de pixels.
+    expect(dimensionsFor('16:9')).toEqual({ width: 1920, height: 1080 });
+    expect(dimensionsFor('9:16')).toEqual({ width: 1080, height: 1920 });
   });
 
-  it('gives 480p a smaller frame than 720p, since that is what is billed', () => {
-    // La trame ne dépendait que du ratio : tout sortait en 1920×1080, donc le
-    // palier 720p facturé 3× et l'essai bridé en 480p ne changeaient rien au
-    // fichier livré.
-    expect(dimensionsFor('16:9', '480p')).toEqual({ width: 848, height: 480 });
-    expect(dimensionsFor('9:16', '480p')).toEqual({ width: 480, height: 848 });
-  });
-
-  it('keeps every frame dimension a multiple of 16', () => {
-    // Les modèles image de Workers AI rabotent au multiple de 16 inférieur.
-    // Une trame qui n'en est pas un reçoit une image plus petite qu'elle, donc
-    // étirée sur chaque plan.
+  it('demande au modèle d images une trame plus grande, jamais plus petite', () => {
+    /*
+     * Les modèles image de Workers AI rabotent au multiple de 16 **inférieur**
+     * : demander 1080 rend 1072, soit huit pixels manquants qu'il faudrait
+     * étirer sur chaque plan. On demande donc 1088 et la composition
+     * redescend — réduire ne fait que jeter des pixels.
+     */
     for (const ratio of ['16:9', '9:16'] as const) {
-      for (const resolution of ['480p', '720p'] as const) {
-        const { width, height } = dimensionsFor(ratio, resolution);
-        expect(width % 16, `${ratio} ${resolution} largeur`).toBe(0);
-        expect(height % 16, `${ratio} ${resolution} hauteur`).toBe(0);
-      }
+      const livree = dimensionsFor(ratio);
+      const demandee = modelFrameFor(ratio);
+      expect(demandee.width % 16, `${ratio} largeur`).toBe(0);
+      expect(demandee.height % 16, `${ratio} hauteur`).toBe(0);
+      expect(demandee.width).toBeGreaterThanOrEqual(livree.width);
+      expect(demandee.height).toBeGreaterThanOrEqual(livree.height);
     }
   });
 });
@@ -173,8 +172,8 @@ describe('serialising for Hyperframes', () => {
     // La composition n'a plus rien à calculer : dimensions, fps et durée
     // totale sont posés une fois ici.
     expect(storyboard).toMatchObject({
-      width: 848,
-      height: 480,
+      width: 1920,
+      height: 1080,
       fps: 30,
       durationInSeconds: 5.28 + POST_NARRATION_PAUSE_SECONDS,
     });

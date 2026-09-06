@@ -11,7 +11,7 @@ import {
   type Video,
 } from '@/lib/db/schema';
 import { PIPELINES, getProject } from '@/lib/projects';
-import { assertResolutionAllowed } from '@/lib/billing/entitlements';
+import { assertQualityAllowed } from '@/lib/billing/entitlements';
 
 /**
  * Videos — a title, a theme, and the storyboard that will be generated from it.
@@ -33,7 +33,7 @@ export class VideoError extends Error {
 
 export const VIDEO_TITLE_MAX = 200;
 export const VIDEO_THEME_MAX = 4_000;
-export const RESOLUTIONS = ['480p', '720p'] as const;
+export const QUALITIES = ['draft', 'standard'] as const;
 
 /** Les cadrages vendus, dans l'ordre de `ratio` en base. */
 export const RATIOS = ratioEnum.enumValues;
@@ -72,7 +72,7 @@ export const videoInputSchema = z.object({
   projectId: z.coerce.number().int().positive(),
   title,
   theme,
-  resolution: z.enum(RESOLUTIONS).optional(),
+  quality: z.enum(QUALITIES).optional(),
   pipelineOverride,
   /**
    * L'apparence des sous-titres. Le champ existait en base et n'était réglable
@@ -147,7 +147,7 @@ export async function createVideo(
 
   // Le 720p demande un abonnement actif. Vérifié ici et pas seulement dans le
   // formulaire : une requête forgée passerait à côté du choix affiché.
-  await assertResolutionAllowed(tdb, data.resolution ?? '480p');
+  await assertQualityAllowed(tdb, data.quality ?? 'draft');
 
   // Tout ce que le schéma accepte est écrit. Trois champs y étaient entrés
   // sans passer ici : une création demandant `ratio: '9:16'` validait
@@ -156,7 +156,7 @@ export async function createVideo(
     projectId: data.projectId,
     title: data.title,
     theme: data.theme ?? null,
-    resolution: data.resolution ?? '480p',
+    quality: data.quality ?? 'draft',
     pipelineOverride: data.pipelineOverride ?? null,
     ...(data.ratio ? { ratio: data.ratio } : {}),
     ...(data.subtitleStyle ? { subtitleStyle: data.subtitleStyle } : {}),
@@ -176,15 +176,15 @@ export async function updateVideo(
   const video = await getVideo(tdb, id);
   assertDraft(video);
 
-  if (data.resolution !== undefined) {
-    await assertResolutionAllowed(tdb, data.resolution);
+  if (data.quality !== undefined) {
+    await assertQualityAllowed(tdb, data.quality);
   }
 
   const patch: Record<string, unknown> = {};
   for (const field of [
     'title',
     'theme',
-    'resolution',
+    'quality',
     'pipelineOverride',
     'subtitleStyle',
     'musicUrl',

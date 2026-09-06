@@ -176,22 +176,22 @@ export async function submitClips(
      * elle aura simplement coûté du mouvement qu'on ne voit pas. Même contrat
      * que les contrôles de registre : ça se journalise et ça passe.
      */
-    const floor = minClipSeconds(video.resolution);
+    const floor = minClipSeconds();
     if (shot.durationS < floor) {
       console.warn(
         `[clips] scene ${shot.order} lasts ${shot.durationS}s but a ` +
-          `${video.resolution} clip cannot be shorter than ${floor.toFixed(2)}s: ` +
+          `A clip cannot be shorter than ${floor.toFixed(2)}s: ` +
           `${(floor - shot.durationS).toFixed(2)}s of motion will be generated, ` +
           'billed, and never shown. Lengthen the line or make it an image scene.'
       );
     }
 
-    const ceiling = maxClipSeconds(video.resolution);
+    const ceiling = maxClipSeconds();
     if (shot.durationS > ceiling) {
       // Le modèle ne sait pas rendre plus long d'un trait, et ralentir le clip
       // pour couvrir la voix off se verrait. La scène doit être coupée en deux.
       throw new StoryboardError(
-        `Scene ${shot.order} lasts ${shot.durationS}s; a ${video.resolution} ` +
+        `Scene ${shot.order} lasts ${shot.durationS}s; a ` +
           `clip cannot exceed ${ceiling}s. Split the scene in two.`,
         409
       );
@@ -255,7 +255,7 @@ export async function submitClips(
         imageUrl: await assets.signedUrl(shot.sourceImageUrl, SOURCE_URL_TTL_S),
         prompt: animationPrompt(shot),
         durationS: shot.durationS,
-        resolution: video.resolution,
+        quality: video.quality,
         ratio: video.ratio,
         webhookUrl: `${base}${client.callbackPath}?job=${job.id}`,
       });

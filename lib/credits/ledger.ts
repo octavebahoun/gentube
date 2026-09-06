@@ -243,7 +243,7 @@ export async function estimateVideo(
   if (!video) throw new Error(`Video ${videoId} not found for this tenant.`);
 
   const storyboard = await tdb.findMany(shots, eq(shots.videoId, videoId));
-  const creditsEstimated = estimateVideoCredits(storyboard, video.resolution);
+  const creditsEstimated = estimateVideoCredits(storyboard, video.quality);
 
   const [updated] = await tdb.update(
     videos,
@@ -290,7 +290,7 @@ export async function validateAndChargeVideo(
       throw new Error(`Video ${videoId} has no shots to generate.`);
     }
 
-    const charged = estimateVideoCredits(storyboard, video.resolution);
+    const charged = estimateVideoCredits(storyboard, video.quality);
 
     const { balance } = await debitCredits(tx, {
       amount: charged,

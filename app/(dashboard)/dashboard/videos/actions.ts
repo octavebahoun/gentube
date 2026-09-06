@@ -15,7 +15,7 @@ import { ImageError, ImageNotConfiguredError } from '@/lib/images/flux';
 import { AnimationError, AnimationNotConfiguredError } from '@/lib/video';
 import {
   RATIOS,
-  RESOLUTIONS,
+  QUALITIES,
   SUBTITLE_STYLES,
   VideoError,
   createVideo,
@@ -424,7 +424,7 @@ export const renderVideoAction = validatedActionWithUser(
  */
 export const videoSettingsAction = validatedActionWithUser(
   videoIdentity.extend({
-    resolution: z.enum(RESOLUTIONS).optional(),
+    quality: z.enum(QUALITIES).optional(),
     ratio: z.enum(RATIOS).optional(),
     subtitleStyle: z.enum(SUBTITLE_STYLES).optional(),
     musicUrl: z.string().optional(),
@@ -432,7 +432,7 @@ export const videoSettingsAction = validatedActionWithUser(
   async (data, _formData, user) => {
     try {
       await updateVideo(tenantDb(user.tenantId), data.videoId, {
-        resolution: data.resolution,
+        quality: data.quality,
         ratio: data.ratio,
         subtitleStyle: data.subtitleStyle,
         musicUrl: data.musicUrl,

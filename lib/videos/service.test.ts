@@ -3,7 +3,7 @@ import { ZodError } from 'zod';
 import { eq } from 'drizzle-orm';
 import { shots, videos } from '@/lib/db/schema';
 import { createProject } from '@/lib/projects';
-import { ResolutionNotAllowedError } from '@/lib/billing/entitlements';
+import { QualityNotAllowedError } from '@/lib/billing/entitlements';
 import {
   closeDb,
   createTenant,
@@ -39,7 +39,7 @@ describe('video creation', () => {
 
     expect(video).toMatchObject({
       status: 'draft',
-      resolution: '480p',
+      quality: 'draft',
       // null signifie « hériter » ; le défaut du projet n'est pas copié,
       // donc changer le projet change les vidéos qui ne l'ont jamais surchargé.
       pipelineOverride: null,
@@ -58,14 +58,14 @@ describe('video creation', () => {
       projectId: project.id,
       title: '  Amazones  ',
       theme: '  The women warriors of the kingdom of Dahomey  ',
-      resolution: '720p',
+      quality: 'standard',
       pipelineOverride: 'image',
     });
 
     expect(video).toMatchObject({
       title: 'Amazones',
       theme: 'The women warriors of the kingdom of Dahomey',
-      resolution: '720p',
+      quality: 'standard',
       pipelineOverride: 'image',
     });
   });
@@ -163,12 +163,12 @@ describe('video edits', () => {
     const { tdb, video } = await draft();
     await subscribe(tdb);
 
-    const updated = await updateVideo(tdb, video.id, { resolution: '720p' });
+    const updated = await updateVideo(tdb, video.id, { quality: 'standard' });
 
     expect(updated).toMatchObject({
       title: 'Draft',
       theme: 'Something',
-      resolution: '720p',
+      quality: 'standard',
     });
   });
 
@@ -244,9 +244,9 @@ describe('the trial', () => {
       createVideo(tdb, {
         projectId: project.id,
         title: 'Amazones',
-        resolution: '720p',
+        quality: 'standard',
       })
-    ).rejects.toThrow(ResolutionNotAllowedError);
+    ).rejects.toThrow(QualityNotAllowedError);
   });
 
   it('refuses to upgrade an existing draft to 720p either', async () => {
@@ -258,8 +258,8 @@ describe('the trial', () => {
     });
 
     await expect(
-      updateVideo(tdb, video.id, { resolution: '720p' })
-    ).rejects.toThrow(ResolutionNotAllowedError);
+      updateVideo(tdb, video.id, { quality: 'standard' })
+    ).rejects.toThrow(QualityNotAllowedError);
   });
 
   it('still allows 480p', async () => {
@@ -269,13 +269,13 @@ describe('the trial', () => {
     const video = await createVideo(tdb, {
       projectId: project.id,
       title: 'Amazones',
-      resolution: '480p',
+      quality: 'draft',
     });
 
-    expect(video.resolution).toBe('480p');
+    expect(video.quality).toBe('draft');
   });
 
-  it('opens 720p as soon as a plan is active', async () => {
+  it('ouvre le Cinéma dès qu un plan qui l inclut est actif', async () => {
     const tdb = await createTenant('Alpha');
     await subscribe(tdb);
     const project = await createProject(tdb, { name: 'Docs' });
@@ -283,10 +283,10 @@ describe('the trial', () => {
     const video = await createVideo(tdb, {
       projectId: project.id,
       title: 'Amazones',
-      resolution: '720p',
+      quality: 'standard',
     });
 
-    expect(video.resolution).toBe('720p');
+    expect(video.quality).toBe('standard');
   });
 
   it('lets a draft choose its music, and drop it again', async () => {

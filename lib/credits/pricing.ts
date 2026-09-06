@@ -1,122 +1,154 @@
-import type { Plan, Resolution, ShotType } from '@/lib/db/schema';
+import type { Plan, Quality, ShotType } from '@/lib/db/schema';
 
 /**
  * Tarification en crédits — source unique de vérité.
  *
- * **Unité : 1 crédit = 1 seconde d'image fixe en 480p.**
+ * **Unité : 1 crédit = 20 FCFA.** Le crédit est ancré dans la monnaie, plus
+ * dans une seconde de rendu. C'est ce qui permet de changer de modèle vidéo
+ * sans renverser la grille : seul le nombre de crédits par seconde bouge.
  *
- * Un plan animé coûte le double, parce qu'il nous coûte réellement bien plus :
- * une minute de clips revient à ~400 FCFA de fournisseur contre ~30 FCFA pour
- * des images fixes. Facturer les deux au même prix faisait payer aux clients
- * « diaporama » — l'usage d'entrée de gamme, le plus sensible au prix — le
- * tarif de la vidéo générée.
- *
- * Le 720p coûte 3× le 480p : réellement ~2,1× plus cher, facturé un peu
- * au-dessus. Chiffrage complet dans docs/tarifs.md.
+ * Grille v1 du 5 septembre 2026 (docs/tarifs.md). Un seul modèle vidéo,
+ * `prunaai/p-video`, en 1080p. Atlas Cloud et wan-2.2 sont hors v1.
  */
-export const CREDITS_PER_SECOND: Record<ShotType, Record<Resolution, number>> = {
-  image: { '480p': 1, '720p': 3 },
-  video: { '480p': 2, '720p': 6 },
-};
-
-/**
- * Coût fournisseur réel. Deux modèles, pas un, depuis le 28 août 2026 —
- * voir `docs/providers.md`.
- *
- * **480p : `wan-video/wan-2.2-i2v-fast`.** Replicate le facture **par vidéo
- * générée**, pas par seconde : 81 images à 16 fps font 5,06 s de clip, à
- * 0,05 $. D'où 0,00988 $/s ci-dessous.
- *
- * Conséquence directe et coûteuse : **une scène de 3 s se paie comme une de
- * 5 s**, et la différence est perdue. Le storyboard doit donc refuser une
- * narration animée sous 5 secondes. La règle vit dans lib/storyboard/, pas
- * ici, mais c'est cette ligne-ci qui la justifie.
- *
- * **720p : `prunaai/p-video`**, à 0,02 $/s facturé à la seconde. Wan y
- * demande 0,11 $ le clip de 5,06 s, soit 0,02174 $/s : l'avantage s'inverse
- * au-dessus du 480p.
- *
- * Les images fixes passent par `flux-2-klein-4b` sur Cloudflare Workers AI,
- * facturé **par tuile de 512×512 générée** : 0,00045 $ pour une trame 848×480,
- * 0,00101 $ pour une 1280×720 (`imageCostUsd()` dans lib/images/flux.ts).
- *
- * Une image ne se paie qu'une fois, quelle que soit sa durée à l'écran. Les
- * valeurs par seconde ci-dessous supposent une fixe tenant 5 s — la moyenne
- * des voix off mesurées. Un diaporama aux plans plus longs nous coûte donc
- * moins que ce tableau ne dit, jamais plus.
- *
- * L'ordre de grandeur est ce qui compte ici : une seconde de clip coûte plus
- * de cent fois une seconde de fixe. C'est ce qui justifie que le plan image
- * soit facturé moitié prix.
- */
-export const PROVIDER_COST_USD_PER_SECOND: Record<
-  ShotType,
-  Record<Resolution, number>
-> = {
-  image: { '480p': 0.00009, '720p': 0.0002 },
-  video: { '480p': 0.00988, '720p': 0.02 },
-};
+export const CREDIT_FCFA = 20;
 
 export const FCFA_PER_USD = 625;
 
 /**
- * Dotations mensuelles, tranchées le 25 août 2026 (docs/tarifs.md).
+ * Ce que le client voit. Le mot « draft » ne doit **jamais** atteindre une
+ * interface : il décrit un mode du modèle, pas ce qu'on livre.
+ */
+export const QUALITY_LABEL: Record<Quality, string> = {
+  draft: 'Full HD',
+  standard: 'Cinéma',
+};
+
+/**
+ * Crédits par seconde de vidéo, par palier.
  *
- * Exprimées dans l'unité image, donc le double de ce qu'un plan « tout
- * animé » consomme :
+ * Les deux rendent en 1080p. Ce qui les sépare est le booléen `draft` de
+ * p-video, et l'écart de coût est d'un facteur quatre — d'où l'écart de prix.
+ */
+export const CREDITS_PER_SECOND: Record<Quality, number> = {
+  draft: 2,
+  standard: 7,
+};
+
+/**
+ * Une image se paie **une fois**, quelle que soit sa durée à l'écran.
  *
- *   Starter : 15 000 FCFA → 2 640 crédits = 22 min animées, ou 44 min d'images
- *   Pro     : 30 000 FCFA → 5 400 crédits = 45 min animées, ou 90 min d'images
+ * C'est le changement de fond de la v1 : facturer une fixe à la seconde
+ * faisait payer la durée d'un plan qui ne coûte rien de plus en restant
+ * affiché. 3 crédits = 60 FCFA pour 0,2 FCFA de coût réel.
+ */
+export const CREDITS_PER_IMAGE = 3;
+
+/** Voix off et lecture de documents, par tranche de 1 000 caractères entamée. */
+export const CREDITS_PER_1000_CHARS = 5;
+
+/**
+ * Le montage final : c'est la promesse commerciale du produit, pas une
+ * option. Coché par défaut dans l'interface.
+ */
+export const CREDITS_MONTAGE = 25;
+
+/** Import d'une vidéo du client, découpe et sous-titrage. Forfait. */
+export const CREDITS_IMPORT = 25;
+
+/**
+ * Coût fournisseur réel, en USD par seconde de 1080p.
  *
- * Le revenu sur une vidéo animée est inchangé : seul l'usage image devient
- * deux fois moins cher.
+ * Relevé sur https://replicate.com/prunaai/p-video/readme le 5 septembre 2026.
+ * Le readme donne aussi le 720p — 0,005 $ et 0,02 $ — qui ne sert pas en v1.
+ *
+ * ⚠️ Le tarif payant de p-video démarre le lundi 9 h CET. Ces valeurs sont
+ * celles annoncées : à revérifier avant lancement.
+ */
+export const PROVIDER_COST_USD_PER_SECOND: Record<Quality, number> = {
+  draft: 0.01,
+  standard: 0.04,
+};
+
+/**
+ * Plafond d'une génération, imposé par le modèle : `duration` est un entier
+ * de 1 à 10 secondes. Les scènes plus longues sont enchaînées par le montage.
+ *
+ * Et pas de plancher : p-video facture à la seconde réelle, contrairement à
+ * wan-2.2 qui facturait au clip et imposait 5 secondes minimum.
+ */
+export const MAX_SHOT_SECONDS = 10;
+
+/** Résolution de rendu, constante en v1. */
+export const RENDER_WIDTH = 1920;
+export const RENDER_HEIGHT = 1080;
+
+/**
+ * Le palier accessible selon le plan.
+ *
+ * Starter reste en Full HD : à 7 crédits la seconde, un quota Starter
+ * intégralement dépensé en Cinéma coûterait plus que l'abonnement ne rapporte
+ * une fois le reste des postes comptés.
+ *
+ * ⚠️ Le plafond Pro — 200 crédits de Cinéma par cycle — n'est **pas** applique
+ * ici : il demande un compteur par cycle de facturation, pas une constante.
+ * Tant qu'il n'existe pas, un client Pro peut dépenser tout son quota en
+ * Cinéma. La marge reste positive, mais elle tombe à ~69 %.
+ */
+export const QUALITY_BY_PLAN: Record<Plan, Quality[]> = {
+  starter: ['draft'],
+  pro: ['draft', 'standard'],
+  business: ['draft', 'standard'],
+};
+
+/** Plafond mensuel de Cinéma sur Pro, en crédits. Pas encore applique. */
+export const STANDARD_MONTHLY_CAP_CREDITS = 200;
+
+/**
+ * Dotations mensuelles, grille v1.
+ *
+ *   Starter : 15 000 FCFA → 1 000 crédits ≈ 12 vidéos de 30 s en Full HD
+ *   Pro     : 35 000 FCFA → 2 600 crédits ≈ 30 vidéos
+ *
+ * Ne jamais promettre un nombre de vidéos ferme côté client : il dépend du
+ * palier choisi et de la part d'images fixes.
  */
 export const PLAN_MONTHLY_CREDITS: Record<Plan, number> = {
-  starter: 2_640,
-  pro: 5_400,
+  starter: 1_000,
+  pro: 2_600,
   business: 0, // négocié par contrat
 };
 
 export const PLAN_PRICE_FCFA: Record<Plan, number | null> = {
   starter: 15_000,
-  pro: 30_000,
+  pro: 35_000,
   business: null, // sur devis
 };
 
 /**
  * Dotation offerte à l'inscription, sans paiement.
  *
- * 120 crédits = **une minute animée ou deux minutes d'images fixes** en 480p.
- * Assez pour produire une vidéo complète et juger le résultat, pas assez pour
- * s'en servir comme d'un abonnement gratuit.
+ * 120 crédits = une minute de vidéo en Full HD, montage compris de justesse.
+ * Assez pour juger le résultat, pas assez pour s'en servir d'abonnement.
  *
- * Le coût réel est de 400 FCFA au pire (tout en plans animés), 60 FCFA si
- * l'essai part en images fixes. C'est un budget publicitaire, pas une fuite.
- *
- * L'inscription offrait auparavant `PLAN_MONTHLY_CREDITS.starter`, soit un
- * mois complet de Starter — 22 minutes animées, environ 8 800 FCFA de coût
- * fournisseur par compte créé, y compris pour dix comptes ouverts par la même
- * personne.
- *
- * L'essai est bridé en 480p et filigrané : les deux concurrents directs
- * vendent « sans filigrane » comme fonctionnalité payante, donc c'est attendu
- * sur ce marché.
+ * Le coût réel au pire est de 750 FCFA — tout en Cinéma — et de 375 FCFA en
+ * Full HD. C'est un budget publicitaire, pas une fuite.
  */
 export const TRIAL_CREDITS = 120;
 
-/** Résolution imposée tant qu'aucun abonnement n'est actif. */
-export const TRIAL_RESOLUTION = '480p' as const;
+/** Palier imposé tant qu'aucun abonnement n'est actif. */
+export const TRIAL_QUALITY: Quality = 'draft';
 
 /**
- * Packs de recharge (docs/tarifs.md) : 5 000 FCFA = 720 crédits, soit 6 min
- * animées ou 12 min d'images.
+ * Packs de recharge, grille v1.
  *
- * Volontairement plus chère à la minute que l'abonnement (833 vs 682 FCFA la
- * minute animée), sinon personne ne s'abonne. `topUpMarginFcfa()` vérifie
- * qu'elle reste bénéficiaire au pire cas.
+ * La remise plafonne à 13 % sur le plus gros pack. **Ne jamais descendre plus
+ * bas** : le coût fournisseur ne baisse pas avec le volume, donc chaque franc
+ * de remise sort directement de la marge.
  */
 export const TOPUP_PACKS: { priceFcfa: number; credits: number }[] = [
-  { priceFcfa: 5_000, credits: 720 },
+  { priceFcfa: 2_000, credits: 100 },
+  { priceFcfa: 5_500, credits: 300 },
+  { priceFcfa: 13_000, credits: 750 },
 ];
 
 function assertPositiveDuration(durationS: number): void {
@@ -125,61 +157,85 @@ function assertPositiveDuration(durationS: number): void {
   }
 }
 
-/** Crédits requis pour générer un plan. Toujours arrondi au-dessus. */
+/**
+ * Crédits requis pour générer un plan.
+ *
+ * Une image est un forfait : sa durée à l'écran ne nous coûte rien de plus.
+ * Une vidéo se paie à la seconde, arrondie au-dessus — c'est la seconde
+ * entière qui part au modèle.
+ */
 export function creditsForShot(
   durationS: number,
   type: ShotType,
-  resolution: Resolution
+  quality: Quality
 ): number {
   assertPositiveDuration(durationS);
-  return Math.ceil(durationS * CREDITS_PER_SECOND[type][resolution]);
+  if (type === 'image') return CREDITS_PER_IMAGE;
+  return Math.ceil(durationS * CREDITS_PER_SECOND[quality]);
 }
 
 /**
- * Crédits requis pour un storyboard entier. Arrondi au-dessus par plan, car
- * un plan est l'unité réellement envoyée au fournisseur — et parce que le
- * tarif dépend maintenant du type de chaque plan, pas seulement de la durée
- * totale.
+ * Crédits requis pour un storyboard entier, montage compris.
+ *
+ * Le montage est dans le total par défaut parce qu'il est coché par défaut :
+ * un devis qui l'omettrait annoncerait un prix que le client ne paiera jamais.
  */
 export function estimateVideoCredits(
   shots: { durationS: number; type: ShotType }[],
-  resolution: Resolution
+  quality: Quality,
+  { montage = true }: { montage?: boolean } = {}
 ): number {
-  return shots.reduce(
-    (total, shot) => total + creditsForShot(shot.durationS, shot.type, resolution),
+  const plans = shots.reduce(
+    (total, shot) => total + creditsForShot(shot.durationS, shot.type, quality),
     0
   );
+  if (plans === 0) return 0;
+  return plans + (montage ? CREDITS_MONTAGE : 0);
 }
 
-/** Ce que ces crédits sont censés nous coûter chez le fournisseur, en USD. */
-export function providerCostUsd(
-  credits: number,
-  type: ShotType,
-  resolution: Resolution
-): number {
-  const seconds = credits / CREDITS_PER_SECOND[type][resolution];
-  return seconds * PROVIDER_COST_USD_PER_SECOND[type][resolution];
+/** Crédits d'une voix off, par tranche de 1 000 caractères entamée. */
+export function creditsForSpeech(characters: number): number {
+  if (characters <= 0) return 0;
+  return Math.ceil(characters / 1_000) * CREDITS_PER_1000_CHARS;
 }
 
-/** Secondes qu'un solde achète, pour un type de plan et une résolution. */
-export function secondsAffordable(
-  credits: number,
-  type: ShotType,
-  resolution: Resolution
-): number {
-  return Math.floor(credits / CREDITS_PER_SECOND[type][resolution]);
+/**
+ * Ce que ces crédits nous coûtent chez le fournisseur, en USD, **au pire cas**
+ * — tout dépensé en vidéo de ce palier.
+ *
+ * Le pire cas et pas la moyenne : une marge vérifiée ici tient quel que soit
+ * l'usage réel. Les images et la voix coûtent des ordres de grandeur moins.
+ */
+export function providerCostUsd(credits: number, quality: Quality): number {
+  const seconds = credits / CREDITS_PER_SECOND[quality];
+  return seconds * PROVIDER_COST_USD_PER_SECOND[quality];
+}
+
+/** Secondes de vidéo qu'un solde achète, pour un palier donné. */
+export function secondsAffordable(credits: number, quality: Quality): number {
+  return Math.floor(credits / CREDITS_PER_SECOND[quality]);
+}
+
+/** Images fixes qu'un solde achète. */
+export function imagesAffordable(credits: number): number {
+  return Math.floor(credits / CREDITS_PER_IMAGE);
+}
+
+/** Prix d'affichage d'un nombre de crédits, en FCFA. */
+export function creditsToFcfa(credits: number): number {
+  return credits * CREDIT_FCFA;
 }
 
 /**
  * Marge brute d'un pack de recharge, en FCFA.
  *
- * Calculée au **pire cas** — tout le pack dépensé en plans animés — pour
- * qu'un pack bénéficiaire ici le soit quel que soit l'usage réel.
+ * Calculée au pire cas — tout le pack dépensé en Cinéma — pour qu'un pack
+ * bénéficiaire ici le soit quel que soit l'usage réel.
  */
 export function topUpMarginFcfa(pack: {
   priceFcfa: number;
   credits: number;
 }): number {
-  const costFcfa = providerCostUsd(pack.credits, 'video', '480p') * FCFA_PER_USD;
+  const costFcfa = providerCostUsd(pack.credits, 'standard') * FCFA_PER_USD;
   return Math.round(pack.priceFcfa - costFcfa);
 }

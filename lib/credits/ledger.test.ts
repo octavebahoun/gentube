@@ -203,23 +203,27 @@ describe('video estimation and charging', () => {
 
     const { creditsEstimated, balance } = await estimateVideo(tdb, video.id);
 
-    // 25 s de plans animés à 2 crédits/s : l'image fixe est l'unité, un plan
-    // qui bouge coûte le double.
-    expect(creditsEstimated).toBe(50);
+    // 25 s de plans animés à 2 crédits/s en Full HD, soit 50, plus les
+    // 25 crédits de montage — coché par défaut, donc dans le devis.
+    expect(creditsEstimated).toBe(75);
     expect(balance).toBe(500);
     expect(await listLedger(tdb)).toEqual([]);
     expect((await tdb.findById(videos, video.id))?.status).toBe('draft');
   });
 
-  it('estimates 720p at three times the 480p rate', async () => {
+  it('estime le Cinéma trois fois et demie le Full HD, montage mis à part', async () => {
     const tdb = await createTenant('Alpha', { credits: 500 });
     const { video } = await createProjectWithVideo(tdb, {
-      resolution: '720p',
+      quality: 'standard',
     });
     await addShots(tdb, video.id, [6, 8, 5, 6]);
 
+    // 25 s à 7 crédits/s font 175, plus les 25 du montage. Le montage étant
+    // au forfait, le rapport entre les deux paliers se lit hors montage :
+    // 175 / 50, soit exactement 3,5.
     const { creditsEstimated } = await estimateVideo(tdb, video.id);
-    expect(creditsEstimated).toBe(150);
+    expect(creditsEstimated).toBe(200);
+    expect((200 - 25) / (75 - 25)).toBe(3.5);
   });
 
   it('charges once at validation and moves the video forward', async () => {
@@ -229,13 +233,13 @@ describe('video estimation and charging', () => {
 
     const result = await validateAndChargeVideo(tdb, video.id, { watermark: false });
 
-    expect(result.charged).toBe(50);
-    expect(result.balance).toBe(450);
+    expect(result.charged).toBe(75);
+    expect(result.balance).toBe(425);
     expect(result.video.status).toBe('validated');
-    expect(result.video.creditsConsumed).toBe(50);
+    expect(result.video.creditsConsumed).toBe(75);
 
     const [entry] = await listLedger(tdb);
-    expect(entry.delta).toBe(-50);
+    expect(entry.delta).toBe(-75);
     expect(entry.reason).toBe('video_debit');
     expect(entry.videoId).toBe(video.id);
   });
@@ -264,7 +268,7 @@ describe('video estimation and charging', () => {
     await expect(validateAndChargeVideo(tdb, video.id, { watermark: false })).rejects.toThrow(
       /only a draft can be validated/
     );
-    expect(await getBalance(tdb)).toBe(450);
+    expect(await getBalance(tdb)).toBe(425);
   });
 
   it('refuses to charge an empty storyboard', async () => {
@@ -296,7 +300,7 @@ describe('video estimation and charging', () => {
 
     const result = await refundVideo(tdb, video.id);
 
-    expect(result.refunded).toBe(50);
+    expect(result.refunded).toBe(75);
     expect(result.balance).toBe(500);
     expect(result.video.status).toBe('failed');
     expect(result.video.creditsConsumed).toBe(0);

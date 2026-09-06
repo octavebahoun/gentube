@@ -220,9 +220,13 @@ describe('submitting the clips', () => {
   });
 
   it('refuse une scène plus longue que ce que le modèle rend d\'un trait', async () => {
-    // 9 s en 480p : Wan plafonne à 7,56 s et ralentir le clip se verrait.
+    /*
+     * 11 s : p-video plafonne à 10, et ralentir le clip pour couvrir la voix
+     * se verrait. Le plafond était de 7,56 s du temps de Wan — une scène de
+     * 9 s passe désormais, c'est ce que le changement de modèle a gagné.
+     */
     const tdb = await createTenant('Alpha', { credits: 5_000 });
-    const video = await readyForClips(tdb, ['video'], { durationS: 9 });
+    const video = await readyForClips(tdb, ['video'], { durationS: 11 });
     const { client, calls } = animator();
 
     await expect(

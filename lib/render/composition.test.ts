@@ -46,7 +46,7 @@ function shot(overrides: Partial<Shot> = {}): Shot {
 const video = {
   title: 'Les Amazones',
   ratio: '16:9',
-  resolution: '480p',
+  quality: 'draft',
   voice: null,
   subtitles: true,
   subtitleStyle: 'karaoke',
@@ -122,10 +122,13 @@ describe('the composition HyperFrames renders', () => {
     // Le registre porte la palette et l'échelle, la composition les pose en
     // variables sur `#root`, et les règles les lisent avec un repli à la
     // valeur calculée : sans variable, la page rend le même pixel qu'hier.
+    //
+    // 63 px et non 28 : le repli se calcule sur la hauteur de la trame, passée
+    // de 480 à 1 080 avec la grille v1.
     const page = html([shot()]);
 
     expect(page).toContain('--gt-accent: #ce1f20;');
-    expect(page).toContain('font-size: var(--gt-sous-titre, 28px);');
+    expect(page).toContain('font-size: var(--gt-sous-titre, 63px);');
   });
 
   it('drives every animation from a declared instant, never an accumulated one', () => {    // Le moteur cherche chaque image au lieu de jouer. `to` part de l'état
@@ -180,16 +183,26 @@ describe('the composition HyperFrames renders', () => {
   });
 
   it('scales the subtitles with the frame, not in absolute pixels', () => {
-    const small = html([shot()]);
-    const large = html([shot()], {
-      video: { ...video, resolution: '720p' } as Video,
+    /*
+     * Les deux paliers vendus rendent desormais dans la meme trame, donc la
+     * comparaison ne peut plus se faire sur la qualite. Elle se fait sur le
+     * cadrage.
+     *
+     * C'est la **hauteur** que les sous-titres suivent, et le rapport le dit :
+     * 1 920 de haut en vertical contre 1 080 en paysage, soit 1,78, et les
+     * tailles sont dans le meme rapport. Une taille en pixels absolus donnerait
+     * un texte minuscule en vertical, la ou l'ecran est le plus haut.
+     */
+    const paysage = html([shot()]);
+    const vertical = html([shot()], {
+      video: { ...video, ratio: '9:16' } as Video,
     });
 
     const size = (page: string) =>
       Number(/\.captions \{ font-size: var\(--gt-sous-titre, (\d+)px\)/.exec(page)?.[1]);
 
-    expect(size(small)).toBeGreaterThan(0);
-    expect(size(large)).toBeGreaterThan(size(small));
+    expect(size(paysage)).toBeGreaterThan(0);
+    expect(size(vertical) / size(paysage)).toBeCloseTo(1920 / 1080, 1);
   });
 
   it('adds the watermark only when it was paid for', () => {
@@ -1013,10 +1026,10 @@ describe('the composition HyperFrames renders', () => {
     });
   });
 
-  it('declares the frame the resolution is billed at', () => {
+  it('declare la trame livree, du 1080p dans les deux paliers', () => {
     const page = html([shot()]);
-    expect(page).toContain('data-width="848"');
-    expect(page).toContain('data-height="480"');
+    expect(page).toContain('data-width="1920"');
+    expect(page).toContain('data-height="1080"');
   });
 });
 

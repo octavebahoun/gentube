@@ -1,40 +1,43 @@
 /**
- * Ce qu'un tenant a le droit de produire, selon qu'il paie ou non.
+ * Ce qu'un tenant a le droit de produire, selon ce qu'il paie.
  *
- * L'essai n'est pas un plan bridé au hasard : il est bridé là où ça coûte
- * cher à produire et là où ça se voit. Le 720p coûte plus du double du 480p à
- * générer, et le filigrane est la seule chose qui distingue une vidéo d'essai
- * d'une vidéo payée aux yeux du spectateur.
+ * Deux verrous, pas un. L'essai est bridé sur le palier **et** filigrané ; un
+ * abonné Starter est bridé sur le palier seul.
  *
- * Les deux concurrents directs vendent « sans filigrane » comme fonctionnalité
- * payante : c'est attendu sur ce marché, personne ne le lit comme une
- * mutilation.
+ * Le palier est là où l'argent se joue : le Cinéma coûte quatre fois le
+ * Full HD à produire — 0,04 $ contre 0,01 $ la seconde — et se vend trois fois
+ * et demie le prix. Un quota Starter intégralement dépensé en Cinéma
+ * rapporterait moins qu'il ne coûte une fois les autres postes comptés, d'où
+ * la restriction : elle protège la marge, pas la qualité livrée.
+ *
+ * Le filigrane, lui, est la seule chose qui distingue une vidéo d'essai d'une
+ * vidéo payée aux yeux du spectateur. Les deux concurrents directs vendent
+ * « sans filigrane » comme fonctionnalité payante : c'est attendu sur ce
+ * marché, personne ne le lit comme une mutilation.
  */
 
-import type { Resolution } from '@/lib/db/schema';
-import { TRIAL_RESOLUTION } from '@/lib/credits/pricing';
+import type { Plan, Quality } from '@/lib/db/schema';
+import {
+  QUALITY_BY_PLAN,
+  QUALITY_LABEL,
+  TRIAL_QUALITY,
+} from '@/lib/credits/pricing';
 import type { TenantDb } from '@/lib/db/tenant-db';
 import { getSubscription } from './checkout';
 
 export type Entitlements = {
   /** Vrai quand un abonnement est actif ou en retard de paiement mais encore ouvert. */
   paid: boolean;
-  /** Résolutions que ce tenant peut demander. */
-  resolutions: Resolution[];
+  /** Paliers que ce tenant peut demander. */
+  qualities: Quality[];
   /** Le rendu portera un filigrane. */
   watermark: boolean;
 };
 
 const TRIAL: Entitlements = {
   paid: false,
-  resolutions: [TRIAL_RESOLUTION],
+  qualities: [TRIAL_QUALITY],
   watermark: true,
-};
-
-const PAID: Entitlements = {
-  paid: true,
-  resolutions: ['480p', '720p'],
-  watermark: false,
 };
 
 export async function getEntitlements(tdb: TenantDb): Promise<Entitlements> {
@@ -45,28 +48,40 @@ export async function getEntitlements(tdb: TenantDb): Promise<Entitlements> {
   // retombent sur l'essai.
   const paid =
     subscription?.status === 'active' || subscription?.status === 'past_due';
-  return paid ? PAID : TRIAL;
+  if (!paid) return TRIAL;
+
+  /*
+   * Le plan décide du palier, et pas seulement le fait de payer. Sans cette
+   * lecture, un Starter à 15 000 FCFA accéderait au Cinéma exactement comme un
+   * Pro à 35 000 — l'écart de prix entre les deux plans ne reposerait plus sur
+   * rien de mesurable.
+   */
+  const plan = (subscription?.plan ?? 'starter') as Plan;
+  return {
+    paid: true,
+    qualities: QUALITY_BY_PLAN[plan] ?? QUALITY_BY_PLAN.starter,
+    watermark: false,
+  };
 }
 
-export class ResolutionNotAllowedError extends Error {
+export class QualityNotAllowedError extends Error {
   readonly statusCode = 402;
 
-  constructor(readonly resolution: Resolution) {
+  constructor(readonly quality: Quality) {
     super(
-      `Resolution ${resolution} needs an active plan. The trial produces ` +
-        `${TRIAL_RESOLUTION} only.`
+      `Le palier ${QUALITY_LABEL[quality]} demande un plan qui l'inclut.`
     );
-    this.name = 'ResolutionNotAllowedError';
+    this.name = 'QualityNotAllowedError';
   }
 }
 
 /** À appeler avant de créer ou de modifier une vidéo. */
-export async function assertResolutionAllowed(
+export async function assertQualityAllowed(
   tdb: TenantDb,
-  resolution: Resolution
+  quality: Quality
 ): Promise<void> {
-  const { resolutions } = await getEntitlements(tdb);
-  if (!resolutions.includes(resolution)) {
-    throw new ResolutionNotAllowedError(resolution);
+  const { qualities } = await getEntitlements(tdb);
+  if (!qualities.includes(quality)) {
+    throw new QualityNotAllowedError(quality);
   }
 }

@@ -1,5 +1,5 @@
-import type { Ratio, Resolution } from '@/lib/db/schema';
-import { dimensionsFor } from '@/lib/storyboard/render';
+import type { Ratio } from '@/lib/db/schema';
+import { modelFrameFor } from '@/lib/storyboard/render';
 
 /**
  * Images fixes — FLUX sur Cloudflare Workers AI.
@@ -111,7 +111,6 @@ export type GeneratedImage = {
 export type ImageRequest = {
   prompt: string;
   ratio: Ratio;
-  resolution: Resolution;
   /** Fixe le bruit initial : deux appels de même graine rendent la même image. */
   seed?: number;
 };
@@ -123,12 +122,7 @@ export interface ImageGenerator {
 export class WorkersAiImageClient implements ImageGenerator {
   constructor(private readonly config: ImageConfig = imageConfig()) {}
 
-  async generate({
-    prompt,
-    ratio,
-    resolution,
-    seed,
-  }: ImageRequest): Promise<GeneratedImage> {
+  async generate({ prompt, ratio, seed }: ImageRequest): Promise<GeneratedImage> {
     const described = prompt.trim();
     if (!described) {
       // Le modèle rend une image de bruit et la facture. Refuser ici est la
@@ -136,7 +130,7 @@ export class WorkersAiImageClient implements ImageGenerator {
       throw new ImageError('Nothing to draw: the visual prompt is empty.', 400);
     }
 
-    const { width, height } = dimensionsFor(ratio, resolution);
+    const { width, height } = modelFrameFor(ratio);
     if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
       throw new ImageError(
         `Frame ${width}×${height} exceeds the model limit of ${MAX_DIMENSION}px.`,

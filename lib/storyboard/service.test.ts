@@ -95,13 +95,13 @@ async function draftVideo(
     pipelineOverride,
     theme,
     stylePrompt,
-    resolution,
+    quality,
   }: {
     defaultPipeline?: Pipeline;
     pipelineOverride?: string;
     theme?: string;
     stylePrompt?: string;
-    resolution?: '480p' | '720p';
+    quality?: 'draft' | 'standard';
   } = {}
 ) {
   const project = await createProject(tdb, {
@@ -113,7 +113,7 @@ async function draftVideo(
     projectId: project.id,
     title: 'Les Amazones',
     theme,
-    resolution,
+    quality,
     pipelineOverride,
   });
   return { project, video };
@@ -160,12 +160,16 @@ describe('storyboard prompting', () => {
       library: LIBRARY,
     });
 
-    const plancher = Math.ceil(minClipSeconds('480p') * CARACTERES_PAR_SECONDE);
+    const plancher = Math.ceil(minClipSeconds() * CARACTERES_PAR_SECONDE);
     expect(messages[0].content).toContain(
       `A \`video\` scene needs at least ${plancher} characters`
     );
-    // Calculé, pas écrit : la borne doit suivre le modèle d'animation.
-    expect(plancher).toBeGreaterThan(70);
+    /*
+     * Calculé, pas écrit : la borne suit le modèle d'animation. Elle est
+     * tombée de 71 caractères à 14 en passant de Wan à p-video — Wan ne
+     * descendait pas sous 81 images, soit 5,06 s de narration imposées.
+     */
+    expect(plancher).toBeLessThan(20);
   });
 
   it('asks for narration and forbids durations', () => {
@@ -394,9 +398,8 @@ describe('storyboard generation', () => {
       'estimated',
       'estimated',
     ]);
-    // 3 scènes animées de 5 s à 2 crédits/s : l'unité est l'image fixe, un
-    // plan qui bouge coûte le double.
-    expect(result.creditsEstimated).toBe(30);
+    // 3 scènes animées de 5 s à 2 crédits/s font 30, plus les 25 du montage.
+    expect(result.creditsEstimated).toBe(55);
     expect(result.durationsMeasured).toBe(false);
     expect(result.video.creditsConsumed).toBe(0);
   });
@@ -449,17 +452,18 @@ describe('storyboard generation', () => {
     expect((await getProject(tdb, choisi.id)).voiceId).toBe('lea');
   });
 
-  it('prices 720p three times the 480p rate', async () => {
+  it('facture le Cinéma trois fois et demie le Full HD', async () => {
     const tdb = await createTenant('Alpha', { credits: 1_000 });
-    await subscribe(tdb); // le 720p demande un abonnement actif
-    const { video } = await draftVideo(tdb, { resolution: '720p' });
+    await subscribe(tdb); // le Cinéma demande un abonnement actif
+    const { video } = await draftVideo(tdb, { quality: 'standard' });
 
     const result = await generateStoryboard(tdb, video.id, {
       client: answering(scenesOf(2, { seconds: 5 })),
       library: [],
     });
 
-    expect(result.creditsEstimated).toBe(60);
+    // 2 scènes de 5 s à 7 crédits/s font 70, plus les 25 du montage.
+    expect(result.creditsEstimated).toBe(95);
   });
 
   it('replaces the previous draft wholesale', async () => {
@@ -565,9 +569,9 @@ describe('storyboard editing', () => {
       durationS: 4,
       durationSource: 'estimated',
     });
-    // Deux plans animés de 5 s, puis une image fixe de 4 s : seule l'image
-    // est facturée à l'unité.
-    expect(board.creditsEstimated).toBe(5 * 2 + 5 * 2 + 4);
+    // Deux plans animés de 5 s, puis une image fixe : celle-ci est un forfait
+    // de 3 crédits, sa durée à l'écran ne la change pas. Plus le montage.
+    expect(board.creditsEstimated).toBe(5 * 2 + 5 * 2 + 3 + 25);
   });
 
   it('refuses a scene with nothing to read', async () => {
@@ -613,7 +617,7 @@ describe('storyboard editing', () => {
       audioUrl: null,
       words: null,
     });
-    expect(updated.creditsEstimated).toBe((8 + 5) * 2);
+    expect(updated.creditsEstimated).toBe((8 + 5) * 2 + 25);
     expect(updated.durationsMeasured).toBe(false);
   });
 
@@ -640,7 +644,7 @@ describe('storyboard editing', () => {
     const after = await deleteShot(tdb, video.id, board.shots[1].id);
 
     expect(after.shots.map((shot) => shot.order)).toEqual([1, 2]);
-    expect(after.creditsEstimated).toBe(20);
+    expect(after.creditsEstimated).toBe(20 + 25);
   });
 
   it('reorders on an exact list, and refuses anything else', async () => {
@@ -714,8 +718,8 @@ describe('validation', () => {
 
     const { charged, balance } = await validateStoryboard(tdb, video.id);
 
-    expect(charged).toBe(30);
-    expect(balance).toBe(970);
+    expect(charged).toBe(55);
+    expect(balance).toBe(945);
     expect((await getStoryboard(tdb, video.id)).video.status).toBe('validated');
   });
 

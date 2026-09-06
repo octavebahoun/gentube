@@ -14,7 +14,6 @@ import {
 } from './plans';
 import type {
   Ratio,
-  Resolution,
   Shot,
   SubtitleStyle,
   Video,
@@ -919,28 +918,44 @@ export function totalDurationSeconds(scenes: TimedScene[]): number {
  * large, donc 6 px de décalage avec la trame — soit un léger étirement sur
  * chaque plan. On aligne la trame sur ce que le modèle sait produire.
  */
-const FRAME_SIZES: Record<Resolution, { long: number; short: number }> = {
-  '480p': { long: 848, short: 480 },
-  '720p': { long: 1280, short: 720 },
-};
+const FRAME_LONG = 1920;
+const FRAME_SHORT = 1080;
 
 /**
- * Taille de la trame de sortie.
+ * Taille de la trame livrée.
  *
- * Dépend de la résolution **et** du ratio. Elle ne dépendait que du ratio,
- * et rendait donc tout en 1920×1080 : un client qui payait le 480p — un
- * crédit la seconde — recevait un fichier 1080p, et le palier 720p facturé
- * trois fois plus n'existait qu'à l'affichage. L'essai gratuit bridé en 480p
- * livrait lui aussi du 1080p.
+ * **1920×1080, quel que soit le palier.** Depuis la grille v1 les deux paliers
+ * vendus rendent en 1080p : ce qui les sépare est le mode `draft` de p-video,
+ * pas le nombre de pixels. Un client « Full HD » et un client « Cinéma »
+ * reçoivent le même cadre, l'un avec moins d'étapes de débruitage.
  */
-export function dimensionsFor(
-  ratio: Ratio,
-  resolution: Resolution
-): { width: number; height: number } {
-  const { long, short } = FRAME_SIZES[resolution];
+export function dimensionsFor(ratio: Ratio): { width: number; height: number } {
   return ratio === '9:16'
-    ? { width: short, height: long }
-    : { width: long, height: short };
+    ? { width: FRAME_SHORT, height: FRAME_LONG }
+    : { width: FRAME_LONG, height: FRAME_SHORT };
+}
+
+/** Arrondi au multiple de 16 supérieur. */
+function auMultipleDe16(valeur: number): number {
+  return Math.ceil(valeur / 16) * 16;
+}
+
+/**
+ * Taille à demander au modèle d'images, qui n'est pas celle qu'on livre.
+ *
+ * Les modèles image de Workers AI ramènent toute dimension au multiple de 16
+ * **inférieur** : demander 1080 rend 1072, soit huit pixels manquants sur une
+ * trame de 1080. Auparavant la trame elle-même était alignée sur le modèle —
+ * 848 au lieu du 854 canonique du 480p — mais ce détour ne tient plus : le
+ * cadre livré est maintenant celui de p-video, un vrai 1920×1080.
+ *
+ * On demande donc le multiple de 16 **supérieur**, 1088, et la composition
+ * redescend à 1080. Réduire ne fait que jeter des pixels ; agrandir depuis
+ * 1072 aurait ramolli chaque plan.
+ */
+export function modelFrameFor(ratio: Ratio): { width: number; height: number } {
+  const { width, height } = dimensionsFor(ratio);
+  return { width: auMultipleDe16(width), height: auMultipleDe16(height) };
 }
 
 // ---------------------------------------------------------------------------
@@ -1043,7 +1058,7 @@ export function toHyperframesStoryboard(
     Video,
     | 'title'
     | 'ratio'
-    | 'resolution'
+    | 'quality'
     | 'voice'
     | 'subtitles'
     | 'subtitleStyle'
@@ -1085,7 +1100,7 @@ export function toHyperframesStoryboard(
   });
 
   const starts = sceneStartTimes(parsed);
-  const { width, height } = dimensionsFor(video.ratio, video.resolution);
+  const { width, height } = dimensionsFor(video.ratio);
 
   return {
     title: video.title,

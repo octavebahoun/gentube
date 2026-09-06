@@ -30,6 +30,7 @@ import { getUser } from '@/lib/db/queries';
 import { tenantDb, eq } from '@/lib/db/tenant-db';
 import { shots, videos } from '@/lib/db/schema';
 import { listVideos } from '@/lib/videos';
+import { QUALITY_LABEL } from '@/lib/credits/pricing';
 
 type EtapeEtat = 'faite' | 'encours' | 'attente' | 'echec' | 'indispo';
 type Etape = {
@@ -57,7 +58,7 @@ function buildEtapes(
     detail:
       total === 0
         ? 'Aucune scène — générez le storyboard depuis la vidéo'
-        : `${total} scène${total > 1 ? 's' : ''} · ${video.resolution}`,
+        : `${total} scène${total > 1 ? 's' : ''} · ${QUALITY_LABEL[video.quality]}`,
     etat: total > 0 ? 'faite' : video.status === 'failed' ? 'echec' : 'attente',
   };
 
@@ -173,7 +174,7 @@ export default async function FabricationPage() {
 
   if (sorted.length === 0) {
     return (
-      <section className="flex flex-1 flex-col p-4 lg:p-8">
+      <section className="shell-gutter mx-auto flex w-full max-w-(--content-max) flex-1 flex-col px-4 py-6 lg:px-8 lg:py-8">
         <div className="mb-8">
           <p className="text-xs font-medium tracking-widest text-brand-accent uppercase">
             Fabrication
@@ -235,7 +236,7 @@ export default async function FabricationPage() {
   const fileAttente = enriched.filter((e) => e.video.status === 'validated' || e.video.status === 'draft').slice(0, 6);
 
   return (
-    <section className="flex flex-1 flex-col gap-8 p-4 lg:p-8">
+    <section className="shell-gutter mx-auto flex w-full max-w-(--content-max) flex-1 flex-col gap-8 px-4 py-6 lg:px-8 lg:py-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-medium tracking-widest text-brand-accent uppercase">
@@ -269,7 +270,7 @@ export default async function FabricationPage() {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-6">
-          {enriched.slice(0, 12).map(({ video, shotList, etapes, progression }) => {
+          {enriched.slice(0, 6).map(({ video, shotList, etapes, progression }) => {
             const aEchoué = etapes.some((e) => e.etat === 'echec');
             return (
               <Card key={video.id} className={aEchoué ? 'border-destructive/40' : undefined}>
@@ -282,7 +283,7 @@ export default async function FabricationPage() {
                         </Link>
                       </CardTitle>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {video.resolution} · {video.ratio} · {shotList.length} scène
+                        {QUALITY_LABEL[video.quality]} · {video.ratio} · {shotList.length} scène
                         {shotList.length !== 1 ? 's' : ''} ·{' '}
                         <span className="capitalize">{video.status}</span>
                         {video.creditsConsumed > 0 && ` · ${video.creditsConsumed} crédits débités`}
@@ -357,10 +358,10 @@ export default async function FabricationPage() {
               </Card>
             );
           })}
-          {enriched.length > 12 && (
+          {enriched.length > 6 && (
             <p className="text-center text-sm text-muted-foreground">
-              + {enriched.length - 12} vidéo{enriched.length - 12 > 1 ? 's' : ''} plus ancienne
-              {enriched.length - 12 > 1 ? 's' : ''} — filtrez dans la bibliothèque.
+              + {enriched.length - 6} vidéo{enriched.length - 6 > 1 ? 's' : ''} plus ancienne
+              {enriched.length - 6 > 1 ? 's' : ''} — filtrez dans la bibliothèque.
             </p>
           )}
         </div>
@@ -381,7 +382,7 @@ export default async function FabricationPage() {
                   <Card key={video.id} className="border-dashed">
                     <CardHeader className="py-3">
                       <CardTitle className="text-sm font-medium">{video.title}</CardTitle>
-                      <p className="text-xs capitalize text-muted-foreground">{video.status} · {video.resolution}</p>
+                      <p className="text-xs capitalize text-muted-foreground">{video.status} · {QUALITY_LABEL[video.quality]}</p>
                     </CardHeader>
                   </Card>
                 ))}

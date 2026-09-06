@@ -26,14 +26,15 @@ export default async function NewVideoPage({
     throw error;
   }
 
-  // L'essai ne produit qu'en 480p. On n'affiche pas un choix que le serveur
-  // refusera : une option grisée sans explication se lit comme un bug.
-  const { resolutions, watermark } = await getEntitlements(
+  // L'essai et le plan Starter ne produisent qu'en Full HD. On n'affiche pas
+  // un choix que le serveur refusera : une option grisée sans explication se
+  // lit comme un bug.
+  const { qualities, watermark } = await getEntitlements(
     tenantDb(user.tenantId)
   );
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
+    <section className="shell-gutter mx-auto w-full max-w-(--content-max) flex-1 px-4 py-6 lg:px-8 lg:py-8">
       <Link
         href={`/dashboard/projects/${project.id}`}
         className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
@@ -49,7 +50,7 @@ export default async function NewVideoPage({
         </CardHeader>
         <CardContent>
           <NewVideoForm
-            allowedResolutions={resolutions}
+            allowedQualities={qualities}
             watermark={watermark}
             projectId={project.id}
             projectPipeline={project.defaultPipeline}

@@ -144,7 +144,7 @@ export function StoryboardEditor({
             durationsMeasured={durationsMeasured}
             spokenSeconds={spokenSeconds}
             sceneCount={items.length}
-            resolution={video.resolution}
+            quality={video.quality}
           />
           {/*
             Le bouton d'écriture du storyboard était **importé et jamais posé**.

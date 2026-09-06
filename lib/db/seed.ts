@@ -269,7 +269,7 @@ async function seed() {
     title: 'Les Amazones du Dahomey (brouillon)',
     theme: THEME,
     status: 'draft',
-    resolution: '480p',
+    quality: 'draft',
   });
   await studioDb.insert(
     shots,
@@ -283,13 +283,16 @@ async function seed() {
    * La facturation passe par les vraies fonctions du grand livre, donc le
    * solde du tenant reste cohérent avec ses écritures.
    */
-  async function createChargedVideo(title: string, resolution: '480p' | '720p') {
+  async function createChargedVideo(
+    title: string,
+    quality: 'draft' | 'standard'
+  ) {
     const [video] = await studioDb.insert(videos, {
       projectId: project.id,
       title,
       theme: THEME,
       status: 'draft',
-      resolution,
+      quality,
     });
     const inserted = await studioDb.insert(
       shots,
@@ -302,7 +305,7 @@ async function seed() {
   // --- Variante 2 : en production — visuels des dernières scènes cuisent ---
   const generating = await createChargedVideo(
     'Les Amazones du Dahomey (production)',
-    '480p'
+    'draft'
   );
   await studioDb.update(
     shots,
@@ -321,7 +324,7 @@ async function seed() {
   );
 
   // --- Variante 3 : échouée — la dernière scène a planté, le reste remboursé ---
-  const failed = await createChargedVideo('Les Amazones du Dahomey (échec)', '480p');
+  const failed = await createChargedVideo('Les Amazones du Dahomey (échec)', 'draft');
   await studioDb.update(
     shots,
     { assetUrl: null, status: 'failed', updatedAt: new Date() },
@@ -330,7 +333,7 @@ async function seed() {
   await refundVideo(studioDb, failed.video.id);
 
   // --- Variante 4 : publiée — complète, en 720p, renvoyée vers YouTube ---
-  const published = await createChargedVideo('Les Amazones du Dahomey', '720p');
+  const published = await createChargedVideo('Les Amazones du Dahomey', 'standard');
   await studioDb.update(
     videos,
     {
@@ -353,7 +356,7 @@ async function seed() {
     projectId: demoProject.id,
     title: 'Demo video',
     status: 'draft',
-    resolution: '720p',
+    quality: 'standard',
   });
 
   const balance = await studioDb.getTenant();

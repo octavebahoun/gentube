@@ -36,11 +36,11 @@ const THEME = process.argv[2] ?? 'Les Amazones du Dahomey';
 
 const CACHE = 'render/demo/pipeline-storyboard.json';
 
-/** 16:9, 480p — le format par défaut, et celui que `render.ts` monte. */
+/** 16:9, Full HD — le palier par défaut, et celui que `render.ts` monte. */
 const VIDEO = {
   title: THEME,
   ratio: '16:9',
-  resolution: '480p',
+  quality: 'draft',
   voice: null,
   subtitles: true,
   subtitleStyle: 'karaoke',
@@ -204,7 +204,6 @@ async function main() {
     // `visualPrompt` va le chercher elle-même.
     const still = await imageFor(nom, visualPrompt(scene.prompt, null, registre), {
       ratio: VIDEO.ratio,
-      resolution: VIDEO.resolution,
       seed: 2_000 + scene.order,
     });
 
