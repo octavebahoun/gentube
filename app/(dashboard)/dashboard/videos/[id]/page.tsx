@@ -1,7 +1,4 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getUser } from '@/lib/db/queries';
 import { tenantDb } from '@/lib/db/tenant-db';
 import { getProject } from '@/lib/projects';
@@ -15,9 +12,17 @@ import { listSounds } from '@/lib/sounds';
 import { listClientAssets } from '@/lib/assets';
 import { createAssetStore } from '@/lib/storage';
 import { QUALITY_LABEL } from '@/lib/credits/pricing';
+import { GxPage, GxFil, GxNotice } from '@/components/gx/gx-page';
+import { EtatBadge } from '@/components/gx/gx-etat';
 
 /** Le temps qu'une lecture tient : assez pour regarder, pas pour partager. */
 const LECTURE_TTL_S = 60 * 60;
+
+const PIPELINE_LABEL: Record<string, string> = {
+  image: 'images fixes',
+  video: 'plans animés',
+  mixed: 'mixte',
+};
 
 /**
  * L'adresse de lecture du montage.
@@ -35,16 +40,6 @@ async function lienDuMontage(cle: string | null): Promise<string | null> {
     return null;
   }
 }
-
-const STATUS_STYLE: Record<string, string> = {
-  draft: 'bg-secondary text-secondary-foreground',
-  validated: 'bg-amber-500/15 text-amber-400',
-  generating: 'bg-amber-500/15 text-amber-400',
-  rendering: 'bg-amber-500/15 text-amber-400',
-  rendered: 'bg-green-500/15 text-green-400',
-  published: 'bg-green-500/15 text-green-400',
-  failed: 'bg-red-500/15 text-red-400',
-};
 
 export default async function VideoPage({
   params,
@@ -67,17 +62,17 @@ export default async function VideoPage({
 
   const montage = await lienDuMontage(board.video.outputUrl);
   const project = await getProject(tdb, board.video.projectId);
+  const brouillon = board.video.status === 'draft';
 
   // Le catalogue est partagé entre tous les projets : il ne passe pas par le
   // scope tenant. Lu ici plutôt que dans le composant, qui est client.
-  const musics =
-    board.video.status === 'draft'
-      ? (await listSounds('music')).map((sound) => ({
-          key: sound.src,
-          name: sound.name,
-          mood: sound.mood,
-        }))
-      : [];
+  const musics = brouillon
+    ? (await listSounds('music')).map((sound) => ({
+        key: sound.src,
+        name: sound.name,
+        mood: sound.mood,
+      }))
+    : [];
   const pipeline = board.video.pipelineOverride ?? project.defaultPipeline;
 
   /*
@@ -88,120 +83,118 @@ export default async function VideoPage({
    * pour un brouillon — après validation les crédits sont débités, et lier un
    * fichier ne rembourserait rien.
    */
-  const apports =
-    board.video.status === 'draft' ? await listClientAssets(tdb, project.id) : [];
+  const apports = brouillon ? await listClientAssets(tdb, project.id) : [];
 
   return (
-    <section className="shell-gutter mx-auto w-full max-w-(--content-max) flex-1 px-4 py-6 lg:px-8 lg:py-8">
-      <nav aria-label="Fil d’Ariane" className="mb-4 flex items-center gap-1 text-sm text-muted-foreground">
-        <Link
-          href={`/dashboard/projects/${project.id}`}
-          className="inline-flex min-h-11 items-center hover:text-foreground"
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" aria-hidden="true" />
-          {project.name}
-        </Link>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page" className="truncate text-foreground">{board.video.title}</span>
-      </nav>
-
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <h1 className="text-lg lg:text-2xl font-medium">{board.video.title}</h1>
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
-            STATUS_STYLE[board.video.status] ?? 'bg-secondary text-secondary-foreground'
-          }`}
-        >
-          {board.video.status}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {QUALITY_LABEL[board.video.quality]} · {pipeline} pipeline
-        </span>
-      </div>
-
-      {board.video.theme && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Thème</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm whitespace-pre-line">{board.video.theme}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {!isLlmConfigured() && board.video.status === 'draft' && (
-        <p className="mb-6 rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-400">
-          La clé <code>DEEPSEEK_API_KEY</code> manque sur cette instance : la
-          génération est indisponible. Les scènes restent éditables à la main.
-        </p>
-      )}
-
-      {board.shots.length > 0 &&
-        !board.durationsMeasured &&
-        board.video.status === 'draft' &&
-        !isVoiceConfigured() && (
-          <p className="mb-6 rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-400">
-            La clé <code>ELEVENLABS_API_KEY</code> manque : la voix off ne peut
-            pas être enregistrée — et sans elle, le prix reste une estimation
-            et la vidéo ne peut pas être validée.
-          </p>
-        )}
-
-      {montage && (
-        <Card className="mb-8 max-w-3xl">
-          <CardHeader>
-            <CardTitle>Le montage</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-            <video src={montage} controls playsInline className="w-full rounded-md" />
-            <p className="text-xs text-muted-foreground">
-              Le lien de lecture vaut une heure. Refaites le montage pour le
-              renouveler.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      <StoryboardEditor
-        video={board.video}
-        shots={board.shots}
-        creditsEstimated={board.creditsEstimated}
-        balance={board.balance}
-        canAfford={board.canAfford}
-        durationsMeasured={board.durationsMeasured}
-        assets={apports}
+    <GxPage className="max-w-6xl">
+      <GxFil
+        parent={project.name}
+        parentHref={`/dashboard/projects/${project.id}`}
+        courant={board.video.title}
       />
 
-      {board.video.status === 'draft' && (
-        <Card className="mt-8 max-w-2xl">
-          <CardHeader>
-            <CardTitle>Réglages de rendu</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <VideoSettings
-              videoId={board.video.id}
-              quality={QUALITY_LABEL[board.video.quality]}
-              ratio={board.video.ratio}
-              subtitleStyle={board.video.subtitleStyle}
-              musicUrl={board.video.musicUrl}
-              musics={musics}
-            />
-          </CardContent>
-        </Card>
+      <header className="mb-8">
+        <p className="t-label text-marque">Vidéo</p>
+        <h1 className="t-h2 mt-3">{board.video.title}</h1>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <EtatBadge status={board.video.status} />
+          <span className="t-data text-xs text-paper-3">
+            {QUALITY_LABEL[board.video.quality]} · {board.video.ratio} ·{' '}
+            {PIPELINE_LABEL[pipeline] ?? pipeline}
+          </span>
+        </div>
+        <div aria-hidden="true" className="mire mt-6 h-[3px] w-24" />
+      </header>
+
+      <div className="space-y-4">
+        {!isLlmConfigured() && brouillon && (
+          <GxNotice tone="erreur">
+            La clé <code className="font-mono">DEEPSEEK_API_KEY</code> manque sur cette instance :
+            la génération est indisponible. Les scènes restent éditables à la main.
+          </GxNotice>
+        )}
+
+        {board.shots.length > 0 && !board.durationsMeasured && brouillon && !isVoiceConfigured() && (
+          <GxNotice tone="erreur">
+            La clé <code className="font-mono">ELEVENLABS_API_KEY</code> manque : la voix off ne
+            peut pas être enregistrée. Sans elle, le prix reste une estimation et la vidéo ne peut
+            pas être validée.
+          </GxNotice>
+        )}
+      </div>
+
+      {/* Le montage d'abord : quand il existe, c'est ce qu'on vient voir. */}
+      {montage && (
+        <section className="plate-hi mt-6 overflow-hidden">
+          <div aria-hidden="true" className="mire h-[3px]" />
+          <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
+            <p className="t-label text-marque">Le montage</p>
+            <p className="t-data text-xs text-paper-3">{board.video.ratio}</p>
+          </div>
+          <div className="p-5">
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <video src={montage} controls playsInline className="w-full rounded-lg bg-ink" />
+            <p className="mt-3 text-xs text-paper-3">
+              Le lien de lecture vaut une heure. Refaites le montage pour le renouveler.
+            </p>
+          </div>
+        </section>
       )}
 
-      {board.video.status === 'draft' && (
-        <Card className="mt-8 max-w-2xl">
-        <CardHeader>
-          <CardTitle>Zone dangereuse</CardTitle>
-        </CardHeader>
-          <CardContent>
-            <DeleteVideoButton videoId={board.video.id} projectId={project.id} />
-          </CardContent>
-        </Card>
+      {board.video.theme && (
+        <section className="plate mt-6 p-5">
+          <p className="t-label text-paper-3">Le sujet</p>
+          <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-paper-2">
+            {board.video.theme}
+          </p>
+        </section>
       )}
-    </section>
+
+      <div className="mt-6">
+        <StoryboardEditor
+          video={board.video}
+          shots={board.shots}
+          creditsEstimated={board.creditsEstimated}
+          balance={board.balance}
+          canAfford={board.canAfford}
+          durationsMeasured={board.durationsMeasured}
+          assets={apports}
+        />
+      </div>
+
+      {brouillon && (
+        <div className="mt-8 space-y-4">
+          <section className="plate p-6">
+            <h2 className="font-display text-lg font-bold tracking-tight">Réglages de rendu</h2>
+            <p className="mt-1 text-sm text-paper-3">
+              Format, sous-titres et musique. Modifiables tant que la vidéo est un brouillon.
+            </p>
+            <div className="mt-5">
+              <VideoSettings
+                videoId={board.video.id}
+                quality={QUALITY_LABEL[board.video.quality]}
+                ratio={board.video.ratio}
+                subtitleStyle={board.video.subtitleStyle}
+                musicUrl={board.video.musicUrl}
+                musics={musics}
+              />
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-rouge/40 bg-rouge/5 p-6">
+            <h2 className="font-display text-lg font-bold tracking-tight text-danger">
+              Supprimer la vidéo
+            </h2>
+            <p className="mt-2 text-sm text-paper-2">
+              Le storyboard et les scènes partent avec. Rien n’a encore été débité sur un
+              brouillon, mais la suppression est définitive.
+            </p>
+            <div className="mt-5">
+              <DeleteVideoButton videoId={board.video.id} projectId={project.id} />
+            </div>
+          </section>
+        </div>
+      )}
+    </GxPage>
   );
 }

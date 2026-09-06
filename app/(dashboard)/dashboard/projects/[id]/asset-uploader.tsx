@@ -2,7 +2,8 @@
 
 import { useRef, useState, useTransition } from 'react';
 import { FileVideo, ImageIcon, Loader2, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { GxButton } from '@/components/gx/gx-button';
+import { GxNotice } from '@/components/gx/gx-page';
 import type { ClientAsset } from '@/lib/db/schema';
 import { extraireLaBandeSon } from '@/lib/assets/audio';
 import { transcribeAssetAction, uploadAssetAction } from '../actions';
@@ -199,49 +200,49 @@ export function AssetUploader({
             if (files?.length) startTransition(() => void envoyer(files));
           }}
         />
-        <Button
+        <GxButton
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={pending}
           onClick={() => input.current?.click()}
         >
           {pending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Upload className="mr-2 h-4 w-4" />
+            <Upload className="size-4" aria-hidden="true" />
           )}
           {pending && step
             ? step
             : pending && progress
               ? `Envoi ${progress.done + 1}/${progress.total}…`
               : 'Ajouter des fichiers'}
-        </Button>
-        <p className="mt-2 text-xs text-muted-foreground">
+        </GxButton>
+        <p className="mt-3 text-xs leading-relaxed text-paper-3">
           Captures d’écran, photo de produit ou vidéo à habiller. JPEG, PNG,
           WebP, MP4, MOV ou WebM, {MAX_BYTES / 1e6} Mo au plus. Un plan servi
           par un de ces fichiers n’est pas facturé au générateur.
         </p>
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {note && <p className="text-sm text-muted-foreground">{note}</p>}
+      {error && <GxNotice tone="erreur">{error}</GxNotice>}
+      {note && <p className="text-sm text-paper-3">{note}</p>}
 
       {assets.length > 0 && (
-        <ul className="divide-y rounded-md border">
+        <ul className="divide-y divide-line rounded-lg border border-line bg-ink">
           {assets.map((asset) => (
             <li
               key={asset.id}
-              className="flex items-center gap-3 px-3 py-2 text-sm"
+              className="flex items-center gap-3 px-4 py-3 text-sm"
             >
               {asset.kind === 'video' ? (
-                <FileVideo className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <FileVideo className="size-4 shrink-0 text-info" aria-hidden="true" />
               ) : (
-                <ImageIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ImageIcon className="size-4 shrink-0 text-alerte" aria-hidden="true" />
               )}
               <span className="truncate">
                 {asset.originalName ?? `Fichier ${asset.id}`}
               </span>
-              <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+              <span className="t-data ml-auto shrink-0 text-xs text-paper-3">
                 {asset.width && asset.height
                   ? `${asset.width}×${asset.height} · `
                   : ''}

@@ -1,8 +1,6 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getUser } from '@/lib/db/queries';
+import { GxPage, GxPageHeader, GxFil, GxSection } from '@/components/gx/gx-page';
 import { NewProjectForm } from '../project-form';
 
 export default async function NewProjectPage() {
@@ -10,24 +8,16 @@ export default async function NewProjectPage() {
   if (!user) redirect('/sign-in');
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <Link
-        href="/dashboard/projects"
-        className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="mr-1 h-4 w-4" />
-        Projects
-      </Link>
-      <h1 className="mb-6 text-lg lg:text-2xl font-medium">New project</h1>
-
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Configuration</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <NewProjectForm />
-        </CardContent>
-      </Card>
-    </section>
+    <GxPage className="max-w-3xl">
+      <GxFil parent="Projets" parentHref="/dashboard/projects" courant="Nouveau projet" />
+      <GxPageHeader
+        eyebrow="Projet"
+        titre="Nouveau projet"
+        intro="Un projet tient un style et une voix. Chaque vidéo lancée depuis ici les reprendra."
+      />
+      <GxSection titre="Configuration">
+        <NewProjectForm />
+      </GxSection>
+    </GxPage>
   );
 }

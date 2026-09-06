@@ -1,120 +1,89 @@
 'use client';
 
-import { useActionState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import { Suspense, useActionState } from 'react';
+import useSWR from 'swr';
 import { Loader2 } from 'lucide-react';
 import { updateAccount } from '@/app/(login)/actions';
-import { User } from '@/lib/db/schema';
-import useSWR from 'swr';
-import { Suspense } from 'react';
+import type { User } from '@/lib/db/schema';
+import { GxButton } from '@/components/gx/gx-button';
+import { GxField, GxInput } from '@/components/gx/gx-field';
+import { GxPage, GxPageHeader, GxSection, GxNotice } from '@/components/gx/gx-page';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-type ActionState = {
-  name?: string;
-  error?: string;
-  success?: string;
-};
+type ActionState = { name?: string; error?: string; success?: string };
 
-type AccountFormProps = {
+function Champs({
+  state,
+  nameValue = '',
+  emailValue = '',
+}: {
   state: ActionState;
   nameValue?: string;
   emailValue?: string;
-};
-
-function AccountForm({
-  state,
-  nameValue = '',
-  emailValue = ''
-}: AccountFormProps) {
+}) {
   return (
     <>
-      <div>
-        <Label htmlFor="name" className="mb-2">
-          Name
-        </Label>
-        <Input
-          id="name"
+      <GxField label="Nom" htmlFor="name" hint="Le nom affiché aux autres membres de l'espace." required>
+        <GxInput
           name="name"
-          placeholder="Enter your name"
+          placeholder="Votre nom"
+          autoComplete="name"
           defaultValue={state.name || nameValue}
           required
         />
-      </div>
-      <div>
-        <Label htmlFor="email" className="mb-2">
-          Email
-        </Label>
-        <Input
-          id="email"
+      </GxField>
+      <GxField label="E-mail" htmlFor="email" hint="Sert à vous connecter et à recevoir les notifications." required>
+        <GxInput
           name="email"
           type="email"
-          placeholder="Enter your email"
+          placeholder="vous@exemple.fr"
+          autoComplete="email"
           defaultValue={emailValue}
           required
         />
-      </div>
+      </GxField>
     </>
   );
 }
 
-function AccountFormWithData({ state }: { state: ActionState }) {
+function ChampsAvecDonnees({ state }: { state: ActionState }) {
   const { data: user } = useSWR<User>('/api/user', fetcher);
-  return (
-    <AccountForm
-      state={state}
-      nameValue={user?.name ?? ''}
-      emailValue={user?.email ?? ''}
-    />
-  );
+  return <Champs state={state} nameValue={user?.name ?? ''} emailValue={user?.email ?? ''} />;
 }
 
 export default function GeneralPage() {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    updateAccount,
-    {}
-  );
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(updateAccount, {});
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
-        General Settings
-      </h1>
+    <GxPage className="max-w-3xl">
+      <GxPageHeader
+        eyebrow="Compte"
+        titre="Mon compte"
+        intro="Votre nom et votre adresse. Le reste des réglages vit dans l'espace de travail."
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" action={formAction}>
-            <Suspense fallback={<AccountForm state={state} />}>
-              <AccountFormWithData state={state} />
-            </Suspense>
-            {state.error && (
-              <p className="text-red-500 text-sm">{state.error}</p>
+      <GxSection titre="Informations du compte">
+        <form className="space-y-6" action={formAction}>
+          <Suspense fallback={<Champs state={state} />}>
+            <ChampsAvecDonnees state={state} />
+          </Suspense>
+
+          {state.error && <GxNotice tone="erreur">{state.error}</GxNotice>}
+          {state.success && <GxNotice tone="ok">{state.success}</GxNotice>}
+
+          <GxButton type="submit" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                Enregistrement…
+              </>
+            ) : (
+              'Enregistrer'
             )}
-            {state.success && (
-              <p className="text-green-500 text-sm">{state.success}</p>
-            )}
-            <Button
-              type="submit"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </section>
+          </GxButton>
+        </form>
+      </GxSection>
+    </GxPage>
   );
 }

@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { GxButton } from '@/components/gx/gx-button';
 
 /**
- * Starts a checkout and hands the payer over to the payment gateway.
+ * Démarre un règlement et confie le payeur à la passerelle.
  *
- * The button never computes a price: it posts an offer id and follows the URL
- * the server got from the gateway. Amounts shown next to it come from the same
- * hardcoded catalogue the server charges from.
+ * Le bouton ne calcule jamais un prix : il envoie l'identifiant d'une offre et
+ * suit l'URL que le serveur a obtenue de la passerelle. Les montants affichés à
+ * côté viennent du même catalogue en dur que celui qui débite.
  */
 export function CheckoutButton({
   endpoint,
@@ -39,35 +39,40 @@ export function CheckoutButton({
       const data = await response.json();
 
       if (!response.ok || !data?.checkoutUrl) {
-        setError(data?.message ?? 'Could not start the payment.');
+        setError(data?.message ?? "Le paiement n'a pas pu démarrer. Réessayez.");
         setPending(false);
         return;
       }
 
       window.location.href = data.checkoutUrl;
     } catch {
-      setError('Network error — please try again.');
+      setError('Réseau injoignable. Vérifiez votre connexion et réessayez.');
       setPending(false);
     }
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <Button
+    <div className="flex flex-col items-stretch gap-2 sm:items-end">
+      <GxButton
         onClick={start}
         disabled={disabled || pending}
-        variant={variant}
+        size="sm"
+        variant={variant === 'outline' ? 'secondary' : 'primary'}
       >
         {pending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Redirecting…
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            Redirection…
           </>
         ) : (
           label
         )}
-      </Button>
-      {error && <p className="text-sm text-red-500 max-w-xs text-right">{error}</p>}
+      </GxButton>
+      {error && (
+        <p role="alert" className="max-w-xs text-xs font-semibold text-danger sm:text-right">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

@@ -2,37 +2,68 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
-import { CircleIcon, Home, LogOut, Clapperboard, Film, FolderKanban, Wallet, Settings, Shield, Activity } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { signOut } from '@/app/(login)/actions';
-import { User } from '@/lib/db/schema';
+import { Suspense } from 'react';
+import { Activity, Home, LogOut, Settings, Shield, Wallet } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
+import { GxButton } from '@/components/gx/gx-button';
+import { GxMenu, GxMenuItem, GxMenuButton } from '@/components/gx/gx-menu';
+import { BoutonAmbiance } from '@/components/gx/gx-theme';
+import { Ancres } from '@/components/gx/gx-ancres';
+import { signOut } from '@/app/(login)/actions';
+import type { TenantDataWithMembers, User } from '@/lib/db/schema';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const pathname = usePathname();
-  const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+/*
+ * UNE seule barre, à un seul niveau.
+ * Sur l'accueil elle porte aussi les ancres de la page : pas de deuxième
+ * bandeau collant sous le premier — deux barres empilées, c'est deux fois
+ * trop, et c'est ce qui donne la sensation de flotter.
+ */
+const ANCRES = [
+  { id: 'mur', label: 'Le mur' },
+  { id: 'probleme', label: 'Le problème' },
+  { id: 'solution', label: 'La solution' },
+  { id: 'preuves', label: 'Preuves' },
+  { id: 'tarifs', label: 'Tarifs' },
+  { id: 'faq', label: 'FAQ' },
+];
+
+function Marque() {
   return (
-    <Link
-      href={href}
-      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${active ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-    >
-      {children}
+    <Link href="/" className="group flex min-h-11 shrink-0 items-center gap-2.5" aria-label="GenTube — accueil">
+      {/* La mire en carré : le logo est la signature du système. */}
+      <span
+        aria-hidden="true"
+        className="mire size-7 rounded-md transition-transform duration-(--t-fast) group-hover:rotate-6"
+      />
+      <span className="font-display text-lg font-bold tracking-tight">
+        Gen<span className="text-marque">Tube</span>
+      </span>
     </Link>
   );
 }
 
-function UserMenu() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+function SoldeCredits() {
+  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const { data: tenant } = useSWR<TenantDataWithMembers>('/api/tenant', fetcher);
+  if (!user) return null;
+  const balance = tenant?.creditsBalance;
+  return (
+    <Link
+      href="/dashboard/billing"
+      aria-label={`Solde : ${balance ?? 'inconnu'} crédits. Aller à la facturation`}
+      className="hidden min-h-11 items-center gap-2 rounded-pill border border-line bg-ink-2 px-3.5 transition-colors duration-(--t-fast) hover:border-jaune sm:inline-flex"
+    >
+      <Wallet className="size-4 text-marque" aria-hidden="true" />
+      <span className="t-data text-sm font-bold">
+        {balance === undefined ? '—' : balance.toLocaleString('fr-FR')}
+      </span>
+    </Link>
+  );
+}
+
+function MenuCompte() {
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const router = useRouter();
 
@@ -44,138 +75,70 @@ function UserMenu() {
 
   if (!user) {
     return (
-      <>
-        <Link href="/#tarifs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-          Tarifs
-        </Link>
-        <Button render={<Link href="/sign-up" />} className="rounded-full">
-          S’inscrire
-        </Button>
-      </>
+      <GxButton href="/sign-up" size="sm">
+        Créer ma vidéo
+      </GxButton>
     );
   }
 
-  return (
-    <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-      <DropdownMenuTrigger>
-        <Avatar className="cursor-pointer size-9">
-          <AvatarImage alt={user.name || ''} />
-          <AvatarFallback>
-            {user.email
-              .split(' ')
-              .map((n) => n[0])
-              .join('')}
-          </AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="flex flex-col gap-1">
-        <DropdownMenuItem className="cursor-pointer">
-          <Link href="/dashboard" className="flex w-full items-center">
-            <Home className="mr-2 h-4 w-4" />
-            <span>Espace de travail</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer">
-          <Link href="/dashboard/general" className="flex w-full items-center">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Mon compte</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer">
-          <Link href="/dashboard/security" className="flex w-full items-center">
-            <Shield className="mr-2 h-4 w-4" />
-            <span>Sécurité</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer">
-          <Link href="/dashboard/activity" className="flex w-full items-center">
-            <Activity className="mr-2 h-4 w-4" />
-            <span>Activité</span>
-          </Link>
-        </DropdownMenuItem>
-        <form action={handleSignOut} className="w-full">
-          <button type="submit" className="flex w-full">
-            <DropdownMenuItem className="w-full flex-1 cursor-pointer">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Se déconnecter</span>
-            </DropdownMenuItem>
-          </button>
-        </form>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+  const initiales = user.email.slice(0, 2).toUpperCase();
 
-function AuthedNav({ mobile = false }: { mobile?: boolean }) {
-  const { data: user } = useSWR<User>('/api/user', fetcher);
-  if (!user) return null;
-  if (mobile) {
-    return (
-      <nav className="flex items-center gap-1 overflow-x-auto pb-1 md:hidden">
-        <NavLink href="/dashboard/projects">
-          <span className="inline-flex items-center gap-1.5"><FolderKanban className="size-3.5" /> Projets</span>
-        </NavLink>
-        <NavLink href="/dashboard/videos">
-          <span className="inline-flex items-center gap-1.5"><Film className="size-3.5" /> Vidéos</span>
-        </NavLink>
-        <NavLink href="/dashboard/fabrication">
-          <span className="inline-flex items-center gap-1.5"><Clapperboard className="size-3.5" /> Fabrication</span>
-        </NavLink>
-        <NavLink href="/dashboard/billing">
-          <span className="inline-flex items-center gap-1.5"><Wallet className="size-3.5" /> Facturation</span>
-        </NavLink>
-      </nav>
-    );
-  }
   return (
-    <nav className="hidden items-center gap-1 md:flex">
-      <NavLink href="/dashboard/projects">
-        <span className="inline-flex items-center gap-1.5"><FolderKanban className="size-3.5" /> Projets</span>
-      </NavLink>
-      <NavLink href="/dashboard/videos">
-        <span className="inline-flex items-center gap-1.5"><Film className="size-3.5" /> Vidéos</span>
-      </NavLink>
-      <NavLink href="/dashboard/fabrication">
-        <span className="inline-flex items-center gap-1.5"><Clapperboard className="size-3.5" /> Fabrication</span>
-      </NavLink>
-      <NavLink href="/dashboard/billing">
-        <span className="inline-flex items-center gap-1.5"><Wallet className="size-3.5" /> Facturation</span>
-      </NavLink>
-    </nav>
-  );
-}
-
-function Header() {
-  return (
-    <header className="border-b border-border">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center">
-          <CircleIcon className="h-6 w-6 text-brand-accent" />
-          <span className="ml-2 text-xl font-semibold tracking-tight text-foreground">GenTube</span>
-        </Link>
-        <Suspense fallback={null}>
-          <AuthedNav />
-        </Suspense>
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Suspense fallback={<div className="h-9 w-20" />}>
-            <UserMenu />
-          </Suspense>
-        </div>
-      </div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Suspense fallback={null}>
-          <AuthedNav mobile />
-        </Suspense>
-      </div>
-    </header>
+    <GxMenu
+      label="Menu du compte"
+      trigger={
+        <span className="flex size-9 items-center justify-center rounded-pill border border-line-hi bg-ink-3 font-mono text-xs font-bold text-paper transition-colors duration-(--t-fast) hover:border-cyan">
+          {initiales}
+        </span>
+      }
+    >
+      <p className="truncate px-3 py-2 text-xs text-paper-3">{user.email}</p>
+      <GxMenuItem href="/dashboard">
+        <Home aria-hidden="true" /> Espace de travail
+      </GxMenuItem>
+      <GxMenuItem href="/dashboard/general">
+        <Settings aria-hidden="true" /> Mon compte
+      </GxMenuItem>
+      <GxMenuItem href="/dashboard/security">
+        <Shield aria-hidden="true" /> Sécurité
+      </GxMenuItem>
+      <GxMenuItem href="/dashboard/activity">
+        <Activity aria-hidden="true" /> Activité
+      </GxMenuItem>
+      <form action={handleSignOut} className="mt-1 border-t border-line pt-1">
+        <GxMenuButton type="submit">
+          <LogOut aria-hidden="true" /> Se déconnecter
+        </GxMenuButton>
+      </form>
+    </GxMenu>
   );
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const surAccueil = pathname === '/';
+
   return (
-    <section className="flex flex-col min-h-screen">
-      <Header />
+    <div className="flex min-h-[100dvh] flex-col bg-ink">
+      <header className="sticky top-0 z-(--z-header) border-b border-line bg-ink/85 backdrop-blur-xl">
+        <div className="gutter mx-auto flex h-(--header-h) w-full max-w-(--content-max) items-center gap-4">
+          <Marque />
+
+          {/* Les ancres vivent ici, dans la même barre. */}
+          {surAccueil && <Ancres ancres={ANCRES} className="hidden min-w-0 flex-1 lg:flex" />}
+
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <BoutonAmbiance />
+            <Suspense fallback={null}>
+              <SoldeCredits />
+            </Suspense>
+            <Suspense fallback={<div className="size-9 rounded-pill bg-ink-3" />}>
+              <MenuCompte />
+            </Suspense>
+          </div>
+        </div>
+      </header>
       {children}
-    </section>
+    </div>
   );
 }

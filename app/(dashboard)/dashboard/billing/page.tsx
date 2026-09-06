@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
 import { Clock, Infinity as InfinityIcon, Wallet } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { GxBadge } from '@/components/gx/gx-badge-empty';
+import { GxTabs } from '@/components/gx/gx-tabs';
+import { GxPage, GxPageHeader, GxNotice } from '@/components/gx/gx-page';
 import { getUser } from '@/lib/db/queries';
 import { tenantDb } from '@/lib/db/tenant-db';
 import { getBillingOverview } from '@/lib/billing/checkout';
@@ -20,43 +21,37 @@ function credits(amount: number) {
 function minutes(seconds: number) {
   return `${Math.floor(seconds / 60)} min`;
 }
-function day(date: Date | string | null) {
+function jour(date: Date | string | null) {
   if (!date) return '—';
   return new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-const STATUS_STYLE: Record<string, string> = {
-  succeeded: 'bg-green-500/15 text-green-400 border border-green-500/30',
-  paid: 'bg-green-500/15 text-green-400 border border-green-500/30',
-  active: 'bg-green-500/15 text-green-400 border border-green-500/30',
-  pending: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
-  created: 'bg-secondary text-muted-foreground border',
-  past_due: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
-  failed: 'bg-red-500/15 text-red-400 border border-red-500/30',
-  cancelled: 'bg-secondary text-muted-foreground border',
-  expired: 'bg-secondary text-muted-foreground border',
-  suspended: 'bg-red-500/15 text-red-400 border border-red-500/30',
+/* Les états de paiement, en français, avec le ton de la mire qui va avec. */
+const ETAT_PAIEMENT: Record<string, { label: string; tone: 'vert' | 'jaune' | 'rouge' | 'neutre' }> = {
+  succeeded: { label: 'Encaissé', tone: 'vert' },
+  paid: { label: 'Payé', tone: 'vert' },
+  active: { label: 'Actif', tone: 'vert' },
+  pending: { label: 'En attente', tone: 'jaune' },
+  created: { label: 'Créé', tone: 'neutre' },
+  past_due: { label: 'En retard', tone: 'jaune' },
+  failed: { label: 'Échoué', tone: 'rouge' },
+  cancelled: { label: 'Annulé', tone: 'neutre' },
+  expired: { label: 'Expiré', tone: 'neutre' },
+  suspended: { label: 'Suspendu', tone: 'rouge' },
 };
 
-function Badge({ status }: { status: string }) {
-  return (
-    <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLE[status] ?? 'bg-secondary text-muted-foreground border'}`}
-    >
-      {status.replace('_', ' ')}
-    </span>
-  );
-}
+const MOTIF: Record<string, string> = {
+  plan_grant: 'Dotation du plan',
+  topup: 'Recharge',
+  generation: 'Génération',
+  render: 'Montage',
+  refund: 'Remboursement',
+  trial: 'Essai offert',
+};
 
-function PocketBadge({ pocket }: { pocket: string }) {
-  const isTopup = pocket === 'topup';
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${isTopup ? 'border-primary/30 bg-primary/10 text-primary' : 'border-amber-500/30 bg-amber-500/10 text-amber-400'}`}
-    >
-      {isTopup ? 'Achetés' : 'Quota'}
-    </span>
-  );
+function EtatPaiement({ status }: { status: string }) {
+  const e = ETAT_PAIEMENT[status] ?? { label: status, tone: 'neutre' as const };
+  return <GxBadge tone={e.tone}>{e.label}</GxBadge>;
 }
 
 /**
@@ -82,6 +77,44 @@ async function rattraper(tenantId: number): Promise<void> {
   }
 }
 
+/* Une poche de crédits : ce qu'elle contient, quand elle se vide. */
+function Poche({
+  titre,
+  montant,
+  note,
+  detail,
+  mention,
+  icone,
+  ton,
+}: {
+  titre: string;
+  montant: number;
+  note: string;
+  detail: string;
+  mention: React.ReactNode;
+  icone: React.ReactNode;
+  ton: 'jaune' | 'cyan';
+}) {
+  return (
+    <div className="plate relative overflow-hidden p-5 pl-6">
+      <span
+        aria-hidden="true"
+        className={`absolute inset-y-0 left-0 w-1 ${ton === 'jaune' ? 'bg-jaune' : 'bg-cyan'}`}
+      />
+      <div className="flex items-center justify-between gap-3">
+        <p className="t-label flex items-center gap-2 text-paper-2">
+          {icone}
+          {titre}
+        </p>
+        {mention}
+      </div>
+      <p className="t-data mt-4 text-4xl font-bold">{credits(montant)}</p>
+      <p className="t-data mt-1 text-xs text-paper-3">{note}</p>
+      <p className="mt-4 border-t border-line pt-3 text-xs leading-relaxed text-paper-3">{detail}</p>
+    </div>
+  );
+}
+
 export default async function BillingPage({
   searchParams,
 }: {
@@ -105,270 +138,243 @@ export default async function BillingPage({
   const expireAt = tenant?.planCreditsExpireAt ?? null;
 
   return (
-    <section className="shell-gutter mx-auto w-full max-w-(--content-max) flex-1 px-4 py-6 lg:px-8 lg:py-8">
-      <div className="mb-2">
-        <p className="text-xs font-medium tracking-widest text-brand-accent uppercase">Facturation</p>
-        <h1 className="text-2xl font-semibold tracking-tight">Crédits et facturation</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Prix en FCFA · paiement par mobile money, sans carte bancaire. Deux poches&nbsp;:
-          le quota mensuel expire, les crédits achetés n&apos;expirent jamais.
-        </p>
+    <GxPage className="max-w-6xl">
+      <GxPageHeader
+        eyebrow="Facturation"
+        titre="Crédits et facturation"
+        intro="Tout en FCFA, par mobile money, sans carte bancaire. Deux poches : le quota mensuel expire avec son cycle, les crédits achetés restent."
+      />
+
+      <div className="space-y-4">
+        {payment === 'return' && (
+          <GxNotice tone="ok">
+            Retour du paiement. Votre encaissement vient d’être relu auprès de SasPay : le solde
+            ci-dessous est à jour. S’il n’a pas bougé, le paiement n’a pas abouti — rien n’a été
+            débité, vous pouvez réessayer.
+          </GxNotice>
+        )}
+        {!overview.billingConfigured && (
+          <GxNotice tone="erreur">
+            Les clés SasPay manquent sur cette instance : le paiement est désactivé. Renseignez{' '}
+            <code className="font-mono">SASPAY_SANDBOX_API_KEY</code> et{' '}
+            <code className="font-mono">SASPAY_SANDBOX_WEBHOOK_SECRET</code>.
+          </GxNotice>
+        )}
+        {overview.subscription?.status === 'suspended' && (
+          <GxNotice tone="erreur">
+            Trop d’échecs de paiement : l’abonnement ne se renouvelle plus. Vos crédits restent
+            intacts — payez un plan pour reprendre.
+          </GxNotice>
+        )}
+        {!canManage && (
+          <GxNotice tone="erreur">
+            Seul un propriétaire ou un admin peut payer pour cet espace.
+          </GxNotice>
+        )}
       </div>
 
-      {payment === 'return' && (
-        <p className="mb-6 rounded-md border border-blue-500/30 bg-blue-500/10 p-4 text-sm text-blue-400">
-          Retour du paiement. Votre encaissement vient d&apos;être relu auprès de
-          SasPay&nbsp;: le solde ci-dessous est à jour. S&apos;il n&apos;a pas bougé,
-          c&apos;est que le paiement n&apos;a pas abouti — rien n&apos;a été débité et
-          vous pouvez réessayer ci-dessous.
-        </p>
-      )}
-      {!overview.billingConfigured && (
-        <p className="mb-6 rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-400">
-          Les clés SasPay manquent sur cette instance : le paiement est désactivé. Renseignez{' '}
-          <code>SASPAY_SANDBOX_API_KEY</code> et <code>SASPAY_SANDBOX_WEBHOOK_SECRET</code>{' '}
-          (ou leurs jumelles <code>SASPAY_LIVE_*</code> avec <code>SASPAY_ENV=live</code>).
-        </p>
-      )}
-
-      {/* ——— Deux poches — promesse commerciale, pas détail d’affichage ——— */}
-      <div className="mb-8 grid gap-4 md:grid-cols-2">
-        <Card className="border-amber-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium">
-              <span className="flex size-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-400">
-                <Clock className="size-4" />
-              </span>
-              Quota mensuel
-              <span className="ml-auto rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-400">
-                expire
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold tabular-nums">{credits(creditsPlan)}</p>
-            <p className="text-xs text-muted-foreground">
-              crédits ·{' '}
-              {expireAt ? (
-                <>expire le {day(expireAt)}</>
-              ) : (
-                <>pas de cycle en cours</>
-              )}
-            </p>
-            <Separator className="my-3" />
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Renouvelé chaque cycle ({overview.currentCycle ? day(overview.currentCycle.periodEnd) : '—'}).
-              <span className="font-medium text-foreground"> Débité en premier</span> : on puise d&apos;abord ici pour que
-              personne ne perde de valeur qu&apos;il aurait pu consommer.
-            </p>
-            <p className="mt-2 text-xs tabular-nums text-muted-foreground">
-              ≈ {minutes(secondsAffordable(creditsPlan, 'draft'))} en Full HD
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-primary/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium">
-              <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Wallet className="size-4" />
-              </span>
-              Crédits achetés
-              <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
-                <InfinityIcon className="size-3" /> n&apos;expire jamais
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold tabular-nums">{credits(creditsTopup)}</p>
-            <p className="text-xs text-muted-foreground">crédits · conservés indéfiniment</p>
-            <Separator className="my-3" />
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Recharges payées en plus de l&apos;abonnement. Faire expirer ce
-              qu&apos;on a acheté serait du vol — ils n&apos;expirent jamais.
-              <span className="font-medium text-foreground"> Débités après le quota.</span>
-            </p>
-            <p className="mt-2 text-xs tabular-nums text-muted-foreground">
-              ≈ {minutes(secondsAffordable(creditsTopup, 'draft'))} en Full HD
-            </p>
-          </CardContent>
-        </Card>
+      {/* ── Les deux poches ─────────────────────────────────────────── */}
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <Poche
+          ton="jaune"
+          titre="Quota mensuel"
+          icone={<Clock className="size-4 text-marque" aria-hidden="true" />}
+          mention={<GxBadge tone="jaune">expire</GxBadge>}
+          montant={creditsPlan}
+          note={`crédits · ${expireAt ? `expire le ${jour(expireAt)}` : 'pas de cycle en cours'} · ≈ ${minutes(secondsAffordable(creditsPlan, 'draft'))} en Full HD`}
+          detail="Renouvelé à chaque cycle payé. Débité en premier, pour que personne ne perde une valeur qu’il aurait pu consommer."
+        />
+        <Poche
+          ton="cyan"
+          titre="Crédits achetés"
+          icone={<Wallet className="size-4 text-info" aria-hidden="true" />}
+          mention={
+            <GxBadge tone="cyan" dot={false}>
+              <InfinityIcon className="size-3" aria-hidden="true" /> jamais
+            </GxBadge>
+          }
+          montant={creditsTopup}
+          note={`crédits · conservés indéfiniment · ≈ ${minutes(secondsAffordable(creditsTopup, 'draft'))} en Full HD`}
+          detail="Recharges payées en plus de l’abonnement. Faire expirer ce qui a été acheté serait du vol : ils restent. Débités après le quota."
+        />
       </div>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Offre actuelle</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-medium capitalize">
-                {overview.plan} {overview.subscription && <Badge status={overview.subscription.status} />}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {overview.subscription?.currentPeriodEnd
-                  ? `Renouvelle le ${day(overview.subscription.currentPeriodEnd)}`
-                  : 'Aucune période payée pour l’instant.'}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-semibold tabular-nums">{credits(overview.creditsBalance)}</p>
-              <p className="text-sm text-muted-foreground">
-                crédits · ≈ {minutes(secondsAffordable(overview.creditsBalance, 'draft'))} en Full HD
-              </p>
-            </div>
-          </div>
-          {overview.subscription?.status === 'suspended' && (
-            <p className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
-              Trop d&apos;échecs de paiement : l&apos;abonnement ne se renouvelle plus. Vos crédits restent intacts —
-              payez un plan ci-dessous pour reprendre.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      {/* ── Offre actuelle ──────────────────────────────────────────── */}
+      <div className="plate mt-4 flex flex-wrap items-center justify-between gap-4 p-5">
+        <div>
+          <p className="t-label text-paper-3">Offre actuelle</p>
+          <p className="mt-2 flex flex-wrap items-center gap-3">
+            <span className="font-display text-lg font-bold capitalize">{overview.plan}</span>
+            {overview.subscription && <EtatPaiement status={overview.subscription.status} />}
+          </p>
+          <p className="mt-1 text-sm text-paper-3">
+            {overview.subscription?.currentPeriodEnd
+              ? `Renouvelle le ${jour(overview.subscription.currentPeriodEnd)}`
+              : 'Aucune période payée pour l’instant.'}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="t-data text-3xl font-bold text-marque">{credits(overview.creditsBalance)}</p>
+          <p className="t-data text-xs text-paper-3">
+            crédits · ≈ {minutes(secondsAffordable(overview.creditsBalance, 'draft'))} en Full HD
+          </p>
+        </div>
+      </div>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Plans</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-4">
-            {overview.offers.map((offer) => {
-              const current = overview.plan === offer.plan;
-              return (
-                <li
-                  key={offer.plan}
-                  className="flex flex-col gap-3 border-b border-border pb-4 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {offer.name} — {fcfa(offer.priceXof)}
-                      <span className="text-sm text-muted-foreground"> / mois</span>
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {credits(offer.monthlyCredits)} crédits ≈ {minutes(secondsAffordable(offer.monthlyCredits, 'draft'))} en Full HD, ou{' '}
-                      {imagesAffordable(offer.monthlyCredits)} images fixes
-                    </p>
-                  </div>
-                  {current ? (
-                    <span className="text-sm text-muted-foreground">Offre actuelle</span>
-                  ) : (
+      {/* ── Onglets : payer, recharger, vérifier ────────────────────── */}
+      <GxTabs
+        className="mt-8"
+        defaultValue="plans"
+        tabs={[
+          { value: 'plans', label: 'Abonnements' },
+          { value: 'recharges', label: 'Recharges' },
+          { value: 'historique', label: 'Historique', count: overview.payments.length },
+        ]}
+        panels={{
+          plans: (
+            <div className="mt-6">
+              <ul className="grid gap-3">
+                {overview.offers.map((offer) => {
+                  const actuelle = overview.plan === offer.plan;
+                  return (
+                    <li
+                      key={offer.plan}
+                      className="plate flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <p className="font-display text-base font-bold">
+                          {offer.name}
+                          <span className="t-data ml-3 text-marque">{fcfa(offer.priceXof)}</span>
+                          <span className="text-sm font-normal text-paper-3"> / mois</span>
+                        </p>
+                        <p className="t-data mt-1 text-xs text-paper-3">
+                          {credits(offer.monthlyCredits)} crédits ≈{' '}
+                          {minutes(secondsAffordable(offer.monthlyCredits, 'draft'))} en Full HD, ou{' '}
+                          {imagesAffordable(offer.monthlyCredits)} images fixes
+                        </p>
+                      </div>
+                      {actuelle ? (
+                        <GxBadge tone="vert">Offre actuelle</GxBadge>
+                      ) : (
+                        <CheckoutButton
+                          endpoint="/api/billing/subscribe"
+                          body={{ plan: offer.plan }}
+                          label={`Payer ${fcfa(offer.priceXof)}`}
+                          disabled={!canManage || !overview.billingConfigured}
+                        />
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="mt-4 text-xs text-paper-3">
+                Mobile money en FCFA via SasPay — MTN, Moov et Celtiis Cash. Les offres Business sont sur devis.
+              </p>
+            </div>
+          ),
+          recharges: (
+            <div className="mt-6">
+              <ul className="grid gap-3">
+                {overview.topupPacks.map((pack) => (
+                  <li
+                    key={pack.id}
+                    className="plate flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div>
+                      <p className="t-data text-lg font-bold">
+                        {credits(pack.credits)} crédits
+                        <span className="ml-3 text-marque">{fcfa(pack.priceXof)}</span>
+                      </p>
+                      <p className="mt-1 text-xs text-paper-3">
+                        Ces crédits n’expirent jamais, contrairement au quota mensuel.
+                      </p>
+                    </div>
                     <CheckoutButton
-                      endpoint="/api/billing/subscribe"
-                      body={{ plan: offer.plan }}
-                      label={`Payer ${fcfa(offer.priceXof)}`}
+                      endpoint="/api/billing/topup"
+                      body={{ packId: pack.id }}
+                      label={`Payer ${fcfa(pack.priceXof)}`}
+                      variant="outline"
                       disabled={!canManage || !overview.billingConfigured}
                     />
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-          <p className="mt-4 text-xs text-muted-foreground">
-            Mobile money en XOF via SasPay — MTN, Moov et Celtiis Cash. Les plans Business sont sur devis.
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Recharger des crédits</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-4">
-            {overview.topupPacks.map((pack) => (
-              <li key={pack.id} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="font-medium">
-                    {credits(pack.credits)} crédits — {fcfa(pack.priceXof)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Ces crédits n&apos;expirent jamais, contrairement au quota mensuel.</p>
-                </div>
-                <CheckoutButton
-                  endpoint="/api/billing/topup"
-                  body={{ packId: pack.id }}
-                  label={`Payer ${fcfa(pack.priceXof)}`}
-                  variant="outline"
-                  disabled={!canManage || !overview.billingConfigured}
-                />
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Volontairement plus cher à la minute que l&apos;abonnement — sinon personne ne s&apos;abonne.
-          </p>
-        </CardContent>
-      </Card>
-
-      {!canManage && (
-        <p className="mb-8 text-sm text-muted-foreground">Seul un owner ou un admin peut payer pour cet espace.</p>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Historique des paiements</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {overview.payments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucun paiement pour l’instant.</p>
-            ) : (
-              <ul className="space-y-3">
-                {overview.payments.map((intent) => (
-                  <li key={intent.id} className="flex items-center justify-between gap-4 text-sm">
-                    <div>
-                      <p className="font-medium">
-                        {intent.kind === 'subscription' ? `Abonnement — ${intent.plan ?? ''}` : 'Recharge de crédits'}
-                      </p>
-                      <p className="text-muted-foreground">
-                        {day(intent.createdAt)} · {credits(intent.creditsGranted)} crédits
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="tabular-nums">{fcfa(intent.amountXof)}</p>
-                      <Badge status={intent.status as PaymentStatus} />
-                    </div>
                   </li>
                 ))}
               </ul>
-            )}
-          </CardContent>
-        </Card>
+              <p className="mt-4 text-xs text-paper-3">
+                Volontairement plus cher à la minute que l’abonnement — sinon personne ne s’abonne.
+              </p>
+            </div>
+          ),
+          historique: (
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              <section className="plate p-5">
+                <h2 className="font-display text-base font-bold">Paiements</h2>
+                {overview.payments.length === 0 ? (
+                  <p className="mt-4 text-sm text-paper-3">Aucun paiement pour l’instant.</p>
+                ) : (
+                  <ul className="mt-4 divide-y divide-line">
+                    {overview.payments.map((intent) => (
+                      <li key={intent.id} className="flex items-center justify-between gap-4 py-3 first:pt-0">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold">
+                            {intent.kind === 'subscription'
+                              ? `Abonnement ${intent.plan ?? ''}`
+                              : 'Recharge de crédits'}
+                          </p>
+                          <p className="t-data mt-0.5 text-xs text-paper-3">
+                            {jour(intent.createdAt)} · {credits(intent.creditsGranted)} crédits
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <p className="t-data text-sm">{fcfa(intent.amountXof)}</p>
+                          <EtatPaiement status={intent.status as PaymentStatus} />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Grand livre — 10 dernières lignes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {overview.ledger.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucune écriture.</p>
-            ) : (
-              <ul className="space-y-2">
-                {overview.ledger.map((entry) => (
-                  <li key={entry.id} className="flex items-center justify-between gap-3 text-sm">
-                    <div className="min-w-0">
-                      <p className="flex items-center gap-2">
-                        <span className={`font-medium tabular-nums ${entry.delta < 0 ? 'text-red-400' : 'text-green-400'}`}>
-                          {entry.delta > 0 ? '+' : ''}{credits(entry.delta)}
-                        </span>
-                        <PocketBadge pocket={entry.pocket} />
-                        <span className="truncate text-xs capitalize text-muted-foreground">{entry.reason.replace('_', ' ')}</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {day(entry.createdAt)} · solde après : {credits(entry.balanceAfter)}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-xs text-muted-foreground">#{entry.id}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <p className="mt-3 text-xs text-muted-foreground">
-              Un débit qui traverse les deux poches écrit deux lignes — une par poche.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </section>
+              <section className="plate p-5">
+                <h2 className="font-display text-base font-bold">Grand livre</h2>
+                <p className="mt-1 text-xs text-paper-3">Les dix dernières écritures.</p>
+                {overview.ledger.length === 0 ? (
+                  <p className="mt-4 text-sm text-paper-3">Aucune écriture.</p>
+                ) : (
+                  <ul className="mt-4 divide-y divide-line">
+                    {overview.ledger.map((entry) => (
+                      <li key={entry.id} className="flex items-center justify-between gap-3 py-3 first:pt-0">
+                        <div className="min-w-0">
+                          <p className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={`t-data text-sm font-bold ${entry.delta < 0 ? 'text-danger' : 'text-ok'}`}
+                            >
+                              {entry.delta > 0 ? '+' : ''}
+                              {credits(entry.delta)}
+                            </span>
+                            <GxBadge tone={entry.pocket === 'topup' ? 'cyan' : 'jaune'} dot={false}>
+                              {entry.pocket === 'topup' ? 'Achetés' : 'Quota'}
+                            </GxBadge>
+                            <span className="truncate text-xs text-paper-3">
+                              {MOTIF[entry.reason] ?? entry.reason.replace('_', ' ')}
+                            </span>
+                          </p>
+                          <p className="t-data mt-0.5 text-xs text-paper-3">
+                            {jour(entry.createdAt)} · solde après : {credits(entry.balanceAfter)}
+                          </p>
+                        </div>
+                        <span className="t-data shrink-0 text-xs text-line-hi">#{entry.id}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <p className="mt-4 border-t border-line pt-3 text-xs text-paper-3">
+                  Un débit qui traverse les deux poches écrit deux lignes — une par poche.
+                </p>
+              </section>
+            </div>
+          ),
+        }}
+      />
+    </GxPage>
   );
 }

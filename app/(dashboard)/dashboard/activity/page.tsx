@@ -1,18 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Settings,
   LogOut,
   UserPlus,
   Lock,
   UserCog,
-  AlertCircle,
   UserMinus,
   Mail,
   CheckCircle,
+  Activity,
   type LucideIcon,
 } from 'lucide-react';
 import { ActivityType } from '@/lib/db/schema';
 import { getActivityLogs } from '@/lib/db/queries';
+import { GxEmpty } from '@/components/gx/gx-badge-empty';
+import { GxPage, GxPageHeader, GxSection } from '@/components/gx/gx-page';
 
 const iconMap: Record<ActivityType, LucideIcon> = {
   [ActivityType.SIGN_UP]: UserPlus,
@@ -27,100 +28,70 @@ const iconMap: Record<ActivityType, LucideIcon> = {
   [ActivityType.ACCEPT_INVITATION]: CheckCircle,
 };
 
-function getRelativeTime(date: Date) {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+const LIBELLE: Record<ActivityType, string> = {
+  [ActivityType.SIGN_UP]: 'Inscription',
+  [ActivityType.SIGN_IN]: 'Connexion',
+  [ActivityType.SIGN_OUT]: 'Déconnexion',
+  [ActivityType.UPDATE_PASSWORD]: 'Mot de passe modifié',
+  [ActivityType.DELETE_ACCOUNT]: 'Compte supprimé',
+  [ActivityType.UPDATE_ACCOUNT]: 'Compte mis à jour',
+  [ActivityType.CREATE_TENANT]: 'Espace créé',
+  [ActivityType.REMOVE_TENANT_MEMBER]: 'Membre retiré',
+  [ActivityType.INVITE_TENANT_MEMBER]: 'Membre invité',
+  [ActivityType.ACCEPT_INVITATION]: 'Invitation acceptée',
+};
 
-  if (diffInSeconds < 60) return 'just now';
-  if (diffInSeconds < 3600)
-    return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400)
-    return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 604800)
-    return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  return date.toLocaleDateString();
-}
-
-function formatAction(action: ActivityType): string {
-  switch (action) {
-    case ActivityType.SIGN_UP:
-      return 'You signed up';
-    case ActivityType.SIGN_IN:
-      return 'You signed in';
-    case ActivityType.SIGN_OUT:
-      return 'You signed out';
-    case ActivityType.UPDATE_PASSWORD:
-      return 'You changed your password';
-    case ActivityType.DELETE_ACCOUNT:
-      return 'You deleted your account';
-    case ActivityType.UPDATE_ACCOUNT:
-      return 'You updated your account';
-    case ActivityType.CREATE_TENANT:
-      return 'You created a new team';
-    case ActivityType.REMOVE_TENANT_MEMBER:
-      return 'You removed a team member';
-    case ActivityType.INVITE_TENANT_MEMBER:
-      return 'You invited a team member';
-    case ActivityType.ACCEPT_INVITATION:
-      return 'You accepted an invitation';
-    default:
-      return 'Unknown action occurred';
-  }
+function tempsRelatif(date: Date) {
+  const secondes = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (secondes < 60) return "à l'instant";
+  if (secondes < 3600) return `il y a ${Math.floor(secondes / 60)} min`;
+  if (secondes < 86400) return `il y a ${Math.floor(secondes / 3600)} h`;
+  if (secondes < 604800) return `il y a ${Math.floor(secondes / 86400)} j`;
+  return date.toLocaleDateString('fr-FR');
 }
 
 export default async function ActivityPage() {
   const logs = await getActivityLogs();
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
-        Activity Log
-      </h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {logs.length > 0 ? (
-            <ul className="space-y-4">
-              {logs.map((log) => {
-                const Icon = iconMap[log.action as ActivityType] || Settings;
-                const formattedAction = formatAction(
-                  log.action as ActivityType
-                );
+    <GxPage className="max-w-3xl">
+      <GxPageHeader
+        eyebrow="Compte"
+        titre="Activité récente"
+        intro="Les connexions et modifications faites sur ce compte, les plus récentes en premier."
+      />
 
-                return (
-                  <li key={log.id} className="flex items-center space-x-4">
-                    <div className="bg-primary/10 rounded-full p-2">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground">
-                        {formattedAction}
-                        {log.ipAddress && ` from IP ${log.ipAddress}`}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {getRelativeTime(new Date(log.timestamp))}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-center py-12">
-              <AlertCircle className="h-12 w-12 text-brand-accent mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                No activity yet
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-sm">
-                When you perform actions like signing in or updating your
-                account, they'll appear here.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </section>
+      <GxSection titre="Dernières actions">
+        {logs.length > 0 ? (
+          <ol className="divide-y divide-line">
+            {logs.map((log) => {
+              const Icon = iconMap[log.action as ActivityType] ?? Settings;
+              return (
+                <li key={log.id} className="flex items-center gap-4 py-3 first:pt-0">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-line bg-ink text-info">
+                    <Icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">
+                      {LIBELLE[log.action as ActivityType] ?? 'Action inconnue'}
+                    </p>
+                    <p className="t-data mt-0.5 text-xs text-paper-3">
+                      {tempsRelatif(new Date(log.timestamp))}
+                      {log.ipAddress && ` · IP ${log.ipAddress}`}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        ) : (
+          <GxEmpty
+            icon={<Activity aria-hidden="true" />}
+            title="Rien à afficher"
+            hint="Vos connexions et modifications de compte apparaîtront ici dès la prochaine action."
+          />
+        )}
+      </GxSection>
+    </GxPage>
   );
 }

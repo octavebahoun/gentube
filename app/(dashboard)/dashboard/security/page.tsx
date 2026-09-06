@@ -1,12 +1,11 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Lock, Trash2, Loader2 } from 'lucide-react';
 import { useActionState } from 'react';
+import { Lock, Trash2, Loader2 } from 'lucide-react';
 import { updatePassword, deleteAccount } from '@/app/(login)/actions';
+import { GxButton } from '@/components/gx/gx-button';
+import { GxField, GxInput } from '@/components/gx/gx-field';
+import { GxPage, GxPageHeader, GxSection, GxNotice } from '@/components/gx/gx-page';
 
 type PasswordState = {
   currentPassword?: string;
@@ -16,40 +15,31 @@ type PasswordState = {
   success?: string;
 };
 
-type DeleteState = {
-  password?: string;
-  error?: string;
-  success?: string;
-};
+type DeleteState = { password?: string; error?: string; success?: string };
 
 export default function SecurityPage() {
-  const [passwordState, passwordAction, isPasswordPending] = useActionState<
-    PasswordState,
-    FormData
-  >(updatePassword, {});
-
-  const [deleteState, deleteAction, isDeletePending] = useActionState<
-    DeleteState,
-    FormData
-  >(deleteAccount, {});
+  const [passwordState, passwordAction, isPasswordPending] = useActionState<PasswordState, FormData>(
+    updatePassword,
+    {}
+  );
+  const [deleteState, deleteAction, isDeletePending] = useActionState<DeleteState, FormData>(
+    deleteAccount,
+    {}
+  );
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium bold text-gray-900 mb-6">
-        Security Settings
-      </h1>
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Password</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" action={passwordAction}>
-            <div>
-              <Label htmlFor="current-password" className="mb-2">
-                Current Password
-              </Label>
-              <Input
-                id="current-password"
+    <GxPage className="max-w-3xl">
+      <GxPageHeader
+        eyebrow="Compte"
+        titre="Sécurité"
+        intro="Changez votre mot de passe, ou fermez définitivement ce compte."
+      />
+
+      <div className="space-y-6">
+        <GxSection titre="Mot de passe" aide="Huit caractères au minimum.">
+          <form className="space-y-6" action={passwordAction}>
+            <GxField label="Mot de passe actuel" htmlFor="current-password" required>
+              <GxInput
                 name="currentPassword"
                 type="password"
                 autoComplete="current-password"
@@ -58,13 +48,15 @@ export default function SecurityPage() {
                 maxLength={100}
                 defaultValue={passwordState.currentPassword}
               />
-            </div>
-            <div>
-              <Label htmlFor="new-password" className="mb-2">
-                New Password
-              </Label>
-              <Input
-                id="new-password"
+            </GxField>
+
+            <GxField
+              label="Nouveau mot de passe"
+              htmlFor="new-password"
+              hint="Huit caractères au minimum, cent au maximum."
+              required
+            >
+              <GxInput
                 name="newPassword"
                 type="password"
                 autoComplete="new-password"
@@ -73,94 +65,86 @@ export default function SecurityPage() {
                 maxLength={100}
                 defaultValue={passwordState.newPassword}
               />
-            </div>
-            <div>
-              <Label htmlFor="confirm-password" className="mb-2">
-                Confirm New Password
-              </Label>
-              <Input
-                id="confirm-password"
+            </GxField>
+
+            <GxField
+              label="Confirmer le nouveau mot de passe"
+              htmlFor="confirm-password"
+              error={passwordState.error}
+              required
+            >
+              <GxInput
                 name="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 required
                 minLength={8}
                 maxLength={100}
                 defaultValue={passwordState.confirmPassword}
               />
-            </div>
-            {passwordState.error && (
-              <p className="text-red-500 text-sm">{passwordState.error}</p>
-            )}
-            {passwordState.success && (
-              <p className="text-green-500 text-sm">{passwordState.success}</p>
-            )}
-            <Button
-              type="submit"
-              disabled={isPasswordPending}
-            >
+            </GxField>
+
+            {passwordState.success && <GxNotice tone="ok">{passwordState.success}</GxNotice>}
+
+            <GxButton type="submit" disabled={isPasswordPending}>
               {isPasswordPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  Mise à jour…
                 </>
               ) : (
                 <>
-                  <Lock className="mr-2 h-4 w-4" />
-                  Update Password
+                  <Lock className="size-4" aria-hidden="true" />
+                  Changer le mot de passe
                 </>
               )}
-            </Button>
+            </GxButton>
           </form>
-        </CardContent>
-      </Card>
+        </GxSection>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Delete Account</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-500 mb-4">
-            Account deletion is non-reversable. Please proceed with caution.
+        {/* La zone dangereuse porte le rouge de la mire, et rien d'autre. */}
+        <section className="rounded-lg border border-rouge/40 bg-rouge/5 p-6">
+          <h2 className="font-display text-lg font-bold tracking-tight text-danger">
+            Supprimer le compte
+          </h2>
+          <p className="mt-2 text-sm text-paper-2">
+            La suppression est définitive. Les vidéos et les crédits restants sont perdus,
+            et rien ne permet de revenir en arrière.
           </p>
-          <form action={deleteAction} className="space-y-4">
-            <div>
-              <Label htmlFor="delete-password" className="mb-2">
-                Confirm Password
-              </Label>
-              <Input
-                id="delete-password"
+          <form action={deleteAction} className="mt-5 space-y-5">
+            <GxField
+              label="Confirmez avec votre mot de passe"
+              htmlFor="delete-password"
+              error={deleteState.error}
+              required
+            >
+              <GxInput
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 required
                 minLength={8}
                 maxLength={100}
                 defaultValue={deleteState.password}
               />
-            </div>
-            {deleteState.error && (
-              <p className="text-red-500 text-sm">{deleteState.error}</p>
-            )}
-            <Button
-              type="submit"
-              variant="destructive"
-              className="bg-red-600 hover:bg-red-700"
-              disabled={isDeletePending}
-            >
+            </GxField>
+
+            <GxButton type="submit" variant="danger" disabled={isDeletePending}>
               {isDeletePending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  Suppression…
                 </>
               ) : (
                 <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Account
+                  <Trash2 className="size-4" aria-hidden="true" />
+                  Supprimer mon compte
                 </>
               )}
-            </Button>
+            </GxButton>
           </form>
-        </CardContent>
-      </Card>
-    </section>
+        </section>
+      </div>
+    </GxPage>
   );
 }

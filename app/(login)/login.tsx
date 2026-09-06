@@ -3,13 +3,19 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { CircleIcon, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { signIn, signUp } from './actions';
-import { ActionState } from '@/lib/auth/middleware';
+import type { ActionState } from '@/lib/auth/middleware';
+import { GxButton } from '@/components/gx/gx-button';
+import { GxField, GxInput } from '@/components/gx/gx-field';
+import { GxNotice } from '@/components/gx/gx-page';
+import { TRIAL_CREDITS } from '@/lib/credits/pricing';
 
+/*
+ * L'écran d'entrée — écran partagé : à gauche ce que le produit rend,
+ * à droite le formulaire. On montre le résultat avant de demander un mot
+ * de passe. Sur mobile, la colonne média disparaît : le formulaire d'abord.
+ */
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
@@ -20,123 +26,119 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     { error: '' }
   );
 
-  return (
-    <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <CircleIcon className="h-12 w-12 text-brand-accent" />
-        </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {mode === 'signin'
-            ? 'Sign in to your account'
-            : 'Create your account'}
-        </h2>
-      </div>
+  const inscription = mode === 'signup';
+  const lienAlternatif = `${inscription ? '/sign-in' : '/sign-up'}${
+    redirect ? `?redirect=${redirect}` : ''
+  }${priceId ? `${redirect ? '&' : '?'}priceId=${priceId}` : ''}`;
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <form className="space-y-6" action={formAction}>
-          <input type="hidden" name="redirect" value={redirect || ''} />
-          <input type="hidden" name="priceId" value={priceId || ''} />
-          <input type="hidden" name="inviteId" value={inviteId || ''} />
-          <div>
-            <Label
-              htmlFor="email"
-              className="block text-sm font-medium text-muted-foreground"
-            >
-              Email
-            </Label>
-            <div className="mt-1">
-              <Input
-                id="email"
+  return (
+    <main className="grid min-h-[100dvh] bg-ink lg:grid-cols-2">
+      {/* Colonne média : de vrais rendus, en mosaïque. */}
+      <aside className="relative hidden overflow-hidden border-r border-line lg:block" aria-hidden="true">
+        <div className="grid h-full grid-cols-2 gap-1 p-1">
+          {[1, 4, 5, 2].map((n) => (
+            <video
+              key={n}
+              src={`/showcase/loop-${n}.mp4`}
+              poster={`/showcase/loop-${n}.webp`}
+              muted
+              loop
+              autoPlay
+              playsInline
+              preload="metadata"
+              className="size-full object-cover opacity-45"
+            />
+          ))}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-transparent" />
+        <div className="absolute right-0 bottom-0 left-0 p-10">
+          <div className="mire h-[3px] w-24" />
+          <p className="t-h2 mt-6 max-w-sm">Décrivez. On monte.</p>
+          <p className="mt-4 max-w-sm text-sm text-paper-2">
+            Des plans rendus par GenTube, sans logiciel de montage ouvert une seule fois.
+          </p>
+        </div>
+      </aside>
+
+      {/* Colonne formulaire */}
+      <div className="flex items-center justify-center px-6 py-14">
+        <div className="w-full max-w-sm">
+          <Link href="/" className="inline-flex items-center gap-2.5" aria-label="GenTube — accueil">
+            <span aria-hidden="true" className="mire size-7 rounded-md" />
+            <span className="font-display text-lg font-bold tracking-tight">
+              Gen<span className="text-marque">Tube</span>
+            </span>
+          </Link>
+
+          <h1 className="t-h2 mt-10">{inscription ? 'Créez votre compte' : 'Content de vous revoir'}</h1>
+          <p className="mt-3 text-sm leading-relaxed text-paper-3">
+            {inscription
+              ? `${TRIAL_CREDITS} crédits offerts à l'inscription, sans carte bancaire.`
+              : 'Connectez-vous pour retrouver vos projets et vos vidéos.'}
+          </p>
+
+          <form className="mt-8 space-y-6" action={formAction}>
+            <input type="hidden" name="redirect" value={redirect || ''} />
+            <input type="hidden" name="priceId" value={priceId || ''} />
+            <input type="hidden" name="inviteId" value={inviteId || ''} />
+
+            <GxField label="E-mail" htmlFor="email" required>
+              <GxInput
                 name="email"
                 type="email"
                 autoComplete="email"
                 defaultValue={state.email}
                 required
                 maxLength={50}
-                className="appearance-none rounded-full relative block w-full px-3 py-2 border border-border placeholder:text-muted-foreground text-foreground focus:outline-none focus:ring-ring focus:border-ring focus:z-10 sm:text-sm"
-                placeholder="Enter your email"
+                placeholder="vous@exemple.fr"
               />
-            </div>
-          </div>
+            </GxField>
 
-          <div>
-            <Label
+            <GxField
+              label="Mot de passe"
               htmlFor="password"
-              className="block text-sm font-medium text-muted-foreground"
+              hint={inscription ? 'Huit caractères au minimum.' : undefined}
+              required
             >
-              Password
-            </Label>
-            <div className="mt-1">
-              <Input
-                id="password"
+              <GxInput
                 name="password"
                 type="password"
-                autoComplete={
-                  mode === 'signin' ? 'current-password' : 'new-password'
-                }
+                autoComplete={inscription ? 'new-password' : 'current-password'}
                 defaultValue={state.password}
                 required
                 minLength={8}
                 maxLength={100}
-                className="appearance-none rounded-full relative block w-full px-3 py-2 border border-border placeholder:text-muted-foreground text-foreground focus:outline-none focus:ring-ring focus:border-ring focus:z-10 sm:text-sm"
-                placeholder="Enter your password"
+                placeholder="••••••••"
               />
-            </div>
-          </div>
+            </GxField>
 
-          {state?.error && (
-            <div className="text-red-500 text-sm">{state.error}</div>
-          )}
+            {state?.error && <GxNotice tone="erreur">{state.error}</GxNotice>}
 
-          <div>
-            <Button
-              type="submit"
-              className="w-full flex justify-center items-center py-2 px-4 rounded-full shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring"
-              disabled={pending}
-            >
+            <GxButton type="submit" size="lg" className="w-full" disabled={pending}>
               {pending ? (
                 <>
-                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                  Loading...
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  Un instant…
                 </>
-              ) : mode === 'signin' ? (
-                'Sign in'
+              ) : inscription ? (
+                'Créer mon compte'
               ) : (
-                'Sign up'
+                'Se connecter'
               )}
-            </Button>
-          </div>
-        </form>
+            </GxButton>
+          </form>
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-background text-muted-foreground">
-                {mode === 'signin'
-                  ? 'New to our platform?'
-                  : 'Already have an account?'}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6">
+          <p className="mt-8 border-t border-line pt-6 text-sm text-paper-3">
+            {inscription ? 'Vous avez déjà un compte ? ' : 'Pas encore de compte ? '}
             <Link
-              href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
-                redirect ? `?redirect=${redirect}` : ''
-              }${priceId ? `&priceId=${priceId}` : ''}`}
-              className="w-full flex justify-center py-2 px-4 border border-border rounded-full shadow-sm text-sm font-medium text-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring"
+              href={lienAlternatif}
+              className="font-semibold text-marque underline-offset-4 hover:underline"
             >
-              {mode === 'signin'
-                ? 'Create an account'
-                : 'Sign in to existing account'}
+              {inscription ? 'Se connecter' : 'En créer un'}
             </Link>
-          </div>
+          </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

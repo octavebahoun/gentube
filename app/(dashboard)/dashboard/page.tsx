@@ -1,22 +1,15 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { useActionState } from 'react';
-import { TenantDataWithMembers, User } from '@/lib/db/schema';
-import { removeTenantMember, inviteTenantMember } from '@/app/(login)/actions';
+import { Suspense, useActionState } from 'react';
 import useSWR from 'swr';
-import { Suspense } from 'react';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle, Users } from 'lucide-react';
+import type { TenantDataWithMembers, User } from '@/lib/db/schema';
+import { removeTenantMember, inviteTenantMember } from '@/app/(login)/actions';
+import { GxButton } from '@/components/gx/gx-button';
+import { GxCard, GxStat } from '@/components/gx/gx-card';
+import { GxBadge } from '@/components/gx/gx-badge-empty';
+import { GxField, GxInput } from '@/components/gx/gx-field';
+import { GxPage, GxPageHeader, GxSection, GxNotice, GxRadio } from '@/components/gx/gx-page';
 import {
   CREDIT_FCFA,
   CREDITS_PER_IMAGE,
@@ -25,22 +18,9 @@ import {
   secondsAffordable,
 } from '@/lib/credits/pricing';
 
-type ActionState = {
-  error?: string;
-  success?: string;
-};
+type ActionState = { error?: string; success?: string };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-function PlanSkeleton() {
-  return (
-    <Card className="mb-8 h-[140px]">
-      <CardHeader>
-        <CardTitle>Offre et crédits</CardTitle>
-      </CardHeader>
-    </Card>
-  );
-}
 
 function formatMinutes(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -48,257 +28,212 @@ function formatMinutes(seconds: number) {
   return rest ? `${minutes} min ${rest}s` : `${minutes} min`;
 }
 
-function PlanAndCredits() {
+function Squelette({ hauteur }: { hauteur: string }) {
+  return <div className={`scan plate ${hauteur}`} aria-hidden="true" />;
+}
+
+function OffreEtCredits() {
   const { data: tenant } = useSWR<TenantDataWithMembers>('/api/tenant', fetcher);
   const balance = tenant?.creditsBalance ?? 0;
 
   return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>Offre et crédits</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="font-medium capitalize">
-              Offre : {tenant?.plan ?? '—'}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Payé en XOF via SasPay —{' '}
-              <a href="/dashboard/billing" className="underline">
-                gérer l’offre et les crédits
-              </a>
-              .
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-semibold tabular-nums">
-              {balance.toLocaleString('fr-FR')}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              crédits ≈ {formatMinutes(secondsAffordable(balance, 'draft'))}{' '}
-              en animé Full HD · {imagesAffordable(balance)} images fixes
-            </p>
-          </div>
-        </div>
-        {balance === 0 && (
-          <p role="alert" className="mt-4 text-sm text-red-500">
-            Solde vide — la génération est bloquée jusqu’à la prochaine recharge.
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <GxStat
+          label="Solde"
+          value={balance.toLocaleString('fr-FR')}
+          hint="crédits disponibles"
+        />
+        <GxStat
+          label="En Full HD"
+          value={formatMinutes(secondsAffordable(balance, 'draft'))}
+          hint={`${CREDITS_PER_SECOND.draft} crédits la seconde`}
+          tone="cyan"
+        />
+        <GxStat
+          label="En images fixes"
+          value={imagesAffordable(balance).toLocaleString('fr-FR')}
+          hint={`${CREDITS_PER_IMAGE} crédits l'image`}
+          tone="magenta"
+        />
+      </div>
+
+      <GxCard className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="t-label text-paper-3">Offre en cours</p>
+          <p className="mt-2 flex items-center gap-3">
+            <span className="font-display text-lg font-bold capitalize">{tenant?.plan ?? '—'}</span>
+            <GxBadge tone="cyan">payé en FCFA</GxBadge>
           </p>
-        )}
-        <p className="mt-4 text-xs text-muted-foreground">
-          Image fixe : {CREDITS_PER_IMAGE} crédits · vidéo Full HD :{' '}
-          {CREDITS_PER_SECOND.draft} crédits/s · Cinéma : {CREDITS_PER_SECOND.standard} crédits/s · 1 crédit = {CREDIT_FCFA} FCFA
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function MembersSkeleton() {
-  return (
-    <Card className="mb-8 h-[140px]">
-      <CardHeader>
-        <CardTitle>Membres de l’espace</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="animate-pulse space-y-4 mt-1">
-          <div className="flex items-center space-x-4">
-            <div className="size-8 rounded-full bg-muted"></div>
-            <div className="space-y-2">
-              <div className="h-4 w-32 bg-muted rounded"></div>
-              <div className="h-3 w-14 bg-muted rounded"></div>
-            </div>
-          </div>
         </div>
-      </CardContent>
-    </Card>
+        <GxButton href="/dashboard/billing" variant="secondary" size="sm">
+          Gérer l'offre et les crédits
+        </GxButton>
+      </GxCard>
+
+      {balance === 0 && (
+        <GxNotice tone="erreur">
+          Solde vide. La génération reste bloquée jusqu'à la prochaine recharge.
+        </GxNotice>
+      )}
+
+      <p className="t-data text-xs text-paper-3">
+        1 crédit = {CREDIT_FCFA} FCFA · image {CREDITS_PER_IMAGE} cr · Full HD{' '}
+        {CREDITS_PER_SECOND.draft} cr/s · Cinéma {CREDITS_PER_SECOND.standard} cr/s
+      </p>
+    </div>
   );
 }
 
-function Members() {
+function Membres() {
   const { data: tenant } = useSWR<TenantDataWithMembers>('/api/tenant', fetcher);
   const { data: currentUser } = useSWR<User>('/api/user', fetcher);
-  const [removeState, removeAction, isRemovePending] = useActionState<
-    ActionState,
-    FormData
-  >(removeTenantMember, {});
+  const [removeState, removeAction, isRemovePending] = useActionState<ActionState, FormData>(
+    removeTenantMember,
+    {}
+  );
 
-  const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) =>
-    user.name || user.email || 'Unknown User';
-
-  const canManage = currentUser?.role !== 'member';
+  const nom = (u: Pick<User, 'id' | 'name' | 'email'>) => u.name || u.email || 'Membre';
+  const peutGerer = currentUser?.role !== 'member';
 
   if (!tenant?.users?.length) {
     return (
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Membres de l’espace</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Aucun membre pour l’instant.</p>
-        </CardContent>
-      </Card>
+      <GxSection titre="Membres de l'espace">
+        <p className="flex items-center gap-2 text-sm text-paper-3">
+          <Users className="size-4" aria-hidden="true" />
+          Personne d'autre ici pour l'instant. Invitez quelqu'un ci-dessous.
+        </p>
+      </GxSection>
     );
   }
 
   return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>Membres de l’espace</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-4">
-          {tenant.users.map((member) => (
-            <li key={member.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarFallback>
-                    {getUserDisplayName(member)
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">{getUserDisplayName(member)}</p>
-                  <p className="text-sm text-muted-foreground capitalize">
-                    {member.role}
-                  </p>
-                </div>
+    <GxSection titre="Membres de l'espace" aide={`${tenant.users.length} personne(s) dans cet espace.`}>
+      <ul className="divide-y divide-line">
+        {tenant.users.map((member) => (
+          <li key={member.id} className="flex items-center justify-between gap-3 py-3 first:pt-0">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-pill border border-line-hi bg-ink-3 font-mono text-xs font-bold">
+                {nom(member).slice(0, 2).toUpperCase()}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{nom(member)}</p>
+                <p className="t-label mt-1 text-paper-3">{member.role}</p>
               </div>
-              {canManage && member.id !== currentUser?.id ? (
-                <form action={removeAction}>
-                  <input type="hidden" name="memberId" value={member.id} />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    size="sm"
-                    disabled={isRemovePending}
-                  >
-                    {isRemovePending ? 'Retrait…' : 'Retirer'}
-                  </Button>
-                </form>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-        {removeState?.error && (
-          <p className="text-red-500 mt-4">{removeState.error}</p>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function InviteMemberSkeleton() {
-  return (
-    <Card className="h-[260px]">
-      <CardHeader>
-        <CardTitle>Inviter un membre</CardTitle>
-      </CardHeader>
-    </Card>
-  );
-}
-
-function InviteMember() {
-  const { data: user } = useSWR<User>('/api/user', fetcher);
-  const canInvite = user?.role === 'owner' || user?.role === 'admin';
-  const [inviteState, inviteAction, isInvitePending] = useActionState<
-    ActionState,
-    FormData
-  >(inviteTenantMember, {});
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Inviter un membre</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form action={inviteAction} className="space-y-4">
-          <div>
-            <Label htmlFor="email" className="mb-2">
-              E-mail
-            </Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="membre@exemple.fr"
-              autoComplete="email"
-              required
-              disabled={!canInvite}
-            />
-          </div>
-          <div>
-            <Label>Rôle</Label>
-            <RadioGroup
-              defaultValue="member"
-              name="role"
-              className="flex space-x-4"
-              disabled={!canInvite}
-            >
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="member" id="member" />
-                <Label htmlFor="member">Membre</Label>
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="admin" id="admin" />
-                <Label htmlFor="admin">Admin</Label>
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="owner" id="owner" />
-                <Label htmlFor="owner">Propriétaire</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          {inviteState?.error && (
-            <p role="alert" className="text-red-500">{inviteState.error}</p>
-          )}
-          {inviteState?.success && (
-            <p role="status" className="text-green-500">{inviteState.success}</p>
-          )}
-          <Button
-            type="submit"
-            disabled={isInvitePending || !canInvite}
-          >
-            {isInvitePending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Invitation…
-              </>
-            ) : (
-              <>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Inviter
-              </>
+            </div>
+            {peutGerer && member.id !== currentUser?.id && (
+              <form action={removeAction}>
+                <input type="hidden" name="memberId" value={member.id} />
+                <GxButton type="submit" variant="ghost" size="sm" disabled={isRemovePending}>
+                  {isRemovePending ? 'Retrait…' : 'Retirer'}
+                </GxButton>
+              </form>
             )}
-          </Button>
-          {!canInvite && (
-            <p className="text-sm text-muted-foreground">
-              Seul un propriétaire ou un admin peut inviter.
-            </p>
-          )}
-        </form>
-      </CardContent>
-    </Card>
+          </li>
+        ))}
+      </ul>
+      {removeState?.error && (
+        <div className="mt-4">
+          <GxNotice tone="erreur">{removeState.error}</GxNotice>
+        </div>
+      )}
+    </GxSection>
   );
 }
 
-export default function SettingsPage() {
+function Inviter() {
+  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const peutInviter = user?.role === 'owner' || user?.role === 'admin';
+  const [inviteState, inviteAction, isInvitePending] = useActionState<ActionState, FormData>(
+    inviteTenantMember,
+    {}
+  );
+
   return (
-    <section className="shell-gutter mx-auto w-full max-w-(--content-max) flex-1 px-4 py-6 lg:px-8 lg:py-8">
-      <p className="text-xs font-medium tracking-widest text-brand-accent uppercase">Espace</p>
-      <h1 className="mt-1 mb-6 text-2xl font-semibold tracking-tight">Espace de travail</h1>
-      <Suspense fallback={<PlanSkeleton />}>
-        <PlanAndCredits />
-      </Suspense>
-      <Suspense fallback={<MembersSkeleton />}>
-        <Members />
-      </Suspense>
-      <Suspense fallback={<InviteMemberSkeleton />}>
-        <InviteMember />
-      </Suspense>
-    </section>
+    <GxSection
+      titre="Inviter quelqu'un"
+      aide={
+        peutInviter
+          ? "La personne reçoit un accès à cet espace et à ses crédits."
+          : 'Seul un propriétaire ou un admin peut inviter.'
+      }
+    >
+      <form action={inviteAction} className="space-y-5">
+        <GxField
+          label="E-mail"
+          htmlFor="email"
+          hint="L'adresse reçoit l'invitation à rejoindre l'espace."
+          error={inviteState?.error}
+          required
+        >
+          <GxInput
+            name="email"
+            type="email"
+            placeholder="membre@exemple.fr"
+            autoComplete="email"
+            required
+            disabled={!peutInviter}
+          />
+        </GxField>
+
+        <GxRadio
+          legend="Rôle"
+          name="role"
+          defaultValue="member"
+          disabled={!peutInviter}
+          options={[
+            { value: 'member', label: 'Membre' },
+            { value: 'admin', label: 'Admin' },
+            { value: 'owner', label: 'Propriétaire' },
+          ]}
+        />
+
+        {inviteState?.success && <GxNotice tone="ok">{inviteState.success}</GxNotice>}
+
+        <GxButton type="submit" disabled={isInvitePending || !peutInviter}>
+          {isInvitePending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              Invitation…
+            </>
+          ) : (
+            <>
+              <PlusCircle className="size-4" aria-hidden="true" />
+              Envoyer l'invitation
+            </>
+          )}
+        </GxButton>
+      </form>
+    </GxSection>
+  );
+}
+
+export default function EspacePage() {
+  return (
+    <GxPage>
+      <GxPageHeader
+        eyebrow="Espace"
+        titre="Espace de travail"
+        intro="Ce que votre espace peut dépenser, et qui y a accès."
+        action={
+          <GxButton href="/dashboard/projects/new" size="sm">
+            <PlusCircle className="size-4" aria-hidden="true" />
+            Nouveau projet
+          </GxButton>
+        }
+      />
+
+      <div className="space-y-6">
+        <Suspense fallback={<Squelette hauteur="h-40" />}>
+          <OffreEtCredits />
+        </Suspense>
+        <Suspense fallback={<Squelette hauteur="h-40" />}>
+          <Membres />
+        </Suspense>
+        <Suspense fallback={<Squelette hauteur="h-64" />}>
+          <Inviter />
+        </Suspense>
+      </div>
+    </GxPage>
   );
 }

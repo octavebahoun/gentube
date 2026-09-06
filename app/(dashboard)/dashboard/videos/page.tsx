@@ -1,56 +1,27 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Film, Clock, Coins, AlertTriangle, CheckCircle2, Play } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { Clock, Coins, Film, Youtube } from 'lucide-react';
+import { GxButton } from '@/components/gx/gx-button';
+import { GxEmpty } from '@/components/gx/gx-badge-empty';
+import { GxTabLinks } from '@/components/gx/gx-tabs';
+import { GxPage, GxPageHeader } from '@/components/gx/gx-page';
+import { GxVignette } from '@/components/gx/gx-vignette';
+import { EtatBadge, ETAT_LABEL } from '@/components/gx/gx-etat';
 import { getUser } from '@/lib/db/queries';
 import { tenantDb, eq } from '@/lib/db/tenant-db';
 import { projects, shots } from '@/lib/db/schema';
 import { listVideos } from '@/lib/videos';
 
 const ETATS = [
-  { value: 'all', label: 'Toutes' },
-  { value: 'draft', label: 'Brouillons' },
-  { value: 'validated', label: 'Validées' },
-  { value: 'generating', label: 'En fabrication' },
-  { value: 'rendering', label: 'Montage' },
-  { value: 'rendered', label: 'Terminées' },
-  { value: 'published', label: 'Publiées' },
-  { value: 'failed', label: 'Échouées' },
+  'all',
+  'draft',
+  'validated',
+  'generating',
+  'rendering',
+  'rendered',
+  'published',
+  'failed',
 ] as const;
-
-const STATUS_BADGE: Record<string, string> = {
-  draft: 'bg-secondary text-muted-foreground border',
-  validated: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
-  generating: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
-  rendering: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
-  rendered: 'bg-green-500/15 text-green-400 border border-green-500/30',
-  published: 'bg-green-500/15 text-green-400 border border-green-500/30',
-  failed: 'bg-red-500/15 text-red-400 border border-red-500/30',
-};
-
-function Vignette({ status }: { status: string }) {
-  const isPublished = status === 'published' || status === 'rendered';
-  const isFailed = status === 'failed';
-  const isGenerating = status === 'generating' || status === 'rendering' || status === 'validated';
-  return (
-    <div
-      className={`flex aspect-video w-full items-center justify-center rounded-md border ${isPublished ? 'border-green-500/30 bg-green-500/10' : isFailed ? 'border-red-500/30 bg-red-500/10' : isGenerating ? 'border-amber-500/30 bg-amber-500/10' : 'border-dashed bg-muted/40'}`}
-    >
-      {isPublished ? (
-        <Play className="size-6 text-green-400" />
-      ) : isFailed ? (
-        <AlertTriangle className="size-6 text-red-400" />
-      ) : isGenerating ? (
-        <Film className="size-6 animate-pulse text-amber-400" />
-      ) : (
-        <Film className="size-6 text-muted-foreground/60" />
-      )}
-    </div>
-  );
-}
 
 export default async function VideosLibraryPage({
   searchParams,
@@ -61,15 +32,13 @@ export default async function VideosLibraryPage({
   if (!user) redirect('/sign-in');
   const tdb = tenantDb(user.tenantId);
   const { etat } = await searchParams;
-  const filtre = ETATS.some((e) => e.value === etat) ? (etat as string) : 'all';
+  const filtre: string = ETATS.includes(etat as (typeof ETATS)[number]) ? (etat as string) : 'all';
 
   const [allVideos, allProjects] = await Promise.all([listVideos(tdb), tdb.findMany(projects)]);
   const projectById = new Map(allProjects.map((p) => [p.id, p.name]));
 
-  const filtered =
-    filtre === 'all' ? allVideos : allVideos.filter((v) => v.status === filtre);
+  const filtered = filtre === 'all' ? allVideos : allVideos.filter((v) => v.status === filtre);
 
-  // enrichir avec durée (somme des scènes) quand il y a des vidéos
   const withMeta = await Promise.all(
     filtered.map(async (video) => {
       const shotList = await tdb.findMany(shots, eq(shots.videoId, video.id));
@@ -80,118 +49,104 @@ export default async function VideosLibraryPage({
   withMeta.sort((a, b) => b.video.updatedAt.getTime() - a.video.updatedAt.getTime());
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium tracking-widest text-brand-accent uppercase">Vidéos</p>
-          <h1 className="text-2xl font-semibold tracking-tight">Bibliothèque</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Vignette, durée, coût, date, plateforme — filtrez par état.
-          </p>
-        </div>
-        <Link href="/dashboard/projects" className={buttonVariants({ size: 'sm' })}>
-          Nouvelle vidéo
-        </Link>
-      </div>
+    <GxPage className="max-w-6xl">
+      <GxPageHeader
+        eyebrow="Vidéos"
+        titre="Bibliothèque"
+        intro="Chaque vidéo avec sa durée, son coût et son état. Survolez une vidéo terminée pour la voir tourner."
+        action={
+          <GxButton href="/dashboard/projects" size="sm">
+            Nouvelle vidéo
+          </GxButton>
+        }
+      />
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {ETATS.map((e) => {
-          const active = filtre === e.value;
-          return (
-            <Link
-              key={e.value}
-              href={e.value === 'all' ? '/dashboard/videos' : `/dashboard/videos?etat=${e.value}`}
-              className={
-                active
-                  ? 'rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground'
-                  : 'rounded-full border bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-secondary/80'
-              }
-            >
-              {e.label}
-              {e.value !== 'all' && (
-                <span className="ml-1.5 tabular-nums opacity-70">
-                  {allVideos.filter((v) => v.status === e.value).length}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </div>
+      <GxTabLinks
+        className="mb-6"
+        active={filtre}
+        tabs={ETATS.map((e) => ({
+          href: e === 'all' ? '/dashboard/videos?etat=all' : `/dashboard/videos?etat=${e}`,
+          label: e === 'all' ? 'Toutes' : ETAT_LABEL[e],
+          count: e === 'all' ? allVideos.length : allVideos.filter((v) => v.status === e).length,
+        }))}
+      />
 
       {withMeta.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="py-16">
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Film />
-                </EmptyMedia>
-                <EmptyTitle>
-                  {filtre === 'all' ? 'Aucune vidéo' : `Aucune vidéo : ${ETATS.find((e) => e.value === filtre)?.label}`}
-                </EmptyTitle>
-                <EmptyDescription>
-                  {filtre === 'all'
-                    ? 'Vos vidéos apparaîtront ici — avec leur vignette, leur durée et leur coût.'
-                    : 'Essayez un autre filtre, ou créez une nouvelle vidéo.'}
-                </EmptyDescription>
-              </EmptyHeader>
-              {filtre !== 'all' && (
-                <Link href="/dashboard/videos" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-                  Voir toutes
-                </Link>
-              )}
-            </Empty>
-          </CardContent>
-        </Card>
+        <div className="plate">
+          <GxEmpty
+            icon={<Film aria-hidden="true" />}
+            title={filtre === 'all' ? 'Aucune vidéo' : `Aucune vidéo dans « ${ETAT_LABEL[filtre]} »`}
+            hint={
+              filtre === 'all'
+                ? 'Vos vidéos apparaîtront ici avec leur aperçu, leur durée et leur coût.'
+                : 'Essayez un autre état, ou lancez une nouvelle vidéo depuis un projet.'
+            }
+            action={
+              filtre === 'all' ? (
+                <GxButton href="/dashboard/projects">Choisir un projet</GxButton>
+              ) : (
+                <GxButton href="/dashboard/videos?etat=all" variant="secondary">
+                  Voir toutes les vidéos
+                </GxButton>
+              )
+            }
+          />
+        </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {withMeta.map(({ video, duree, scenes }) => (
-            <Link key={video.id} href={`/dashboard/videos/${video.id}`} className="group">
-              <Card className="overflow-hidden transition-colors group-hover:border-primary/40">
-                <div className="p-2">
-                  <Vignette status={video.status} />
-                </div>
-                <CardContent className="space-y-2">
+            <li key={video.id}>
+              <Link
+                href={`/dashboard/videos/${video.id}`}
+                className="group plate block overflow-hidden transition-[border-color,transform] duration-(--t-fast) hover:-translate-y-1 hover:border-line-hi"
+              >
+                <GxVignette status={video.status} src={video.outputUrl} titre={video.title} />
+                <div className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="line-clamp-2 text-sm font-medium leading-tight group-hover:text-primary">{video.title}</h3>
-                    <Badge className={`shrink-0 text-[10px] capitalize ${STATUS_BADGE[video.status] ?? 'bg-secondary text-muted-foreground border'}`}>
-                      {video.status}
-                    </Badge>
+                    <h2 className="line-clamp-2 font-display text-sm leading-snug font-bold transition-colors duration-(--t-fast) group-hover:text-marque">
+                      {video.title}
+                    </h2>
+                    <EtatBadge status={video.status} className="shrink-0" />
                   </div>
-                  <p className="truncate text-xs text-muted-foreground">{projectById.get(video.projectId) ?? 'Projet'}</p>
-                  <div className="flex flex-wrap items-center gap-2 text-xs tabular-nums text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <Clock className="size-3" />
+
+                  <p className="truncate text-xs text-paper-3">
+                    {projectById.get(video.projectId) ?? 'Projet'}
+                  </p>
+
+                  <div className="t-data flex flex-wrap items-center gap-3 text-xs text-paper-3">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock className="size-3.5" aria-hidden="true" />
                       {duree > 0 ? `${duree.toFixed(1).replace('.', ',')} s` : '—'}
                     </span>
-                    <span>·</span>
-                    <span className="inline-flex items-center gap-1">
-                      <Coins className="size-3" />
-                      {video.creditsConsumed > 0 ? `${video.creditsConsumed}` : `${video.creditsEstimated || '—'}`} cr
+                    <span className="inline-flex items-center gap-1.5">
+                      <Coins className="size-3.5" aria-hidden="true" />
+                      {video.creditsConsumed > 0 ? video.creditsConsumed : video.creditsEstimated || '—'} cr
                     </span>
-                    <span>·</span>
-                    <span>{scenes} scène{scenes !== 1 ? 's' : ''}</span>
+                    <span>
+                      {scenes} scène{scenes !== 1 ? 's' : ''}
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+
+                  <div className="t-data flex items-center justify-between border-t border-line pt-3 text-xs text-paper-3">
                     <span>{new Date(video.updatedAt).toLocaleDateString('fr-FR')}</span>
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1.5">
                       {video.youtubeVideoId ? (
                         <>
-                          <CheckCircle2 className="size-3 text-green-500" /> YouTube
+                          <Youtube className="size-3.5 text-ok" aria-hidden="true" /> Sur YouTube
                         </>
                       ) : video.outputUrl ? (
-                        'MP4 prêt'
+                        <span className="text-ok">MP4 prêt</span>
                       ) : (
                         '—'
                       )}
                     </span>
                   </div>
-                </CardContent>
-              </Card>
-            </Link>
+                </div>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
-    </section>
+    </GxPage>
   );
 }
