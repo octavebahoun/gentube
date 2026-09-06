@@ -2,22 +2,29 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /*
- * GX Progress — la tête de lecture. La barre remplie est la mire elle-même :
- * l'avancement et l'identité sont le même objet.
- * Anime `transform` uniquement, jamais `width`.
+ * GenTube Progress Gauge
  */
 export function GxProgress({
   value,
   max = 100,
   label,
+  tone = 'orange',
   className,
 }: {
   value: number;
   max?: number;
   label: string;
+  tone?: 'orange' | 'purple' | 'gradient';
   className?: string;
 }) {
   const ratio = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
+
+  const fills = {
+    orange: 'bg-[#FF7A18]',
+    purple: 'bg-[#A855F7]',
+    gradient: 'bg-gradient-gt',
+  };
+
   return (
     <div
       role="progressbar"
@@ -25,11 +32,11 @@ export function GxProgress({
       aria-valuemax={max}
       aria-valuenow={Math.round(value)}
       aria-label={label}
-      className={cn('relative h-1.5 w-full overflow-hidden rounded-pill bg-ink-3', className)}
+      className={cn('relative h-2 w-full overflow-hidden rounded-full bg-[#171A20] border border-[#292D35]', className)}
     >
       <span
         aria-hidden="true"
-        className="mire absolute inset-0 origin-left transition-transform duration-(--t-slow) ease-(--ease-out)"
+        className={cn('absolute inset-y-0 left-0 origin-left transition-transform duration-300 ease-out', fills[tone])}
         style={{ transform: `scaleX(${ratio})` }}
       />
     </div>
@@ -37,17 +44,16 @@ export function GxProgress({
 }
 
 /*
- * Le compteur de niveau : six barres qui montent, façon vumètre. Sert à dire
- * « ça travaille » sans afficher un pourcentage qu'on ne connaît pas.
+ * GenTube Audio / Render Meter Animation
  */
 export function GxMeter({ label, className }: { label: string; className?: string }) {
   return (
     <span role="status" aria-label={label} className={cn('inline-flex items-end gap-0.5', className)}>
-      {[0, 1, 2, 3].map((i) => (
+      {[0, 1, 2, 3, 4].map((i) => (
         <span
           key={i}
           aria-hidden="true"
-          className="w-1 origin-bottom rounded-[1px] bg-cyan"
+          className="w-1 origin-bottom rounded-full bg-[#FF7A18]"
           style={{
             height: `${8 + i * 3}px`,
             animation: `gt-bar ${520 + i * 130}ms ease-in-out ${i * 90}ms infinite alternate`,

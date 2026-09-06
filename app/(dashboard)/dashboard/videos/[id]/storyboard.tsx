@@ -18,10 +18,12 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2, Trash2, Play, Pause, FastForward, Rewind, Sparkles, Film, Mic, Music, Layers, Wand2, Sliders } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GxButton } from '@/components/gx/gx-button';
+import { GxCard, GxCardTitle, GxPerfCard } from '@/components/gx/gx-card';
+import { GxBadge } from '@/components/gx/gx-badge-empty';
+import { StudioTimelineTrack, AIAction } from '@/components/gx/gx-studio-ui';
 import type { ClientAsset, Shot, Video } from '@/lib/db/schema';
 import { deleteVideoAction, reorderShotsAction } from '../actions';
 import { PriceStrip } from '@/components/storyboard/price-strip';
@@ -53,21 +55,9 @@ export function StoryboardEditor({
   balance: number;
   canAfford: boolean;
   durationsMeasured: boolean;
-  /**
-   * Les fichiers déposés sur le projet, servables sur un plan.
-   *
-   * Vide hors brouillon : la page ne les charge pas, et lier après le débit
-   * ne rembourserait rien.
-   */
   assets: ClientAsset[];
 }) {
   const editable = video.status === 'draft';
-  /*
-   * Les vidéos déposées, les seules qui se découpent.
-   *
-   * Une image est une scène : elle s'attache à un plan depuis sa carte. Une
-   * vidéo n'en est pas une — elle se taille en plans, et c'est un autre geste.
-   */
   const videosApportees = assets
     .filter((asset) => asset.kind === 'video')
     .map((asset) => ({
@@ -77,17 +67,9 @@ export function StoryboardEditor({
     }));
   const spokenSeconds = shots.reduce((t, s) => t + s.durationS, 0);
 
-  // Les visuels s'ouvrent une fois les crédits débités : `validated` au premier
-  // passage, `generating` pour une reprise après un échec partiel.
   const producible = video.status === 'validated' || video.status === 'generating';
   const hasAnimated = shots.some((shot) => shot.type === 'video');
-  /*
-   * Montable dès que chaque plan a de quoi s'afficher et de quoi s'entendre.
-   *
-   * Une scène qui dessine son propre écran — une carte, un compteur, un
-   * graphique — n'a pas d'image, et c'est elle l'image : lui réclamer un
-   * `assetUrl` cacherait le bouton pour une scène qui va très bien.
-   */
+
   const montable =
     (video.status === 'validated' ||
       video.status === 'generating' ||
@@ -99,7 +81,17 @@ export function StoryboardEditor({
 
   const [items, setItems] = useState(shots);
   const [reorderError, setReorderError] = useState<string | null>(null);
-  useEffect(() => setItems(shots), [shots]);
+  const [activeShotId, setActiveShotId] = useState<number | string>(shots[0]?.id ?? '');
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    setItems(shots);
+    if (shots.length > 0 && !activeShotId) {
+      setActiveShotId(shots[0].id);
+    }
+  }, [shots]);
+
+  const activeShot = items.find((s) => s.id === activeShotId) || items[0];
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -133,77 +125,159 @@ export function StoryboardEditor({
   }
 
   return (
-    <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Storyboard</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <PriceStrip
-            credits={creditsEstimated}
-            durationsMeasured={durationsMeasured}
-            spokenSeconds={spokenSeconds}
-            sceneCount={items.length}
-            quality={video.quality}
-          />
-          {/*
-            Le bouton d'écriture du storyboard était **importé et jamais posé**.
-            La page offrait la voix, la validation, les images et le montage, et
-            aucun moyen de faire écrire les scènes : rien ne s'affichait parce
-            que rien ne pouvait être demandé.
-          */}
-          {editable && <GenerateButton videoId={video.id} hasShots={items.length > 0} />}
-          {/*
-            Le montage d'un import, posé à côté de l'écriture du storyboard
-            plutôt que sur une carte de scène : les deux partent d'un thème ou
-            d'un fichier et produisent TOUS les plans. Le sélecteur des cartes,
-            lui, sert un plan à la fois.
-          */}
-          {editable && videosApportees.length > 0 && (
-            <ApportForm
-              videoId={video.id}
-              videos={videosApportees}
-              hasShots={items.length > 0}
-            />
-          )}
-          {editable &&
-            items.length > 0 &&
-            (durationsMeasured ? (
-              <ValidateForm
-                videoId={video.id}
-                creditsEstimated={creditsEstimated}
-                balance={balance}
-                canAfford={canAfford}
-              />
-            ) : (
-              <VoiceoverForm videoId={video.id} />
-            ))}
-          {!editable && (
-            <p className="text-sm text-muted-foreground">
-              Cette vidéo est {video.status} — {video.creditsConsumed} crédits ont été débités. Le
-              storyboard est en lecture seule à partir d&apos;ici.
-            </p>
-          )}
-          {producible && <VisualsForm videoId={video.id} hasAnimated={hasAnimated} />}
-          {producible && hasAnimated && (
-            <NovitaForm
-              videoId={video.id}
-              plans={shots.filter((shot) => shot.type === 'video' && !shot.assetUrl).length}
-            />
-          )}
-          {montable && (
-            <RenderForm videoId={video.id} dejaRendu={video.status === 'rendered'} />
-          )}
-          {reorderError && <p className="text-sm text-red-500">{reorderError}</p>}
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* Top Studio Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#292D35] bg-[#111419] p-4 text-[#F5F5F5]">
+        <div className="flex items-center gap-3">
+          <GxBadge tone={video.status === 'rendered' ? 'success' : 'orange'} live>
+            {video.status.toUpperCase()}
+          </GxBadge>
+          <span className="font-display font-bold text-base">{video.title || 'Vidéo GenTube'}</span>
+        </div>
 
+        {/* Video Player Controls */}
+        <div className="flex items-center gap-2 rounded-lg border border-[#292D35] bg-[#050608] px-3 py-1.5">
+          <button className="text-[#A5A7AD] hover:text-[#FF7A18] transition" title="Reculer">
+            <Rewind className="size-4" />
+          </button>
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="flex size-8 items-center justify-center rounded-full bg-[#FF7A18] text-[#050608] font-bold hover:scale-105 transition"
+          >
+            {isPlaying ? <Pause className="size-4" /> : <Play className="size-4 ml-0.5" />}
+          </button>
+          <button className="text-[#A5A7AD] hover:text-[#FF7A18] transition" title="Avancer">
+            <FastForward className="size-4" />
+          </button>
+          <span className="font-mono text-xs text-[#A5A7AD] ml-2">
+            {spokenSeconds > 0 ? `00:00 / 00:${String(Math.round(spokenSeconds)).padStart(2, '0')}` : '00:00 / 00:00'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {editable && items.length === 0 && <GenerateButton videoId={video.id} hasShots={false} />}
+          {montable && <RenderForm videoId={video.id} dejaRendu={video.status === 'rendered'} />}
+        </div>
+      </div>
+
+      {/* Main Studio Viewport (Video Monitor + AI Inspector) */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        {/* Center Monitor Viewport */}
+        <GxPerfCard title="Monitor Studio" timecode={`${items.length} Scènes · Full HD`}>
+          <div className="flex flex-col items-center justify-center min-h-[300px] bg-[#050608] rounded-xl border border-[#292D35] p-4">
+            {activeShot?.assetUrl ? (
+              <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-[#292D35] bg-[#111419]">
+                <img src={activeShot.assetUrl} alt="Visualisation scène" className="size-full object-cover" />
+                <div className="absolute bottom-2 inset-x-2 bg-[#050608]/80 backdrop-blur-md p-2 rounded text-center text-xs text-[#F5F5F5] font-semibold">
+                  "{activeShot.narration || activeShot.prompt}"
+                </div>
+              </div>
+            ) : (
+              <div className="text-center p-8 space-y-3">
+                <Film className="size-10 text-[#FF7A18] mx-auto opacity-80" />
+                <p className="text-sm text-[#A5A7AD]">
+                  {activeShot ? `Scène #${activeShot.order} : ${activeShot.narration || activeShot.prompt}` : 'Aucun aperçu disponible. Génère ou sélectionne une scène.'}
+                </p>
+              </div>
+            )}
+          </div>
+        </GxPerfCard>
+
+        {/* Right AI Assistant & Controls Panel */}
+        <div className="space-y-4">
+          <AIAction
+            label="AI Scene Generator"
+            description="Génère ou modifie la scène active avec l'assistant IA."
+          />
+
+          <GxCard className="space-y-4">
+            <PriceStrip
+              credits={creditsEstimated}
+              durationsMeasured={durationsMeasured}
+              spokenSeconds={spokenSeconds}
+              sceneCount={items.length}
+              quality={video.quality}
+            />
+
+            {editable && items.length > 0 && <GenerateButton videoId={video.id} hasShots={true} />}
+            {editable && videosApportees.length > 0 && (
+              <ApportForm videoId={video.id} videos={videosApportees} hasShots={items.length > 0} />
+            )}
+            {editable &&
+              items.length > 0 &&
+              (durationsMeasured ? (
+                <ValidateForm
+                  videoId={video.id}
+                  creditsEstimated={creditsEstimated}
+                  balance={balance}
+                  canAfford={canAfford}
+                />
+              ) : (
+                <VoiceoverForm videoId={video.id} />
+              ))}
+            {producible && <VisualsForm videoId={video.id} hasAnimated={hasAnimated} />}
+            {producible && hasAnimated && (
+              <NovitaForm
+                videoId={video.id}
+                plans={shots.filter((shot) => shot.type === 'video' && !shot.assetUrl).length}
+              />
+            )}
+            {reorderError && <p className="text-xs text-[#FF4D5A] font-semibold">{reorderError}</p>}
+          </GxCard>
+        </div>
+      </div>
+
+      {/* Multi-Track Studio Timeline */}
+      <GxCard className="space-y-3">
+        <div className="flex items-center justify-between border-b border-[#292D35] pb-2">
+          <p className="t-label text-xs text-[#FF7A18]">Studio Timeline & Tracks</p>
+          <span className="font-mono text-xs text-[#A5A7AD]">3 Tracks Active</span>
+        </div>
+
+        <StudioTimelineTrack
+          label="Piste Vidéo"
+          icon={<Film className="size-4" />}
+          timecode={`${spokenSeconds.toFixed(1)}s`}
+          clips={items.map((shot, idx) => ({
+            id: shot.id,
+            title: `Scène ${idx + 1}`,
+            duration: `${shot.durationS}s`,
+            type: shot.type,
+          }))}
+          activeClipId={activeShotId}
+          onSelectClip={(id) => setActiveShotId(id)}
+        />
+
+        <StudioTimelineTrack
+          label="Piste Voix Off"
+          icon={<Mic className="size-4" />}
+          timecode={`${spokenSeconds.toFixed(1)}s`}
+          clips={items.map((shot, idx) => ({
+            id: `voice-${shot.id}`,
+            title: `Voix ${idx + 1}`,
+            duration: `${shot.durationS}s`,
+            type: 'audio',
+          }))}
+        />
+
+        <StudioTimelineTrack
+          label="Sous-titres"
+          icon={<Layers className="size-4" />}
+          timecode={`${spokenSeconds.toFixed(1)}s`}
+          clips={items.map((shot, idx) => ({
+            id: `caption-${shot.id}`,
+            title: `Karaoké ${idx + 1}`,
+            duration: `${shot.durationS}s`,
+            type: 'caption',
+          }))}
+        />
+      </GxCard>
+
+      {/* Storyboard Shots List Editor */}
       {items.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Aucune scène. Faites écrire un premier jet, puis reprenez à la main ce que vous voulez.
-          </CardContent>
-        </Card>
+        <GxCard className="py-12 text-center text-[#A5A7AD]">
+          Aucune scène générée. Clique sur "Générer le storyboard" avec l'IA pour démarrer.
+        </GxCard>
       ) : (
         <DndContext
           sensors={sensors}
@@ -229,40 +303,35 @@ export function StoryboardEditor({
       )}
 
       {editable && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Ajouter une scène</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AddShotForm videoId={video.id} />
-          </CardContent>
-        </Card>
+        <GxCard>
+          <GxCardTitle className="mb-4">Ajouter une scène manuelle</GxCardTitle>
+          <AddShotForm videoId={video.id} />
+        </GxCard>
       )}
     </div>
   );
 }
 
-/** Suppression d'un brouillon. Refusée par le serveur dès que quelque chose a été facturé. */
 export function DeleteVideoButton({ videoId, projectId }: { videoId: number; projectId: number }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(deleteVideoAction, {});
   return (
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="videoId" value={videoId} />
       <input type="hidden" name="projectId" value={projectId} />
-      <Button type="submit" variant="outline" size="sm" disabled={isPending}>
+      <GxButton type="submit" variant="ghost" size="sm" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="animate-spin" />
+            <Loader2 className="size-3.5 animate-spin" />
             Suppression…
           </>
         ) : (
           <>
-            <Trash2 />
+            <Trash2 className="size-3.5 text-[#FF4D5A]" />
             Supprimer ce brouillon
           </>
         )}
-      </Button>
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
+      </GxButton>
+      {state?.error && <p className="text-xs text-[#FF4D5A]">{state.error}</p>}
     </form>
   );
 }

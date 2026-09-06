@@ -19,12 +19,6 @@ import { GxProgress } from '@/components/gx/gx-progress';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-/*
- * Le shell — un seul système de navigation par niveau.
- * ≥1024px : rail gauche (Fabriquer / Espace séparés).
- * <1024px : barre basse, 4 destinations, icône + mot.
- * L'onglet actif porte la mire. C'est le même repère partout dans le produit.
- */
 const FABRIQUER = [
   { href: '/dashboard/projects', label: 'Projets', Icon: FolderKanban },
   { href: '/dashboard/videos', label: 'Vidéos', Icon: Film },
@@ -61,13 +55,15 @@ function RailLink({
       href={href}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-lg px-3',
-        'font-display text-sm font-semibold transition-colors duration-(--t-fast)',
-        active ? 'bg-ink-3 text-paper' : 'text-paper-3 hover:bg-ink-2 hover:text-paper-2'
+        'group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3.5',
+        'font-display text-sm font-semibold transition-all duration-200',
+        active
+          ? 'bg-[#FF7A18]/15 border border-[#FF7A18]/30 text-[#F5F5F5] glow-orange-subtle'
+          : 'text-[#A5A7AD] hover:bg-[#171A20] hover:text-[#F5F5F5]'
       )}
     >
-      {active && <span aria-hidden="true" className="mire absolute inset-y-0 left-0 w-[3px]" />}
-      <Icon className={cn('size-4 shrink-0', active ? 'text-marque' : '')} aria-hidden="true" />
+      {active && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-[#FF7A18]" />}
+      <Icon className={cn('size-4 shrink-0', active ? 'text-[#FF7A18]' : '')} aria-hidden="true" />
       <span className="truncate">{label}</span>
     </Link>
   );
@@ -76,26 +72,26 @@ function RailLink({
 function SoldeRail() {
   const { data: tenant } = useSWR<TenantDataWithMembers>('/api/tenant', fetcher);
   const balance = tenant?.creditsBalance ?? null;
-  // Repère visuel seulement : 2 600 crédits, c'est la dotation Pro d'un mois.
   const jauge = balance === null ? 0 : Math.min(balance, 2600);
 
   return (
-    <div className="plate overflow-hidden p-4">
-      <p className="t-label text-paper-3">Solde</p>
-      <p className="t-data mt-2 text-2xl font-bold text-marque">
+    <div className="rounded-xl border border-[#292D35] bg-[#111419] p-4 text-[#F5F5F5]">
+      <p className="t-label text-xs text-[#A5A7AD]">Solde Crédits</p>
+      <p className="t-data mt-2 text-2xl font-bold text-[#FF7A18]">
         {balance === null ? '—' : balance.toLocaleString('fr-FR')}
       </p>
       <GxProgress
         value={jauge}
         max={2600}
-        label="Solde de crédits, rapporté à une dotation Pro mensuelle"
+        label="Solde de crédits, rapporté à un plan Pro"
+        tone="orange"
         className="mt-3"
       />
       <Link
         href="/dashboard/billing"
-        className="mt-4 flex min-h-11 cursor-pointer items-center justify-center rounded-pill bg-jaune px-3 font-display text-sm font-bold text-ink transition-transform duration-(--t-fast) hover:-translate-y-0.5"
+        className="mt-4 flex min-h-10 cursor-pointer items-center justify-center rounded-xl bg-[#FF7A18] px-3 font-display text-xs font-bold text-[#050608] hover:bg-[#FFB45C] transition-all glow-orange-subtle"
       >
-        Recharger
+        Recharger mes crédits
       </Link>
     </div>
   );
@@ -105,25 +101,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   return (
-    <div className="mx-auto flex w-full max-w-(--content-max) flex-1 items-stretch">
+    <div className="mx-auto flex w-full max-w-(--content-max) flex-1 items-stretch bg-[#050608] text-[#F5F5F5]">
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-(--z-pop) focus:rounded-lg focus:bg-jaune focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-ink"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-(--z-pop) focus:rounded-lg focus:bg-[#FF7A18] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-[#050608]"
       >
         Aller au contenu
       </a>
 
-      {/* ── Rail desktop ─────────────────────────────────────────────── */}
-      <aside className="sticky top-(--header-h) z-(--z-sidebar) hidden h-[calc(100dvh-var(--header-h))] w-(--sidebar-w) shrink-0 flex-col gap-7 overflow-y-auto border-r border-line bg-sidebar px-3 py-6 lg:flex">
+      {/* ── Desktop Studio Sidebar ───────────────────────────────────── */}
+      <aside className="sticky top-(--header-h) z-(--z-sidebar) hidden h-[calc(100dvh-var(--header-h))] w-(--sidebar-w) shrink-0 flex-col gap-6 overflow-y-auto border-r border-[#292D35] bg-[#0B0D10] px-3 py-6 lg:flex">
         <nav aria-label="Fabriquer" className="flex flex-col gap-1">
-          <p className="t-label px-3 pb-3 text-paper-3">Fabriquer</p>
+          <p className="t-label px-3 pb-2 text-xs text-[#FF7A18]">Studio Production</p>
           {FABRIQUER.map(({ href, label, Icon }) => (
             <RailLink key={href} href={href} label={label} Icon={Icon} active={isActive(pathname, href)} />
           ))}
         </nav>
 
-        <nav aria-label="Espace et compte" className="flex flex-col gap-1 border-t border-line pt-5">
-          <p className="t-label px-3 pb-3 text-paper-3">Espace</p>
+        <nav aria-label="Espace et compte" className="flex flex-col gap-1 border-t border-[#292D35] pt-5">
+          <p className="t-label px-3 pb-2 text-xs text-[#A855F7]">Espace & Équipe</p>
           {ESPACE.map(({ href, label, Icon }) => (
             <RailLink key={href} href={href} label={label} Icon={Icon} active={isActive(pathname, href)} />
           ))}
@@ -134,15 +130,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* ── Contenu ──────────────────────────────────────────────────── */}
-      <main id="contenu" className="bottom-safe min-w-0 flex-1">
+      {/* ── Content Viewport ────────────────────────────────────────── */}
+      <main id="contenu" className="bottom-safe min-w-0 flex-1 p-4 lg:p-8">
         {children}
       </main>
 
-      {/* ── Barre basse mobile ───────────────────────────────────────── */}
+      {/* ── Mobile Navigation Bar ───────────────────────────────────── */}
       <nav
         aria-label="Navigation principale"
-        className="fixed inset-x-0 bottom-0 z-(--z-bottomnav) border-t border-line bg-ink/95 backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-(--z-bottomnav) border-t border-[#292D35] bg-[#0B0D10]/95 backdrop-blur-xl lg:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <ul className="mx-auto grid max-w-lg grid-cols-4">
@@ -155,12 +151,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'relative flex min-h-14 flex-col items-center justify-center gap-1 px-1 py-2',
-                    'transition-colors duration-(--t-fast)',
-                    active ? 'text-paper' : 'text-paper-3'
+                    'transition-colors duration-200',
+                    active ? 'text-[#FF7A18]' : 'text-[#A5A7AD]'
                   )}
                 >
-                  {active && <span aria-hidden="true" className="mire absolute inset-x-3 top-0 h-[3px]" />}
-                  <Icon className={cn('size-5', active && 'text-marque')} aria-hidden="true" />
+                  {active && <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 bg-[#FF7A18]" />}
+                  <Icon className="size-5" aria-hidden="true" />
                   <span className="t-label text-[0.625rem]">{label}</span>
                 </Link>
               </li>

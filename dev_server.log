@@ -1,0 +1,49 @@
+
+> gentube@ dev /app
+> next dev --turbopack
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 15.6.0-canary.59 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.2:3000
+   - Experiments (use with caution):
+     ✓ ppr
+     ✓ rdcForNavigations (enabled by `experimental.ppr`)
+     · serverActions
+
+ ✓ Starting...
+ ✓ Compiled middleware in 415ms
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ✓ Ready in 1459ms
+ ○ Compiling / ...
+ ✓ Compiled / in 4.3s
+ ⨯ Error: DATABASE_URL environment variable is not set
+    at __TURBOPACK__module__evaluation__ (lib/db/drizzle.ts:9:9)
+    at __TURBOPACK__module__evaluation__ (lib/db/queries.ts:3:1)
+    at __TURBOPACK__module__evaluation__ (app/layout.tsx:4:1)
+    at __TURBOPACK__module__evaluation__ (.next/dev/server/chunks/ssr/[root-of-the-server]__d7e07dc5._.js:14:47)
+   7 |
+   8 | if (!process.env.DATABASE_URL) {
+>  9 |   throw new Error('DATABASE_URL environment variable is not set');
+     |         ^
+  10 | }
+  11 |
+  12 | export const client = postgres(process.env.DATABASE_URL);
+ ⨯ Error: DATABASE_URL environment variable is not set
+    at __TURBOPACK__module__evaluation__ (lib/db/drizzle.ts:9:9)
+    at __TURBOPACK__module__evaluation__ (lib/db/queries.ts:3:1)
+    at __TURBOPACK__module__evaluation__ (app/layout.tsx:4:1)
+    at __TURBOPACK__module__evaluation__ (.next/dev/server/chunks/ssr/[root-of-the-server]__d7e07dc5._.js:14:47)
+   7 |
+   8 | if (!process.env.DATABASE_URL) {
+>  9 |   throw new Error('DATABASE_URL environment variable is not set');
+     |         ^
+  10 | }
+  11 |
+  12 | export const client = postgres(process.env.DATABASE_URL); {
+  page: '/'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1149ms
+ HEAD / 500 in 6955ms
