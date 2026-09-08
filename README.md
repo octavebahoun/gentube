@@ -880,17 +880,20 @@ par tenant, mais elle n'est plus un préalable à demander.
 
 ## Qui fait quoi
 
-La répartition a été arrêtée le 26 août 2026. Chacun a sa fiche, écrite pour
-être lue seule le premier jour.
+La répartition tient dans `docs/hackathon.md` : deux jours, du 9 au 10 septembre
+2026, à cinq. Les six fiches par personne d'août ont été supprimées — elles
+décrivaient une équipe qui n'est plus celle-là.
 
-| Qui | Sa voie | Sa fiche |
-|---|---|---|
-| Ezechiel TADAGBE | Orchestration n8n, publication YouTube, les deux agents | `docs/ezechiel.md` |
-| Prince KOUCHEME | Toute la logique directe : journal, API d'admin, quotas, statistiques, tooling, chemin de l'argent | `docs/prince.md` |
-| Ahmad OUOROU | Les écrans du parcours client | `docs/ahmad.md` |
-| Rosaire KAKPO | Les écrans compte et administration, plus le son | `docs/rosaire.md` |
-| Merveille GANDJI | Cloisonnement des comptes, identités, quotas AWS et Replicate | `docs/merveille.md` |
-| Cosme MISSIKPODE | Sécurité logicielle, secrets, isolation, plus les plans animés | `docs/cosme.md` |
+| Qui | Sa voie |
+|---|---|
+| Ezechiel TADAGBE | Orchestration n8n et routes `/api/internal`, puis publication YouTube |
+| Ahmad OUOROU | Tous les écrans : parcours client, compte, administration |
+| Prince KOUCHEME | Le journal des événements réels, puis renfort écrans |
+| Merveille GANDJI | API d'administration, quotas, isolation des routes internes |
+| Cosme MISSIKPODE | Infra, déploiement, sécurité post-déploiement, SAST/DAST |
+
+Une seule personne génère des migrations — Merveille : le `_journal.json` de
+Drizzle casse dès que deux `db:generate` se croisent.
 
 `docs/passation.md` est le briefing général, et sa section 6 liste les pièges
 découverts. C'est la plus utile du document.

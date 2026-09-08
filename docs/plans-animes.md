@@ -1,6 +1,6 @@
 # Plans animés — Replicate
 
-**Pour Cosme**, en plus de sa voie sécurité, voir `docs/cosme.md`.
+**Pour Cosme**, en plus de sa voie infra et sécurité — voir `docs/hackathon.md`.
 
 Deux raisons de le mettre là. C'est l'étape la plus isolée du pipeline : un
 appel fournisseur, un webhook, une boucle reprenable, sans toucher ni à l'ordre

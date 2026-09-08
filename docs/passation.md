@@ -383,17 +383,17 @@ et ne pouvait rien débiter.
 
 ## 7. Qui fait quoi
 
-La répartition a été arrêtée le 26 août 2026. Chacun a sa fiche, écrite pour
-être lue seule le premier jour. Commence par la tienne, reviens ici ensuite.
+La répartition vaut pour le hackathon Cursor des 9 et 10 septembre 2026, à
+cinq. Le détail jour par jour est dans `docs/hackathon.md` ; les six fiches
+individuelles d'août ont été supprimées.
 
-| Qui | Sa voie | Sa fiche |
-| --- | --- | --- |
-| Ezechiel TADAGBE | Orchestration n8n, publication YouTube, les deux agents | `docs/ezechiel.md` |
-| Prince KOUCHEME | Toute la logique directe : journal, API d'admin, quotas, statistiques, tooling, chemin de l'argent | `docs/prince.md` |
-| Ahmad OUOROU | Les écrans du parcours client | `docs/ahmad.md` |
-| Rosaire KAKPO | Les écrans compte et administration, plus le son | `docs/rosaire.md` |
-| Merveille GANDJI | Cloisonnement des comptes, identités, quotas AWS et Replicate | `docs/merveille.md` |
-| Cosme MISSIKPODE | Sécurité logicielle, secrets, isolation, plus les plans animés | `docs/cosme.md` et `docs/plans-animes.md` |
+| Qui | Sa voie |
+| --- | --- |
+| Ezechiel TADAGBE | Orchestration n8n et routes `/api/internal`, puis publication YouTube |
+| Ahmad OUOROU | Tous les écrans : parcours client, compte, administration |
+| Prince KOUCHEME | Le journal des événements réels, puis renfort écrans |
+| Merveille GANDJI | API d'administration, quotas, isolation des routes internes |
+| Cosme MISSIKPODE | Infra, déploiement, sécurité post-déploiement, SAST/DAST (plans animés : `docs/plans-animes.md`) |
 
 Trois règles qui évitent de se marcher dessus :
 
