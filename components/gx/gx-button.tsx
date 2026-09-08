@@ -1,79 +1,74 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'accent' | 'danger' | 'dark';
+type Variant = 'primary' | 'ai' | 'secondary' | 'ghost' | 'danger' | 'dark';
 type Size = 'sm' | 'md' | 'lg';
 
 /*
- * GX Button — pilule pleine sur plaque au rasoir. Zéro preset, zéro Radix.
- * La signature : au survol, la mire sort par le bas du bouton primaire,
- * comme une bande qui défile sous une tête de lecture.
+ * GenTube Button Component
+ * Primary Action: Orange (#FF7A18)
+ * AI Action: Purple (#A855F7)
+ * Radius: 10px - 16px (rounded-xl)
  */
 const variants: Record<Variant, string> = {
   primary:
-    'bg-jaune text-ink font-bold hover:shadow-[0_10px_30px_-10px_rgba(255,225,77,0.55)]',
+    'bg-[#FF7A18] text-[#050608] font-bold hover:bg-[#FFB45C] hover:shadow-[0_0_25px_-5px_rgba(255,122,24,0.5)] border border-[#FF7A18]/30',
+  ai:
+    'bg-[#A855F7] text-white font-bold hover:bg-[#B975F8] hover:shadow-[0_0_25px_-5px_rgba(168,85,247,0.5)] border border-[#A855F7]/30',
   secondary:
-    'border border-line-hi bg-ink-2 text-paper hover:border-cyan hover:bg-ink-3',
-  ghost: 'text-paper-2 hover:bg-ink-3 hover:text-paper',
-  accent:
-    'bg-magenta text-ink font-bold hover:shadow-[0_10px_30px_-10px_rgba(255,79,195,0.55)]',
-  danger: 'bg-rouge text-ink font-bold hover:opacity-90',
-  dark: 'bg-paper text-ink font-bold hover:opacity-90',
+    'border border-[#292D35] bg-[#111419] text-[#F5F5F5] hover:border-[#3D434F] hover:bg-[#171A20]',
+  ghost: 'text-[#A5A7AD] hover:bg-[#171A20] hover:text-[#F5F5F5]',
+  danger: 'bg-[#FF4D5A] text-white font-bold hover:bg-[#FF6B76] hover:shadow-[0_0_25px_-5px_rgba(255,77,90,0.5)]',
+  dark: 'bg-[#171A20] text-[#F5F5F5] border border-[#292D35] hover:bg-[#292D35]',
 };
 
 const sizes: Record<Size, string> = {
-  sm: 'min-h-11 px-4 text-[0.8125rem]',
-  md: 'min-h-11 px-6 text-sm',
-  lg: 'min-h-[3.25rem] px-8 text-base',
+  sm: 'h-9 px-3.5 text-xs rounded-lg',
+  md: 'h-11 px-5 text-sm rounded-xl',
+  lg: 'h-13 px-7 text-base rounded-2xl',
 };
 
 export type GxButtonProps = {
   variant?: Variant;
   size?: Size;
   href?: string;
+  glow?: boolean;
 } & React.ButtonHTMLAttributes<HTMLButtonElement> &
   React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
 export function GxButton({
   variant = 'primary',
   size = 'md',
+  glow = false,
   href,
   className,
   children,
   ...rest
 }: GxButtonProps) {
   const cls = cn(
-    'group/btn relative isolate inline-flex cursor-pointer items-center justify-center gap-2',
-    'overflow-hidden rounded-pill font-display font-semibold tracking-tight whitespace-nowrap',
-    'transition-[transform,box-shadow,background-color,border-color,color] duration-(--t-fast) ease-(--ease-out)',
+    'group/btn relative isolate inline-flex cursor-pointer items-center justify-center gap-2.5',
+    'font-display font-semibold tracking-tight whitespace-nowrap',
+    'transition-all duration-200 ease-out',
     'hover:-translate-y-0.5 active:translate-y-0',
-    'outline-none focus-visible:outline-2 focus-visible:outline-cyan focus-visible:outline-offset-3',
+    'outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A18] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050608]',
     'disabled:pointer-events-none disabled:opacity-45',
+    glow && variant === 'primary' && 'glow-orange-subtle',
+    glow && variant === 'ai' && 'glow-purple-subtle',
     variants[variant],
     sizes[size],
     className
   );
 
-  const inner = (
-    <>
-      {children}
-      <span
-        aria-hidden="true"
-        className="mire absolute inset-x-0 bottom-0 h-[3px] translate-y-full transition-transform duration-(--t-fast) ease-(--ease-out) group-hover/btn:translate-y-0"
-      />
-    </>
-  );
-
   if (href) {
     return (
       <a href={href} className={cls} {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
-        {inner}
+        {children}
       </a>
     );
   }
   return (
     <button className={cls} {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}>
-      {inner}
+      {children}
     </button>
   );
 }
