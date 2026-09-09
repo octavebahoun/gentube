@@ -41,6 +41,7 @@ import {
 } from '@/lib/storyboard';
 import { renderVideo } from '@/lib/render/sortie';
 import { animateWithNovita } from '@/lib/video/novita';
+import { startProductionWorkflow } from '@/lib/internal/n8n';
 
 /**
  * Mutations des vidéos et des storyboards. Les règles vivent dans lib/videos
@@ -328,6 +329,13 @@ export const validateVideoAction = validatedActionWithUser(
         tenantDb(user.tenantId),
         data.videoId
       );
+      // Les crédits sont débités : n8n enchaîne voix → images → clips → rendu.
+      // Un échec de réveil ne doit pas faire croire que le débit a échoué.
+      try {
+        await startProductionWorkflow(user.tenantId, data.videoId);
+      } catch (error) {
+        console.error('[n8n] production workflow failed to start:', error);
+      }
       revalidatePath(`/dashboard/videos/${data.videoId}`);
       return { success: `Validated — ${charged} credits charged.` };
     } catch (error) {
