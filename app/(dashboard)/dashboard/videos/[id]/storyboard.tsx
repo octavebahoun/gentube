@@ -137,16 +137,26 @@ export function StoryboardEditor({
 
         {/* Video Player Controls */}
         <div className="flex items-center gap-2 rounded-lg border border-[#292D35] bg-[#050608] px-3 py-1.5">
-          <button className="text-[#A5A7AD] hover:text-[#FF7A18] transition" title="Reculer">
+          <button
+            className="text-[#A5A7AD] hover:text-[#FF7A18] transition rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A18] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050608]"
+            title="Reculer"
+            aria-label="Reculer"
+          >
             <Rewind className="size-4" />
           </button>
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className="flex size-8 items-center justify-center rounded-full bg-[#FF7A18] text-[#050608] font-bold hover:scale-105 transition"
+            aria-label={isPlaying ? "Mettre en pause" : "Lire la vidéo"}
+            aria-pressed={isPlaying}
+            className="flex size-8 items-center justify-center rounded-full bg-[#FF7A18] text-[#050608] font-bold hover:scale-105 transition outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A18] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050608]"
           >
             {isPlaying ? <Pause className="size-4" /> : <Play className="size-4 ml-0.5" />}
           </button>
-          <button className="text-[#A5A7AD] hover:text-[#FF7A18] transition" title="Avancer">
+          <button
+            className="text-[#A5A7AD] hover:text-[#FF7A18] transition rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A18] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050608]"
+            title="Avancer"
+            aria-label="Avancer"
+          >
             <FastForward className="size-4" />
           </button>
           <span className="font-mono text-xs text-[#A5A7AD] ml-2">
