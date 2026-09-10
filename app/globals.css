@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* Palette officielle GenTube */
+  /* Palette officielle GenTube — Direction C (hybrid) */
   --color-bg-primary: #050608;
   --color-bg-secondary: #0B0D10;
   --color-surface: #111419;
@@ -17,9 +17,10 @@
   --color-text-primary: #F5F5F5;
   --color-text-secondary: #A5A7AD;
 
-  --color-accent-orange: #FF7A18;
-  --color-accent-purple: #A855F7;
-  --color-accent-light: #FFB45C;
+  --color-brand-red: #FF3B30;
+  --color-brand-red-deep: #D0021B;
+  --color-ai-purple: #A855F7;
+  --color-amber: #FFB340;
 
   --color-status-success: #35D07F;
   --color-status-error: #FF4D5A;
@@ -31,7 +32,7 @@
   --color-card-foreground: #F5F5F5;
   --color-popover: #171A20;
   --color-popover-foreground: #F5F5F5;
-  --color-primary: #FF7A18;
+  --color-primary: #FF3B30;
   --color-primary-foreground: #050608;
   --color-secondary: #A855F7;
   --color-secondary-foreground: #FFFFFF;
@@ -43,7 +44,7 @@
   --color-destructive-foreground: #FFFFFF;
   --color-border: #292D35;
   --color-input: #171A20;
-  --color-ring: #FF7A18;
+  --color-ring: #FF3B30;
 
   --color-sidebar: #0B0D10;
   --color-sidebar-foreground: #F5F5F5;
@@ -59,9 +60,9 @@
   --color-paper: #F5F5F5;
   --color-paper-2: #D1D3D8;
   --color-paper-3: #A5A7AD;
-  --color-marque: #FF7A18;
+  --color-marque: #FF3B30;
   --color-ai: #A855F7;
-  --color-info: #FFB45C;
+  --color-info: #FFB340;
   --color-ok: #35D07F;
   --color-danger: #FF4D5A;
 
@@ -79,11 +80,12 @@
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
 
   /* Gradients & Glows */
-  --shadow-glow-orange: 0 0 25px -5px rgba(255, 122, 24, 0.35);
+  --shadow-glow-red: 0 0 25px -5px rgba(255, 59, 48, 0.35);
   --shadow-glow-purple: 0 0 25px -5px rgba(168, 85, 247, 0.35);
   --shadow-deep: 0 20px 50px -15px rgba(0, 0, 0, 0.8);
 
-  --gradient-orange-purple: linear-gradient(135deg, #FF7A18 0%, #A855F7 100%);
+  --gradient-red-purple: linear-gradient(135deg, #FF3B30 0%, #A855F7 100%);
+  --gradient-red-deep: linear-gradient(135deg, #FF3B30 0%, #D0021B 100%);
   --gradient-subtle: linear-gradient(180deg, rgba(23, 26, 32, 0.6) 0%, rgba(11, 13, 16, 0.9) 100%);
 }
 
@@ -99,9 +101,9 @@
     --gx-paper: #F5F5F5;
     --gx-paper-2: #D1D3D8;
     --gx-paper-3: #A5A7AD;
-    --gx-marque: #FF7A18;
+    --gx-marque: #FF3B30;
     --gx-ai: #A855F7;
-    --gx-info: #FFB45C;
+    --gx-info: #FFB340;
     --gx-ok: #35D07F;
     --gx-danger: #FF4D5A;
     color-scheme: dark;
@@ -137,12 +139,12 @@
   }
 
   ::selection {
-    background: #FF7A18;
+    background: #FF3B30;
     color: #050608;
   }
 
   :focus-visible {
-    outline: 2px solid #FF7A18;
+    outline: 2px solid #FF3B30;
     outline-offset: 2px;
     border-radius: 6px;
   }
@@ -155,25 +157,25 @@
 
 @layer utilities {
   .bg-gradient-gt {
-    background-image: linear-gradient(135deg, #FF7A18 0%, #A855F7 100%);
+    background-image: linear-gradient(135deg, #FF3B30 0%, #A855F7 100%);
   }
 
   .text-gradient-gt {
-    background-image: linear-gradient(135deg, #FF7A18 0%, #FFB45C 50%, #A855F7 100%);
+    background-image: linear-gradient(135deg, #FF3B30 0%, #FFB340 50%, #A855F7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  .glow-orange {
-    box-shadow: 0 0 30px -5px rgba(255, 122, 24, 0.3);
+  .glow-red {
+    box-shadow: 0 0 30px -5px rgba(255, 59, 48, 0.3);
   }
 
   .glow-purple {
     box-shadow: 0 0 30px -5px rgba(168, 85, 247, 0.3);
   }
 
-  .glow-orange-subtle {
-    box-shadow: 0 0 15px 0 rgba(255, 122, 24, 0.15);
+  .glow-red-subtle {
+    box-shadow: 0 0 15px 0 rgba(255, 59, 48, 0.15);
   }
 
   .glow-purple-subtle {

@@ -52,7 +52,7 @@ function ActionsRapides() {
             Reprends l'édition de tes vidéos, ajuste les pistes voix, audio et sous-titres karaoké.
           </p>
           <GxButton href="/dashboard/videos" variant="secondary" className="w-full">
-            <Film className="size-4 text-[#FF7A18]" /> Ouvrir la liste des vidéos
+            <Film className="size-4 text-[#FF3B30]" /> Ouvrir la liste des vidéos
           </GxButton>
         </div>
       </GxPerfCard>

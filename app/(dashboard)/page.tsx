@@ -40,7 +40,7 @@ import { ProofCarousel } from '@/components/landing-proof-carousel';
  * ═══ GENTUBE LANDING PAGE — CINEMATIC AI VIDEO PLATFORM ══════════════════
  * Direction artistique : AI × Cinema × Motion × Creative Studio
  * Palette : #050608 (Bg), #0B0D10 (Secondary), #111419 (Surface), #171A20 (Elevated)
- * Accent Action : Orange #FF7A18, Accent IA : Violet #A855F7, Highlight : #FFB45C
+ * Accent Action : Rouge Brand #FF3B30, Accent IA : Violet #A855F7, Highlight : #FFB340
  * ═════════════════════════════════════════════════════════════════════════ */
 
 const LOOPS = [1, 2, 3, 4, 5, 6] as const;
@@ -50,8 +50,8 @@ function minutes(credits: number) {
   return Math.floor(secondsAffordable(credits, 'draft') / 60);
 }
 
-function Eyebrow({ children, tone = 'orange' }: { children: React.ReactNode; tone?: 'orange' | 'purple' | 'cyan' }) {
-  const c = { orange: 'text-[#FF7A18]', purple: 'text-[#A855F7]', cyan: 'text-[#FFB45C]' }[tone];
+function Eyebrow({ children, tone = 'rouge' }: { children: React.ReactNode; tone?: 'rouge' | 'purple' | 'amber' }) {
+  const c = { rouge: 'text-[#FF3B30]', purple: 'text-[#A855F7]', amber: 'text-[#FFB340]' }[tone];
   return <p className={`t-label ${c}`}>{children}</p>;
 }
 
@@ -75,9 +75,9 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="relative bg-[#050608] text-[#F5F5F5] selection:bg-[#FF7A18] selection:text-[#050608]">
+    <main className="relative bg-[#050608] text-[#F5F5F5] selection:bg-[#FF3B30] selection:text-[#050608]">
       {/* Glows d'arrière-plan cinématiques très subtils */}
-      <div className="pointer-events-none absolute top-0 left-1/2 -z-10 h-[600px] w-[1000px] -translate-x-1/2 rounded-full bg-gradient-to-b from-[#FF7A18]/10 via-[#A855F7]/5 to-transparent blur-[140px]" />
+      <div className="pointer-events-none absolute top-0 left-1/2 -z-10 h-[600px] w-[1000px] -translate-x-1/2 rounded-full bg-gradient-to-b from-[#FF3B30]/10 via-[#A855F7]/5 to-transparent blur-[140px]" />
 
       {/* ── Navigation Minimaliste ─────────────────────────────────── */}
       <div className="sticky top-(--header-h) z-30 border-b border-[#292D35] bg-[#050608]/90 backdrop-blur-xl">
@@ -94,7 +94,7 @@ export default function HomePage() {
             <a
               key={href}
               href={href}
-              className="t-label inline-flex min-h-11 shrink-0 cursor-pointer items-center px-3.5 text-[#A5A7AD] transition-colors duration-200 hover:text-[#FF7A18]"
+              className="t-label inline-flex min-h-11 shrink-0 cursor-pointer items-center px-3.5 text-[#A5A7AD] transition-colors duration-200 hover:text-[#FF3B30]"
             >
               {label}
             </a>
@@ -125,7 +125,7 @@ export default function HomePage() {
               <ArrowRight className="size-4" aria-hidden="true" />
             </GxButton>
             <GxButton href="#studio" variant="secondary" size="lg">
-              <Play className="size-4 text-[#FF7A18]" aria-hidden="true" />
+              <Play className="size-4 text-[#FF3B30]" aria-hidden="true" />
               Voir la démo
             </GxButton>
           </div>
@@ -136,13 +136,13 @@ export default function HomePage() {
 
           {/* Mockup Réaliste de l'Éditeur Vidéo GenTube */}
           <div id="studio" className="a-rise d-5 mt-12 w-full scroll-mt-32">
-            <div className="relative overflow-hidden rounded-2xl border border-[#292D35] bg-[#0B0D10] shadow-2xl glow-orange-subtle">
+            <div className="relative overflow-hidden rounded-2xl border border-[#292D35] bg-[#0B0D10] shadow-2xl glow-red-subtle">
               {/* Studio Toolbar Header */}
               <div className="flex items-center justify-between border-b border-[#292D35] bg-[#111419] px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="flex gap-1.5">
                     <span className="size-3 rounded-full bg-[#FF4D5A]/80" />
-                    <span className="size-3 rounded-full bg-[#FFB45C]/80" />
+                    <span className="size-3 rounded-full bg-[#FFB340]/80" />
                     <span className="size-3 rounded-full bg-[#35D07F]/80" />
                   </div>
                   <span className="t-label text-xs text-[#A5A7AD] ml-2">GenTube Video Studio v2.4 — [Projet_Docu_IA.gt]</span>
@@ -151,7 +151,7 @@ export default function HomePage() {
                   <GxBadge tone="purple" live>
                     AI Assistant Actif
                   </GxBadge>
-                  <span className="font-mono text-xs text-[#FF7A18] font-bold">00:02:14 / 00:05:00</span>
+                  <span className="font-mono text-xs text-[#FF3B30] font-bold">00:02:14 / 00:05:00</span>
                 </div>
               </div>
 
@@ -185,7 +185,7 @@ export default function HomePage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/90 via-transparent to-transparent flex flex-col justify-end p-4">
                       <div className="flex items-center justify-between">
-                        <div className="bg-[#050608]/80 backdrop-blur-md px-3 py-1 rounded border border-[#FF7A18]/40 text-xs font-mono text-[#FF7A18]">
+                        <div className="bg-[#050608]/80 backdrop-blur-md px-3 py-1 rounded border border-[#FF3B30]/40 text-xs font-mono text-[#FF3B30]">
                           REC 1080p 60fps
                         </div>
                         <div className="bg-[#A855F7]/80 backdrop-blur-md px-3 py-1 rounded text-xs font-mono text-white">
@@ -224,11 +224,11 @@ export default function HomePage() {
                 </div>
                 {/* Track 1: Video */}
                 <div className="flex items-center gap-2">
-                  <span className="w-20 text-xs font-mono text-[#FF7A18] text-left">Piste Vidéo</span>
+                  <span className="w-20 text-xs font-mono text-[#FF3B30] text-left">Piste Vidéo</span>
                   <div className="flex-1 grid grid-cols-4 gap-1 h-8">
-                    <div className="bg-[#FF7A18]/30 border border-[#FF7A18] rounded px-2 py-1 text-[10px] font-mono text-white flex items-center">Scène 1 (Wan 2.2)</div>
-                    <div className="bg-[#FF7A18]/50 border border-[#FF7A18] rounded px-2 py-1 text-[10px] font-mono text-white flex items-center">Scène 2 (Flux)</div>
-                    <div className="bg-[#FF7A18]/30 border border-[#FF7A18] rounded px-2 py-1 text-[10px] font-mono text-white flex items-center">Scène 3 (P-Video)</div>
+                    <div className="bg-[#FF3B30]/30 border border-[#FF3B30] rounded px-2 py-1 text-[10px] font-mono text-white flex items-center">Scène 1 (Wan 2.2)</div>
+                    <div className="bg-[#FF3B30]/50 border border-[#FF3B30] rounded px-2 py-1 text-[10px] font-mono text-white flex items-center">Scène 2 (Flux)</div>
+                    <div className="bg-[#FF3B30]/30 border border-[#FF3B30] rounded px-2 py-1 text-[10px] font-mono text-white flex items-center">Scène 3 (P-Video)</div>
                     <div className="bg-[#171A20] border border-[#292D35] rounded px-2 py-1 text-[10px] font-mono text-[#A5A7AD] flex items-center">+ Ajouter</div>
                   </div>
                 </div>
@@ -263,7 +263,7 @@ export default function HomePage() {
                 { title: 'Contrôle créatif total', desc: 'Édite chaque mot, ajust la timeline et choisis tes effets.' },
               ].map((item, idx) => (
                 <div key={idx} className="flex gap-4">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#FF7A18]/20 text-[#FF7A18]">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#FF3B30]/20 text-[#FF3B30]">
                     <Check className="size-4" />
                   </div>
                   <div>
@@ -283,7 +283,7 @@ export default function HomePage() {
                   <p className="text-sm font-mono text-[#F5F5F5]">1. DeepSeek Storyboard Generator</p>
                   <p className="text-sm font-mono text-[#F5F5F5] mt-1">2. EdgeTTS & ElevenLabs Voice Alignment</p>
                   <p className="text-sm font-mono text-[#F5F5F5] mt-1">3. Flux Klein 4B & Wan 2.2 Motion Synthesis</p>
-                  <p className="text-sm font-mono text-[#FF7A18] mt-1">4. HyperFrames Distributed AWS Rendering</p>
+                  <p className="text-sm font-mono text-[#FF3B30] mt-1">4. HyperFrames Distributed AWS Rendering</p>
                 </div>
                 <div className="flex items-center justify-between text-xs text-[#A5A7AD]">
                   <span>Durée estimée : 45s</span>
@@ -298,7 +298,7 @@ export default function HomePage() {
       {/* ═══ 3. SECTION : FONCTIONNALITÉS ═══ */}
       <section id="features" className="gutter mx-auto w-full max-w-(--content-max) scroll-mt-32 py-16">
         <Reveal className="text-center">
-          <Eyebrow tone="orange">Fonctionnalités Studio</Eyebrow>
+          <Eyebrow tone="rouge">Fonctionnalités Studio</Eyebrow>
           <h2 className="t-h2 mt-3">Tout ce dont tu as besoin pour créer.</h2>
           <p className="mx-auto mt-3 max-w-xl text-base text-[#A5A7AD]">
             Un ensemble d'outils intelligents conçus spécifiquement pour la création vidéo moderne.
@@ -316,7 +316,7 @@ export default function HomePage() {
           ].map((f, i) => (
             <Reveal key={f.title} delay={i * 80}>
               <GxCard className="h-full group">
-                <div className="flex size-12 items-center justify-center rounded-xl bg-[#171A20] border border-[#292D35] text-[#FF7A18] group-hover:border-[#FF7A18] group-hover:glow-orange-subtle transition-all">
+                <div className="flex size-12 items-center justify-center rounded-xl bg-[#171A20] border border-[#292D35] text-[#FF3B30] group-hover:border-[#FF3B30] group-hover:glow-red-subtle transition-all">
                   <f.icon className="size-6" />
                 </div>
                 <GxCardTitle className="mt-5">{f.title}</GxCardTitle>
@@ -356,7 +356,7 @@ export default function HomePage() {
       <section id="galerie" className="scroll-mt-32 py-16">
         <div className="gutter mx-auto mb-8 flex w-full max-w-(--content-max) flex-wrap items-end justify-between gap-4">
           <div>
-            <Eyebrow tone="cyan">Galerie Cinéma</Eyebrow>
+            <Eyebrow tone="amber">Galerie Cinéma</Eyebrow>
             <h2 className="t-h2 mt-2">Rendus réels générés par GenTube.</h2>
           </div>
           <p className="max-w-sm text-sm text-[#A5A7AD]">
@@ -381,7 +381,7 @@ export default function HomePage() {
       {/* ═══ 6. SECTION : TÉMOIGNAGES ═══ */}
       <section id="temoignages" className="gutter mx-auto w-full max-w-(--content-max) scroll-mt-32 py-16 border-t border-[#292D35]">
         <Reveal className="text-center">
-          <Eyebrow tone="orange">Témoignages</Eyebrow>
+          <Eyebrow tone="rouge">Témoignages</Eyebrow>
           <h2 className="t-h2 mt-3">Ce que disent les créateurs.</h2>
         </Reveal>
 
@@ -406,7 +406,7 @@ export default function HomePage() {
             <Reveal key={t.name} delay={idx * 100}>
               <GxCard className="h-full flex flex-col justify-between">
                 <div>
-                  <div className="flex gap-1 text-[#FF7A18]">
+                  <div className="flex gap-1 text-[#FF3B30]">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="size-4 fill-current" />
                     ))}
@@ -451,7 +451,7 @@ export default function HomePage() {
           <GxPerfCard title="Starter Plan" timecode="Inclus Voix Polly">
             <div className="flex flex-col justify-between h-full">
               <div>
-                <p className="t-data text-4xl font-bold text-[#FF7A18]">
+                <p className="t-data text-4xl font-bold text-[#FF3B30]">
                   {PLAN_OFFERS.starter.priceXof.toLocaleString('fr-FR')} <span className="text-sm text-[#A5A7AD]">FCFA / mois</span>
                 </p>
                 <p className="mt-2 text-xs text-[#A5A7AD]">
@@ -496,7 +496,7 @@ export default function HomePage() {
       {/* ═══ 8. CTA FINAL ═══ */}
       <section className="gutter mx-auto w-full max-w-(--content-max) pb-20">
         <Reveal>
-          <div className="relative overflow-hidden rounded-2xl border border-[#FF7A18]/30 bg-gradient-to-r from-[#171A20] via-[#111419] to-[#0B0D10] p-10 lg:p-16 glow-orange-subtle">
+          <div className="relative overflow-hidden rounded-2xl border border-[#FF3B30]/30 bg-gradient-to-r from-[#171A20] via-[#111419] to-[#0B0D10] p-10 lg:p-16 glow-red-subtle">
             <div className="flex flex-col items-center text-center">
               <h2 className="t-h1 text-[#F5F5F5]">Prêt à créer ta prochaine vidéo ?</h2>
               <p className="mt-4 max-w-xl text-lg text-[#A5A7AD]">
@@ -517,7 +517,7 @@ export default function HomePage() {
       <footer className="border-t border-[#292D35] bg-[#0B0D10] py-12">
         <div className="gutter mx-auto flex w-full max-w-(--content-max) flex-wrap items-center justify-between gap-6 text-xs text-[#A5A7AD]">
           <div className="flex items-center gap-3">
-            <span className="size-6 rounded bg-[#FF7A18]" />
+            <span className="size-6 rounded bg-[#FF3B30]" />
             <span className="font-display font-bold text-sm text-[#F5F5F5]">GenTube Studio</span>
           </div>
           <p>© 2026 GenTube — Creative Video AI Platform</p>

@@ -277,7 +277,7 @@ export function FabricationClient({
             </dl>
           </section>
 
-          <section className="rounded-lg border border-jaune/30 bg-jaune/5 p-5">
+          <section className="rounded-lg border border-info/30 bg-info/5 p-5">
             <p className="t-label text-marque">3 postes sur 6</p>
             <p className="mt-3 text-xs leading-relaxed text-paper-2">
               Storyboard, voix off et images fonctionnent aujourd'hui. Plans animés, montage et
