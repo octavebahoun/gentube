@@ -120,7 +120,8 @@ export async function canAfford(
  */
 export async function grantCredits(
   tdb: TenantDb,
-  { amount, reason, videoId, idempotencyKey, pocket, expiresAt }: MovementInput
+  { amount, reason, videoId, idempotencyKey, pocket, expiresAt }: MovementInput,
+  userId?: number
 ): Promise<LedgerResult> {
   assertAmount(amount);
 
@@ -150,6 +151,12 @@ export async function grantCredits(
       idempotencyKey: idempotencyKey ?? null,
     });
 
+    if (userId) {
+      const { logActivity } = await import('@/lib/activity');
+      const { ActivityType } = await import('@/lib/db/schema');
+      await logActivity(tx, userId, ActivityType.CREDITS_GRANTED);
+    }
+
     return { entry, balance: tenant.creditsBalance, replayed: false };
   });
 }
@@ -163,7 +170,8 @@ export async function grantCredits(
  */
 export async function debitCredits(
   tdb: TenantDb,
-  { amount, reason, videoId, idempotencyKey }: MovementInput
+  { amount, reason, videoId, idempotencyKey }: MovementInput,
+  userId?: number
 ): Promise<LedgerResult> {
   assertAmount(amount);
 
@@ -227,6 +235,12 @@ export async function debitCredits(
       entries.push(written);
     }
 
+    if (userId) {
+      const { logActivity } = await import('@/lib/activity');
+      const { ActivityType } = await import('@/lib/db/schema');
+      await logActivity(tx, userId, ActivityType.CREDITS_DEBITED);
+    }
+
     return { entry: entries[0], balance: tenant.creditsBalance, replayed: false };
   });
 }
@@ -275,7 +289,8 @@ export async function validateAndChargeVideo(
    * qu'un appelant l'oublie en silence. C'est `lib/billing/entitlements.ts`
    * qui la tranche.
    */
-  { watermark }: { watermark: boolean }
+  { watermark }: { watermark: boolean },
+  userId?: number
 ): Promise<{ video: Video; charged: number; balance: number }> {
   return await tdb.transaction(async (tx) => {
     const video = await tx.findById(videos, videoId);
@@ -308,7 +323,7 @@ export async function validateAndChargeVideo(
       reason: 'video_debit',
       videoId,
       idempotencyKey: `video:${videoId}:debit`,
-    });
+    }, userId);
 
     const [updated] = await tx.update(
       videos,
@@ -321,6 +336,12 @@ export async function validateAndChargeVideo(
       },
       eq(videos.id, videoId)
     );
+
+    if (userId) {
+      const { logActivity } = await import('@/lib/activity');
+      const { ActivityType } = await import('@/lib/db/schema');
+      await logActivity(tx, userId, ActivityType.VIDEO_VALIDATED);
+    }
 
     return { video: updated, charged, balance };
   });
