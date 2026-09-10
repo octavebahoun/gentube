@@ -17,3 +17,4 @@ export {
 export type { InternalDeps, InternalResult, StepState } from './handlers';
 export { PRODUCTION_WEBHOOK_PATH, startProductionWorkflow } from './n8n';
 export { INTERNAL_ROUTE_MAX_DURATION, postInternal } from './route';
+export { PUBLISH_STEP, handlePublish } from './publish';
