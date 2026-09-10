@@ -8,6 +8,7 @@ import type { User } from '@/lib/db/schema';
 import { GxButton } from '@/components/gx/gx-button';
 import { GxField, GxInput } from '@/components/gx/gx-field';
 import { GxPage, GxPageHeader, GxSection, GxNotice } from '@/components/gx/gx-page';
+import { YoutubeConnection } from '@/components/youtube-connection';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -83,6 +84,13 @@ export default function GeneralPage() {
             )}
           </GxButton>
         </form>
+      </GxSection>
+
+      <GxSection
+        titre="YouTube"
+        aide="Publiez vos vidéos directement sur votre chaîne YouTube."
+      >
+        <YoutubeConnection />
       </GxSection>
     </GxPage>
   );
