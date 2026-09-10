@@ -10,7 +10,7 @@ import { createPaymentGateway, isBillingConfigured } from '@/lib/payments';
 import { reveillerLeTenant } from '@/lib/billing/reveil';
 import { imagesAffordable, secondsAffordable } from '@/lib/credits/pricing';
 import type { PaymentStatus } from '@/lib/db/schema';
-import { CheckoutButton } from './billing-actions';
+import { CheckoutButton, SubscriptionCancellation } from './billing-actions';
 
 function fcfa(amount: number) {
   return `${amount.toLocaleString('fr-FR')} FCFA`;
@@ -219,6 +219,7 @@ export default async function BillingPage({
             crédits · ≈ {minutes(secondsAffordable(overview.creditsBalance, 'draft'))} en Full HD
           </p>
         </div>
+        <SubscriptionCancellation subscription={overview.subscription} canManage={canManage} />
       </div>
 
       {/* ── Onglets : payer, recharger, vérifier ────────────────────── */}
