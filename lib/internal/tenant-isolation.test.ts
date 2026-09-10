@@ -83,9 +83,15 @@ describe('Tenant isolation on /api/internal routes', () => {
 
   it('refuse un appel sans jeton valide', async () => {
     const body = JSON.stringify({ tenantId: 1, videoId: 1 });
+    
+    // Unset the token to test the unconfigured case
+    delete process.env.INTERNAL_API_TOKEN;
 
     const result = await handleStatus({}, body);
     expect(result.status).toBe(503); // INTERNAL_API_TOKEN non configuré
+    
+    // Restore it for other tests
+    process.env.INTERNAL_API_TOKEN = TOKEN;
   });
 
   it('refuse un jeton invalide', async () => {

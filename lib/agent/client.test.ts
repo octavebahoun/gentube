@@ -54,7 +54,7 @@ describe('callInternal', () => {
     process.env.INTERNAL_API_TOKEN = 'test-token';
     const mockErrorResponse = { ok: false, message: 'Video not found' };
 
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: false,
       status: 404,
       json: async () => mockErrorResponse,
