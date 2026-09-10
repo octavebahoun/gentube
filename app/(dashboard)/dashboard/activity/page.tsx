@@ -8,6 +8,12 @@ import {
   Mail,
   CheckCircle,
   Activity,
+  Video,
+  FileText,
+  CheckSquare,
+  CreditCard,
+  Play,
+  Check,
   type LucideIcon,
 } from 'lucide-react';
 import { ActivityType } from '@/lib/db/schema';
@@ -26,6 +32,13 @@ const iconMap: Record<ActivityType, LucideIcon> = {
   [ActivityType.REMOVE_TENANT_MEMBER]: UserMinus,
   [ActivityType.INVITE_TENANT_MEMBER]: Mail,
   [ActivityType.ACCEPT_INVITATION]: CheckCircle,
+  [ActivityType.VIDEO_CREATED]: Video,
+  [ActivityType.STORYBOARD_GENERATED]: FileText,
+  [ActivityType.VIDEO_VALIDATED]: CheckSquare,
+  [ActivityType.CREDITS_DEBITED]: CreditCard,
+  [ActivityType.CREDITS_GRANTED]: CreditCard,
+  [ActivityType.RENDER_STARTED]: Play,
+  [ActivityType.RENDER_COMPLETED]: Check,
 };
 
 const LIBELLE: Record<ActivityType, string> = {
@@ -39,6 +52,13 @@ const LIBELLE: Record<ActivityType, string> = {
   [ActivityType.REMOVE_TENANT_MEMBER]: 'Membre retiré',
   [ActivityType.INVITE_TENANT_MEMBER]: 'Membre invité',
   [ActivityType.ACCEPT_INVITATION]: 'Invitation acceptée',
+  [ActivityType.VIDEO_CREATED]: 'Vidéo créée',
+  [ActivityType.STORYBOARD_GENERATED]: 'Storyboard généré',
+  [ActivityType.VIDEO_VALIDATED]: 'Vidéo validée',
+  [ActivityType.CREDITS_DEBITED]: 'Crédits débités',
+  [ActivityType.CREDITS_GRANTED]: 'Crédits accordés',
+  [ActivityType.RENDER_STARTED]: 'Rendu lancé',
+  [ActivityType.RENDER_COMPLETED]: 'Rendu terminé',
 };
 
 function tempsRelatif(date: Date) {
