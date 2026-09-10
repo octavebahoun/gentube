@@ -83,7 +83,9 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
     {
       refreshInterval: (latest) => {
         const status = latest?.job?.status;
-        return status === 'running' || status === 'pending' || status === 'queued' ? 5000 : 0;
+        return status === 'running' || status === 'pending' || status === 'queued'
+          ? 5000
+          : 0;
       },
       revalidateOnFocus: true,
     }
@@ -165,22 +167,22 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
             <dd className="text-sm">{new Date(job.updatedAt).toLocaleString('fr-FR')}</dd>
           </div>
 
-          {job.externalId && (
+          {job.externalId ? (
             <div className="flex flex-col gap-1 sm:col-span-2">
               <dt className="text-xs text-paper-3">ID externe</dt>
               <dd className="font-mono text-sm">{job.externalId}</dd>
             </div>
-          )}
+          ) : null}
         </dl>
 
-        {job.error && (
+        {job.error ? (
           <div className="mt-6 rounded-lg border border-rouge/40 bg-rouge/10 p-4">
             <p className="text-sm font-semibold text-danger">Erreur</p>
             <pre className="mt-2 overflow-x-auto text-xs text-danger">{job.error}</pre>
           </div>
-        )}
+        ) : null}
 
-        {job.payload != null && (
+        {job.payload != null ? (
           <details className="mt-6">
             <summary className="cursor-pointer text-sm font-semibold text-paper-3 hover:text-paper">
               Payload (JSON)
@@ -189,7 +191,7 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
               {JSON.stringify(job.payload, null, 2)}
             </pre>
           </details>
-        )}
+        ) : null}
       </div>
 
       <div className="mt-4">
