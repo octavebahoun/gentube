@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '100mb',
     },
   },
+  serverExternalPackages: ['esbuild', 'drizzle-kit'],
 };
 
 export default nextConfig;
