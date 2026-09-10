@@ -63,7 +63,9 @@
   },
   "devDependencies": {
     "@hyperframes/shader-transitions": "0.7.106",
+    "esbuild": "^0.28.2",
     "hyperframes": "0.7.106",
+    "puppeteer-core": "^25.10.0",
     "tsx": "^4.23.12",
     "vitest": "^4.1.11"
   },
