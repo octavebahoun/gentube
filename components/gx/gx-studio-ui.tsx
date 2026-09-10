@@ -55,7 +55,7 @@ export function StudioTimelineTrack({
   return (
     <div className="flex items-center gap-3 rounded-lg border border-[#292D35] bg-[#111419] p-2.5">
       <div className="flex w-36 shrink-0 items-center gap-2 border-r border-[#292D35] pr-3 text-xs font-mono text-[#A5A7AD]">
-        <span className="text-[#FF7A18]">{icon}</span>
+        <span className="text-[#FF3B30]">{icon}</span>
         <span className="truncate font-semibold">{label}</span>
       </div>
       <div className="relative flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1">
@@ -68,7 +68,7 @@ export function StudioTimelineTrack({
               className={cn(
                 'group relative flex h-10 shrink-0 cursor-pointer items-center justify-between rounded-md border px-3 text-xs transition-all',
                 isActive
-                  ? 'border-[#FF7A18] bg-[#FF7A18]/20 text-[#F5F5F5] glow-orange-subtle'
+                  ? 'border-[#FF3B30] bg-[#FF3B30]/20 text-[#F5F5F5] glow-red-subtle'
                   : 'border-[#292D35] bg-[#171A20] text-[#A5A7AD] hover:border-[#3D434F] hover:text-[#F5F5F5]'
               )}
               style={{ minWidth: '120px' }}

@@ -113,7 +113,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="mx-auto flex w-full max-w-(--content-max) flex-1 items-stretch bg-[#050608] text-[#F5F5F5]">
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-(--z-pop) focus:rounded-lg focus:bg-[#FF7A18] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-[#050608]"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-(--z-pop) focus:rounded-lg focus:bg-[#FF3B30] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white"
       >
         Aller au contenu
       </a>
