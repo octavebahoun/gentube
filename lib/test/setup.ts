@@ -46,6 +46,11 @@ for (const name of [
   'AWS_SECRET_ACCESS_KEY',
   'HYPERFRAMES_RENDER_BUCKET',
   'HYPERFRAMES_STATE_MACHINE_ARN',
+  // Orchestration. Un test ne doit ni réveiller un n8n réel, ni hériter du
+  // jeton interne posé dans le .env de développement.
+  'INTERNAL_API_TOKEN',
+  'N8N_WEBHOOK_SECRET',
+  'N8N_BASE_URL',
 ]) {
   process.env[name] = '';
 }

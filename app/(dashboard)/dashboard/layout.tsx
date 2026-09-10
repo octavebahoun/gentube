@@ -11,6 +11,7 @@ import {
   Settings,
   Shield,
   Wallet,
+  Wrench,
 } from 'lucide-react';
 import useSWR from 'swr';
 import type { TenantDataWithMembers } from '@/lib/db/schema';
@@ -26,12 +27,18 @@ const FABRIQUER = [
   { href: '/dashboard/billing', label: 'Crédits', Icon: Wallet },
 ] as const;
 
-const ESPACE = [
+const ESPACE: Array<{
+  href: string;
+  label: string;
+  Icon: typeof Home;
+  adminOnly?: boolean;
+}> = [
   { href: '/dashboard', label: 'Espace de travail', Icon: Home },
   { href: '/dashboard/general', label: 'Mon compte', Icon: Settings },
   { href: '/dashboard/security', label: 'Sécurité', Icon: Shield },
   { href: '/dashboard/activity', label: 'Activité', Icon: Activity },
-] as const;
+  { href: '/dashboard/admin', label: 'Admin', Icon: Wrench, adminOnly: true },
+];
 
 function isActive(pathname: string | null, href: string) {
   if (!pathname) return false;
@@ -99,6 +106,8 @@ function SoldeRail() {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { data: user } = useSWR<{ id: number; role: string }>('/api/user', fetcher);
+  const isAdmin = user?.role === 'owner' || user?.role === 'admin';
 
   return (
     <div className="mx-auto flex w-full max-w-(--content-max) flex-1 items-stretch bg-[#050608] text-[#F5F5F5]">
@@ -120,9 +129,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <nav aria-label="Espace et compte" className="flex flex-col gap-1 border-t border-[#292D35] pt-5">
           <p className="t-label px-3 pb-2 text-xs text-[#A855F7]">Espace & Équipe</p>
-          {ESPACE.map(({ href, label, Icon }) => (
-            <RailLink key={href} href={href} label={label} Icon={Icon} active={isActive(pathname, href)} />
-          ))}
+          {ESPACE.map(({ href, label, Icon, adminOnly }) => {
+            if (adminOnly && !isAdmin) return null;
+            return (
+              <RailLink key={href} href={href} label={label} Icon={Icon} active={isActive(pathname, href)} />
+            );
+          })}
         </nav>
 
         <div className="mt-auto">
