@@ -43,6 +43,7 @@ export type InternalResult = {
 };
 
 export type InternalDeps = {
+  tdb?: TenantDb;
   voice?: VoiceSynthesizer;
   images?: ImageGenerator;
   animator?: VideoAnimator;
