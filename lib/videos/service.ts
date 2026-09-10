@@ -136,7 +136,8 @@ export async function listVideos(
 
 export async function createVideo(
   tdb: TenantDb,
-  input: VideoInput
+  input: VideoInput,
+  userId?: number
 ): Promise<Video> {
   const data = videoInputSchema.parse(input);
 
@@ -163,6 +164,12 @@ export async function createVideo(
     ...(data.musicUrl ? { musicUrl: data.musicUrl } : {}),
     status: 'draft',
   });
+
+  if (userId) {
+    const { logActivity } = await import('@/lib/activity');
+    const { ActivityType } = await import('@/lib/db/schema');
+    await logActivity(tdb, userId, ActivityType.VIDEO_CREATED);
+  }
 
   return video;
 }

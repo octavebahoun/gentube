@@ -1,15 +1,16 @@
-import { redirect } from 'next/navigation';
+import { eq } from 'drizzle-orm';
 import { getUser } from '@/lib/db/queries';
-import { tenantDb, eq } from '@/lib/db/tenant-db';
+import { tenantDb } from '@/lib/db/tenant-db';
 import { shots } from '@/lib/db/schema';
 import { listVideos } from '@/lib/videos';
-import { FabricationClient } from './client';
 
-export default async function FabricationPage() {
+export async function GET() {
   const user = await getUser();
-  if (!user) redirect('/sign-in');
+  if (!user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   const tdb = tenantDb(user.tenantId);
-  const tenant = await tdb.getTenant();
   const allVideos = await listVideos(tdb);
 
   const sorted = [...allVideos].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
@@ -22,5 +23,5 @@ export default async function FabricationPage() {
     })
   );
 
-  return <FabricationClient initialData={enriched} tenantCredits={tenant?.creditsBalance ?? 0} />;
+  return Response.json(enriched);
 }
