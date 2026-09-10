@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 type Tone =
   | 'neutre'
   | 'rouge'
+  | 'orange'
   | 'purple'
   | 'success'
   | 'error'
@@ -17,6 +18,7 @@ type Tone =
 const tones: Record<Tone, string> = {
   neutre: 'border-[#292D35] bg-[#171A20] text-[#A5A7AD] [--dot:#A5A7AD]',
   rouge: 'border-[#FF3B30]/30 bg-[#FF3B30]/10 text-[#FF3B30] [--dot:#FF3B30]',
+  orange: 'border-[#FF3B30]/30 bg-[#FF3B30]/10 text-[#FF3B30] [--dot:#FF3B30]',
   jaune: 'border-[#FF3B30]/30 bg-[#FF3B30]/10 text-[#FF3B30] [--dot:#FF3B30]',
   purple: 'border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] [--dot:#A855F7]',
   success: 'border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F] [--dot:#35D07F]',

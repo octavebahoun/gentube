@@ -73,11 +73,12 @@ export function GxStat({
   label: string;
   value: React.ReactNode;
   hint?: string;
-  tone?: 'rouge' | 'purple' | 'amber' | 'success' | 'error' | 'jaune' | 'cyan' | 'magenta' | 'vert' | 'bleu';
+  tone?: 'rouge' | 'orange' | 'purple' | 'amber' | 'success' | 'error' | 'jaune' | 'cyan' | 'magenta' | 'vert' | 'bleu';
   className?: string;
 }) {
   const bars: Record<string, string> = {
     rouge: 'bg-[#FF3B30]',
+    orange: 'bg-[#FF3B30]',
     jaune: 'bg-[#FF3B30]',
     purple: 'bg-[#A855F7]',
     magenta: 'bg-[#A855F7]',

@@ -14,13 +14,14 @@ export function GxProgress({
   value: number;
   max?: number;
   label: string;
-  tone?: 'rouge' | 'purple' | 'gradient';
+  tone?: 'rouge' | 'orange' | 'purple' | 'gradient';
   className?: string;
 }) {
   const ratio = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
 
   const fills = {
     rouge: 'bg-[#FF3B30]',
+    orange: 'bg-[#FF3B30]',
     purple: 'bg-[#A855F7]',
     gradient: 'bg-gradient-gt',
   };
