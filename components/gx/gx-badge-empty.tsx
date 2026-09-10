@@ -3,28 +3,30 @@ import { cn } from '@/lib/utils';
 
 type Tone =
   | 'neutre'
+  | 'rouge'
   | 'orange'
   | 'purple'
   | 'success'
   | 'error'
-  | 'cyan'
+  | 'amber'
   | 'jaune'
   | 'vert'
   | 'magenta'
-  | 'rouge'
+  | 'cyan'
   | 'bleu';
 
 const tones: Record<Tone, string> = {
   neutre: 'border-[#292D35] bg-[#171A20] text-[#A5A7AD] [--dot:#A5A7AD]',
-  orange: 'border-[#FF7A18]/30 bg-[#FF7A18]/10 text-[#FF7A18] [--dot:#FF7A18]',
+  rouge: 'border-[#FF3B30]/30 bg-[#FF3B30]/10 text-[#FF3B30] [--dot:#FF3B30]',
+  orange: 'border-[#FF3B30]/30 bg-[#FF3B30]/10 text-[#FF3B30] [--dot:#FF3B30]',
+  jaune: 'border-[#FF3B30]/30 bg-[#FF3B30]/10 text-[#FF3B30] [--dot:#FF3B30]',
   purple: 'border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] [--dot:#A855F7]',
   success: 'border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F] [--dot:#35D07F]',
   error: 'border-[#FF4D5A]/30 bg-[#FF4D5A]/10 text-[#FF4D5A] [--dot:#FF4D5A]',
-  cyan: 'border-[#FFB45C]/30 bg-[#FFB45C]/10 text-[#FFB45C] [--dot:#FFB45C]',
-  jaune: 'border-[#FF7A18]/30 bg-[#FF7A18]/10 text-[#FF7A18] [--dot:#FF7A18]',
+  amber: 'border-[#FFB340]/30 bg-[#FFB340]/10 text-[#FFB340] [--dot:#FFB340]',
+  cyan: 'border-[#FFB340]/30 bg-[#FFB340]/10 text-[#FFB340] [--dot:#FFB340]',
   vert: 'border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F] [--dot:#35D07F]',
   magenta: 'border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] [--dot:#A855F7]',
-  rouge: 'border-[#FF4D5A]/30 bg-[#FF4D5A]/10 text-[#FF4D5A] [--dot:#FF4D5A]',
   bleu: 'border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] [--dot:#A855F7]',
 };
 
@@ -75,7 +77,7 @@ export function GxEmpty({
 }) {
   return (
     <div className={cn('flex flex-col items-center gap-4 px-6 py-16 text-center rounded-xl border border-[#292D35] bg-[#111419]', className)}>
-      <span className="relative flex size-14 items-center justify-center overflow-hidden rounded-xl border border-[#292D35] bg-[#171A20] text-[#FF7A18] [&_svg]:size-7">
+      <span className="relative flex size-14 items-center justify-center overflow-hidden rounded-xl border border-[#292D35] bg-[#171A20] text-[#FF3B30] [&_svg]:size-7">
         {icon}
       </span>
       <p className="t-h3 text-[#F5F5F5]">{title}</p>

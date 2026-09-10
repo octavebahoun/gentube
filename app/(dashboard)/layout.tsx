@@ -53,7 +53,7 @@ function SoldeCredits() {
     <Link
       href="/dashboard/billing"
       aria-label={`Solde : ${balance ?? 'inconnu'} crédits. Aller à la facturation`}
-      className="hidden min-h-11 items-center gap-2 rounded-pill border border-line bg-ink-2 px-3.5 transition-colors duration-(--t-fast) hover:border-jaune sm:inline-flex"
+      className="hidden min-h-11 items-center gap-2 rounded-pill border border-line bg-ink-2 px-3.5 transition-colors duration-(--t-fast) hover:border-line-hi sm:inline-flex"
     >
       <Wallet className="size-4 text-marque" aria-hidden="true" />
       <span className="t-data text-sm font-bold">
@@ -87,7 +87,7 @@ function MenuCompte() {
     <GxMenu
       label="Menu du compte"
       trigger={
-        <span className="flex size-9 items-center justify-center rounded-pill border border-line-hi bg-ink-3 font-mono text-xs font-bold text-paper transition-colors duration-(--t-fast) hover:border-cyan">
+        <span className="flex size-9 items-center justify-center rounded-pill border border-line-hi bg-ink-3 font-mono text-xs font-bold text-paper transition-colors duration-(--t-fast) hover:border-marque">
           {initiales}
         </span>
       }

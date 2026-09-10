@@ -5,14 +5,14 @@ type Variant = 'primary' | 'ai' | 'secondary' | 'ghost' | 'danger' | 'dark';
 type Size = 'sm' | 'md' | 'lg';
 
 /*
- * GenTube Button Component
- * Primary Action: Orange (#FF7A18)
+ * GenTube Button Component — Direction C
+ * Primary Action: Brand Red (#FF3B30)
  * AI Action: Purple (#A855F7)
  * Radius: 10px - 16px (rounded-xl)
  */
 const variants: Record<Variant, string> = {
   primary:
-    'bg-[#FF7A18] text-[#050608] font-bold hover:bg-[#FFB45C] hover:shadow-[0_0_25px_-5px_rgba(255,122,24,0.5)] border border-[#FF7A18]/30',
+    'bg-[#FF3B30] text-white font-bold hover:bg-[#D0021B] hover:shadow-[0_0_25px_-5px_rgba(255,59,48,0.5)] border border-[#FF3B30]/30',
   ai:
     'bg-[#A855F7] text-white font-bold hover:bg-[#B975F8] hover:shadow-[0_0_25px_-5px_rgba(168,85,247,0.5)] border border-[#A855F7]/30',
   secondary:
@@ -50,9 +50,9 @@ export function GxButton({
     'font-display font-semibold tracking-tight whitespace-nowrap',
     'transition-all duration-200 ease-out',
     'hover:-translate-y-0.5 active:translate-y-0',
-    'outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A18] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050608]',
+    'outline-none focus-visible:ring-2 focus-visible:ring-[#FF3B30] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050608]',
     'disabled:pointer-events-none disabled:opacity-45',
-    glow && variant === 'primary' && 'glow-orange-subtle',
+    glow && variant === 'primary' && 'glow-red-subtle',
     glow && variant === 'ai' && 'glow-purple-subtle',
     variants[variant],
     sizes[size],

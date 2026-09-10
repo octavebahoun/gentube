@@ -30,7 +30,7 @@ export function GxField({
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between">
         <label htmlFor={htmlFor} className="t-label block text-[#F5F5F5]">
-          {label} {required && <span aria-hidden="true" className="text-[#FF7A18]">*</span>}
+          {label} {required && <span aria-hidden="true" className="text-[#FF3B30]">*</span>}
         </label>
         {ai && (
           <span className="t-label text-[10px] text-[#A855F7] bg-[#A855F7]/10 px-2 py-0.5 rounded-full border border-[#A855F7]/30">
@@ -63,7 +63,7 @@ const fieldBase =
   'min-h-11 w-full rounded-xl border border-[#292D35] bg-[#171A20] px-4 text-base text-[#F5F5F5] ' +
   'transition-all duration-200 outline-none ' +
   'placeholder:text-[#A5A7AD]/60 hover:border-[#3D434F] ' +
-  'focus:border-[#FF7A18] focus:bg-[#111419] focus:ring-2 focus:ring-[#FF7A18]/20 ' +
+  'focus:border-[#FF3B30] focus:bg-[#111419] focus:ring-2 focus:ring-[#FF3B30]/20 ' +
   'aria-[invalid=true]:border-[#FF4D5A] disabled:cursor-not-allowed disabled:opacity-45 md:text-sm';
 
 export function GxInput({ className, ...rest }: React.InputHTMLAttributes<HTMLInputElement>) {
@@ -118,7 +118,7 @@ export function GxChoix({
             className={cn(
               'flex cursor-pointer gap-3 rounded-xl border border-[#292D35] bg-[#171A20] p-4',
               'transition-all duration-200 hover:border-[#3D434F]',
-              'has-checked:border-[#FF7A18] has-checked:bg-[#FF7A18]/10'
+              'has-checked:border-[#FF3B30] has-checked:bg-[#FF3B30]/10'
             )}
           >
             <input
@@ -126,7 +126,7 @@ export function GxChoix({
               name={name}
               value={o.value}
               defaultChecked={defaultValue === o.value}
-              className="mt-0.5 size-4 shrink-0 accent-[#FF7A18]"
+              className="mt-0.5 size-4 shrink-0 accent-[#FF3B30]"
             />
             <span className="min-w-0">
               <span className="block font-display text-sm font-bold text-[#F5F5F5]">{o.label}</span>
