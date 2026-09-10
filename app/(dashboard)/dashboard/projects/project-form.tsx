@@ -75,7 +75,7 @@ function ChampsProjet({ project }: { project?: Project }) {
       <GxField
         label="Voix"
         htmlFor="voiceId"
-        hint="Identifiant de la voix. Il est enregistré ici et servira quand le choix de voix sera branché."
+        hint="Identifiant de la voix utilisée pour la voix off des vidéos de ce projet."
       >
         <GxInput
           name="voiceId"
