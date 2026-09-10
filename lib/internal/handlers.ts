@@ -118,9 +118,19 @@ function parseTarget(rawBody: string): { tenantId: number; videoId: number } {
 }
 
 /**
- * Le tenant du corps, confronté à la vidéo visée. Un jeton valide ne
- * donne pas accès à tout : `tenantDb` filtre, `getVideo` rend 404 si la
- * ligne n'appartient pas à ce tenant.
+ * Résolution et isolation stricte par tenant.
+ *
+ * **Contrat de sécurité** : un jeton interne valide ne donne pas accès à
+ * toutes les données — chaque requête doit porter `tenantId` et `videoId`,
+ * et cette fonction garantit que :
+ * 1. Le `tenantDb(tenantId)` scope toutes les lectures/écritures au tenant déclaré
+ * 2. `getVideo(tdb, videoId)` vérifie que la vidéo appartient bien à ce tenant
+ * 3. Toute ressource liée (shots, jobs, etc.) est automatiquement scopée via `tdb`
+ *
+ * **Cross-tenant access impossible** : si `tenantId` ne correspond pas à la
+ * vidéo, `getVideo` renvoie 404 (la ligne n'existe pas dans le scope).
+ * Les lectures/écritures suivantes passent toutes par `tdb`, donc filtrent
+ * automatiquement sur `tenant_id = tenantId` (cf. `lib/db/tenant-db.ts`).
  */
 async function resolveTarget(rawBody: string): Promise<{
   tdb: TenantDb;
@@ -128,6 +138,8 @@ async function resolveTarget(rawBody: string): Promise<{
 }> {
   const { tenantId, videoId } = parseTarget(rawBody);
   const tdb = tenantDb(tenantId);
+  // Cette ligne est la barrière d'isolation : si videoId n'appartient pas
+  // à tenantId, getVideo lève une erreur et la requête est refusée.
   await getVideo(tdb, videoId);
   return { tdb, videoId };
 }
