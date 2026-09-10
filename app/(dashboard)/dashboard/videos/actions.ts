@@ -110,7 +110,7 @@ export const createVideoAction = validatedActionWithUser(
   async (data, _formData, user) => {
     let videoId: number;
     try {
-      const video = await createVideo(tenantDb(user.tenantId), data);
+      const video = await createVideo(tenantDb(user.tenantId), data, user.id);
       videoId = video.id;
     } catch (error) {
       return formError(error);
@@ -126,6 +126,9 @@ export const generateStoryboardAction = validatedActionWithUser(
   async (data, _formData, user) => {
     try {
       await generateStoryboard(tenantDb(user.tenantId), data.videoId);
+      const { logActivity } = await import('@/lib/activity');
+      const { ActivityType } = await import('@/lib/db/schema');
+      await logActivity(tenantDb(user.tenantId), user.id, ActivityType.STORYBOARD_GENERATED);
     } catch (error) {
       return formError(error);
     }
@@ -327,7 +330,8 @@ export const validateVideoAction = validatedActionWithUser(
     try {
       const { charged } = await validateStoryboard(
         tenantDb(user.tenantId),
-        data.videoId
+        data.videoId,
+        user.id
       );
       // Les crédits sont débités : n8n enchaîne voix → images → clips → rendu.
       // Un échec de réveil ne doit pas faire croire que le débit a échoué.
@@ -422,10 +426,19 @@ export const renderVideoAction = validatedActionWithUser(
   videoIdentity,
   async (data, _formData, user) => {
     try {
+      const { logActivity } = await import('@/lib/activity');
+      const { ActivityType } = await import('@/lib/db/schema');
+      const tdb = tenantDb(user.tenantId);
+      
+      await logActivity(tdb, user.id, ActivityType.RENDER_STARTED);
+      
       const { durationInSeconds, tookSeconds } = await renderVideo(
-        tenantDb(user.tenantId),
+        tdb,
         data.videoId
       );
+      
+      await logActivity(tdb, user.id, ActivityType.RENDER_COMPLETED);
+      
       revalidatePath(`/dashboard/videos/${data.videoId}`);
       return {
         success:
