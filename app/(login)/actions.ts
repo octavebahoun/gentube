@@ -8,7 +8,6 @@ import { db } from '@/lib/db/drizzle';
 import { tenantDb } from '@/lib/db/tenant-db';
 import {
   ActivityType,
-  activityLogs,
   invitations,
   tenants,
   users,
@@ -21,22 +20,7 @@ import {
   validatedAction,
   validatedActionWithUser,
 } from '@/lib/auth/middleware';
-
-async function logActivity(
-  tenantId: number | null | undefined,
-  userId: number,
-  type: ActivityType,
-  ipAddress?: string
-) {
-  if (tenantId === null || tenantId === undefined) {
-    return;
-  }
-  await tenantDb(tenantId).insert(activityLogs, {
-    userId,
-    action: type,
-    ipAddress: ipAddress || '',
-  });
-}
+import { logActivity } from '@/lib/activity';
 
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255),

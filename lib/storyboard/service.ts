@@ -702,7 +702,8 @@ export async function moveShot(
  */
 export async function validateStoryboard(
   tdb: TenantDb,
-  videoId: number
+  videoId: number,
+  userId?: number
 ): Promise<{ video: Video; charged: number; balance: number }> {
   const video = await getVideo(tdb, videoId);
   assertDraft(video);
@@ -725,7 +726,7 @@ export async function validateStoryboard(
   }
 
   const { watermark } = await getEntitlements(tdb);
-  return await validateAndChargeVideo(tdb, videoId, { watermark });
+  return await validateAndChargeVideo(tdb, videoId, { watermark }, userId);
 }
 
 export { VideoError };
