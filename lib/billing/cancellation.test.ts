@@ -19,7 +19,7 @@ beforeEach(async () => {
 
 describe('scheduleCancellation', () => {
   it('pose cancel_at sur currentPeriodEnd', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Alpha', { plan: 'pro' });
     const periodEnd = new Date('2026-10-01');
 
     await tdb.insert(subscriptions, {
@@ -35,7 +35,7 @@ describe('scheduleCancellation', () => {
   });
 
   it('est idempotent si cancel_at est déjà posé', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Alpha', { plan: 'pro' });
     const periodEnd = new Date('2026-10-01');
 
     await tdb.insert(subscriptions, {
@@ -51,12 +51,12 @@ describe('scheduleCancellation', () => {
   });
 
   it('refuse si pas de subscription', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Alpha', { plan: 'pro' });
     await expect(scheduleCancellation(tdb)).rejects.toThrow(/No active subscription/);
   });
 
   it('refuse si pas de période en cours', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Alpha', { plan: 'pro' });
     await tdb.insert(subscriptions, {
       plan: 'pro',
       status: 'pending',
@@ -72,7 +72,7 @@ describe('scheduleCancellation', () => {
 
 describe('revertCancellation', () => {
   it('retire cancel_at pour réactiver le renouvellement', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Alpha', { plan: 'pro' });
     const periodEnd = new Date('2026-10-01');
 
     await tdb.insert(subscriptions, {
@@ -89,7 +89,7 @@ describe('revertCancellation', () => {
   });
 
   it('est idempotent si cancel_at n est pas posé', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Alpha', { plan: 'pro' });
     await tdb.insert(subscriptions, {
       plan: 'pro',
       status: 'active',
@@ -103,7 +103,7 @@ describe('revertCancellation', () => {
   });
 
   it('refuse si l abonnement est déjà canceled', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Alpha', { plan: 'pro' });
     await tdb.insert(subscriptions, {
       plan: 'pro',
       status: 'canceled',
@@ -168,7 +168,7 @@ describe('shouldCancelNow', () => {
 
 describe('finalizeCancellation', () => {
   it('bascule le statut en canceled', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Alpha', { plan: 'pro' });
     const [sub] = await tdb.insert(subscriptions, {
       plan: 'pro',
       status: 'active',

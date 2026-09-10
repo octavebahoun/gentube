@@ -22,7 +22,7 @@ function authHeaders() {
 describe('Tenant isolation on /api/internal routes', () => {
   it('refuse un accès cross-tenant sur une vidéo d un autre tenant', async () => {
     // Tenant A crée une vidéo
-    const { tdb: tdbA } = await createTenant({ plan: 'pro' });
+    const tdbA = await createTenant('TenantA', { plan: 'pro' });
     const projectA = await createProject(tdbA, { name: 'Project A' });
     const videoA = await createVideo(tdbA, {
       projectId: projectA.id,
@@ -31,7 +31,7 @@ describe('Tenant isolation on /api/internal routes', () => {
     });
 
     // Tenant B essaie d'accéder à la vidéo de A
-    const { tdb: tdbB } = await createTenant({ plan: 'pro' });
+    const tdbB = await createTenant('TenantB', { plan: 'pro' });
 
     const body = JSON.stringify({
       tenantId: tdbB.tenantId, // Tenant B
@@ -46,7 +46,7 @@ describe('Tenant isolation on /api/internal routes', () => {
   });
 
   it('autorise l accès à une vidéo du bon tenant', async () => {
-    const { tdb } = await createTenant({ plan: 'pro' });
+    const tdb = await createTenant('Tenant', { plan: 'pro' });
     const project = await createProject(tdb, { name: 'Project' });
     const video = await createVideo(tdb, {
       projectId: project.id,
@@ -101,7 +101,7 @@ describe('Tenant isolation on /api/internal routes', () => {
 
   it('empêche l écriture cross-tenant via tenantDb', async () => {
     // Tenant A crée une vidéo
-    const { tdb: tdbA } = await createTenant({ plan: 'pro' });
+    const tdbA = await createTenant('TenantA', { plan: 'pro' });
     const projectA = await createProject(tdbA, { name: 'Project A' });
     const videoA = await createVideo(tdbA, {
       projectId: projectA.id,
@@ -110,7 +110,7 @@ describe('Tenant isolation on /api/internal routes', () => {
     });
 
     // Tenant B crée sa propre vidéo
-    const { tdb: tdbB } = await createTenant({ plan: 'pro' });
+    const tdbB = await createTenant('TenantB', { plan: 'pro' });
     const projectB = await createProject(tdbB, { name: 'Project B' });
     const videoB = await createVideo(tdbB, {
       projectId: projectB.id,
