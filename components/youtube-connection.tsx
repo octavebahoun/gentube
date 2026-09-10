@@ -22,10 +22,6 @@ export function YoutubeConnection() {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [disconnectError, setDisconnectError] = useState<string | null>(null);
 
-  const handleConnect = () => {
-    window.location.href = '/api/youtube/authorize';
-  };
-
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     setDisconnectError(null);
@@ -66,7 +62,7 @@ export function YoutubeConnection() {
         <p className="text-sm text-[#A5A7AD]">
           Connectez votre chaîne YouTube pour publier vos vidéos directement.
         </p>
-        <GxButton onClick={handleConnect}>
+        <GxButton href="/api/youtube/authorize">
           <Youtube className="size-4" aria-hidden="true" />
           Connecter YouTube
         </GxButton>
