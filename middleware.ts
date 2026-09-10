@@ -4,8 +4,18 @@ import { signToken, verifyToken } from '@/lib/auth/session';
 
 const protectedRoutes = '/dashboard';
 
+const LOCALE_PREFIXES = ['en', 'es', 'de', 'it', 'pt', 'ar', 'zh', 'ja', 'ko', 'ru'];
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // Redirect locale-prefixed routes (e.g., /en/*, /es/*) to non-prefixed FR routes
+  const localeMatch = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
+  if (localeMatch && LOCALE_PREFIXES.includes(localeMatch[1])) {
+    const pathWithoutLocale = localeMatch[2] || '/';
+    return NextResponse.redirect(new URL(pathWithoutLocale, request.url));
+  }
+
   const sessionCookie = request.cookies.get('session');
   const isProtectedRoute = pathname.startsWith(protectedRoutes);
 
