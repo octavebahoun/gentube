@@ -17,7 +17,7 @@ import {
 } from '@/lib/youtube/quota';
 import type { AssetStore } from '@/lib/storage';
 import type { InternalDeps, InternalHeaders, InternalResult } from './handlers';
-import { assertInternalAuth } from './auth';
+import { assertInternalAuth, InternalAuthError } from './auth';
 
 export const PUBLISH_STEP = 'publish';
 
@@ -41,6 +41,10 @@ const publishSchema = z.object({
 });
 
 function toResult(error: unknown): InternalResult {
+  if (error instanceof InternalAuthError) {
+    return { status: error.statusCode, body: { ok: false, message: error.message } };
+  }
+
   if (error instanceof VideoError || error instanceof PublishError) {
     return { status: error.statusCode, body: { ok: false, message: error.message } };
   }

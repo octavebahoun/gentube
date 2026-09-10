@@ -35,6 +35,7 @@ import {
   handleStatus,
   handleVoice,
 } from './handlers';
+import { handlePublish } from './publish';
 
 afterAll(async () => {
   await closeDb();
@@ -212,6 +213,24 @@ describe('the internal auth gate', () => {
 
     expect(result.status).toBe(401);
     expect(await tdb.count(jobs)).toBe(0);
+  });
+
+  it('rejects publish without token with 401, not 500', async () => {
+    const tdb = await createTenant('Alpha', { credits: 1_000 });
+    const { video } = await withStills(tdb, ['image', 'image']);
+    await tdb.update(videos, { status: 'rendered', outputUrl: 'test.mp4' }, eq(videos.id, video.id));
+
+    const result = await handlePublish(
+      {},
+      JSON.stringify({
+        tenantId: tdb.tenantId,
+        videoId: video.id,
+        title: 'Test',
+      })
+    );
+
+    expect(result.status).toBe(401);
+    expect(result.body.message).toMatch(/Unauthorized/);
   });
 
   it('rejects invalid JSON with 400', async () => {
