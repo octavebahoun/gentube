@@ -41,14 +41,14 @@ export function GxPerfCard({
     <article
       className={cn(
         'relative overflow-hidden rounded-xl border border-[#292D35] bg-[#171A20] text-[#F5F5F5] shadow-2xl',
-        'transition-all duration-200 ease-out hover:border-[#FF7A18]/50 hover:glow-orange-subtle',
+        'transition-all duration-200 ease-out hover:border-[#FF3B30]/50 hover:glow-red-subtle',
         className
       )}
       {...rest}
     >
       <div aria-hidden="true" className="h-1 bg-gradient-gt" />
       <div className="flex items-center justify-between gap-3 border-b border-[#292D35] px-5 py-3.5 bg-[#0B0D10]/50">
-        <p className="t-label text-[#FF7A18] font-bold">{title}</p>
+        <p className="t-label text-[#FF3B30] font-bold">{title}</p>
         <p className="t-data text-xs text-[#A5A7AD]">{timecode}</p>
       </div>
       <div className="p-5">{children}</div>
@@ -67,21 +67,22 @@ export function GxStat({
   label,
   value,
   hint,
-  tone = 'orange',
+  tone = 'rouge',
   className,
 }: {
   label: string;
   value: React.ReactNode;
   hint?: string;
-  tone?: 'orange' | 'purple' | 'cyan' | 'success' | 'error' | 'jaune' | 'magenta' | 'vert' | 'bleu';
+  tone?: 'rouge' | 'purple' | 'amber' | 'success' | 'error' | 'jaune' | 'cyan' | 'magenta' | 'vert' | 'bleu';
   className?: string;
 }) {
   const bars: Record<string, string> = {
-    orange: 'bg-[#FF7A18]',
-    jaune: 'bg-[#FF7A18]',
+    rouge: 'bg-[#FF3B30]',
+    jaune: 'bg-[#FF3B30]',
     purple: 'bg-[#A855F7]',
     magenta: 'bg-[#A855F7]',
-    cyan: 'bg-[#FFB45C]',
+    amber: 'bg-[#FFB340]',
+    cyan: 'bg-[#FFB340]',
     success: 'bg-[#35D07F]',
     vert: 'bg-[#35D07F]',
     error: 'bg-[#FF4D5A]',

@@ -65,12 +65,12 @@ function RailLink({
         'group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3.5',
         'font-display text-sm font-semibold transition-all duration-200',
         active
-          ? 'bg-[#FF7A18]/15 border border-[#FF7A18]/30 text-[#F5F5F5] glow-orange-subtle'
+          ? 'bg-[#FF3B30]/15 border border-[#FF3B30]/30 text-[#F5F5F5] glow-red-subtle'
           : 'text-[#A5A7AD] hover:bg-[#171A20] hover:text-[#F5F5F5]'
       )}
     >
-      {active && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-[#FF7A18]" />}
-      <Icon className={cn('size-4 shrink-0', active ? 'text-[#FF7A18]' : '')} aria-hidden="true" />
+      {active && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-[#FF3B30]" />}
+      <Icon className={cn('size-4 shrink-0', active ? 'text-[#FF3B30]' : '')} aria-hidden="true" />
       <span className="truncate">{label}</span>
     </Link>
   );
@@ -84,19 +84,19 @@ function SoldeRail() {
   return (
     <div className="rounded-xl border border-[#292D35] bg-[#111419] p-4 text-[#F5F5F5]">
       <p className="t-label text-xs text-[#A5A7AD]">Solde Crédits</p>
-      <p className="t-data mt-2 text-2xl font-bold text-[#FF7A18]">
+      <p className="t-data mt-2 text-2xl font-bold text-[#FF3B30]">
         {balance === null ? '—' : balance.toLocaleString('fr-FR')}
       </p>
       <GxProgress
         value={jauge}
         max={2600}
         label="Solde de crédits, rapporté à un plan Pro"
-        tone="orange"
+        tone="rouge"
         className="mt-3"
       />
       <Link
         href="/dashboard/billing"
-        className="mt-4 flex min-h-10 cursor-pointer items-center justify-center rounded-xl bg-[#FF7A18] px-3 font-display text-xs font-bold text-[#050608] hover:bg-[#FFB45C] transition-all glow-orange-subtle"
+        className="mt-4 flex min-h-10 cursor-pointer items-center justify-center rounded-xl bg-[#FF3B30] px-3 font-display text-xs font-bold text-white hover:bg-[#D0021B] transition-all glow-red-subtle"
       >
         Recharger mes crédits
       </Link>
@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ── Desktop Studio Sidebar ───────────────────────────────────── */}
       <aside className="sticky top-(--header-h) z-(--z-sidebar) hidden h-[calc(100dvh-var(--header-h))] w-(--sidebar-w) shrink-0 flex-col gap-6 overflow-y-auto border-r border-[#292D35] bg-[#0B0D10] px-3 py-6 lg:flex">
         <nav aria-label="Fabriquer" className="flex flex-col gap-1">
-          <p className="t-label px-3 pb-2 text-xs text-[#FF7A18]">Studio Production</p>
+          <p className="t-label px-3 pb-2 text-xs text-[#FF3B30]">Studio Production</p>
           {FABRIQUER.map(({ href, label, Icon }) => (
             <RailLink key={href} href={href} label={label} Icon={Icon} active={isActive(pathname, href)} />
           ))}
@@ -164,10 +164,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   className={cn(
                     'relative flex min-h-14 flex-col items-center justify-center gap-1 px-1 py-2',
                     'transition-colors duration-200',
-                    active ? 'text-[#FF7A18]' : 'text-[#A5A7AD]'
+                    active ? 'text-[#FF3B30]' : 'text-[#A5A7AD]'
                   )}
                 >
-                  {active && <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 bg-[#FF7A18]" />}
+                  {active && <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 bg-[#FF3B30]" />}
                   <Icon className="size-5" aria-hidden="true" />
                   <span className="t-label text-[0.625rem]">{label}</span>
                 </Link>

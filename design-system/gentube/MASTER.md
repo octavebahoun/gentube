@@ -8,7 +8,7 @@
 
 ---
 
-## Palette & Color Tokens
+## Palette & Color Tokens — Direction C (hybrid)
 
 | Role | Hex Code | CSS Variable | Description / Usage |
 |------|----------|--------------|---------------------|
@@ -17,18 +17,21 @@
 | Surface | `#111419` | `--color-surface` | Cards, panels, timeline tracks |
 | Surface Elevated | `#171A20` | `--color-surface-elevated` | Floating dialogs, tooltips, modals |
 | Border | `#292D35` | `--color-border-subtle` | Fine subtle dividers |
+| Border High | `#3D434F` | `--color-line-hi` | Elevated border contrast |
 | Primary Text | `#F5F5F5` | `--color-text-primary` | High-contrast headers & body |
 | Secondary Text | `#A5A7AD` | `--color-text-secondary` | Muted labels, metadata & timecodes |
-| Primary Action Accent | `#FF7A18` | `--color-accent-orange` | Primary buttons, playheads, key actions |
-| AI Accent | `#A855F7` | `--color-accent-purple` | AI generation buttons, AI tags, AI assistant |
-| Luminous Accent | `#FFB45C` | `--color-accent-light` | Hover glows, active highlights |
+| Brand Red | `#FF3B30` | `--color-brand-red` / `--color-marque` | Primary buttons, logo Tube, active nav, CTAs |
+| Brand Red Deep | `#D0021B` | `--color-brand-red-deep` | Hover states, gradients, deep accents |
+| AI Purple | `#A855F7` | `--color-ai-purple` / `--color-ai` | AI generation buttons, AI tags, AI suggestions |
+| Amber / In Progress | `#FFB340` | `--color-amber` / `--color-info` | Active tasks, processing states |
 | Success Status | `#35D07F` | `--color-status-success` | Render complete, active tracks, green indicators |
-| Error Status | `#FF4D5A` | `--color-status-error` | Validation errors, failed renders, alerts |
+| Error / Danger | `#FF4D5A` | `--color-status-error` / `--color-danger` | Validation errors, failed renders, alerts (distinct from brand) |
 
 ### Color Rules
-- **Orange (`#FF7A18`)** is the primary action color across the UI.
-- **Purple (`#A855F7`)** is specifically reserved for AI features (Script generation, Voice generation, Scene AI, Prompt-to-video).
-- **Gradients**: Kept subtle and elegant, transitioning from Orange (`#FF7A18`) to Purple (`#A855F7`).
+- **Red (`#FF3B30`)** is the brand identity: logo Tube text, primary CTAs, active navigation, recharge buttons.
+- **Purple (`#A855F7`)** is exclusively for AI features (Script generation, Voice generation, Scene AI, Prompt-to-video, AI suggestions).
+- **Amber (`#FFB340`)** signals work-in-progress (rendering, processing, active tasks).
+- **Gradients**: Brand red to deep red (`#FF3B30` → `#D0021B`) for CTAs; red to purple for hybrid AI/brand moments.
 
 ---
 

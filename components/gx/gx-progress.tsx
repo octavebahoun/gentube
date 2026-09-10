@@ -8,19 +8,19 @@ export function GxProgress({
   value,
   max = 100,
   label,
-  tone = 'orange',
+  tone = 'rouge',
   className,
 }: {
   value: number;
   max?: number;
   label: string;
-  tone?: 'orange' | 'purple' | 'gradient';
+  tone?: 'rouge' | 'purple' | 'gradient';
   className?: string;
 }) {
   const ratio = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
 
   const fills = {
-    orange: 'bg-[#FF7A18]',
+    rouge: 'bg-[#FF3B30]',
     purple: 'bg-[#A855F7]',
     gradient: 'bg-gradient-gt',
   };
@@ -53,7 +53,7 @@ export function GxMeter({ label, className }: { label: string; className?: strin
         <span
           key={i}
           aria-hidden="true"
-          className="w-1 origin-bottom rounded-full bg-[#FF7A18]"
+          className="w-1 origin-bottom rounded-full bg-[#FF3B30]"
           style={{
             height: `${8 + i * 3}px`,
             animation: `gt-bar ${520 + i * 130}ms ease-in-out ${i * 90}ms infinite alternate`,
