@@ -1,0 +1,3 @@
+## 2024-05-15 - ARIA Labels vs Title attributes on Icon-only Buttons
+**Learning:** `title` attributes alone on icon-only buttons (like Rewind, Play, FastForward) are insufficient for screen reader accessibility, particularly when standardizing to a specific language like French in this app. The `title` provides a tooltip, but an explicit `aria-label` provides reliable, consistent text to assistive technologies, and `aria-pressed` can convey the active state (e.g. for Play/Pause).
+**Action:** Always provide explicit `aria-label` attributes in French for icon-only interactive elements and hide the decorative icons from screen readers using `aria-hidden="true"`. Use `aria-pressed` or `aria-expanded` when the button acts as a toggle.
