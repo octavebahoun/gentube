@@ -137,16 +137,18 @@ export function StoryboardEditor({
 
         {/* Video Player Controls */}
         <div className="flex items-center gap-2 rounded-lg border border-[#292D35] bg-[#050608] px-3 py-1.5">
-          <button className="text-[#A5A7AD] hover:text-[#FF3B30] transition" title="Reculer">
+          <button className="text-[#A5A7AD] hover:text-[#FF3B30] transition" title="Reculer" aria-label="Reculer de 10 secondes">
             <Rewind className="size-4" />
           </button>
           <button
             onClick={() => setIsPlaying(!isPlaying)}
+            aria-label={isPlaying ? "Mettre en pause" : "Lire la vidéo"}
+            aria-pressed={isPlaying}
             className="flex size-8 items-center justify-center rounded-full bg-[#FF3B30] text-white font-bold hover:bg-[#D0021B] hover:scale-105 transition"
           >
-            {isPlaying ? <Pause className="size-4" /> : <Play className="size-4 ml-0.5" />}
+            {isPlaying ? <Pause className="size-4" aria-hidden="true" /> : <Play className="size-4 ml-0.5" aria-hidden="true" />}
           </button>
-          <button className="text-[#A5A7AD] hover:text-[#FF3B30] transition" title="Avancer">
+          <button className="text-[#A5A7AD] hover:text-[#FF3B30] transition" title="Avancer" aria-label="Avancer de 10 secondes">
             <FastForward className="size-4" />
           </button>
           <span className="font-mono text-xs text-[#A5A7AD] ml-2">
