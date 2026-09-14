@@ -57,8 +57,14 @@ export type RenderStatus = {
  * `generating` est le premier passage — les visuels sont faits. `rendering`
  * est une relance. `rendered` est refusé : remonter une vidéo déjà livrée
  * changerait le fichier sous un client qui l'a peut-être déjà publié.
+ *
+ * `failed` est accepté, et c'est voulu : une vidéo dont le montage s'est
+ * arrêté n'a livré aucun fichier, ses crédits sont déjà débités et ses visuels
+ * existent. La refuser l'immobiliserait sans recours depuis l'écran — le même
+ * piège que `collectRender` évite en la laissant `rendering` plutôt que de la
+ * marquer `failed`. Les visuels sont revérifiés plus bas de toute façon.
  */
-const RENDERABLE = new Set(['generating', 'rendering']);
+const RENDERABLE = new Set(['generating', 'rendering', 'failed']);
 
 export function assertRenderable(video: Video): void {
   if (RENDERABLE.has(video.status)) return;

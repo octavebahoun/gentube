@@ -71,10 +71,12 @@ export function StoryboardEditor({
   const producible = video.status === 'validated' || video.status === 'generating';
   const hasAnimated = shots.some((shot) => shot.type === 'video');
 
+  // Les mêmes statuts que `RENDERABLE` dans lib/render/service : proposer le
+  // bouton sur un statut que le moteur refuse ne donne qu'une erreur 409.
+  // `rendered` en fait partie : une vidéo livrée ne se remonte pas.
   const montable =
-    (video.status === 'validated' ||
-      video.status === 'generating' ||
-      video.status === 'rendered' ||
+    (video.status === 'generating' ||
+      video.status === 'rendering' ||
       video.status === 'failed') &&
     shots.length > 0 &&
     shots.every((shot) => Boolean(shot.audioUrl)) &&
@@ -136,7 +138,13 @@ export function StoryboardEditor({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {editable && items.length === 0 && <GenerateButton videoId={video.id} hasShots={false} />}
-          {montable && <RenderForm videoId={video.id} dejaRendu={video.status === 'rendered'} />}
+          {montable && (
+            <RenderForm
+              videoId={video.id}
+              dejaRendu={video.status === 'failed'}
+              enCours={video.status === 'rendering'}
+            />
+          )}
         </div>
       </div>
 

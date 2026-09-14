@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useCallback, useEffect, useRef, useState } from 'react';
 import {
   CheckCircle2,
   Clapperboard,
@@ -24,6 +24,7 @@ import {
   generateVisualsAction,
   generateVoiceoverAction,
   monterApportAction,
+  collectRenderAction,
   renderVideoAction,
   validateVideoAction,
 } from '@/app/(dashboard)/dashboard/videos/actions';
@@ -254,23 +255,79 @@ export function NovitaForm({ videoId, plans }: { videoId: number; plans: number 
   );
 }
 
+/** Entre deux relevés d'un montage en cours. */
+const RELEVE_MS = 5_000;
+
+function appel(action: typeof renderVideoAction, videoId: number) {
+  const formData = new FormData();
+  formData.set('videoId', String(videoId));
+  return action({}, formData) as Promise<ActionState>;
+}
+
 /**
  * Le montage, depuis l'écran.
  *
- * Le bouton attend la fin : une minute de vidéo demande à peu près une minute
- * de machine, et l'action serveur tient la connexion pendant ce temps. C'est
- * fait pour essayer, pas pour servir — la file viendra.
+ * Le rendu part sur Lambda et **ne bloque pas** l'action : `renderVideoAction`
+ * rend la main dès que l'exécution est lancée, et l'écran relève l'état toutes
+ * les cinq secondes jusqu'au fichier. Une action serveur qui attendrait la fin
+ * tiendrait la connexion une minute par minute de vidéo.
+ *
+ * `enCours` permet de reprendre la boucle après un rechargement : le montage
+ * continue sur Lambda même si personne ne regarde, mais c'est ce relevé qui
+ * descend le fichier sur R2 — sans lui, la vidéo resterait « au montage » avec
+ * son MP4 prêt et jamais réclamé.
  */
-export function RenderForm({ videoId, dejaRendu }: { videoId: number; dejaRendu: boolean }) {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    renderVideoAction,
-    {}
-  );
+export function RenderForm({
+  videoId,
+  dejaRendu,
+  enCours = false,
+}: {
+  videoId: number;
+  dejaRendu: boolean;
+  enCours?: boolean;
+}) {
+  const [state, setState] = useState<ActionState>({});
+  const [actif, setActif] = useState(enCours);
+  const monte = useRef(true);
+
+  useEffect(() => {
+    monte.current = true;
+    return () => {
+      monte.current = false;
+    };
+  }, []);
+
+  const relever = useCallback(async () => {
+    const resultat = await appel(collectRenderAction, videoId);
+    if (!monte.current) return;
+    setState(resultat ?? {});
+    // Un succès qui ne dit plus « en cours » est le dernier : le fichier est
+    // posé, ou l'erreur est définitive. Dans les deux cas on arrête la boucle.
+    if (!resultat?.success || !/en cours/i.test(resultat.success)) {
+      setActif(false);
+      if (resultat?.success) window.location.reload();
+    }
+  }, [videoId]);
+
+  useEffect(() => {
+    if (!actif) return;
+    const minuteur = setInterval(relever, RELEVE_MS);
+    void relever();
+    return () => clearInterval(minuteur);
+  }, [actif, relever]);
+
+  async function lancer() {
+    setState({});
+    const resultat = await appel(renderVideoAction, videoId);
+    if (!monte.current) return;
+    setState(resultat ?? {});
+    if (!resultat?.error) setActif(true);
+  }
+
   return (
-    <form action={formAction} className="space-y-2">
-      <input type="hidden" name="videoId" value={videoId} />
-      <Button type="submit" disabled={isPending}>
-        {isPending ? (
+    <div className="space-y-2">
+      <Button type="button" disabled={actif} onClick={lancer}>
+        {actif ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             Montage en cours…
@@ -283,13 +340,13 @@ export function RenderForm({ videoId, dejaRendu }: { videoId: number; dejaRendu:
         )}
       </Button>
       <p className="max-w-xl text-xs leading-relaxed text-ink-3">
-        Les images et les voix redescendent sur le disque, la page se compose, et
-        le moteur rend le fichier. Comptez à peu près une seconde de machine par
-        seconde de vidéo — la page reste ouverte pendant ce temps.
+        Le montage part sur Lambda, découpé en morceaux rendus en parallèle.
+        Comptez à peu près deux secondes de machine par seconde de vidéo. Vous
+        pouvez fermer la page : l'état se reprend au retour.
       </p>
       {state?.error && <Notice tone="erreur">{state.error}</Notice>}
       {state?.success && <Notice tone="ok">{state.success}</Notice>}
-    </form>
+    </div>
   );
 }
 
