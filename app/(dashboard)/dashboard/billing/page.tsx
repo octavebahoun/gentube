@@ -236,7 +236,7 @@ export default async function BillingPage({
         panels={{
           plans: (
             <div className="mt-6">
-              <ul className="grid gap-3">
+              <ul className="grid grid-cols-1 gap-3">
                 {overview.offers.map((offer) => {
                   const actuelle = overview.plan === offer.plan;
                   return (
@@ -277,7 +277,7 @@ export default async function BillingPage({
           ),
           recharges: (
             <div className="mt-6">
-              <ul className="grid gap-3">
+              <ul className="grid grid-cols-1 gap-3">
                 {overview.topupPacks.map((pack) => (
                   <Card
                     key={pack.id}

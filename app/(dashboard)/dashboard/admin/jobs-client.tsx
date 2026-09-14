@@ -149,7 +149,7 @@ export function JobsClient() {
                           <h3 className="t-h3">
                             <Link
                               href={`/dashboard/videos/${video.id}`}
-                              className="underline-offset-4 transition-colors duration-(--t-fast) hover:underline"
+                              className="inline-flex min-h-11 items-center underline-offset-4 transition-colors duration-(--t-fast) hover:underline"
                             >
                               {video.title}
                             </Link>
@@ -284,7 +284,7 @@ export function JobsClient() {
                           <td className="py-3 pr-4">
                             <Link
                               href={`/dashboard/videos/${job.videoId}`}
-                              className="text-sm text-ink-2 underline-offset-4 transition-colors duration-(--t-fast) hover:text-ink hover:underline"
+                              className="inline-flex min-h-11 items-center text-sm text-ink-2 underline-offset-4 transition-colors duration-(--t-fast) hover:text-ink hover:underline"
                             >
                               Vidéo #{job.videoId}
                             </Link>

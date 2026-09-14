@@ -75,7 +75,7 @@ export default async function ProjectPage({
                   }
                 />
               ) : (
-                <ul className="grid gap-2.5">
+                <ul className="grid grid-cols-1 gap-2.5">
                   {videos.map((video) => (
                     <li key={video.id}>
                       <Link

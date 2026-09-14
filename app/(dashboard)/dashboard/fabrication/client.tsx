@@ -141,7 +141,7 @@ export function FabricationClient({
                       <h2 className="text-base font-bold text-ink">
                         <Link
                           href={`/dashboard/videos/${video.id}`}
-                          className="underline-offset-2 transition-colors duration-(--t-fast) hover:underline"
+                          className="inline-flex min-h-11 items-center underline-offset-2 transition-colors duration-(--t-fast) hover:underline"
                         >
                           {video.title}
                         </Link>
@@ -240,7 +240,7 @@ export function FabricationClient({
                   <li key={video.id} className="py-3 first:pt-0 last:pb-0">
                     <Link
                       href={`/dashboard/videos/${video.id}`}
-                      className="block truncate text-sm font-semibold text-ink underline-offset-2 transition-colors duration-(--t-fast) hover:underline"
+                      className="flex min-h-11 items-center truncate text-sm font-semibold text-ink underline-offset-2 transition-colors duration-(--t-fast) hover:underline"
                     >
                       {video.title}
                     </Link>

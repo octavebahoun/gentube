@@ -99,7 +99,7 @@ export default async function ProjectsPage({
           }
         />
       ) : (
-        <ul className="grid gap-2.5">
+        <ul className="grid grid-cols-1 gap-2.5">
           {visibles.map((project) => (
             <li key={project.id}>
               <Link

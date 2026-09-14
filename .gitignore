@@ -72,3 +72,6 @@ openmontage/
 render/demo/imports/
 .env*
 !.env.example
+
+# Captures de QA (générées, non versionnées)
+qa/
