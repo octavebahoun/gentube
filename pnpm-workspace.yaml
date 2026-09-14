@@ -1,0 +1,8 @@
+# pnpm 10 ne lit plus le champ "pnpm" de package.json : les réglages
+# vivent ici. On ne laisse tourner que les scripts postinstall utiles à
+# l'image de service (Tailwind v4, sharp, esbuild) ; puppeteer,
+# ffmpeg-static et onnxruntime restent ignorés — le montage part sur Lambda.
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - sharp
+  - esbuild

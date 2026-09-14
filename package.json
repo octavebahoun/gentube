@@ -61,8 +61,5 @@
     "tsx": "^4.23.12",
     "vitest": "^4.1.11"
   },
-  "name": "gentube",
-  "pnpm": {
-    "onlyBuiltDependencies": ["@tailwindcss/oxide", "sharp", "esbuild"]
-  }
+  "name": "gentube"
 }
