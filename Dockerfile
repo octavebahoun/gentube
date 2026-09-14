@@ -32,11 +32,12 @@ RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Le worker de build plafonne à ~2 Go de tas et s'y cogne : le graphe de
-# modules de cette application le dépasse. Même valeur que le script `build`
-# du package.json, répétée ici parce que l'image peut être construite sur une
+# Le build passe sous 2 Go de tas, à froid, avec webpack. Turbopack en
+# demandait davantage et le worker Next se cognait au plafond ; webpack, lui,
+# tient dans la RAM d'un VPS. Même valeur que le script `build` du
+# package.json, répétée ici parce que l'image peut être construite sur une
 # machine qui n'a pas les mêmes réglages.
-ENV NODE_OPTIONS=--max-old-space-size=6144
+ENV NODE_OPTIONS=--max-old-space-size=2048
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # La sortie `standalone` produit un serveur qui embarque ses seules
