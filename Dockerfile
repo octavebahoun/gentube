@@ -42,6 +42,13 @@ COPY . .
 ENV NODE_OPTIONS=--max-old-space-size=2048
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# La collecte des pages importe le module DB, qui exige DATABASE_URL et
+# refuse de se charger sans. Le client postgres est paresseux (aucune
+# connexion tant qu'aucune requête ne part), donc une valeur factice suffit
+# à passer le build ; le vrai DATABASE_URL est fourni au runtime. Cet étage
+# est jeté, rien de tout ça ne se retrouve dans l'image finale.
+ENV DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
+
 # La sortie `standalone` produit un serveur qui embarque ses seules
 # dépendances utiles : l'étage final n'a pas besoin de `node_modules`.
 RUN pnpm build
