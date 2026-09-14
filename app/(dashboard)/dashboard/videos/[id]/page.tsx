@@ -6,6 +6,7 @@ import { VideoError } from '@/lib/videos';
 import { getStoryboard } from '@/lib/storyboard';
 import { isLlmConfigured } from '@/lib/llm/deepseek';
 import { isVoiceConfigured } from '@/lib/voice/elevenlabs';
+import { voixDisponibles } from '@/lib/voice';
 import { DeleteVideoButton, StoryboardEditor } from './storyboard';
 import { VideoSettings } from '@/components/storyboard/video-settings';
 import { listSounds } from '@/lib/sounds';
@@ -22,7 +23,7 @@ import { EtatBadge } from '@/components/kit/etat';
 const PIPELINE_LABEL: Record<string, string> = {
   image: 'images fixes',
   video: 'plans animés',
-  mixed: 'mixte',
+  mixed: 'images et plans animés',
 };
 
 export default async function VideoPage({
@@ -65,6 +66,12 @@ export default async function VideoPage({
   );
   const project = await getProject(tdb, board.video.projectId);
   const brouillon = board.video.status === 'draft';
+
+  // Les voix proposées dépendent du plan : Polly sur Starter, ElevenLabs sur
+  // Pro. Lu ici, côté serveur — le composant est client et ne doit pas
+  // décider seul de ce qu'un plan a le droit de choisir.
+  const tenant = await tdb.getTenant();
+  const voixOptions = voixDisponibles(tenant?.plan);
 
   // Le catalogue est partagé entre tous les projets : il ne passe pas par le
   // scope tenant. Lu ici plutôt que dans le composant, qui est client.
@@ -161,6 +168,7 @@ export default async function VideoPage({
           canAfford={board.canAfford}
           durationsMeasured={board.durationsMeasured}
           assets={apports}
+          voixOptions={voixOptions}
         />
       </div>
 

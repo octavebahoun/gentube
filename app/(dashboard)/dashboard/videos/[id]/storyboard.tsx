@@ -38,6 +38,7 @@ import {
   ValidateForm,
   VisualsForm,
   VoiceoverForm,
+  VoixForm,
 } from '@/components/storyboard/storyboard-forms';
 import { type ActionState, seconds } from '@/components/storyboard/utils';
 
@@ -51,6 +52,7 @@ export function StoryboardEditor({
   canAfford,
   durationsMeasured,
   assets,
+  voixOptions,
 }: {
   video: Video;
   shots: Shot[];
@@ -63,6 +65,8 @@ export function StoryboardEditor({
   canAfford: boolean;
   durationsMeasured: boolean;
   assets: ClientAsset[];
+  /** Voix off proposées, filtrées selon le plan du tenant (lib/voice). */
+  voixOptions: { value: string; label: string }[];
 }) {
   const editable = video.status === 'draft';
   const videosApportees = assets
@@ -204,7 +208,7 @@ export function StoryboardEditor({
                       onClick={() => setActiveShotId(shot.id)}
                       aria-current={active ? 'true' : undefined}
                       className={cn(
-                        'flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded-control border px-3 text-xs',
+                        'flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded-control border px-3 text-xs whitespace-nowrap',
                         'transition-colors duration-(--t-fast)',
                         active
                           ? 'border-ink-3 bg-surface-2 text-ink'
@@ -212,7 +216,7 @@ export function StoryboardEditor({
                       )}
                     >
                       <span className="t-data font-bold">#{String(index + 1).padStart(2, '0')}</span>
-                      <span className="t-data">{shot.durationS}s</span>
+                      <span className="t-data">{seconds(shot.durationS)}</span>
                       <span className="text-ink-3">{shot.type === 'video' ? 'animé' : 'fixe'}</span>
                     </button>
                   </li>
@@ -236,6 +240,13 @@ export function StoryboardEditor({
             {editable && items.length > 0 && <GenerateButton videoId={video.id} hasShots={true} />}
             {editable && videosApportees.length > 0 && (
               <ApportForm videoId={video.id} videos={videosApportees} hasShots={items.length > 0} />
+            )}
+            {editable && items.length > 0 && (
+              <VoixForm
+                videoId={video.id}
+                voix={video.voice}
+                options={voixOptions}
+              />
             )}
             {editable &&
               items.length > 0 &&
@@ -263,27 +274,39 @@ export function StoryboardEditor({
 
       {/* Les scènes, éditables une par une */}
       {items.length > 0 && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={items.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-            <ul className="space-y-3">
-              {items.map((shot, index) => (
-                <SortableShotCard
-                  key={shot.id}
-                  shot={shot}
-                  index={index}
-                  editable={editable}
-                  video={video}
-                  assets={assets}
-                />
-              ))}
-            </ul>
-          </SortableContext>
-        </DndContext>
+        <>
+          <div>
+            <p className="t-label">Les scènes</p>
+            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-ink-3">
+              La narration fait la durée et le prix de la scène ; la réécrire efface l'audio déjà
+              enregistré. Le prompt visuel est en anglais, la langue des modèles d'image et de vidéo.
+            </p>
+          </div>
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={items.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+              <ul className="space-y-3">
+                {items.map((shot, index) => (
+                  <SortableShotCard
+                    key={shot.id}
+                    shot={shot}
+                    index={index}
+                    editable={editable}
+                    video={video}
+                    assets={assets}
+                    apercu={apercus[shot.id] ?? null}
+                    apercuAnime={apercusAnimes[shot.id] ?? false}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
+        </>
       )}
 
       {editable && (

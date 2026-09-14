@@ -1,7 +1,7 @@
 import type { Plan } from '@/lib/db/schema';
 import { createEdgeClient, isEdgeConfigured } from './edge';
-import { createElevenLabsClient, isVoiceConfigured } from './elevenlabs';
-import { createPollyClient, isPollyConfigured } from './polly';
+import { VOICE_IDS, createElevenLabsClient, isVoiceConfigured } from './elevenlabs';
+import { POLLY_VOICES, createPollyClient, isPollyConfigured } from './polly';
 import { VoiceNotConfiguredError, type VoiceSynthesizer } from './contract';
 
 /**
@@ -41,6 +41,54 @@ export const MEASURING_PROVIDER: VoiceProvider = 'edge';
  */
 export function voiceProviderFor(plan?: Plan | null): VoiceProvider {
   return plan === 'pro' || plan === 'business' ? 'elevenlabs' : 'polly';
+}
+
+export type VoixOption = { value: string; label: string };
+
+/**
+ * Les libellés lisibles, à côté des noms courts que le rendu attend. Ils ne
+ * gouvernent rien — un nom absent d'ici s'affiche tel quel — mais ils évitent
+ * de montrer « lea » au client.
+ */
+const LIBELLES_POLLY: Record<string, string> = {
+  lea: 'Léa — fr-FR, féminine',
+  remi: 'Rémi — fr-FR, masculine',
+  gabrielle: 'Gabrielle — fr-CA, féminine',
+};
+
+const LIBELLES_ELEVENLABS: Record<string, string> = {
+  george: 'George — masculine',
+  liam: 'Liam — masculine',
+  antoni: 'Antoni — masculine',
+  anais: 'Anaïs — féminine',
+  rachel: 'Rachel — féminine',
+};
+
+/**
+ * Les voix qu'un plan a le droit de choisir.
+ *
+ * Le fournisseur est décidé par le plan (`voiceProviderFor`) : Starter parle
+ * en Polly, Pro et Business en ElevenLabs. La liste suit — un plan ne voit
+ * jamais les voix d'un fournisseur qu'il ne paie pas. C'est aussi ce que
+ * `voixAutorisee` fait respecter côté serveur, pour qu'un menu trafiqué ne
+ * force pas une voix premium.
+ */
+export function voixDisponibles(plan?: Plan | null): VoixOption[] {
+  if (voiceProviderFor(plan) === 'elevenlabs') {
+    return Object.keys(VOICE_IDS).map((value) => ({
+      value,
+      label: LIBELLES_ELEVENLABS[value] ?? value,
+    }));
+  }
+  return Object.keys(POLLY_VOICES).map((value) => ({
+    value,
+    label: LIBELLES_POLLY[value] ?? value,
+  }));
+}
+
+/** Vrai si ce plan a le droit de poser cette voix. Le garde-fou du serveur. */
+export function voixAutorisee(plan: Plan | null | undefined, voice: string): boolean {
+  return voixDisponibles(plan).some((option) => option.value === voice);
 }
 
 /** Construit le client d'un fournisseur nommé, ou dit ce qui lui manque. */

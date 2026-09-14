@@ -20,11 +20,13 @@ import {
   QUALITIES,
   SUBTITLE_STYLES,
   VideoError,
+  changerVoixVideo,
   createVideo,
   deleteVideo,
   updateVideo,
   videoInputSchema,
 } from '@/lib/videos';
+import { voixAutorisee } from '@/lib/voice';
 import {
   StoryboardError,
   addShot,
@@ -305,6 +307,27 @@ export const reorderShotsAction = validatedActionWithUser(
  * Enregistre la voix off. C'est ce qui transforme un prix estimé en prix
  * exact : la durée de chaque scène devient la longueur réelle de son audio.
  */
+export const changerVoixAction = validatedActionWithUser(
+  videoIdentity.extend({ voice: z.string().trim().min(1) }),
+  async (data, _formData, user) => {
+    try {
+      const tdb = tenantDb(user.tenantId);
+      const tenant = await tdb.getTenant();
+      // Le garde-fou du serveur : le menu peut être trafiqué, la liste des
+      // voix d'un plan ne l'est pas. Un Starter qui pousse une voix ElevenLabs
+      // est refusé ici, avant l'écriture.
+      if (!voixAutorisee(tenant?.plan, data.voice)) {
+        return { error: "Cette voix n'est pas disponible pour votre plan." };
+      }
+      await changerVoixVideo(tdb, data.videoId, data.voice);
+      revalidatePath(`/dashboard/videos/${data.videoId}`);
+      return { success: 'Voix mise à jour.' };
+    } catch (error) {
+      return formError(error);
+    }
+  }
+);
+
 export const generateVoiceoverAction = validatedActionWithUser(
   videoIdentity,
   async (data, _formData, user) => {

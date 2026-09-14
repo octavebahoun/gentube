@@ -8,6 +8,8 @@ import {
   createMeasuringVoiceClient,
   deliveryProviderFor,
   voiceProviderFor,
+  voixAutorisee,
+  voixDisponibles,
 } from './index';
 
 const MANAGED = [
@@ -93,5 +95,35 @@ describe('createVoiceClient', () => {
     withPolly();
     process.env.VOICE_PROVIDER = 'suno';
     expect(createDeliveryVoiceClient('starter')).toBeInstanceOf(PollyVoiceClient);
+  });
+});
+
+describe('les voix offertes par plan', () => {
+  it('propose les voix Polly sur Starter, jamais les premium', () => {
+    const valeurs = voixDisponibles('starter').map((o) => o.value);
+    expect(valeurs).toEqual(['lea', 'remi', 'gabrielle']);
+  });
+
+  it('propose les voix ElevenLabs sur Pro et Business', () => {
+    for (const plan of ['pro', 'business'] as const) {
+      const valeurs = voixDisponibles(plan).map((o) => o.value);
+      expect(valeurs).toContain('george');
+      expect(valeurs).not.toContain('lea');
+    }
+  });
+
+  it('retombe sur Polly quand le plan est inconnu ou absent', () => {
+    expect(voixDisponibles(null).map((o) => o.value)).toContain('lea');
+    expect(voixDisponibles(undefined).map((o) => o.value)).toContain('lea');
+  });
+
+  it('refuse à un Starter une voix ElevenLabs — le garde-fou du serveur', () => {
+    expect(voixAutorisee('starter', 'lea')).toBe(true);
+    expect(voixAutorisee('starter', 'george')).toBe(false);
+  });
+
+  it('autorise le Pro sur ElevenLabs mais pas sur une voix Polly', () => {
+    expect(voixAutorisee('pro', 'george')).toBe(true);
+    expect(voixAutorisee('pro', 'lea')).toBe(false);
   });
 });

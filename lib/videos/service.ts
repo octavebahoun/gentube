@@ -211,6 +211,30 @@ export async function updateVideo(
 }
 
 /**
+ * Pose la voix off de la vidéo.
+ *
+ * À part, et pas dans `updateVideo`, parce que la voix se choisit dans un
+ * menu dont les options dépendent du plan : le droit de poser telle voix se
+ * vérifie chez l'appelant (`voixAutorisee`), pas ici. On garde seulement le
+ * garde-fou commun — la voix ne bouge que tant que la vidéo est un brouillon,
+ * puisque c'est la passe de livraison, après paiement, qui la fait parler.
+ */
+export async function changerVoixVideo(
+  tdb: TenantDb,
+  id: number,
+  voice: string
+): Promise<Video> {
+  const video = await getVideo(tdb, id);
+  assertDraft(video);
+  const [updated] = await tdb.update(
+    videos,
+    { voice, updatedAt: new Date() },
+    eq(videos.id, id)
+  );
+  return updated;
+}
+
+/**
  * Supprime un brouillon et son storyboard.
  *
  * Refusé dès que quelque chose a été facturé : une ligne de grand livre

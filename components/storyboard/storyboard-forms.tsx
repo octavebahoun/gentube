@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import {
   addShotAction,
   animateNovitaAction,
+  changerVoixAction,
   generateStoryboardAction,
   generateVisualsAction,
   generateVoiceoverAction,
@@ -92,6 +93,63 @@ export function GenerateButton({ videoId, hasShots }: { videoId: number; hasShot
         <p className="text-xs text-ink-3">Réécrire remplace toutes les scènes ci-dessous.</p>
       )}
       {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+    </form>
+  );
+}
+
+/**
+ * Le choix de la voix off. Les options sont celles du plan (Polly sur Starter,
+ * ElevenLabs sur Pro) : le serveur les recalcule et refuse tout ce qui n'y est
+ * pas, donc un menu forcé ne donne pas accès à une voix premium. On sauve au
+ * changement, sans bouton — un réglage, pas un formulaire.
+ */
+export function VoixForm({
+  videoId,
+  voix,
+  options,
+}: {
+  videoId: number;
+  voix: string | null;
+  options: { value: string; label: string }[];
+}) {
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    changerVoixAction,
+    {}
+  );
+  const formRef = useRef<HTMLFormElement>(null);
+  const defaut = options.some((o) => o.value === voix)
+    ? (voix as string)
+    : options[0]?.value;
+
+  if (options.length === 0) return null;
+
+  return (
+    <form ref={formRef} action={formAction} className="space-y-2">
+      <input type="hidden" name="videoId" value={videoId} />
+      <label className="t-label block" htmlFor={`voix-${videoId}`}>
+        Voix off
+      </label>
+      <div className="flex items-center gap-2">
+        <Select
+          id={`voix-${videoId}`}
+          name="voice"
+          defaultValue={defaut}
+          disabled={isPending}
+          onChange={() => formRef.current?.requestSubmit()}
+          className="max-w-xs"
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </Select>
+        {isPending && (
+          <Loader2 className="size-4 animate-spin text-ink-3" aria-hidden="true" />
+        )}
+      </div>
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      {state?.success && <Notice tone="ok">{state.success}</Notice>}
     </form>
   );
 }
@@ -340,9 +398,8 @@ export function RenderForm({
         )}
       </Button>
       <p className="max-w-xl text-xs leading-relaxed text-ink-3">
-        Le montage part sur Lambda, découpé en morceaux rendus en parallèle.
-        Comptez à peu près deux secondes de machine par seconde de vidéo. Vous
-        pouvez fermer la page : l'état se reprend au retour.
+        Le montage se fait sur nos serveurs. Comptez à peu près deux fois la durée de la vidéo.
+        Vous pouvez fermer la page : l'état se reprend au retour.
       </p>
       {state?.error && <Notice tone="erreur">{state.error}</Notice>}
       {state?.success && <Notice tone="ok">{state.success}</Notice>}
