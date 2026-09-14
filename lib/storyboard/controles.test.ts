@@ -58,7 +58,7 @@ describe('la liste blanche de transitions', () => {
     verdictsDe(surcouche).find((v) => v.regle === 'transition');
 
   it('laisse passer une transition du registre', () => {
-    expect(transitionDe({ render: { effects: { transition: 'push-left' } } })?.statut).toBe(
+    expect(transitionDe({ render: { effects: { transition: 'whip-pan' } } })?.statut).toBe(
       'ok'
     );
   });
@@ -67,11 +67,11 @@ describe('la liste blanche de transitions', () => {
     // Le modèle ne choisit plus, mais un plan peut porter des effets rédigés
     // à la main — et la liste ne refusait rien tant qu'elle n'avait pas
     // d'appelant.
-    const verdict = transitionDe({ render: { effects: { transition: 'whip-pan' } } });
+    const verdict = transitionDe({ render: { effects: { transition: 'glitch' } } });
 
     expect(verdict?.statut).toBe('ko');
-    expect(verdict?.recu).toBe('whip-pan');
-    expect(verdict?.attendu).toContain('push-left');
+    expect(verdict?.recu).toBe('glitch');
+    expect(verdict?.attendu).toContain('whip-pan');
   });
 
   it('juge le fondu par défaut quand le plan ne dit rien', () => {

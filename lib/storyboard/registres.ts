@@ -156,7 +156,12 @@ const EXPLAINER: Fiche = {
   // Sous trois secondes une phrase n'a pas fini d'être comprise ; au-delà de
   // neuf, l'image a fini de dire ce qu'elle avait à dire.
   rythme: { min: 3, max: 9 },
-  transitions: ['none', 'fade', 'black', 'push-left'],
+  // Deux shaders discrets entrent ici, et rien de plus : `whip-pan` sur le
+  // changement de sujet (l'équivalent WebGL de push-left) et `light-leak` sur
+  // l'accent. Le reste est en fondu CSS. `push-left` sort : dès qu'une vidéo
+  // porte un shader, les transformations retombent en coupe franche
+  // (`lib/render/composition.ts`) — on ne mélange pas les deux familles.
+  transitions: ['none', 'fade', 'black', 'whip-pan', 'light-leak'],
   prefixeVisuel:
     'clean documentary photography, natural light, realistic textures, unstaged',
   ancrages: [
@@ -197,18 +202,21 @@ const EXPLAINER: Fiche = {
     }
 
     if (ton === 'bascule') {
-      // On change de sujet : la coupe doit s'entendre. Une poussée dit que la
-      // vidéo est passée ailleurs, là où un fondu dirait la continuité — et le
-      // panoramique va dans le même sens que la poussée, au lieu de la
-      // contredire.
-      return { transition: 'push-left', zoom: 'none', cameraMotion: 'pan' };
+      // On change de sujet : la coupe doit s'entendre. `whip-pan` balaie d'un
+      // côté à l'autre — il dit que la vidéo est passée ailleurs, là où un
+      // fondu dirait la continuité — et le panoramique va dans le même sens
+      // que le balayage, au lieu de le contredire. C'est la version shader de
+      // l'ancien push-left : le même geste, rendu par WebGL.
+      return { transition: 'whip-pan', zoom: 'none', cameraMotion: 'pan' };
     }
 
     if (ton === 'appui') {
       // Un seul accent, et il est sur le rythme. `beatAccent` se cale tout seul
       // sur le pic musical le plus proche : pas de `onBeat` à poser ici.
+      // `light-leak` — une bande de lumière qui traverse une fois — pose
+      // l'accent sans voler la phrase : le shader le plus sobre du paquet.
       return {
-        transition: 'fade',
+        transition: 'light-leak',
         zoom: 'in',
         cameraMotion: 'dolly',
         // 0,06 est le plafond du schéma, et le commentaire qui le pose dit
