@@ -40,6 +40,7 @@ import {
   validateStoryboard,
 } from '@/lib/storyboard';
 import { collectRender, startRender } from '@/lib/render/service';
+import { RenderError, RenderNotConfiguredError } from '@/lib/render/lambda';
 import { animateWithNovita } from '@/lib/video/novita';
 import { startProductionWorkflow } from '@/lib/internal/n8n';
 
@@ -71,7 +72,12 @@ function formError(error: unknown): { error: string } {
     error instanceof AnimationError ||
     error instanceof AnimationNotConfiguredError ||
     error instanceof StorageNotConfiguredError ||
-    error instanceof AssetError
+    error instanceof AssetError ||
+    // Le moteur de montage manquait à cette liste : une coordonnée Lambda
+    // absente ou une exécution refusée tombait dans le « something went
+    // wrong » du bas, sans même une ligne de journal pour dire laquelle.
+    error instanceof RenderError ||
+    error instanceof RenderNotConfiguredError
   ) {
     // Dit aussi côté serveur. Une erreur métier ne partait que dans la page,
     // et un écran qui ne bouge pas ne laissait aucune trace à lire.
