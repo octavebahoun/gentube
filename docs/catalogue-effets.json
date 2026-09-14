@@ -1,0 +1,225 @@
+{
+  "modele": "prunaai/p-video",
+  "cadre_de_test": {
+    "reference": "Un skateur seul, en haut d'une piste en bois, skatepark vide, lumiere diffuse realiste",
+    "duree_s": 5,
+    "resolution": "1080p",
+    "qualite": "pleine (draft=false)",
+    "methode": "image de reference figee, seul le prompt d'animation varie (scripts/catalogue-effets.ts)"
+  },
+  "mis_a_jour": "2026-09-14",
+  "effets": [
+    {
+      "id": "camera-verrouillee",
+      "intention": "Camera totalement fixe, tout le mouvement vient de la scene",
+      "prompt": "The camera stays planted in one immovable position from the first frame to the last. Zero motion — no drift, no shake, no breathing, no stabilization float, no micro-drift; absolute rock-solid stillness throughout. Angle, elevation, distance to the scene and the overall composition are frozen and never altered; every ounce of motion comes from the scene itself, never from the camera. The clip closes on precisely the framing it began with, identical down to the pixel.",
+      "verdict": "reussite (avec image adaptee)",
+      "image": "1er essai : reference figee inadaptee -> ECHEC (camera derive). 2e essai : image de plan fixe type trepied, sujet centre avec de la place pour bouger -> REUSSITE (camera tient).",
+      "prompt_image_reussi": "A locked-off tripod wide shot of a young skateboarder at the top edge of a clean wooden skatepark ramp, about to drop in, full body centered in a stable balanced composition, plenty of empty ramp space, level horizon, empty skatepark, overcast diffused daylight, photorealistic 35mm film, static tripod framing",
+      "observation": "Avec l'image inadaptee la camera bougeait ; avec une image de plan fixe (trepied) et le sujet qui descend dans le cadre, la camera TIENT. Hypothese confirmee : l'image taillee etait la cause.",
+      "fichier": "2026-09-14T22-35-32-the-camera-is-a-locked-off-tripod-absolu.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "pano-horizontal-gauche-droite",
+      "intention": "Rotation horizontale de la camera sur place (comme une tete qui tourne), gauche vers droite, decelerant en fin, sujet qui entre par la droite",
+      "prompt": "Rotate the camera horizontally from left to right from one fixed point, like a standing head-turn, starting on the left portion of the empty wooden skatepark and sweeping across the ramps and environment; no sideways travel, no dolly, no truck, no arc, no slide, no zoom, no tilt. Speed: smooth constant rotation, decelerating gently at the end. Framing: keep the horizon level while new space enters from the right side of the frame only through rotation; the young skateboarder at the top of the ramp stays beyond the right edge until the rotation brings them in. End: settle on a clear final composition on the young skateboarder and hold.",
+      "verdict": "reussite",
+      "image": "reference figee (skateur debout, plan large)",
+      "observation": "Le panoramique horizontal est respecte.",
+      "fichier": "2026-09-14T22-19-38-rotate-the-camera-horizontally-from-left.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "tilt-up",
+      "intention": "Tilt vertical vers le haut, camera fixe, des pieds/board jusqu'au visage et au ciel",
+      "prompt": "Fixed camera position at foot level. Pure TILT UP: the camera rotates vertically upward at one constant smooth speed from the skateboard and sneakers on the wooden ramp up to the skater's face and the sky, no crane rise, no pedestal, no dolly, no zoom, no horizontal drift; the camera's position never changes. The tilt starts on the feet and board and finishes framing the young skateboarder in the upper third, decelerating into a static hold.",
+      "prompt_image": "Low frontal eye-level shot of a young skateboarder standing still on a clean wooden skatepark ramp, camera near foot level looking slightly upward, his sneakers and skateboard large in the lower foreground, his body rising straight up through the frame, empty skatepark, overcast soft diffused daylight, photorealistic 35mm film, vertical composition",
+      "verdict": "reussite",
+      "image": "TAILLEE pour le mouvement (angle bas, pieds + board au premier plan, corps qui monte hors cadre)",
+      "observation": "Respect total. Un premier essai avec la reference figee avait fait ROULER le personnage avant le tilt ; avec une image taillee dans le sens du mouvement, le tilt est parfait.",
+      "fichier": "2026-09-14T22-30-47-fixed-camera-position-at-foot-level-pure.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "pano-gauche-90",
+      "intention": "Rotation horizontale gauche d'environ 90 degres, trepied fixe, decelerant en fin",
+      "prompt": "The camera body is locked on a fixed tripod at eye level; the only motion is one smooth continuous horizontal rotation LEFT of about 90 degrees across the full shot — no travel, no dolly, no truck, no arc, no zoom, no tilt. Constant unhurried rotational speed with a gentle settle in the final half second, timed so the landing composition and the landing event arrive together. The horizon stays level throughout; new space enters from the left frame edge only through rotation. End: settle on a clear final composition and hold.",
+      "verdict": "reussite",
+      "image": "TAILLEE : cote au coucher de soleil, falaise a droite, ocean ouvrant a gauche (hors univers skate)",
+      "observation": "Pano gauche respecte. Univers non-skate : marche aussi. NB : mettre le sujet d'arrivee du cote du pano (ici le phare etait a droite, donc le pano finissait sur l'ocean).",
+      "fichier": "2026-09-14T22-40-29-the-camera-body-is-locked-on-a-fixed-tri.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "pedestal-down",
+      "intention": "Descente verticale pure de la camera (2.2m -> 0.8m), lentille horizontale, horizon tenu, cadrage qui glisse vers le bas comme un ascenseur",
+      "prompt": "The whole camera body sinks straight down along a clean vertical line from a lens height of 2.2 meters to 0.8 meters. Even fluid uninterrupted rate. The lens stays perfectly horizontal and locked on its original heading — no tilting, no turning, no crane arc, no dolly, no zoom: the horizon holds its exact angle while the framing slides down the subject like an elevator window. The camera's horizontal position is identical in the first and last frame; rest with the lower vantage clearly established.",
+      "verdict": "reussite",
+      "image": "TAILLEE : foret de sequoias, tronc vertical massif descendant vers le sol (hors skate)",
+      "observation": "Descente verticale respectee, horizon tenu.",
+      "fichier": "2026-09-14T22-44-34-the-whole-camera-body-sinks-straight-dow.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "pedestal-up",
+      "intention": "Montee verticale pure de la camera (0.8m -> 2.2m), lentille horizontale, horizon tenu, cadrage qui glisse vers le haut comme un ascenseur",
+      "prompt": "The entire camera ascends straight upward along a pure vertical path from a lens height of 0.8 meters to 2.2 meters. Steady seamless constant pace. The lens holds dead level and keeps facing its original direction — no tilt, no rotation, no crane arc, no dolly, no zoom: the horizon holds its exact angle while the framing slides up the subject like an elevator window. The camera's horizontal position is identical in the first and last frame; settles with the elevated viewpoint plainly legible.",
+      "verdict": "reussite",
+      "image": "TAILLEE : base d'une grande cascade, colonne d'eau montant vers la crete (hors skate)",
+      "observation": "Montee verticale respectee, horizon tenu.",
+      "fichier": "2026-09-14T22-47-26-the-entire-camera-ascends-straight-upwar.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "tilt-down",
+      "intention": "Tilt vertical vers le bas (rotation +35 -> -10 deg), trepied fixe, du haut vers l'arrivee basse",
+      "prompt": "One slow continuous tilt down — a pure vertical rotation on the locked tripod head from +35 degrees to -10 degrees — traveling from the upper anchor, along the mid-path detail, down to the lower landing framing. No crane rise, no pedestal, no dolly, no truck, no zoom, no horizontal drift; the camera's position never changes, and the tilt decelerates into a static hold on the final framing.",
+      "verdict": "reussite",
+      "image": "TAILLEE : interieur de cathedrale gothique, du plafond voute vers l'autel (hors skate)",
+      "observation": "Tilt down respecte.",
+      "fichier": "2026-09-14T22-50-57-one-slow-continuous-tilt-down-a-pure-ver.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "whip-pan-gauche",
+      "intention": "Whip pan violent vers la gauche (smear 0.4s), A statique -> B statique, overshoot 2 deg",
+      "prompt": "The camera holds this composition perfectly static, then executes ONE violent horizontal whip pan to the left — a 0.4-second full motion-blur smear — landing hard on a new composition with a 2-degree overshoot-and-settle, then holds the new composition perfectly static. No dolly, no truck, no crane, no handheld drift; a pure rotation between two directed static frames.",
+      "verdict": "reussite",
+      "image": "TAILLEE : ruelle neon nocturne (Tokyo), enseigne a droite, trainee lumineuse vers la gauche (hors skate)",
+      "observation": "Whip pan gauche respecte (le smear neon rend bien).",
+      "fichier": "2026-09-14T22-53-08-the-camera-holds-this-composition-perfec.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "whip-pan-droite",
+      "intention": "Whip pan violent vers la droite (smear 0.4s), A statique -> B statique, overshoot 2 deg",
+      "prompt": "The camera holds this composition perfectly static on the tripod, then executes ONE violent horizontal whip pan to the right — a 0.4-second full motion-blur smear — landing hard on a new composition with a 2-degree overshoot-and-settle, then holds the new composition perfectly static. No dolly, no truck, no crane, no handheld drift; a pure rotation between two directed static frames.",
+      "verdict": "reussite",
+      "image": "TAILLEE : marche aux epices ensoleille, stand a gauche, allee ouvrant a droite (hors skate)",
+      "observation": "Whip pan droite respecte.",
+      "fichier": "2026-09-14T22-56-34-the-camera-holds-this-composition-perfec.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "zoom-in-optique",
+      "intention": "Zoom in optique pur (focale 84 -> 29 deg), camera fixe, pas de parallaxe, resserrage sur le sujet",
+      "prompt": "Locked tripod, zero rotation, zero travel — the entire move is optical, a focal-length change only: one slow perfectly even continuous zoom in from 84 degrees to 29 degrees across the full duration, no speed changes, no steps, no wobble. The camera position is fixed and never moves; only the field of view changes; perspective stays constant and there is no parallax — the background keeps the exact same apparent size relative to the subject while the framing tightens.",
+      "verdict": "reussite",
+      "image": "TAILLEE : silhouette isolee au centre d'un champ brumeux a l'aube, beaucoup d'espace autour (hors skate)",
+      "observation": "Zoom in optique respecte.",
+      "fichier": "2026-09-14T22-59-24-locked-tripod-zero-rotation-zero-travel-.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "dolly-zoom-vertigo",
+      "intention": "Effet Vertigo : dolly avant (6m -> 2.5m) + zoom arriere (18 -> 84 deg) synchronises, tete constante, fond qui s'etire",
+      "prompt": "The camera physically dollies forward from 6 meters to 2.5 meters while the lens simultaneously zooms out from 18 to 84 degrees field of view, in one continuous, perfectly synchronized ramp. The subject's head size stays EXACTLY constant in frame the entire time; the background behind them visibly stretches, elongates and recedes into depth, the repeating background elements pulling away. Constant lens height, no pan, no tilt, no handheld drift; the two motions start and end together.",
+      "prompt_image": "Young woman facing camera in the foreground, long straight promenade with repeating columns and lampposts receding behind her, strong one-point perspective",
+      "verdict": "echec",
+      "image": "TAILLEE : sujet au premier plan + promenade a colonnes repetees en fuite (hors skate)",
+      "observation": "L'effet Vertigo ne tient pas : les deux mouvements synchronises (dolly + zoom inverse a tete constante) ne sont pas rendus correctement.",
+      "fichier": "2026-09-14T23-02-12-the-camera-physically-dollies-forward-fr.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "rack-focus",
+      "intention": "Bascule de nettete (focus pull), camera verrouillee : net sur le plan lointain, puis rack vers le sujet proche, avec suivi de point",
+      "prompt": "The camera hard-locked on a tripod with no pan, no tilt, no push, no drift; the only optical change is FOCUS. Hold sharp on plane A (the far anchor); then rack once to plane B (the near subject); then follow focus on the subject if they move toward the lens. Slow smooth continuous rack, no hunting, no overshoot; follow focus without breathing. The composition never changes; exactly one plane is sharp at any moment, the other melts into clean bokeh; the subject grows in frame only by physically approaching the lens. End: settle sharp on the final subject framing, the far plane dissolved to soft bokeh behind.",
+      "verdict": "reussite",
+      "image": "TAILLEE : deux plans nets distincts (visage proche / lumieres de cafe lointaines), faible profondeur de champ (hors skate)",
+      "observation": "Bascule de nettete respectee.",
+      "fichier": "2026-09-14T23-05-10-the-camera-hard-locked-on-a-tripod-with-.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "crash-zoom-out",
+      "intention": "Dezoom optique violent (~0.4s, 18 -> 84 deg), flou de zoom, arret net, du serre au large",
+      "prompt": "Camera locked on a tripod — a perfectly static hold on the tight 18-degree frame, then a violent optical crash zoom OUT — about 0.4 seconds, zoom-ring only, with real motion blur and a hard stop — landing on a locked wide 84-degree frame held perfectly static to the end. No dolly, no handheld, no speed ramps; the camera position never moves, only the field of view changes, and there is no parallax.",
+      "verdict": "reussite",
+      "image": "TAILLEE : plan serre telephoto sur un randonneur au sommet -> revele la chaine de montagnes (hors skate)",
+      "observation": "Crash zoom out respecte.",
+      "fichier": "2026-09-14T23-11-58-camera-locked-on-a-tripod-a-perfectly-st.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "snap-zoom-in",
+      "intention": "Zoom in decisif (~1.2s, 84 -> 18 deg), camera fixe, du large au serre sur le sujet",
+      "prompt": "Locked tripod, zero rotation, zero travel — the entire move is optical. Hold the wide 84-degree frame perfectly static; then ONE sharp continuous zoom from 84 degrees to 18 degrees — a single decisive ramp of about 1.2 seconds with no steps and no wobble, flying the framing from the wide composition to the tight landing framing; then hold the tight frame perfectly static to the end. The camera position is fixed and never moves; only the field of view changes; perspective stays constant and there is no parallax.",
+      "verdict": "reussite",
+      "image": "TAILLEE : salle de bibliotheque large, lecteur isole au centre comme point d'arrivee (hors skate)",
+      "observation": "Snap zoom in decisif respecte.",
+      "fichier": "2026-09-14T23-14-03-locked-tripod-zero-rotation-zero-travel-.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "travelling-lateral-parallaxe",
+      "intention": "Travelling lateral parallele au sujet, profil strict 90 deg, 3 couches de parallaxe (proche rapide / sujet constant / fond lent)",
+      "prompt": "One continuous lateral tracking move — the camera glides parallel to the subject at exactly the speed that keeps their framing constant, strict 90-degree side view at all times. Three clean parallax layers: nearest — posts/mullions/table edges sweeping fast past the lens, briefly occluding the subject; middle — the subject, constant size at frame center; farthest — the background row sliding by slower behind. No zoom, no pan drift, no push-in.",
+      "verdict": "reussite",
+      "image": "TAILLEE : profil strict d'une marcheuse, colonnes proches / sujet centre / arcade lointaine (hors skate)",
+      "observation": "Travelling lateral + parallaxe 3 couches : reussi (juge « super »). p-video gere la parallaxe sur un travelling simple.",
+      "fichier": "2026-09-14T23-16-24-one-continuous-lateral-tracking-move-the.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "handheld-action-follow",
+      "intention": "Sweep-in puis suivi handheld d'un sujet qui court, secousses a chaque impact, hasards qui traversent le cadre, stabilisation en fin",
+      "prompt": "Sweep the camera in toward the running subject, then follow them handheld across the terrain, lurching and shaking with each impact. Speed: fast and unstable, with sharp jolts on every tremor/collision, imperfect reframes that always recover the subject. Framing: keep the subject in frame while the hazards enter and pass through it. End: the shake eases; settle on a clear final composition.",
+      "verdict": "reussite",
+      "image": "TAILLEE : coureur en plein sprint dans un temple qui s'effondre, poussiere et debris (hors skate)",
+      "observation": "Suivi handheld d'action respecte (secousses + hasards qui traversent).",
+      "fichier": "2026-09-14T23-19-15-sweep-the-camera-in-toward-the-running-s.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "truck-right",
+      "intention": "Translation laterale pure vers la droite, axe de la lentille verrouille (pas de pan), parallaxe, sujet qui traverse vers le bord gauche",
+      "prompt": "One continuous truck right — pure lateral travel of the camera to the right at constant speed with the lens axis locked straight ahead, no panning to compensate: the scene slides through the frame with strong natural parallax, near objects sweeping past fast, the far layer drifting slow, the subject crossing gradually toward the left frame edge. No pan, no arc, no dolly, no zoom, no handheld drift; the lens points the same world direction in the first and last frame.",
+      "verdict": "reussite",
+      "image": "TAILLEE : campagne au coucher de soleil, piquets proches / personne au centre / collines lointaines (hors skate)",
+      "observation": "Truck right respecte, parallaxe et traversee du sujet OK.",
+      "fichier": "2026-09-14T23-21-28-one-continuous-truck-right-pure-lateral-.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "slow-motion-extreme-lateral-bas",
+      "intention": "Slow motion extreme (~1000fps, sans ramp), camera au ras du sol sous le genou, travelling lateral, profil strict, fin en plein mouvement",
+      "prompt": "Extreme slow motion throughout — a ~1000fps look with no speed ramps and no real-time moments — the camera at ground height below knee level the entire time: a smooth lateral track gliding alongside the subject at slow-mo pace, strict side view, never rising, never tilting up, no push, no orbit, no zoom. The track never stops: the shot ends mid-motion on a live frame — no cut to black, no fade, no freeze.",
+      "verdict": "reussite",
+      "image": "TAILLEE : sprint dans l'eau en bord de mer, vue au ras du sol, gouttes en suspension (hors skate)",
+      "observation": "Slow-mo extreme + travelling bas respecte.",
+      "fichier": "2026-09-14T23-23-45-extreme-slow-motion-throughout-a-1000fps.mp4",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "arc-left-orbit",
+      "intention": "Arc gauche ~60 deg autour du sujet, rayon 2.5m et hauteur constants, pan continu pour garder le sujet centre, fond qui balaye (pas d'effet tourne-disque)",
+      "prompt": "One continuous arc left — the camera sweeps along a circular path around the subject through about 60 degrees on a locked constant radius of 2.5 meters at a locked constant height, panning continuously to keep the subject dead-center at constant size while the background sweeps behind them. Even calm deliberate pace; the subject stays planted, facing one fixed direction — it is the camera that travels. No radius drift, no height change, no zoom, no turntable effect. The arc resolves on a fresh vantage from the left.",
+      "verdict": "a_evaluer",
+      "image": "TAILLEE : arriere-martial dans une bambouseraie brumeuse, fond qui balaye (hors skate)",
+      "observation": "En attente du verdict (orbite = mouvement exigeant).",
+      "fichier": "2026-09-14T23-25-57-one-continuous-arc-left-the-camera-sweep.mp4",
+      "date": "2026-09-14"
+    },
+    { "id": "reverse-tracking", "intention": "Travelling arriere a la vitesse de marche, visage constant, monde qui defile vers la camera sur les bords, 47 deg", "verdict": "a_evaluer", "image": "TAILLEE : marcheuse de face, parc d'automne", "fichier": "2026-09-14T23-29-28-one-continuous-reverse-tracking-move-the.mp4", "date": "2026-09-14" },
+    { "id": "truck-left", "intention": "Translation laterale gauche pure, axe verrouille, sujet qui traverse vers la droite, parallaxe", "verdict": "a_evaluer", "image": "TAILLEE : rue de nuit, voitures proches / personne / vitrines lointaines", "fichier": "2026-09-14T23-31-02-one-continuous-truck-left-pure-lateral-t.mp4", "date": "2026-09-14" },
+    { "id": "crane-out-recul-montee", "intention": "Recul + montee acceleres (2.5m/3m -> 40m/25m), sujet centre qui retrecit, horizon qui monte", "verdict": "a_evaluer", "image": "TAILLEE : voilier au large au coucher de soleil", "fichier": "2026-09-14T23-32-27-the-camera-starts-2-5-meters-ahead-of-th.mp4", "date": "2026-09-14" },
+    { "id": "fpv-drone-flyover", "intention": "FPV rase-mottes rapide + banking, montee le long de la pente, pitch up et suivi du sujet qui passe au-dessus", "verdict": "a_evaluer", "image": "TAILLEE : vallee de montagne, pic au centre, aigle au-dessus", "fichier": "2026-09-14T23-34-15-skim-the-camera-low-and-fast-over-the-fo.mp4", "date": "2026-09-14" },
+    { "id": "descente-verticale-cible", "intention": "Descente verticale depuis un point haut, face a la cible, tilt de la plongee vers eye level, cible centree et grandissante", "verdict": "a_evaluer", "image": "TAILLEE : place circulaire vue de haut, figure au centre", "fichier": "2026-09-14T23-35-50-descend-the-camera-vertically-from-a-hig.mp4", "date": "2026-09-14" },
+    { "id": "orbite-360", "intention": "Orbite 360 complete, rayon/hauteur constants, sujet centre, retour au cadrage de depart, pas de tourne-disque", "verdict": "a_evaluer", "image": "TAILLEE : silhouette au centre d'un desert au coucher de soleil", "fichier": "2026-09-14T23-37-34-one-continuous-360-degree-orbit-the-came.mp4", "date": "2026-09-14" },
+    { "id": "pov-marche-1re-personne", "intention": "POV yeux a 1.7m, marche avant, cadence naturelle (bob, sway, micro-rotations), mains pour l'interaction puis sortie", "verdict": "a_evaluer", "image": "TAILLEE : POV allee de librairie", "fichier": "2026-09-14T23-39-18-the-camera-is-a-person-s-eyes-at-1-7-met.mp4", "date": "2026-09-14" },
+    { "id": "handheld-brut-epaule", "intention": "Handheld epaule brut (shake, respiration, horizon roulant), demi-cercle -> lean-in -> pull-back, jamais stabilise", "verdict": "a_evaluer", "image": "TAILLEE : boxeur dans une salle de boxe, style doc", "fichier": "2026-09-14T23-40-49-raw-handheld-shoulder-rig-throughout-vis.mp4", "date": "2026-09-14" }
+  ],
+  "methodologie": [
+    "CLE : tailler l'image DANS LE SENS du mouvement voulu (une image inadaptee pousse le modele a inventer une autre action). Une image par prompt, pas une reference figee.",
+    "Workflow : scripts/catalogue-effets.ts scene \"<prompt image> ::: <prompt animation>\" — genere l'image puis l'anime, en 1080p pleine qualite."
+  ],
+  "conclusions": [
+    "CONFIRME : la qualite du respect depend surtout de l'adequation image <-> mouvement, PAS du type de mouvement. Le meme effet (camera verrouillee) echoue avec une image inadaptee et reussit avec une image taillee.",
+    "p-video respecte BIEN, avec l'image adaptee : panoramique horizontal, tilt vertical, camera verrouillee.",
+    "Regle de production : ne jamais reutiliser une image figee pour tous les plans ; generer l'image dans le sens du mouvement voulu.",
+    "Mouvements SIMPLES (une seule intention) tiennent : pano G/D, tilt haut/bas, pedestal haut/bas, camera verrouillee, whip pan G/D, zoom in optique.",
+    "Mouvement COMPOSE synchronise ECHOUE : le dolly zoom (Vertigo, dolly + zoom inverse a tete constante) n'est pas rendu. Piste : eviter de demander deux mouvements coordonnes dans un meme plan."
+  ]
+}
