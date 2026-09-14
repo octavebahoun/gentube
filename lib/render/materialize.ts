@@ -2,7 +2,7 @@ import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { HyperframesStoryboard } from '@/lib/storyboard/render';
-import { COMPOSITION_DIR, composeHtml } from './composition';
+import { COMPOSITION_DIR, COMPOSITION_PARTS, composeHtml } from './composition';
 
 /**
  * Prépare un dossier de rendu sur disque.
@@ -68,7 +68,12 @@ export async function materialize(
 
   try {
     // Le squelette de composition d'abord : style, GSAP, configuration.
-    await cp(COMPOSITION_DIR, dir, { recursive: true });
+    // Partie par partie, pas le dossier entier — voir COMPOSITION_PARTS.
+    await Promise.all(
+      COMPOSITION_PARTS.map((part) =>
+        cp(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true })
+      )
+    );
     await mkdir(join(dir, 'media'), { recursive: true });
     await mkdir(join(dir, 'voice'), { recursive: true });
 

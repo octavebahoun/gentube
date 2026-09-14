@@ -11,6 +11,10 @@ node_modules
 .vercel
 
 render/
+# … sauf le gabarit de composition, que le montage ouvre par chemin.
+!render/gentube-v1/style.css
+!render/gentube-v1/hyperframes.json
+!render/gentube-v1/vendor/
 design-system/
 docs/
 passation/

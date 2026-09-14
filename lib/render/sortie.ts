@@ -10,7 +10,7 @@ import { assetKey, createAssetStore, type AssetStore } from '@/lib/storage';
 import { StoryboardError, listShots } from '@/lib/storyboard/service';
 import { controlerStoryboard, signalerLesRefus } from '@/lib/storyboard/controles';
 import { rendersOwnContent, toHyperframesStoryboard } from '@/lib/storyboard/render';
-import { COMPOSITION_DIR, composeHtml } from './composition';
+import { COMPOSITION_DIR, COMPOSITION_PARTS, composeHtml } from './composition';
 
 /**
  * Le dernier maillon : la vidéo devient un fichier.
@@ -198,7 +198,7 @@ export async function renderVideo(
       eq(videos.id, videoId)
     );
 
-    for (const part of ['style.css', 'hyperframes.json', 'vendor']) {
+    for (const part of COMPOSITION_PARTS) {
       cpSync(join(COMPOSITION_DIR, part), join(dir, part), { recursive: true });
     }
 

@@ -38,12 +38,47 @@ const nextConfig: NextConfig = {
    * ffmpeg-static, onnxruntime, sharp — et le build mourait d'un OOM sur
    * l'hébergement. Il n'a rien à faire dans le bundle : le rendu s'exécute
    * sur Lambda, le serveur ne fait que démarrer l'exécution.
+   *
+   * Même piège pour les clients AWS v3 : chaque client est un graphe de
+   * plusieurs milliers de modules (commands, middleware, serde). Ils sont
+   * appelés depuis `lib/storage/r2.ts`, `lib/voice/polly.ts` et
+   * `lib/render/lambda.ts` — statiquement ou en import dynamique littéral —
+   * et n'ont aucune raison d'entrer dans le bundle. `msedge-tts` traîne
+   * `protobufjs` derrière lui, même traitement.
    */
+  /**
+   * Le gabarit de composition, embarqué dans la fonction serveur.
+   *
+   * `lib/render/materialize.ts` ouvre `render/gentube-v1` par chemin : rien ne
+   * l'importe, donc le traçage de fichiers de Next ne le voit pas et ne le
+   * déploie pas. Le montage tombait sur `ENOENT: lstat 'render/gentube-v1'`
+   * — l'écran n'a jamais pu produire un MP4 pour cette raison.
+   *
+   * On n'embarque que `COMPOSITION_PARTS` (520 Ko) : le `media/` du dossier
+   * est de la démonstration, vingt-cinq mégaoctets qu'un rendu écrase.
+   */
+  outputFileTracingIncludes: {
+    '/dashboard/videos/[id]': [
+      './render/gentube-v1/style.css',
+      './render/gentube-v1/hyperframes.json',
+      './render/gentube-v1/vendor/**',
+    ],
+    '/api/internal/render': [
+      './render/gentube-v1/style.css',
+      './render/gentube-v1/hyperframes.json',
+      './render/gentube-v1/vendor/**',
+    ],
+  },
+
   serverExternalPackages: [
     'esbuild',
     'drizzle-kit',
     '@hyperframes/aws-lambda',
     'hyperframes',
+    '@aws-sdk/client-s3',
+    '@aws-sdk/client-polly',
+    '@aws-sdk/s3-request-presigner',
+    'msedge-tts',
   ],
 };
 

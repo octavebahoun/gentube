@@ -53,6 +53,27 @@ import {
 export const COMPOSITION_DIR = 'render/gentube-v1';
 
 /**
+ * Ce qu'un rendu recopie du gabarit — et rien d'autre.
+ *
+ * Le dossier contient aussi un `media/` de vingt-cinq mégaoctets : les plans
+ * de la vidéo de démonstration. Ils sont écrasés par les vrais médias juste
+ * après, donc les copier ne sert qu'à faire attendre. Pire, un plan que le
+ * storyboard ne remplit pas laissait apparaître une image de démonstration
+ * dans une vidéo de client.
+ *
+ * L'`index.html` n'est pas là non plus : il est composé, pas recopié.
+ *
+ * Cette liste est aussi ce que `next.config.ts` embarque dans la fonction
+ * serveur — le gabarit est lu par chemin, jamais importé, donc rien ne le
+ * tire tout seul dans le déploiement. Les deux se lisent ensemble.
+ */
+export const COMPOSITION_PARTS = [
+  'style.css',
+  'hyperframes.json',
+  'vendor',
+] as const;
+
+/**
  * L'échelle typographique vient du registre (`lib/storyboard/apparence.ts`),
  * pas d'ici : `apparenceDe()` la porte, `echelleEnPx()` la met en pixels.
  *
