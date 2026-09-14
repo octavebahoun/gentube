@@ -4,12 +4,11 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /*
- * GX Tile — une vignette de rush. Au repos c'est une image (rien ne charge),
- * au survol ou au focus la vidéo démarre. C'est le geste central du produit :
- * une image fixe qui se met à bouger.
- * Les fichiers viennent de vraies vidéos rendues par GenTube (public/showcase).
+ * La tuile de rush — le geste central du produit : une image fixe
+ * qui se met à bouger. Au repos c'est une image (rien ne charge),
+ * au survol ou au focus la vidéo démarre.
  */
-export function GxTile({
+export function Tile({
   poster,
   src,
   legend,
@@ -29,7 +28,9 @@ export function GxTile({
     const v = video.current;
     if (!v) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    v.play().then(() => setPlaying(true)).catch(() => {});
+    v.play()
+      .then(() => setPlaying(true))
+      .catch(() => {});
   };
   const stop = () => {
     const v = video.current;
@@ -42,9 +43,9 @@ export function GxTile({
   return (
     <figure
       className={cn(
-        'group/tile relative overflow-hidden rounded-lg border border-line bg-ink-2',
-        'transition-[border-color,transform] duration-(--t-base) ease-(--ease-out)',
-        'hover:-translate-y-1 hover:border-line-hi focus-within:border-cyan',
+        'group/tile relative overflow-hidden rounded-card border border-line bg-surface-2',
+        'transition-colors duration-(--t-fast) ease-(--ease-out)',
+        'hover:border-line-strong focus-within:border-line-strong',
         className
       )}
       onMouseEnter={start}
@@ -79,16 +80,11 @@ export function GxTile({
             )}
           />
         )}
-        {/* La mire ne sort que quand la vignette est active. */}
-        <span
-          aria-hidden="true"
-          className="mire absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 transition-transform duration-(--t-base) ease-(--ease-out) group-hover/tile:scale-x-100 group-focus-within/tile:scale-x-100"
-        />
       </div>
       {(legend || timecode) && (
-        <figcaption className="flex items-center justify-between gap-2 px-3 py-2">
-          {legend && <span className="t-label truncate text-paper-2">{legend}</span>}
-          {timecode && <span className="t-data text-[0.6875rem] text-paper-3">{timecode}</span>}
+        <figcaption className="flex items-center justify-between gap-2 border-t border-line px-3 py-2">
+          {legend && <span className="truncate text-xs font-medium text-ink-2">{legend}</span>}
+          {timecode && <span className="t-data text-[0.6875rem] text-ink-3">{timecode}</span>}
         </figcaption>
       )}
     </figure>
@@ -96,10 +92,10 @@ export function GxTile({
 }
 
 /*
- * GX Marquee — le banc défile tout seul et s'arrête dès qu'on le survole ou
- * qu'on tabule dedans. Deux copies de la liste, translation de -50 %.
+ * Le banc qui défile et s'arrête dès qu'on le survole ou qu'on tabule dedans.
+ * Deux copies de la liste, translation de -50 %.
  */
-export function GxMarquee({
+export function Marquee({
   children,
   duration = 42,
   reverse = false,

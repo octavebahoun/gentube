@@ -2,8 +2,8 @@
 
 import { useRef, useState, useTransition } from 'react';
 import { FileVideo, ImageIcon, Loader2, Upload } from 'lucide-react';
-import { GxButton } from '@/components/gx/gx-button';
-import { GxNotice } from '@/components/gx/gx-page';
+import { Button } from '@/components/kit/button';
+import { Notice } from '@/components/kit/page';
 import type { ClientAsset } from '@/lib/db/schema';
 import { extraireLaBandeSon } from '@/lib/assets/audio';
 import { transcribeAssetAction, uploadAssetAction } from '../actions';
@@ -200,7 +200,7 @@ export function AssetUploader({
             if (files?.length) startTransition(() => void envoyer(files));
           }}
         />
-        <GxButton
+        <Button
           type="button"
           variant="secondary"
           disabled={pending}
@@ -216,33 +216,33 @@ export function AssetUploader({
             : pending && progress
               ? `Envoi ${progress.done + 1}/${progress.total}…`
               : 'Ajouter des fichiers'}
-        </GxButton>
-        <p className="mt-3 text-xs leading-relaxed text-paper-3">
+        </Button>
+        <p className="mt-3 text-xs leading-relaxed text-ink-3">
           Captures d’écran, photo de produit ou vidéo à habiller. JPEG, PNG,
           WebP, MP4, MOV ou WebM, {MAX_BYTES / 1e6} Mo au plus. Un plan servi
           par un de ces fichiers n’est pas facturé au générateur.
         </p>
       </div>
 
-      {error && <GxNotice tone="erreur">{error}</GxNotice>}
-      {note && <p className="text-sm text-paper-3">{note}</p>}
+      {error && <Notice tone="erreur">{error}</Notice>}
+      {note && <p className="text-sm text-ink-3">{note}</p>}
 
       {assets.length > 0 && (
-        <ul className="divide-y divide-line rounded-lg border border-line bg-ink">
+        <ul className="divide-y divide-line rounded-card border border-line bg-surface">
           {assets.map((asset) => (
             <li
               key={asset.id}
               className="flex items-center gap-3 px-4 py-3 text-sm"
             >
               {asset.kind === 'video' ? (
-                <FileVideo className="size-4 shrink-0 text-info" aria-hidden="true" />
+                <FileVideo className="size-4 shrink-0 text-ink-3" aria-hidden="true" />
               ) : (
-                <ImageIcon className="size-4 shrink-0 text-alerte" aria-hidden="true" />
+                <ImageIcon className="size-4 shrink-0 text-ink-3" aria-hidden="true" />
               )}
               <span className="truncate">
                 {asset.originalName ?? `Fichier ${asset.id}`}
               </span>
-              <span className="t-data ml-auto shrink-0 text-xs text-paper-3">
+              <span className="t-data ml-auto shrink-0 text-xs text-ink-3">
                 {asset.width && asset.height
                   ? `${asset.width}×${asset.height} · `
                   : ''}

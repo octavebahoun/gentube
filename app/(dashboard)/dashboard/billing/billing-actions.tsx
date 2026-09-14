@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { GxButton } from '@/components/gx/gx-button';
-import { GxNotice } from '@/components/gx/gx-page';
+import { Button } from '@/components/kit/button';
 
 /**
  * Démarre un règlement et confie le payeur à la passerelle.
@@ -18,13 +17,11 @@ export function CheckoutButton({
   body,
   label,
   disabled = false,
-  variant = 'default',
 }: {
   endpoint: string;
   body: Record<string, unknown>;
   label: string;
   disabled?: boolean;
-  variant?: 'default' | 'outline';
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,12 +52,7 @@ export function CheckoutButton({
 
   return (
     <div className="flex flex-col items-stretch gap-2 sm:items-end">
-      <GxButton
-        onClick={start}
-        disabled={disabled || pending}
-        size="sm"
-        variant={variant === 'outline' ? 'secondary' : 'primary'}
-      >
+      <Button onClick={start} disabled={disabled || pending} size="sm" variant="secondary">
         {pending ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -69,9 +61,9 @@ export function CheckoutButton({
         ) : (
           label
         )}
-      </GxButton>
+      </Button>
       {error && (
-        <p role="alert" className="max-w-xs text-xs font-semibold text-danger sm:text-right">
+        <p role="alert" className="max-w-xs text-xs font-semibold text-bad sm:text-right">
           {error}
         </p>
       )}
@@ -124,7 +116,7 @@ export function CancelButton({
 
   return (
     <div className="flex flex-col items-stretch gap-2 sm:items-end">
-      <GxButton onClick={action} disabled={disabled || pending} size="sm" variant="ghost">
+      <Button onClick={action} disabled={disabled || pending} size="sm" variant="ghost">
         {pending ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -133,9 +125,9 @@ export function CancelButton({
         ) : (
           label
         )}
-      </GxButton>
+      </Button>
       {error && (
-        <p role="alert" className="max-w-xs text-xs font-semibold text-danger sm:text-right">
+        <p role="alert" className="max-w-xs text-xs font-semibold text-bad sm:text-right">
           {error}
         </p>
       )}
@@ -176,8 +168,8 @@ export function SubscriptionCancellation({
   if (subscription.cancelAt) {
     return (
       <div className="mt-4 space-y-3">
-        <p className="flex items-start gap-2 rounded-lg border border-line bg-bg-2 px-3 py-2.5 text-sm">
-          <span aria-hidden="true" className="mt-1.5 size-1.5 shrink-0 rounded-full bg-paper-3" />
+        <p className="flex items-start gap-2 rounded-control border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink-2">
+          <span aria-hidden="true" className="mt-1.5 size-1.5 shrink-0 rounded-full bg-ink-3" />
           Annulation prévue le {formatDate(subscription.cancelAt)}. Votre accès continue jusqu'à cette date.
         </p>
         <CancelButton
@@ -196,7 +188,7 @@ export function SubscriptionCancellation({
         label="Annuler à la fin de la période"
         onSuccess={handleSuccess}
       />
-      <p className="mt-2 text-xs text-paper-3">
+      <p className="mt-2 text-xs text-ink-3">
         Le renouvellement s'arrêtera après le {formatDate(subscription.currentPeriodEnd)}. Vos crédits restent intacts.
       </p>
     </div>

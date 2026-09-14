@@ -4,10 +4,9 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /*
- * GX Reveal — le contenu monte quand il entre dans le cadre, une fois.
+ * Le contenu monte quand il entre dans le cadre, une fois.
  * Pas de librairie : un IntersectionObserver et deux classes CSS.
- * Si le visiteur a demandé moins de mouvement, tout est visible d'emblée
- * (la règle est dans globals.css, pas ici — un seul endroit à vérifier).
+ * prefers-reduced-motion est réglé dans globals.css, pas ici.
  */
 export function Reveal({
   children,

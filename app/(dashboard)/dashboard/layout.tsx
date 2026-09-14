@@ -16,7 +16,7 @@ import {
 import useSWR from 'swr';
 import type { TenantDataWithMembers } from '@/lib/db/schema';
 import { cn } from '@/lib/utils';
-import { GxProgress } from '@/components/gx/gx-progress';
+import { ButtonLink } from '@/components/kit/button';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -62,15 +62,17 @@ function RailLink({
       href={href}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3.5',
-        'font-display text-sm font-semibold transition-all duration-200',
+        'relative flex min-h-10 items-center gap-2.5 rounded-control px-3',
+        'text-sm font-medium transition-colors duration-(--t-fast)',
         active
-          ? 'bg-[#FF3B30]/15 border border-[#FF3B30]/30 text-[#F5F5F5] glow-red-subtle'
-          : 'text-[#A5A7AD] hover:bg-[#171A20] hover:text-[#F5F5F5]'
+          ? 'bg-surface-2 text-ink'
+          : 'text-ink-2 hover:bg-surface hover:text-ink'
       )}
     >
-      {active && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-[#FF3B30]" />}
-      <Icon className={cn('size-4 shrink-0', active ? 'text-[#FF3B30]' : '')} aria-hidden="true" />
+      {active && (
+        <span aria-hidden="true" className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-ink" />
+      )}
+      <Icon className={cn('size-4 shrink-0', active ? 'text-ink' : 'text-ink-3')} aria-hidden="true" />
       <span className="truncate">{label}</span>
     </Link>
   );
@@ -79,27 +81,16 @@ function RailLink({
 function SoldeRail() {
   const { data: tenant } = useSWR<TenantDataWithMembers>('/api/tenant', fetcher);
   const balance = tenant?.creditsBalance ?? null;
-  const jauge = balance === null ? 0 : Math.min(balance, 2600);
 
   return (
-    <div className="rounded-xl border border-[#292D35] bg-[#111419] p-4 text-[#F5F5F5]">
-      <p className="t-label text-xs text-[#A5A7AD]">Solde Crédits</p>
-      <p className="t-data mt-2 text-2xl font-bold text-[#FF3B30]">
+    <div className="rounded-card border border-line bg-surface p-4">
+      <p className="t-label">Solde crédits</p>
+      <p className="t-data mt-1 text-xl font-bold text-ink">
         {balance === null ? '—' : balance.toLocaleString('fr-FR')}
       </p>
-      <GxProgress
-        value={jauge}
-        max={2600}
-        label="Solde de crédits, rapporté à un plan Pro"
-        tone="rouge"
-        className="mt-3"
-      />
-      <Link
-        href="/dashboard/billing"
-        className="mt-4 flex min-h-10 cursor-pointer items-center justify-center rounded-xl bg-[#FF3B30] px-3 font-display text-xs font-bold text-white hover:bg-[#D0021B] transition-all glow-red-subtle"
-      >
-        Recharger mes crédits
-      </Link>
+      <ButtonLink href="/dashboard/billing" variant="secondary" size="sm" className="mt-3 w-full">
+        Recharger
+      </ButtonLink>
     </div>
   );
 }
@@ -110,25 +101,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isAdmin = user?.role === 'owner' || user?.role === 'admin';
 
   return (
-    <div className="mx-auto flex w-full max-w-(--content-max) flex-1 items-stretch bg-[#050608] text-[#F5F5F5]">
+    <div className="mx-auto flex w-full max-w-(--content-max) flex-1 items-stretch">
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-(--z-pop) focus:rounded-lg focus:bg-[#FF3B30] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-(--z-pop) focus:rounded-control focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-on-brand"
       >
         Aller au contenu
       </a>
 
-      {/* ── Desktop Studio Sidebar ───────────────────────────────────── */}
-      <aside className="sticky top-(--header-h) z-(--z-sidebar) hidden h-[calc(100dvh-var(--header-h))] w-(--sidebar-w) shrink-0 flex-col gap-6 overflow-y-auto border-r border-[#292D35] bg-[#0B0D10] px-3 py-6 lg:flex">
-        <nav aria-label="Fabriquer" className="flex flex-col gap-1">
-          <p className="t-label px-3 pb-2 text-xs text-[#FF3B30]">Studio Production</p>
+      {/* Sidebar desktop */}
+      <aside className="sticky top-(--header-h) z-(--z-sidebar) hidden h-[calc(100dvh-var(--header-h))] w-(--sidebar-w) shrink-0 flex-col gap-5 overflow-y-auto border-r border-line px-3 py-5 lg:flex">
+        <nav aria-label="Fabriquer" className="flex flex-col gap-0.5">
+          <p className="t-label px-3 pb-2">Fabriquer</p>
           {FABRIQUER.map(({ href, label, Icon }) => (
             <RailLink key={href} href={href} label={label} Icon={Icon} active={isActive(pathname, href)} />
           ))}
         </nav>
 
-        <nav aria-label="Espace et compte" className="flex flex-col gap-1 border-t border-[#292D35] pt-5">
-          <p className="t-label px-3 pb-2 text-xs text-[#A855F7]">Espace & Équipe</p>
+        <nav aria-label="Espace et compte" className="flex flex-col gap-0.5 border-t border-line pt-4">
+          <p className="t-label px-3 pb-2">Espace & compte</p>
           {ESPACE.map(({ href, label, Icon, adminOnly }) => {
             if (adminOnly && !isAdmin) return null;
             return (
@@ -142,15 +133,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* ── Content Viewport ────────────────────────────────────────── */}
-      <main id="contenu" className="bottom-safe min-w-0 flex-1 p-4 lg:p-8">
+      {/* Contenu */}
+      <main id="contenu" className="min-w-0 flex-1 pb-24 lg:pb-8">
         {children}
       </main>
 
-      {/* ── Mobile Navigation Bar ───────────────────────────────────── */}
+      {/* Bottom-nav mobile */}
       <nav
         aria-label="Navigation principale"
-        className="fixed inset-x-0 bottom-0 z-(--z-bottomnav) border-t border-[#292D35] bg-[#0B0D10]/95 backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-(--z-bottomnav) border-t border-line bg-canvas lg:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <ul className="mx-auto grid max-w-lg grid-cols-4">
@@ -163,13 +154,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'relative flex min-h-14 flex-col items-center justify-center gap-1 px-1 py-2',
-                    'transition-colors duration-200',
-                    active ? 'text-[#FF3B30]' : 'text-[#A5A7AD]'
+                    'transition-colors duration-(--t-fast)',
+                    active ? 'text-ink' : 'text-ink-3'
                   )}
                 >
-                  {active && <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 bg-[#FF3B30]" />}
+                  {active && (
+                    <span aria-hidden="true" className="absolute inset-x-4 top-0 h-0.5 bg-ink" />
+                  )}
                   <Icon className="size-5" aria-hidden="true" />
-                  <span className="t-label text-[0.625rem]">{label}</span>
+                  <span className="text-[0.625rem] font-semibold tracking-wide uppercase">{label}</span>
                 </Link>
               </li>
             );

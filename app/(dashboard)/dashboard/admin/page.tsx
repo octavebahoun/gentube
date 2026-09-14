@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { GxPage, GxPageHeader, GxNotice } from '@/components/gx/gx-page';
+import { Page, PageHeader, Notice } from '@/components/kit/page';
 import { getUser } from '@/lib/db/queries';
 import { JobsClient } from './jobs-client';
 
@@ -9,26 +9,24 @@ export default async function AdminPage() {
 
   if (user.role !== 'owner' && user.role !== 'admin') {
     return (
-      <GxPage className="max-w-4xl">
-        <GxPageHeader eyebrow="Admin" titre="Régie opérationnelle" />
-        <div className="plate p-6">
-          <GxNotice tone="erreur">
-            Cette zone est réservée aux propriétaires et administrateurs. Contactez votre
-            responsable d'équipe pour obtenir un accès.
-          </GxNotice>
-        </div>
-      </GxPage>
+      <Page className="max-w-4xl">
+        <PageHeader eyebrow="Admin" titre="Régie opérationnelle" />
+        <Notice tone="erreur">
+          Cette zone est réservée aux propriétaires et administrateurs. Contactez votre
+          responsable d'équipe pour obtenir un accès.
+        </Notice>
+      </Page>
     );
   }
 
   return (
-    <GxPage className="max-w-7xl">
-      <GxPageHeader
+    <Page className="max-w-7xl">
+      <PageHeader
         eyebrow="Admin"
         titre="Régie opérationnelle"
         intro="Supervision des jobs de fabrication : storyboard, voix, images, clips, montage et publication."
       />
       <JobsClient />
-    </GxPage>
+    </Page>
   );
 }

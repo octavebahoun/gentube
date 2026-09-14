@@ -4,11 +4,11 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /*
- * GX Menu — le menu du compte, écrit à la main : pas de Radix, pas de portail.
- * Échap ferme, clic dehors ferme, flèches parcourent, le focus revient au
- * déclencheur. Tout ce qu'un menu doit faire, rien de plus.
+ * Le menu du compte, écrit à la main : pas de Radix, pas de portail.
+ * Échap ferme, clic dehors ferme, flèches parcourent, le focus revient
+ * au déclencheur.
  */
-export function GxMenu({
+export function Menu({
   trigger,
   label,
   align = 'end',
@@ -44,9 +44,7 @@ export function GxMenu({
 
   const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-    const items = Array.from(
-      root.current?.querySelectorAll<HTMLElement>('[data-menu-item]') ?? []
-    );
+    const items = Array.from(root.current?.querySelectorAll<HTMLElement>('[data-menu-item]') ?? []);
     if (items.length === 0) return;
     e.preventDefault();
     const i = items.indexOf(document.activeElement as HTMLElement);
@@ -63,7 +61,7 @@ export function GxMenu({
         aria-expanded={open}
         aria-label={label}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-11 cursor-pointer items-center rounded-pill outline-none focus-visible:outline-2 focus-visible:outline-cyan focus-visible:outline-offset-2"
+        className="inline-flex min-h-11 cursor-pointer items-center rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       >
         {trigger}
       </button>
@@ -73,11 +71,10 @@ export function GxMenu({
           aria-label={label}
           className={cn(
             'absolute top-[calc(100%+0.5rem)] z-(--z-pop) w-60 overflow-hidden',
-            'plate-hi shadow-lift a-fade',
+            'rounded-card border border-line bg-surface-2 shadow-xl shadow-black/40',
             align === 'end' ? 'right-0' : 'left-0'
           )}
         >
-          <span aria-hidden="true" className="mire block h-[3px]" />
           <div className="p-1.5">{children}</div>
         </div>
       )}
@@ -85,32 +82,20 @@ export function GxMenu({
   );
 }
 
-export function GxMenuItem({
+const item =
+  'flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-control px-3 text-sm font-medium text-ink-2 ' +
+  'transition-colors duration-(--t-fast) hover:bg-surface hover:text-ink ' +
+  'outline-none focus-visible:bg-surface focus-visible:text-ink [&_svg]:size-4 [&_svg]:text-ink-3';
+
+export function MenuItem({
   className,
-  children,
   ...rest
-}: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href?: string }) {
-  return (
-    <a
-      role="menuitem"
-      data-menu-item=""
-      tabIndex={-1}
-      className={cn(
-        'flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-sm font-medium text-paper-2',
-        'transition-colors duration-(--t-tap) hover:bg-ink-4 hover:text-paper',
-        'outline-none focus-visible:bg-ink-4 focus-visible:text-paper [&_svg]:size-4 [&_svg]:text-paper-3',
-        className
-      )}
-      {...rest}
-    >
-      {children}
-    </a>
-  );
+}: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) {
+  return <a role="menuitem" data-menu-item="" tabIndex={-1} className={cn(item, className)} {...rest} />;
 }
 
-export function GxMenuButton({
+export function MenuButton({
   className,
-  children,
   ...rest
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
@@ -118,15 +103,8 @@ export function GxMenuButton({
       role="menuitem"
       data-menu-item=""
       tabIndex={-1}
-      className={cn(
-        'flex w-full min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-paper-2',
-        'transition-colors duration-(--t-tap) hover:bg-ink-4 hover:text-paper',
-        'outline-none focus-visible:bg-ink-4 focus-visible:text-paper [&_svg]:size-4 [&_svg]:text-paper-3',
-        className
-      )}
+      className={cn(item, 'text-left', className)}
       {...rest}
-    >
-      {children}
-    </button>
+    />
   );
 }

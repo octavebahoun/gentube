@@ -2,16 +2,12 @@
 
 import { useActionState, useState } from 'react';
 import { Loader2, Trash2 } from 'lucide-react';
-import { GxButton } from '@/components/gx/gx-button';
-import { GxField, GxInput, GxTextarea, GxChoix } from '@/components/gx/gx-field';
-import { GxNotice } from '@/components/gx/gx-page';
+import { Button } from '@/components/kit/button';
+import { Field, Input, Textarea, ChoiceGroup } from '@/components/kit/field';
+import { Notice } from '@/components/kit/page';
 import { CREDITS_PER_IMAGE, CREDITS_PER_SECOND } from '@/lib/credits/pricing';
 import type { Project } from '@/lib/db/schema';
-import {
-  createProjectAction,
-  deleteProjectAction,
-  updateProjectAction,
-} from './actions';
+import { createProjectAction, deleteProjectAction, updateProjectAction } from './actions';
 
 type ActionState = { error?: string; success?: string };
 
@@ -41,17 +37,17 @@ const PIPELINES = [
 function ChampsProjet({ project }: { project?: Project }) {
   return (
     <>
-      <GxField label="Nom du projet" htmlFor="name" required>
-        <GxInput
+      <Field label="Nom du projet" htmlFor="name" required>
+        <Input
           name="name"
           placeholder="Histoires du Bénin"
           defaultValue={project?.name ?? ''}
           maxLength={120}
           required
         />
-      </GxField>
+      </Field>
 
-      <GxChoix
+      <ChoiceGroup
         name="defaultPipeline"
         legend="Type de plans par défaut"
         options={PIPELINES}
@@ -59,44 +55,44 @@ function ChampsProjet({ project }: { project?: Project }) {
         aide="Chaque nouvelle vidéo démarre là-dessus, et peut encore en changer."
       />
 
-      <GxField
+      <Field
         label="Style visuel"
         htmlFor="stylePrompt"
         hint="Ajouté devant chaque description de plan : c'est le look que tout le projet partage."
       >
-        <GxTextarea
+        <Textarea
           name="stylePrompt"
           placeholder="Documentaire cinématographique, lumière dorée chaude, grain 35 mm."
           defaultValue={project?.stylePrompt ?? ''}
           maxLength={2000}
         />
-      </GxField>
+      </Field>
 
-      <GxField
+      <Field
         label="Voix"
         htmlFor="voiceId"
         hint="Identifiant de la voix utilisée pour la voix off des vidéos de ce projet."
       >
-        <GxInput
+        <Input
           name="voiceId"
           placeholder="elevenlabs:rachel"
           defaultValue={project?.voiceId ?? ''}
           maxLength={100}
         />
-      </GxField>
+      </Field>
 
-      <GxField
+      <Field
         label="Chaîne YouTube"
         htmlFor="youtubeChannelId"
         hint="L'identifiant de la chaîne, collé à la main pour l'instant. La connexion par compte arrive plus tard."
       >
-        <GxInput
+        <Input
           name="youtubeChannelId"
           placeholder="UC…"
           defaultValue={project?.youtubeChannelId ?? ''}
           maxLength={100}
         />
-      </GxField>
+      </Field>
     </>
   );
 }
@@ -108,10 +104,10 @@ export function NewProjectForm() {
   );
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-5">
       <ChampsProjet />
-      {state?.error && <GxNotice tone="erreur">{state.error}</GxNotice>}
-      <GxButton type="submit" disabled={isPending}>
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      <Button type="submit" disabled={isPending}>
         {isPending ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -120,7 +116,7 @@ export function NewProjectForm() {
         ) : (
           'Créer le projet'
         )}
-      </GxButton>
+      </Button>
     </form>
   );
 }
@@ -132,12 +128,12 @@ export function EditProjectForm({ project }: { project: Project }) {
   );
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-5">
       <input type="hidden" name="id" value={project.id} />
       <ChampsProjet project={project} />
-      {state?.error && <GxNotice tone="erreur">{state.error}</GxNotice>}
-      {state?.success && <GxNotice tone="ok">{state.success}</GxNotice>}
-      <GxButton type="submit" disabled={isPending}>
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      {state?.success && <Notice tone="ok">{state.success}</Notice>}
+      <Button type="submit" disabled={isPending}>
         {isPending ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -146,7 +142,7 @@ export function EditProjectForm({ project }: { project: Project }) {
         ) : (
           'Enregistrer les modifications'
         )}
-      </GxButton>
+      </Button>
     </form>
   );
 }
@@ -170,11 +166,7 @@ export function DeleteProjectButton({
   const [confirmation, setConfirmation] = useState(false);
 
   if (!canDelete) {
-    return (
-      <p className="text-sm text-paper-3">
-        Seul un propriétaire ou un admin peut supprimer un projet.
-      </p>
-    );
+    return <p className="text-sm text-ink-2">Seul un propriétaire ou un admin peut supprimer un projet.</p>;
   }
 
   return (
@@ -183,7 +175,7 @@ export function DeleteProjectButton({
       <div className="flex flex-wrap items-center gap-3">
         {confirmation ? (
           <>
-            <GxButton type="submit" variant="danger" disabled={isPending}>
+            <Button type="submit" variant="danger" disabled={isPending}>
               {isPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -192,24 +184,24 @@ export function DeleteProjectButton({
               ) : (
                 'Oui, supprimer définitivement'
               )}
-            </GxButton>
-            <GxButton
+            </Button>
+            <Button
               type="button"
               variant="ghost"
               onClick={() => setConfirmation(false)}
               disabled={isPending}
             >
               Annuler
-            </GxButton>
+            </Button>
           </>
         ) : (
-          <GxButton type="button" variant="secondary" onClick={() => setConfirmation(true)}>
+          <Button type="button" variant="secondary" onClick={() => setConfirmation(true)}>
             <Trash2 className="size-4" aria-hidden="true" />
             Supprimer le projet
-          </GxButton>
+          </Button>
         )}
       </div>
-      {state?.error && <GxNotice tone="erreur">{state.error}</GxNotice>}
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
     </form>
   );
 }

@@ -18,8 +18,8 @@ import {
 } from 'lucide-react';
 import { ActivityType } from '@/lib/db/schema';
 import { getActivityLogs } from '@/lib/db/queries';
-import { GxEmpty } from '@/components/gx/gx-badge-empty';
-import { GxPage, GxPageHeader, GxSection } from '@/components/gx/gx-page';
+import { Empty } from '@/components/kit/badge';
+import { Page, PageHeader, Section } from '@/components/kit/page';
 
 const iconMap: Record<ActivityType, LucideIcon> = {
   [ActivityType.SIGN_UP]: UserPlus,
@@ -74,28 +74,28 @@ export default async function ActivityPage() {
   const logs = await getActivityLogs();
 
   return (
-    <GxPage className="max-w-3xl">
-      <GxPageHeader
+    <Page className="max-w-3xl">
+      <PageHeader
         eyebrow="Compte"
         titre="Activité récente"
         intro="Les connexions et modifications faites sur ce compte, les plus récentes en premier."
       />
 
-      <GxSection titre="Dernières actions">
+      <Section titre="Dernières actions">
         {logs.length > 0 ? (
           <ol className="divide-y divide-line">
             {logs.map((log) => {
               const Icon = iconMap[log.action as ActivityType] ?? Settings;
               return (
                 <li key={log.id} className="flex items-center gap-4 py-3 first:pt-0">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-line bg-ink text-info">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-control border border-line bg-surface-2 text-ink-2">
                     <Icon className="size-4" aria-hidden="true" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">
+                    <p className="text-sm font-semibold text-ink">
                       {LIBELLE[log.action as ActivityType] ?? 'Action inconnue'}
                     </p>
-                    <p className="t-data mt-0.5 text-xs text-paper-3">
+                    <p className="t-data mt-0.5 text-xs text-ink-3">
                       {tempsRelatif(new Date(log.timestamp))}
                       {log.ipAddress && ` · IP ${log.ipAddress}`}
                     </p>
@@ -105,13 +105,13 @@ export default async function ActivityPage() {
             })}
           </ol>
         ) : (
-          <GxEmpty
+          <Empty
             icon={<Activity aria-hidden="true" />}
             title="Rien à afficher"
             hint="Vos connexions et modifications de compte apparaîtront ici dès la prochaine action."
           />
         )}
-      </GxSection>
-    </GxPage>
+      </Section>
+    </Page>
   );
 }

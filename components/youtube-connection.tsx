@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import { Youtube, Loader2, Link as LinkIcon, Unlink } from 'lucide-react';
-import { GxButton } from '@/components/gx/gx-button';
-import { GxNotice } from '@/components/gx/gx-page';
+import { Button, ButtonLink } from '@/components/kit/button';
+import { Notice } from '@/components/kit/page';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -41,16 +41,16 @@ export function YoutubeConnection() {
 
   if (error) {
     return (
-      <GxNotice tone="erreur">
+      <Notice tone="erreur">
         Impossible de vérifier l'état de la connexion YouTube.
-      </GxNotice>
+      </Notice>
     );
   }
 
   if (!data) {
     return (
-      <div className="flex items-center gap-2 text-sm text-[#A5A7AD]">
-        <Loader2 className="size-4 animate-spin" />
+      <div className="flex items-center gap-2 text-sm text-ink-2">
+        <Loader2 className="pulse-wait size-4 text-ink-3" aria-hidden="true" />
         Vérification…
       </div>
     );
@@ -59,44 +59,44 @@ export function YoutubeConnection() {
   if (!data.connected) {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-[#A5A7AD]">
+        <p className="text-sm text-ink-2">
           Connectez votre chaîne YouTube pour publier vos vidéos directement.
         </p>
-        <GxButton href="/api/youtube/authorize">
+        <ButtonLink href="/api/youtube/authorize" variant="secondary">
           <Youtube className="size-4" aria-hidden="true" />
           Connecter YouTube
-        </GxButton>
+        </ButtonLink>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 rounded-xl border border-[#292D35] bg-[#111419] p-4">
+      <div className="flex items-center gap-3 rounded-card border border-line bg-surface-2 p-4">
         {data.channel?.thumbnailUrl && (
           <img
             src={data.channel.thumbnailUrl}
             alt=""
-            className="size-10 rounded-full"
+            className="size-10 rounded-full border border-line"
           />
         )}
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <Youtube className="size-4 text-[#FF7A18]" aria-hidden="true" />
-            <span className="font-display text-sm font-semibold text-[#F5F5F5]">
+            <Youtube className="size-4 text-ink-2" aria-hidden="true" />
+            <span className="text-sm font-semibold text-ink">
               {data.channel?.title || 'Chaîne connectée'}
             </span>
           </div>
-          <p className="mt-1 text-xs text-[#A5A7AD]">
+          <p className="mt-1 text-xs text-ink-2">
             Chaîne YouTube connectée
           </p>
         </div>
-        <LinkIcon className="size-4 text-[#4ADE80]" aria-hidden="true" />
+        <LinkIcon className="size-4 text-ok" aria-hidden="true" />
       </div>
 
-      {disconnectError && <GxNotice tone="erreur">{disconnectError}</GxNotice>}
+      {disconnectError && <Notice tone="erreur">{disconnectError}</Notice>}
 
-      <GxButton
+      <Button
         variant="secondary"
         onClick={handleDisconnect}
         disabled={isDisconnecting}
@@ -112,7 +112,7 @@ export function YoutubeConnection() {
             Déconnecter YouTube
           </>
         )}
-      </GxButton>
+      </Button>
     </div>
   );
 }

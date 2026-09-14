@@ -3,15 +3,16 @@
 import * as React from 'react';
 import { AlertTriangle, Film, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ETATS_ACTIFS } from '@/components/gx/gx-etat';
+import { ETATS_ACTIFS } from '@/components/kit/etat';
 
 /*
  * La vignette d'une vidéo.
  * Rendue : le vrai fichier, qui démarre au survol — on montre le résultat,
  * pas une icône qui le représente.
- * Pas encore rendue : une plaque d'attente qui dit où en est la fabrication.
+ * Pas encore rendue : une plaque d'attente neutre qui dit où en est la
+ * fabrication. L'attente pulse, elle ne s'habille pas en ambre.
  */
-export function GxVignette({
+export function Vignette({
   status,
   src,
   titre,
@@ -30,7 +31,9 @@ export function GxVignette({
   const start = () => {
     const v = video.current;
     if (!v || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    v.play().then(() => setPlaying(true)).catch(() => {});
+    v.play()
+      .then(() => setPlaying(true))
+      .catch(() => {});
   };
   const stop = () => {
     const v = video.current;
@@ -43,7 +46,7 @@ export function GxVignette({
   if (src) {
     return (
       <div
-        className={cn('relative aspect-video w-full overflow-hidden bg-ink', className)}
+        className={cn('relative aspect-video w-full overflow-hidden bg-canvas', className)}
         onMouseEnter={start}
         onMouseLeave={stop}
       >
@@ -60,9 +63,9 @@ export function GxVignette({
         {!playing && (
           <span
             aria-hidden="true"
-            className="absolute inset-0 flex items-center justify-center bg-ink/40 transition-opacity duration-(--t-fast)"
+            className="absolute inset-0 flex items-center justify-center bg-canvas/45"
           >
-            <Play className="size-8 fill-jaune text-marque" />
+            <Play className="size-7 fill-ink text-ink" />
           </span>
         )}
       </div>
@@ -72,17 +75,16 @@ export function GxVignette({
   return (
     <div
       className={cn(
-        'relative flex aspect-video w-full items-center justify-center overflow-hidden bg-ink-3',
+        'relative flex aspect-video w-full items-center justify-center overflow-hidden bg-surface-2',
         enCours && 'scan',
         className
       )}
     >
       {echec ? (
-        <AlertTriangle className="size-7 text-danger" aria-hidden="true" />
+        <AlertTriangle className="size-6 text-bad" aria-hidden="true" />
       ) : (
-        <Film className={cn('size-7', enCours ? 'text-info' : 'text-line-hi')} aria-hidden="true" />
+        <Film className={cn('size-6', enCours ? 'pulse-wait text-ink-2' : 'text-ink-3')} aria-hidden="true" />
       )}
-      {enCours && <span aria-hidden="true" className="mire-live absolute inset-x-0 bottom-0 h-[3px]" />}
     </div>
   );
 }

@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { GxBadge } from '@/components/gx/gx-badge-empty';
+import { Badge } from '@/components/kit/badge';
 
 /*
  * Le vocabulaire des états — un seul endroit, en français.
@@ -16,29 +15,23 @@ export const ETAT_LABEL: Record<string, string> = {
   failed: 'Échouée',
 };
 
-type Tone = 'neutre' | 'jaune' | 'cyan' | 'vert' | 'magenta' | 'rouge' | 'bleu';
-
-export const ETAT_TON: Record<string, Tone> = {
-  draft: 'neutre',
-  validated: 'bleu',
-  generating: 'cyan',
-  rendering: 'magenta',
-  rendered: 'vert',
-  published: 'vert',
-  failed: 'rouge',
+export const ETAT_TON: Record<string, 'neutral' | 'ok' | 'bad'> = {
+  draft: 'neutral',
+  validated: 'neutral',
+  generating: 'neutral',
+  rendering: 'neutral',
+  rendered: 'ok',
+  published: 'ok',
+  failed: 'bad',
 };
 
-/** Les états où quelque chose tourne : le point clignote. */
+/** Les états où quelque chose tourne : le point pulse. */
 export const ETATS_ACTIFS = new Set(['validated', 'generating', 'rendering']);
 
 export function EtatBadge({ status, className }: { status: string; className?: string }) {
   return (
-    <GxBadge
-      tone={ETAT_TON[status] ?? 'neutre'}
-      live={ETATS_ACTIFS.has(status)}
-      className={className}
-    >
+    <Badge tone={ETAT_TON[status] ?? 'neutral'} live={ETATS_ACTIFS.has(status)} className={className}>
       {ETAT_LABEL[status] ?? status}
-    </GxBadge>
+    </Badge>
   );
 }

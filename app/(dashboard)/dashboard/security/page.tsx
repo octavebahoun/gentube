@@ -3,9 +3,9 @@
 import { useActionState } from 'react';
 import { Lock, Trash2, Loader2 } from 'lucide-react';
 import { updatePassword, deleteAccount } from '@/app/(login)/actions';
-import { GxButton } from '@/components/gx/gx-button';
-import { GxField, GxInput } from '@/components/gx/gx-field';
-import { GxPage, GxPageHeader, GxSection, GxNotice } from '@/components/gx/gx-page';
+import { Button } from '@/components/kit/button';
+import { Field, Input } from '@/components/kit/field';
+import { Page, PageHeader, Section, Notice } from '@/components/kit/page';
 
 type PasswordState = {
   currentPassword?: string;
@@ -28,18 +28,18 @@ export default function SecurityPage() {
   );
 
   return (
-    <GxPage className="max-w-3xl">
-      <GxPageHeader
+    <Page className="max-w-3xl">
+      <PageHeader
         eyebrow="Compte"
         titre="Sécurité"
         intro="Changez votre mot de passe, ou fermez définitivement ce compte."
       />
 
       <div className="space-y-6">
-        <GxSection titre="Mot de passe" aide="Huit caractères au minimum.">
+        <Section titre="Mot de passe" aide="Huit caractères au minimum.">
           <form className="space-y-6" action={passwordAction}>
-            <GxField label="Mot de passe actuel" htmlFor="current-password" required>
-              <GxInput
+            <Field label="Mot de passe actuel" htmlFor="current-password" required>
+              <Input
                 name="currentPassword"
                 type="password"
                 autoComplete="current-password"
@@ -48,15 +48,15 @@ export default function SecurityPage() {
                 maxLength={100}
                 defaultValue={passwordState.currentPassword}
               />
-            </GxField>
+            </Field>
 
-            <GxField
+            <Field
               label="Nouveau mot de passe"
               htmlFor="new-password"
               hint="Huit caractères au minimum, cent au maximum."
               required
             >
-              <GxInput
+              <Input
                 name="newPassword"
                 type="password"
                 autoComplete="new-password"
@@ -65,15 +65,15 @@ export default function SecurityPage() {
                 maxLength={100}
                 defaultValue={passwordState.newPassword}
               />
-            </GxField>
+            </Field>
 
-            <GxField
+            <Field
               label="Confirmer le nouveau mot de passe"
               htmlFor="confirm-password"
               error={passwordState.error}
               required
             >
-              <GxInput
+              <Input
                 name="confirmPassword"
                 type="password"
                 autoComplete="new-password"
@@ -82,11 +82,11 @@ export default function SecurityPage() {
                 maxLength={100}
                 defaultValue={passwordState.confirmPassword}
               />
-            </GxField>
+            </Field>
 
-            {passwordState.success && <GxNotice tone="ok">{passwordState.success}</GxNotice>}
+            {passwordState.success && <Notice tone="ok">{passwordState.success}</Notice>}
 
-            <GxButton type="submit" disabled={isPasswordPending}>
+            <Button type="submit" disabled={isPasswordPending}>
               {isPasswordPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -98,27 +98,25 @@ export default function SecurityPage() {
                   Changer le mot de passe
                 </>
               )}
-            </GxButton>
+            </Button>
           </form>
-        </GxSection>
+        </Section>
 
-        {/* La zone dangereuse porte le rouge de la mire, et rien d'autre. */}
-        <section className="rounded-lg border border-rouge/40 bg-rouge/5 p-6">
-          <h2 className="font-display text-lg font-bold tracking-tight text-danger">
-            Supprimer le compte
-          </h2>
-          <p className="mt-2 text-sm text-paper-2">
+        {/* La zone dangereuse porte le rouge, et rien d'autre. */}
+        <section className="rounded-card border border-bad/40 bg-bad/5 p-4 sm:p-5">
+          <h2 className="t-h3 text-bad">Supprimer le compte</h2>
+          <p className="mt-2 text-sm text-ink-2">
             La suppression est définitive. Les vidéos et les crédits restants sont perdus,
             et rien ne permet de revenir en arrière.
           </p>
           <form action={deleteAction} className="mt-5 space-y-5">
-            <GxField
+            <Field
               label="Confirmez avec votre mot de passe"
               htmlFor="delete-password"
               error={deleteState.error}
               required
             >
-              <GxInput
+              <Input
                 name="password"
                 type="password"
                 autoComplete="current-password"
@@ -127,9 +125,9 @@ export default function SecurityPage() {
                 maxLength={100}
                 defaultValue={deleteState.password}
               />
-            </GxField>
+            </Field>
 
-            <GxButton type="submit" variant="danger" disabled={isDeletePending}>
+            <Button type="submit" variant="danger" disabled={isDeletePending}>
               {isDeletePending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -141,10 +139,10 @@ export default function SecurityPage() {
                   Supprimer mon compte
                 </>
               )}
-            </GxButton>
+            </Button>
           </form>
         </section>
       </div>
-    </GxPage>
+    </Page>
   );
 }
