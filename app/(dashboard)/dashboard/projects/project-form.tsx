@@ -29,7 +29,7 @@ const PIPELINES = [
   },
   {
     value: 'mixed',
-    label: 'Mixte',
+    label: 'Images et plans animés',
     hint: 'Vous décidez scène par scène dans le storyboard. Le devis suit vos choix.',
   },
 ] as const;

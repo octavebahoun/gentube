@@ -39,7 +39,7 @@ const STEP_LABELS: Record<string, string> = {
   storyboard: 'Storyboard',
   voix: 'Voix off',
   images: 'Images',
-  clips: 'Clips',
+  clips: 'Plans animés',
   montage: 'Montage',
   publication: 'Publication',
 };
@@ -59,7 +59,7 @@ function StatusBadge({ status }: { status: JobStatus }) {
     running: 'En cours',
     succeeded: 'Réussi',
     failed: 'Échoué',
-    queued: 'File',
+    queued: 'En file',
   };
 
   const tones = {
@@ -98,7 +98,7 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
   if (isLoading) {
     return (
       <Page className="max-w-4xl">
-        <Breadcrumb parent="Admin" parentHref="/dashboard/admin" courant={`Job #${jobId}`} />
+        <Breadcrumb parent="Admin" parentHref="/dashboard/admin" courant={`Tâche #${jobId}`} />
         <div className="flex items-center justify-center rounded-card border border-line bg-surface p-12">
           <Loader2 className="pulse-wait size-6 text-ink-3" aria-hidden="true" />
         </div>
@@ -109,9 +109,9 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
   if (error || !data?.job) {
     return (
       <Page className="max-w-4xl">
-        <Breadcrumb parent="Admin" parentHref="/dashboard/admin" courant={`Job #${jobId}`} />
+        <Breadcrumb parent="Admin" parentHref="/dashboard/admin" courant={`Tâche #${jobId}`} />
         <Notice tone="erreur">
-          {error instanceof Error ? error.message : 'Job introuvable ou erreur API.'}
+          {error instanceof Error ? error.message : 'Tâche introuvable ou erreur API.'}
         </Notice>
       </Page>
     );
@@ -121,13 +121,13 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
 
   return (
     <Page className="max-w-4xl">
-      <Breadcrumb parent="Admin" parentHref="/dashboard/admin" courant={`Job #${job.id}`} />
+      <Breadcrumb parent="Admin" parentHref="/dashboard/admin" courant={`Tâche #${job.id}`} />
 
       <Card className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="t-h2">
-              Job #{job.id} · {STEP_LABELS[job.step] || job.step}
+              Tâche #{job.id} · {STEP_LABELS[job.step] || job.step}
             </h1>
             <p className="mt-2 text-sm text-ink-2">
               {video ? (
@@ -208,7 +208,7 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
           className="inline-flex min-h-11 items-center gap-2 text-sm text-ink-2 transition-colors duration-(--t-fast) hover:text-ink"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
-          Retour à la régie
+          Retour à la supervision
         </Link>
       </div>
     </Page>

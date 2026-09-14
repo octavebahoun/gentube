@@ -11,8 +11,8 @@ import { listProjects } from '@/lib/projects';
 
 const PIPELINE_LABEL: Record<string, string> = {
   image: 'Images fixes',
-  video: 'Animé',
-  mixed: 'Mixte',
+  video: 'Plans animés',
+  mixed: 'Images et plans animés',
 };
 
 /* Les onglets sont des URL : on peut les partager, y revenir, faire retour. */

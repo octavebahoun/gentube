@@ -53,7 +53,7 @@ export default function SecurityPage() {
             <Field
               label="Nouveau mot de passe"
               htmlFor="new-password"
-              hint="Huit caractères au minimum, cent au maximum."
+              hint="Huit caractères au minimum."
               required
             >
               <Input

@@ -57,8 +57,8 @@ const LIBELLE: Record<ActivityType, string> = {
   [ActivityType.VIDEO_VALIDATED]: 'Vidéo validée',
   [ActivityType.CREDITS_DEBITED]: 'Crédits débités',
   [ActivityType.CREDITS_GRANTED]: 'Crédits accordés',
-  [ActivityType.RENDER_STARTED]: 'Rendu lancé',
-  [ActivityType.RENDER_COMPLETED]: 'Rendu terminé',
+  [ActivityType.RENDER_STARTED]: 'Montage lancé',
+  [ActivityType.RENDER_COMPLETED]: 'Montage terminé',
 };
 
 function tempsRelatif(date: Date) {

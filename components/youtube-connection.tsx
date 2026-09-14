@@ -60,7 +60,7 @@ export function YoutubeConnection() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-ink-2">
-          Connectez votre chaîne YouTube pour publier vos vidéos directement.
+          Aucune chaîne connectée pour l'instant.
         </p>
         <ButtonLink href="/api/youtube/authorize" variant="secondary">
           <Youtube className="size-4" aria-hidden="true" />

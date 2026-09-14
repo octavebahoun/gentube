@@ -19,7 +19,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 function formatMinutes(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
-  return rest ? `${minutes} min ${rest}s` : `${minutes} min`;
+  return rest ? `${minutes} min ${rest} s` : `${minutes} min`;
 }
 
 function Squelette({ hauteur }: { hauteur: string }) {
@@ -35,14 +35,14 @@ function OffreEtCredits() {
       <div className="grid gap-3 sm:grid-cols-3">
         <Stat label="Solde crédits" value={balance.toLocaleString('fr-FR')} hint="crédits disponibles" />
         <Stat
-          label="Vidéo montée"
+          label="Vidéo possible"
           value={formatMinutes(secondsAffordable(balance, 'draft'))}
-          hint={`${CREDITS_PER_SECOND.draft} cr / seconde`}
+          hint={`${CREDITS_PER_SECOND.draft} crédits par seconde`}
         />
         <Stat
-          label="Visuels fixes"
+          label="Images possibles"
           value={imagesAffordable(balance).toLocaleString('fr-FR')}
-          hint={`${CREDITS_PER_IMAGE} cr / image`}
+          hint={`${CREDITS_PER_IMAGE} crédits par image`}
         />
       </div>
 
@@ -93,7 +93,7 @@ function Membres() {
   return (
     <Section
       titre="Membres de l’espace"
-      aide={`${tenant.users.length} personne(s) avec accès à cet espace.`}
+      aide={`${tenant.users.length} personne${tenant.users.length > 1 ? 's' : ''} avec accès à cet espace.`}
     >
       <ul className="divide-y divide-line">
         {tenant.users.map((member) => (

@@ -88,8 +88,8 @@ export default async function ProjectPage({
                         <span className="flex shrink-0 items-center gap-3">
                           <span className="t-data text-xs text-ink-3">
                             {video.creditsConsumed > 0
-                              ? `${video.creditsConsumed} cr débités`
-                              : `${video.creditsEstimated} cr estimés`}
+                              ? `${video.creditsConsumed} crédits débités`
+                              : `${video.creditsEstimated} crédits estimés`}
                           </span>
                           <EtatBadge status={video.status} />
                         </span>

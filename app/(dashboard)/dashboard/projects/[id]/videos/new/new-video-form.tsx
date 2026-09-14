@@ -23,7 +23,7 @@ const PIPELINES = [
   { value: 'inherit', label: 'Hériter du projet', hint: 'Le type de plans défini dans les réglages du projet.' },
   { value: 'image', label: 'Images fixes seulement', hint: 'Le moins cher à la minute.' },
   { value: 'video', label: 'Plans animés seulement', hint: 'Chaque scène bouge.' },
-  { value: 'mixed', label: 'Mixte (recommandé)', hint: 'Vous décidez scène par scène dans le storyboard.' },
+  { value: 'mixed', label: 'Images et plans animés (recommandé)', hint: 'Vous décidez scène par scène dans le storyboard.' },
 ] as const;
 
 export function NewVideoForm({

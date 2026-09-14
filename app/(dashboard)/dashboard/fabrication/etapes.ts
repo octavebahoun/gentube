@@ -84,13 +84,13 @@ export function buildEtapes(
     detail:
       videoShots.length === 0
         ? 'Aucun plan animé dans ce storyboard'
-        : `${avecClip}/${videoShots.length} clips — bientôt disponible (Wan)`,
+        : `${avecClip}/${videoShots.length} plans animés — bientôt disponible`,
     etat: videoShots.length === 0 ? 'indispo' : 'indispo',
   };
 
-  // 5 — Montage (HyperFrames) — local OK, Lambda en prod à venir
-  let montageEtat: EtapeEtat = 'indispo';
-  let montageDetail = 'Bientôt : montage HyperFrames';
+  // 5 — Montage (HyperFrames) — disponible, l'étape attend les précédentes
+  let montageEtat: EtapeEtat = 'attente';
+  let montageDetail = 'En attente des étapes précédentes';
   if (video.outputUrl) {
     montageEtat = 'faite';
     montageDetail = 'Vidéo montée — prête';

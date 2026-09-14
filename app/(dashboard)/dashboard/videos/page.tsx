@@ -7,6 +7,7 @@ import { TabLinks } from '@/components/kit/tabs';
 import { Page, PageHeader } from '@/components/kit/page';
 import { Vignette } from '@/components/kit/vignette';
 import { EtatBadge, ETAT_LABEL } from '@/components/kit/etat';
+import { seconds } from '@/components/storyboard/utils';
 import { getUser } from '@/lib/db/queries';
 import { tenantDb, eq } from '@/lib/db/tenant-db';
 import { projects, shots } from '@/lib/db/schema';
@@ -121,14 +122,14 @@ export default async function VideosLibraryPage({
                   <div className="t-data flex flex-wrap items-center gap-3 text-xs text-ink-3">
                     <span className="inline-flex items-center gap-1.5">
                       <Clock className="size-3.5" aria-hidden="true" />
-                      {duree > 0 ? `${duree.toFixed(1).replace('.', ',')} s` : '—'}
+                      {duree > 0 ? seconds(duree) : '—'}
                     </span>
                     <span className="inline-flex items-center gap-1.5">
                       <Coins className="size-3.5" aria-hidden="true" />
                       {video.creditsConsumed > 0
-                        ? `${video.creditsConsumed} cr`
+                        ? `${video.creditsConsumed} crédits`
                         : video.creditsEstimated > 0
-                          ? `${video.creditsEstimated} cr`
+                          ? `${video.creditsEstimated} crédits`
                           : '—'}
                     </span>
                     <span>

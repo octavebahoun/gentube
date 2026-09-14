@@ -84,13 +84,13 @@ export function FabricationClient({
       <Page>
         <PageHeader
           eyebrow="Fabrication"
-          titre="La régie"
+          titre="Le suivi"
           intro="Ce qui avance, ce qui a échoué, ce que vous pouvez relancer. Votre point de passage du matin."
         />
         <Empty
           icon={<Clapperboard aria-hidden="true" />}
           title="Rien en fabrication"
-          hint="Cet écran s'anime dès que vous lancez une vidéo. Trois postes sur six fonctionnent aujourd'hui : storyboard, voix off et images."
+          hint="Cet écran s'anime dès que vous lancez une vidéo. Vous y verrez chaque étape : storyboard, voix off, images, plans animés, montage, publication."
           action={<ButtonLink href="/dashboard/projects">Créer une vidéo</ButtonLink>}
         />
       </Page>
@@ -101,7 +101,7 @@ export function FabricationClient({
     const etapes = buildEtapes(video, shotList);
     const faites = etapes.filter((e) => e.etat === 'faite').length;
     const progression = Math.round((faites / etapes.length) * 100);
-    return { video, shotList, etapes, progression };
+    return { video, shotList, etapes, progression, faites };
   });
 
   const enCours = enriched.filter((e) =>
@@ -111,16 +111,18 @@ export function FabricationClient({
     .filter((e) => e.video.status === 'validated' || e.video.status === 'draft')
     .slice(0, 6);
   const enEchec = enriched.filter((e) => e.etapes.some((s) => s.etat === 'echec')).length;
+  const etapesRef = enriched[0]?.etapes ?? [];
+  const etapesDispo = etapesRef.filter((e) => e.etat !== 'indispo').length;
 
   return (
     <Page>
       <PageHeader
         eyebrow="Fabrication"
-        titre="La régie"
+        titre="Le suivi"
         intro={
           enCours.length > 0
-            ? `${enCours.length} vidéo${enCours.length > 1 ? 's' : ''} en fabrication en ce moment.`
-            : 'Aucune vidéo en fabrication en ce moment.'
+            ? `${enCours.length} vidéo${enCours.length > 1 ? 's' : ''} en cours.`
+            : 'Rien en cours. Voici vos dernières vidéos.'
         }
         action={
           <ButtonLink href="/dashboard/projects" size="sm">
@@ -131,7 +133,7 @@ export function FabricationClient({
 
       <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
         <div className="flex flex-col gap-4">
-          {enriched.slice(0, 6).map(({ video, shotList, etapes, progression }) => {
+          {enriched.slice(0, 6).map(({ video, shotList, etapes, progression, faites }) => {
             const aEchoue = etapes.some((e) => e.etat === 'echec');
             return (
               <Card key={video.id} className={aEchoue ? 'border-bad/40' : undefined}>
@@ -161,7 +163,9 @@ export function FabricationClient({
                     className="mt-4"
                   />
                   <div className="t-data mt-2 flex justify-between text-xs text-ink-3">
-                    <span>{progression}% · 3 postes sur 6 actifs</span>
+                    <span>
+                      {progression}% · {faites} étape{faites > 1 ? 's' : ''} sur {etapes.length}
+                    </span>
                     <span>{new Date(video.updatedAt).toLocaleDateString('fr-FR')}</span>
                   </div>
 
@@ -233,7 +237,7 @@ export function FabricationClient({
         </div>
 
         <aside className="flex flex-col gap-4">
-          <Section titre="File d'attente">
+          <Section titre="À venir">
             {fileAttente.length > 0 ? (
               <ul className="divide-y divide-line">
                 {fileAttente.map(({ video }) => (
@@ -251,11 +255,11 @@ export function FabricationClient({
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-ink-3">File vide.</p>
+              <p className="text-sm text-ink-3">Rien pour l'instant.</p>
             )}
           </Section>
 
-          <Section titre="Cette fabrication">
+          <Section titre="Résumé">
             <dl className="flex flex-col gap-3 text-sm">
               {[
                 ['Vidéos suivies', enriched.length],
@@ -273,10 +277,13 @@ export function FabricationClient({
           </Section>
 
           <Card className="p-5">
-            <p className="t-label">3 postes sur 6</p>
+            <p className="t-label">
+              {etapesDispo} étapes sur {etapesRef.length} disponibles
+            </p>
             <p className="mt-3 text-xs leading-relaxed text-ink-2">
-              Storyboard, voix off et images fonctionnent aujourd'hui. Plans animés, montage et
-              publication YouTube arrivent — les cartes le disent plutôt que de le cacher.
+              Aujourd'hui, le storyboard, la voix off, les images et le montage fonctionnent. Les
+              plans animés et la publication YouTube arrivent bientôt : chaque étape concernée le
+              dit sur la vidéo.
             </p>
           </Card>
         </aside>

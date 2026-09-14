@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: JobStatus }) {
     running: 'En cours',
     succeeded: 'Réussi',
     failed: 'Échoué',
-    queued: 'File',
+    queued: 'En file',
   };
 
   const tones = {
@@ -85,7 +85,7 @@ const STEP_LABELS: Record<string, string> = {
   storyboard: 'Storyboard',
   voix: 'Voix off',
   images: 'Images',
-  clips: 'Clips',
+  clips: 'Plans animés',
   montage: 'Montage',
   publication: 'Publication',
 };
@@ -126,7 +126,7 @@ export function JobsClient() {
       onValueChange={(v) => setView(v as 'videos' | 'jobs')}
       tabs={[
         { value: 'videos', label: 'Vidéos' },
-        { value: 'jobs', label: 'Jobs' },
+        { value: 'jobs', label: 'Tâches' },
       ]}
       panels={{
         videos: (
@@ -162,7 +162,7 @@ export function JobsClient() {
                       </div>
 
                       {video.jobs && (
-                        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 md:grid-cols-6">
+                        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 md:grid-cols-5">
                           <div className="flex flex-col gap-1">
                             <dt className="t-label">Total</dt>
                             <dd className="t-data font-bold text-ink">
@@ -170,9 +170,9 @@ export function JobsClient() {
                             </dd>
                           </div>
                           <div className="flex flex-col gap-1">
-                            <dt className="t-label">En attente</dt>
+                            <dt className="t-label">En file</dt>
                             <dd className="t-data font-bold text-ink-3">
-                              {video.jobs.pending.toLocaleString('fr-FR')}
+                              {video.jobs.queued.toLocaleString('fr-FR')}
                             </dd>
                           </div>
                           <div className="flex flex-col gap-1">
@@ -193,12 +193,6 @@ export function JobsClient() {
                               {video.jobs.failed.toLocaleString('fr-FR')}
                             </dd>
                           </div>
-                          <div className="flex flex-col gap-1">
-                            <dt className="t-label">File</dt>
-                            <dd className="t-data font-bold text-ink-3">
-                              {video.jobs.queued.toLocaleString('fr-FR')}
-                            </dd>
-                          </div>
                         </dl>
                       )}
                     </Card>
@@ -208,7 +202,8 @@ export function JobsClient() {
 
             {videosData && (
               <p className="text-center text-sm text-ink-3">
-                {videosData.count.toLocaleString('fr-FR')} vidéo(s) au total
+                {videosData.count.toLocaleString('fr-FR')}{' '}
+                {videosData.count > 1 ? 'vidéos' : 'vidéo'} au total
               </p>
             )}
           </div>
@@ -223,11 +218,10 @@ export function JobsClient() {
                   aria-label="Filtrer par statut"
                 >
                   <option value="">Tous les statuts</option>
-                  <option value="pending">En attente</option>
                   <option value="running">En cours</option>
                   <option value="succeeded">Réussi</option>
                   <option value="failed">Échoué</option>
-                  <option value="queued">File</option>
+                  <option value="queued">En file</option>
                 </Select>
               </div>
 
@@ -241,7 +235,7 @@ export function JobsClient() {
                   <option value="storyboard">Storyboard</option>
                   <option value="voix">Voix off</option>
                   <option value="images">Images</option>
-                  <option value="clips">Clips</option>
+                  <option value="clips">Plans animés</option>
                   <option value="montage">Montage</option>
                   <option value="publication">Publication</option>
                 </Select>
@@ -254,8 +248,8 @@ export function JobsClient() {
               (jobsData.jobs.length === 0 ? (
                 <Empty
                   icon={<Circle aria-hidden="true" />}
-                  title="Aucun job"
-                  hint="Les jobs de fabrication apparaîtront ici dès qu'une vidéo sera lancée."
+                  title="Aucune tâche"
+                  hint="Les tâches de fabrication apparaîtront ici dès qu'une vidéo sera lancée."
                 />
               ) : (
                 <div className="overflow-x-auto">
@@ -330,7 +324,8 @@ export function JobsClient() {
 
             {jobsData && (
               <p className="text-center text-sm text-ink-3">
-                {jobsData.count.toLocaleString('fr-FR')} job(s) au total
+                {jobsData.count.toLocaleString('fr-FR')}{' '}
+                {jobsData.count > 1 ? 'tâches' : 'tâche'} au total
               </p>
             )}
           </div>

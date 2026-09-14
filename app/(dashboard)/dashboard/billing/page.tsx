@@ -19,7 +19,8 @@ function fcfa(amount: number) {
 function credits(amount: number) {
   return amount.toLocaleString('fr-FR');
 }
-function minutes(seconds: number) {
+function duree(seconds: number) {
+  if (seconds < 60) return `${seconds} s`;
   return `${Math.floor(seconds / 60)} min`;
 }
 function jour(date: Date | string | null) {
@@ -184,7 +185,7 @@ export default async function BillingPage({
           icone={<Clock className="size-4" aria-hidden="true" />}
           mention={<Badge tone="neutral">expire</Badge>}
           montant={creditsPlan}
-          note={`crédits · ${expireAt ? `expire le ${jour(expireAt)}` : 'pas de cycle en cours'} · ≈ ${minutes(secondsAffordable(creditsPlan, 'draft'))} en Full HD`}
+          note={`crédits · ${expireAt ? `expire le ${jour(expireAt)}` : 'pas de cycle en cours'} · ≈ ${duree(secondsAffordable(creditsPlan, 'draft'))} en Full HD`}
           detail="Renouvelé à chaque cycle payé. Débité en premier, pour que personne ne perde une valeur qu’il aurait pu consommer."
         />
         <Poche
@@ -196,7 +197,7 @@ export default async function BillingPage({
             </Badge>
           }
           montant={creditsTopup}
-          note={`crédits · conservés indéfiniment · ≈ ${minutes(secondsAffordable(creditsTopup, 'draft'))} en Full HD`}
+          note={`crédits · conservés indéfiniment · ≈ ${duree(secondsAffordable(creditsTopup, 'draft'))} en Full HD`}
           detail="Recharges payées en plus de l’abonnement. Faire expirer ce qui a été acheté serait du vol : ils restent. Débités après le quota."
         />
       </div>
@@ -218,7 +219,7 @@ export default async function BillingPage({
         <div className="text-right">
           <p className="t-data text-3xl font-bold text-ink">{credits(overview.creditsBalance)}</p>
           <p className="t-data text-xs text-ink-3">
-            crédits · ≈ {minutes(secondsAffordable(overview.creditsBalance, 'draft'))} en Full HD
+            crédits · ≈ {duree(secondsAffordable(overview.creditsBalance, 'draft'))} en Full HD
           </p>
         </div>
         <SubscriptionCancellation subscription={overview.subscription} canManage={canManage} />
@@ -252,7 +253,7 @@ export default async function BillingPage({
                         </p>
                         <p className="t-data mt-1 text-xs text-ink-3">
                           {credits(offer.monthlyCredits)} crédits ≈{' '}
-                          {minutes(secondsAffordable(offer.monthlyCredits, 'draft'))} en Full HD, ou{' '}
+                          {duree(secondsAffordable(offer.monthlyCredits, 'draft'))} en Full HD, ou{' '}
                           {imagesAffordable(offer.monthlyCredits)} images fixes
                         </p>
                       </div>

@@ -46,7 +46,7 @@ function ShotCredits({ shot, video }: { shot: Shot; video: Video }) {
   const credits = creditsForShot(shot.durationS, shot.type, video.quality);
   return (
     <span className="t-data inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-[0.6875rem] font-medium text-ink-2">
-      {frenchCredits(credits)} cr
+      {frenchCredits(credits)} crédits
     </span>
   );
 }
@@ -92,35 +92,62 @@ function TypeChoice({
 }
 
 /**
- * Les clés R2 ne sont pas des URLs : sans route de signature, aucun visuel
- * n'est affichable. Le cadre reste honnête — plein quand la scène a son
- * asset, pointillé sinon.
+ * L'aperçu de la scène, quand il existe.
  *
- * **Il dit aussi d'où vient le visuel.** « Visuel généré » sur un fichier que
- * le client a lui-même déposé serait faux, et c'est exactement la distinction
- * qui décide s'il sera facturé : un plan servi par un apport ne repasse chez
- * aucun fournisseur.
+ * Les clés R2 ne sont pas des URLs : sans route de signature, aucun visuel
+ * n'est affichable. La page signe donc les aperçus et les passe ici — le cadre
+ * reste pointillé tant que la scène n'a rien.
+ *
+ * **Il dit aussi d'où vient le visuel.** « Fichier du client » sur un fichier
+ * que la personne a elle-même déposé : c'est exactement la distinction qui
+ * décide s'il sera facturé — un plan servi par un apport ne repasse chez aucun
+ * fournisseur.
  */
-function VisualFrame({ shot }: { shot: Shot }) {
-  const ready = Boolean(shot.assetUrl ?? shot.sourceImageUrl);
+function VisualFrame({
+  shot,
+  apercu,
+  anime,
+}: {
+  shot: Shot;
+  apercu?: string | null;
+  anime?: boolean;
+}) {
   const depose = Boolean(shot.sourceAssetId);
-  const Icone = depose && shot.type === 'video' ? FileVideo : ImageIcon;
 
+  if (apercu) {
+    return (
+      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-control border border-line-strong bg-surface-2 lg:w-44">
+        {anime ? (
+          <video
+            src={`${apercu}#t=0.1`}
+            className="size-full object-cover"
+            muted
+            playsInline
+            preload="metadata"
+            aria-label={`Aperçu de la scène ${shot.order}`}
+          />
+        ) : (
+          <img
+            src={apercu}
+            alt={`Aperçu de la scène ${shot.order}`}
+            loading="lazy"
+            className="size-full object-cover"
+          />
+        )}
+        {depose && (
+          <span className="absolute bottom-1 left-1 rounded-full bg-canvas/85 px-1.5 py-0.5 text-[0.625rem] text-ink">
+            Fichier du client
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  const Icone = depose && shot.type === 'video' ? FileVideo : ImageIcon;
   return (
-    <div
-      className={cn(
-        'flex aspect-video w-full shrink-0 items-center justify-center gap-2 rounded-control lg:w-44',
-        ready ? 'border border-line-strong bg-surface-2' : 'border border-dashed border-line'
-      )}
-    >
-      <Icone className={cn('size-4', ready ? 'text-ink-2' : 'text-ink-3')} aria-hidden="true" />
-      <span className={cn('text-xs', ready ? 'text-ink-2' : 'text-ink-3')}>
-        {depose
-          ? 'Fichier du client'
-          : ready
-            ? 'Visuel généré'
-            : 'Pas encore de visuel'}
-      </span>
+    <div className="flex aspect-video w-full shrink-0 items-center justify-center gap-2 rounded-control border border-dashed border-line lg:w-44">
+      <Icone className="size-4 text-ink-3" aria-hidden="true" />
+      <span className="text-xs text-ink-3">Pas encore de visuel</span>
     </div>
   );
 }
@@ -200,6 +227,8 @@ export function SortableShotCard({
   editable,
   video,
   assets = [],
+  apercu,
+  apercuAnime,
 }: {
   shot: Shot;
   index: number;
@@ -207,6 +236,10 @@ export function SortableShotCard({
   video: Video;
   /** Les fichiers déposés sur le projet. Vide hors brouillon. */
   assets?: ClientAsset[];
+  /** L'aperçu signé de la scène, s'il existe. Voir lib/storage/lecture. */
+  apercu?: string | null;
+  /** Si cet aperçu est un clip : un `.mp4` dans un `<img>` n'affiche rien. */
+  apercuAnime?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(shotFormAction, {});
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -262,7 +295,7 @@ export function SortableShotCard({
           </div>
 
           <div className="flex flex-col gap-4 lg:flex-row">
-            <VisualFrame shot={shot} />
+            <VisualFrame shot={shot} apercu={apercu} anime={apercuAnime} />
             <div className="min-w-0 flex-1 space-y-4">
               <div className="space-y-2">
                 <label htmlFor={`narration-${shot.id}`} className="text-sm font-medium text-ink">
@@ -276,10 +309,6 @@ export function SortableShotCard({
                   disabled={!editable}
                   className="min-h-20"
                 />
-                <p className="text-xs leading-relaxed text-ink-3">
-                  Ce que la voix lit. Sa longueur fait la durée de la scène — et le prix. La
-                  réécrire efface l&apos;audio déjà enregistré.
-                </p>
               </div>
               <div className="space-y-2">
                 <label htmlFor={`prompt-${shot.id}`} className="text-sm font-medium text-ink">
@@ -293,9 +322,6 @@ export function SortableShotCard({
                   disabled={!editable}
                   className="min-h-20"
                 />
-                <p className="text-xs leading-relaxed text-ink-3">
-                  En anglais : les modèles d&apos;image et de vidéo sont entraînés en anglais.
-                </p>
               </div>
               {/*
                 Caché quand rien n'a été déposé : un sélecteur vide n'aurait

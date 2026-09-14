@@ -1,6 +1,8 @@
 'use client';
 
 import { Badge } from '@/components/kit/badge';
+import { QUALITY_LABEL } from '@/lib/credits/pricing';
+import type { Quality } from '@/lib/db/schema';
 import { frenchCredits, seconds } from './utils';
 
 /**
@@ -19,7 +21,7 @@ export function PriceStrip({
   durationsMeasured: boolean;
   spokenSeconds: number;
   sceneCount: number;
-  quality: string;
+  quality: Quality;
 }) {
   return (
     <div className="rounded-control border border-line bg-surface-2 p-4">
@@ -31,8 +33,8 @@ export function PriceStrip({
           </Badge>
         </div>
         <p className="t-data text-xs text-ink-3">
-          {seconds(Math.round(spokenSeconds * 10) / 10)} · {sceneCount} scène
-          {sceneCount === 1 ? '' : 's'} · {quality}
+          {seconds(spokenSeconds)} · {sceneCount} scène
+          {sceneCount === 1 ? '' : 's'} · {QUALITY_LABEL[quality]}
         </p>
       </div>
       <p className="mt-2 text-xs leading-relaxed text-ink-2">
