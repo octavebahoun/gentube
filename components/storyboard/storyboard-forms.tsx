@@ -13,10 +13,10 @@ import {
   Wand2,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/kit/button';
+import { Select, Textarea } from '@/components/kit/field';
+import { Notice } from '@/components/kit/page';
+import { cn } from '@/lib/utils';
 import {
   addShotAction,
   animateNovitaAction,
@@ -37,20 +37,32 @@ function TypeChoice({
   idPrefix: string;
 }) {
   return (
-    <RadioGroup name="type" defaultValue={defaultValue} className="flex gap-4">
+    <fieldset className="flex gap-2">
+      <legend className="sr-only">Type de plan</legend>
       {[
         { value: 'image', label: 'Image fixe', Icon: ImageIcon },
         { value: 'video', label: 'Plan animé', Icon: VideoIcon },
       ].map(({ value, label, Icon }) => (
-        <div key={value} className="flex items-center gap-2">
-          <RadioGroupItem value={value} id={`${idPrefix}-${value}`} />
-          <Label htmlFor={`${idPrefix}-${value}`} className="gap-1">
-            <Icon className="h-3.5 w-3.5" />
-            {label}
-          </Label>
-        </div>
+        <label
+          key={value}
+          className={cn(
+            'inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-control border border-line bg-surface px-3 text-sm text-ink-2',
+            'transition-colors duration-(--t-fast) hover:border-line-strong',
+            'has-checked:border-ink-3 has-checked:bg-surface-2 has-checked:text-ink'
+          )}
+        >
+          <input
+            type="radio"
+            name="type"
+            value={value}
+            defaultChecked={defaultValue === value}
+            className="size-4 accent-ink"
+          />
+          <Icon className="size-3.5" aria-hidden="true" />
+          {label}
+        </label>
       ))}
-    </RadioGroup>
+    </fieldset>
   );
 }
 
@@ -62,21 +74,23 @@ export function GenerateButton({ videoId, hasShots }: { videoId: number; hasShot
   return (
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="videoId" value={videoId} />
-      <Button type="submit" variant={hasShots ? 'outline' : 'default'} disabled={isPending}>
+      <Button type="submit" variant={hasShots ? 'secondary' : 'primary'} disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             Écriture du storyboard…
           </>
         ) : (
           <>
-            <Wand2 />
+            <Wand2 className="size-4" aria-hidden="true" />
             {hasShots ? 'Réécrire le storyboard' : 'Écrire le storyboard'}
           </>
         )}
       </Button>
-      {hasShots && <p className="text-xs text-muted-foreground">Réécrire remplace toutes les scènes ci-dessous.</p>}
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
+      {hasShots && (
+        <p className="text-xs text-ink-3">Réécrire remplace toutes les scènes ci-dessous.</p>
+      )}
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
     </form>
   );
 }
@@ -93,22 +107,22 @@ export function VoiceoverForm({ videoId }: { videoId: number }) {
       <Button type="submit" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             Enregistrement de la voix…
           </>
         ) : (
           <>
-            <Mic />
+            <Mic className="size-4" aria-hidden="true" />
             Enregistrer la voix off
           </>
         )}
       </Button>
-      <p className="max-w-xl text-xs text-muted-foreground">
+      <p className="max-w-xl text-xs leading-relaxed text-ink-3">
         Tant que la voix manque, le prix ci-dessus est une estimation lue dans le texte.
         L&apos;enregistrement mesure chaque scène — ensuite, le montant devient ferme.
       </p>
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      {state?.success && <Notice tone="ok">{state.success}</Notice>}
     </form>
   );
 }
@@ -131,24 +145,24 @@ export function ValidateForm({
       <Button type="submit" disabled={isPending || !canAfford}>
         {isPending ? (
           <>
-            <Loader2 className="animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             Débit en cours…
           </>
         ) : (
           <>
-            <CheckCircle2 />
+            <CheckCircle2 className="size-4" aria-hidden="true" />
             Valider et débiter {frenchCredits(creditsEstimated)} crédits
           </>
         )}
       </Button>
       {!canAfford && (
-        <p className="text-sm text-red-500">
-          Solde : {frenchCredits(balance)} crédits — il manque {frenchCredits(creditsEstimated - balance)}.
-          Rechargez depuis la page facturation.
-        </p>
+        <Notice tone="erreur">
+          Solde : {frenchCredits(balance)} crédits — il manque{' '}
+          {frenchCredits(creditsEstimated - balance)}. Rechargez depuis la page facturation.
+        </Notice>
       )}
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      {state?.success && <Notice tone="ok">{state.success}</Notice>}
     </form>
   );
 }
@@ -176,23 +190,27 @@ export function VisualsForm({
       <Button type="submit" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             {hasAnimated ? 'Dessin des images et lancement des clips…' : 'Dessin des images…'}
           </>
         ) : (
           <>
-            {hasAnimated ? <VideoIcon /> : <ImageIcon />}
+            {hasAnimated ? (
+              <VideoIcon className="size-4" aria-hidden="true" />
+            ) : (
+              <ImageIcon className="size-4" aria-hidden="true" />
+            )}
             {hasAnimated ? 'Générer les images et les clips' : 'Générer les images'}
           </>
         )}
       </Button>
-      <p className="max-w-xl text-xs text-muted-foreground">
+      <p className="max-w-xl text-xs leading-relaxed text-ink-3">
         {hasAnimated
           ? 'Chaque scène reçoit d’abord son image fixe — c’est elle que le modèle anime. Les clips partent ensuite chez le fournisseur et arrivent au fil de l’eau : rechargez la page pour suivre.'
           : 'Chaque scène reçoit son image fixe. Rien d’autre à attendre : ce pipeline n’a pas de plan animé.'}
       </p>
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      {state?.success && <Notice tone="ok">{state.success}</Notice>}
     </form>
   );
 }
@@ -212,26 +230,26 @@ export function NovitaForm({ videoId, plans }: { videoId: number; plans: number 
   return (
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="videoId" value={videoId} />
-      <Button type="submit" variant="outline" disabled={isPending}>
+      <Button type="submit" variant="secondary" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             Animation en cours…
           </>
         ) : (
           <>
-            <Film />
+            <Film className="size-4" aria-hidden="true" />
             Animer par Novita ({plans} plan{plans === 1 ? '' : 's'})
           </>
         )}
       </Button>
-      <p className="max-w-xl text-xs text-muted-foreground">
+      <p className="max-w-xl text-xs leading-relaxed text-ink-3">
         Essai, à côté de Replicate. Novita s&apos;interroge au lieu de rappeler,
         donc le bouton attend&nbsp;: comptez une à deux minutes par plan animé,
         et gardez la page ouverte. Rien n&apos;est débité.
       </p>
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      {state?.success && <Notice tone="ok">{state.success}</Notice>}
     </form>
   );
 }
@@ -254,23 +272,23 @@ export function RenderForm({ videoId, dejaRendu }: { videoId: number; dejaRendu:
       <Button type="submit" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             Montage en cours…
           </>
         ) : (
           <>
-            <Clapperboard />
+            <Clapperboard className="size-4" aria-hidden="true" />
             {dejaRendu ? 'Refaire le montage' : 'Monter la vidéo'}
           </>
         )}
       </Button>
-      <p className="max-w-xl text-xs text-muted-foreground">
+      <p className="max-w-xl text-xs leading-relaxed text-ink-3">
         Les images et les voix redescendent sur le disque, la page se compose, et
         le moteur rend le fichier. Comptez à peu près une seconde de machine par
         seconde de vidéo — la page reste ouverte pendant ce temps.
       </p>
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      {state?.success && <Notice tone="ok">{state.success}</Notice>}
     </form>
   );
 }
@@ -281,10 +299,10 @@ export function AddShotForm({ videoId }: { videoId: number }) {
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="videoId" value={videoId} />
       <TypeChoice defaultValue="video" idPrefix="new-shot" />
-      <div>
-        <Label htmlFor="new-narration" className="mb-2">
+      <div className="space-y-2">
+        <label htmlFor="new-narration" className="text-sm font-medium text-ink">
           Narration
-        </Label>
+        </label>
         <Textarea
           id="new-narration"
           name="narration"
@@ -293,10 +311,10 @@ export function AddShotForm({ videoId }: { videoId: number }) {
           required
         />
       </div>
-      <div>
-        <Label htmlFor="new-prompt" className="mb-2">
+      <div className="space-y-2">
+        <label htmlFor="new-prompt" className="text-sm font-medium text-ink">
           Prompt visuel
-        </Label>
+        </label>
         <Textarea
           id="new-prompt"
           name="prompt"
@@ -305,11 +323,11 @@ export function AddShotForm({ videoId }: { videoId: number }) {
           required
         />
       </div>
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      <Button type="submit" variant="outline" disabled={isPending}>
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      <Button type="submit" variant="secondary" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             Ajout…
           </>
         ) : (
@@ -352,11 +370,11 @@ export function ApportForm({
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="videoId" value={videoId} />
       <div className="flex flex-wrap items-center gap-2">
-        <select
+        <Select
           name="assetId"
           defaultValue={String(videos[0]?.id ?? '')}
           disabled={isPending}
-          className="h-9 min-w-0 max-w-sm flex-1 rounded-md border bg-transparent px-2 text-sm"
+          className="min-w-0 flex-1"
         >
           {videos.map((video) => (
             <option key={video.id} value={video.id}>
@@ -364,22 +382,22 @@ export function ApportForm({
               {video.words > 0 ? ` · ${video.words} mots` : ' · non transcrite'}
             </option>
           ))}
-        </select>
-        <Button type="submit" variant="outline" disabled={isPending}>
+        </Select>
+        <Button type="submit" variant="secondary" disabled={isPending}>
           {isPending ? (
             <>
-              <Loader2 className="animate-spin" />
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               Découpage…
             </>
           ) : (
             <>
-              <Scissors />
+              <Scissors className="size-4" aria-hidden="true" />
               Monter cette vidéo
             </>
           )}
         </Button>
       </div>
-      <p className="max-w-xl text-xs text-muted-foreground">
+      <p className="max-w-xl text-xs leading-relaxed text-ink-3">
         Les coupes tombent dans les silences, et le cadrage alterne d&apos;un
         plan à l&apos;autre pour qu&apos;elles se voient.{' '}
         {hasShots
@@ -388,8 +406,8 @@ export function ApportForm({
         {videos.every((video) => video.words === 0) &&
           'Sans transcription, la vidéo reste un plan unique : il n’y a aucun silence où couper.'}
       </p>
-      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+      {state?.success && <Notice tone="ok">{state.success}</Notice>}
     </form>
   );
 }

@@ -3,8 +3,9 @@
 import { useActionState, useState } from 'react';
 import { Loader2, Music, Settings2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/kit/button';
+import { Field, Select } from '@/components/kit/field';
+import { Notice } from '@/components/kit/page';
 import { videoSettingsAction } from '@/app/(dashboard)/dashboard/videos/actions';
 import { type ActionState } from './utils';
 
@@ -21,10 +22,6 @@ import { type ActionState } from './utils';
  */
 
 export type MusicChoice = { key: string; name: string; mood: string | null };
-
-const CHAMP =
-  'w-full rounded-md border border-border bg-background px-3 py-2 text-sm ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
 /**
  * L'explication vit sous le champ, pas dans l'option.
@@ -71,67 +68,50 @@ export function VideoSettings({
       <input type="hidden" name="videoId" value={videoId} />
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="quality">Qualité</Label>
-          <select
-            id="quality"
-            name="quality"
-            defaultValue={quality}
-            className={CHAMP}
-          >
+        <Field
+          label="Qualité"
+          htmlFor="quality"
+          hint="Les deux sont en 1080p. Le Cinéma coûte trois fois et demie plus cher : c’est l’argent du client, il choisit."
+        >
+          <Select id="quality" name="quality" defaultValue={quality}>
             <option value="draft">Full HD — 2 crédits la seconde</option>
             <option value="standard">Cinéma — 7 crédits la seconde</option>
-          </select>
-          <p className="text-xs text-muted-foreground">
-            Les deux sont en 1080p. Le Cinéma coûte trois fois et demie plus
-            cher&nbsp;: c’est l’argent du client, il choisit.
-          </p>
-        </div>
+          </Select>
+        </Field>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="ratio">Cadrage</Label>
-          <select id="ratio" name="ratio" defaultValue={ratio} className={CHAMP}>
+        <Field
+          label="Cadrage"
+          htmlFor="ratio"
+          hint="En vertical, les sous-titres remontent pour passer au-dessus de l’interface de TikTok, Reels et Shorts."
+        >
+          <Select id="ratio" name="ratio" defaultValue={ratio}>
             <option value="16:9">Paysage 16:9</option>
             <option value="9:16">Vertical 9:16</option>
-          </select>
-          <p className="text-xs text-muted-foreground">
-            En vertical, les sous-titres remontent pour passer au-dessus de
-            l’interface de TikTok, Reels et Shorts.
-          </p>
-        </div>
+          </Select>
+        </Field>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="subtitleStyle">Sous-titres</Label>
-          <select
+        <Field label="Sous-titres" htmlFor="subtitleStyle" hint={SOUS_TITRES[style]?.aide}>
+          <Select
             id="subtitleStyle"
             name="subtitleStyle"
             value={style}
             onChange={(event) => setStyle(event.target.value)}
-            className={CHAMP}
           >
             {Object.entries(SOUS_TITRES).map(([value, sous]) => (
               <option key={value} value={value}>
                 {sous.label}
               </option>
             ))}
-          </select>
-          <p className="text-xs text-muted-foreground">
-            {SOUS_TITRES[style]?.aide}
-          </p>
-        </div>
+          </Select>
+        </Field>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="musicUrl" className="flex items-center gap-1.5">
-          <Music className="h-3.5 w-3.5" />
-          Musique de fond
-        </Label>
-        <select
-          id="musicUrl"
-          name="musicUrl"
-          defaultValue={musicUrl ?? ''}
-          className={CHAMP}
-        >
+      <Field
+        label="Musique de fond"
+        htmlFor="musicUrl"
+        hint={musics.length === 0 ? undefined : 'Le catalogue est partagé par tous les projets.'}
+      >
+        <Select id="musicUrl" name="musicUrl" defaultValue={musicUrl ?? ''}>
           <option value="">Aucune</option>
           {musics.map((music) => (
             <option key={music.key} value={music.key}>
@@ -139,31 +119,32 @@ export function VideoSettings({
               {music.mood ? ` — ${music.mood}` : ''}
             </option>
           ))}
-        </select>
-        {musics.length === 0 && (
-          <p className="text-xs text-amber-400">
-            Le catalogue est vide. Importez-le avec{' '}
-            <code>pnpm tsx lib/sounds/import-catalog.ts</code>.
-          </p>
-        )}
-      </div>
+        </Select>
+      </Field>
+      {musics.length === 0 && (
+        <p className="flex items-center gap-1.5 text-xs text-ink-3">
+          <Music className="size-3.5" aria-hidden="true" />
+          Le catalogue est vide. Importez-le avec{' '}
+          <code className="font-mono">pnpm tsx lib/sounds/import-catalog.ts</code>.
+        </p>
+      )}
 
-      <div className="flex items-center gap-3">
-        <Button type="submit" variant="outline" disabled={isPending}>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" variant="secondary" disabled={isPending}>
           {isPending ? (
             <>
-              <Loader2 className="animate-spin" />
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               Enregistrement…
             </>
           ) : (
             <>
-              <Settings2 />
+              <Settings2 className="size-4" aria-hidden="true" />
               Enregistrer les réglages
             </>
           )}
         </Button>
-        {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-        {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
+        {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+        {state?.success && <Notice tone="ok">{state.success}</Notice>}
       </div>
     </form>
   );

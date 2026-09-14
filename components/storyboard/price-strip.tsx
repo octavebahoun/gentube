@@ -1,12 +1,12 @@
 'use client';
 
+import { Badge } from '@/components/kit/badge';
 import { frenchCredits, seconds } from './utils';
 
 /**
  * Le bandeau de prix : le seul endroit où l'estimation devient engagement.
- * Pointillés tant que la voix off manque, plein rouge une fois mesuré — la
- * bascule doit se voir, c'est elle qui explique au client pourquoi le prix a
- * bougé.
+ * Neutre tant que la voix off manque, vert une fois mesuré — la bascule doit
+ * se voir, c'est elle qui explique au client pourquoi le prix a bougé.
  */
 export function PriceStrip({
   credits,
@@ -22,27 +22,23 @@ export function PriceStrip({
   quality: string;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
-      <div className="flex items-center gap-4">
-        <p className="text-3xl font-semibold tabular-nums">{frenchCredits(credits)}</p>
-        <span
-          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
-            durationsMeasured
-              ? 'border-primary bg-primary text-primary-foreground'
-              : 'border-dashed border-border text-muted-foreground'
-          }`}
-        >
-          {durationsMeasured ? 'prix ferme' : 'prix estimé'}
-        </span>
+    <div className="rounded-control border border-line bg-surface-2 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <p className="t-data text-2xl font-bold text-ink">{frenchCredits(credits)}</p>
+          <Badge tone={durationsMeasured ? 'ok' : 'neutral'} dot={false}>
+            {durationsMeasured ? 'prix ferme' : 'prix estimé'}
+          </Badge>
+        </div>
+        <p className="t-data text-xs text-ink-3">
+          {seconds(Math.round(spokenSeconds * 10) / 10)} · {sceneCount} scène
+          {sceneCount === 1 ? '' : 's'} · {quality}
+        </p>
       </div>
-      <p className="max-w-md text-sm text-muted-foreground">
+      <p className="mt-2 text-xs leading-relaxed text-ink-2">
         {durationsMeasured
           ? 'Mesuré sur la voix off enregistrée — c’est ce montant qui sera débité.'
           : 'Indicatif : lu dans le texte, scène par scène. Enregistrez la voix off pour le verrouiller.'}
-      </p>
-      <p className="w-full text-xs tabular-nums text-muted-foreground sm:w-auto">
-        {seconds(Math.round(spokenSeconds * 10) / 10)} de narration · {sceneCount} scène
-        {sceneCount === 1 ? '' : 's'} · {quality}
       </p>
     </div>
   );

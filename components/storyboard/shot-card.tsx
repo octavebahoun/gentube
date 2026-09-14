@@ -13,11 +13,11 @@ import {
   Video as VideoIcon,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/kit/button';
+import { Card } from '@/components/kit/card';
+import { Select, Textarea } from '@/components/kit/field';
+import { Notice } from '@/components/kit/page';
+import { cn } from '@/lib/utils';
 import { creditsForShot } from '@/lib/credits/pricing';
 import type { ClientAsset, Shot, Video } from '@/lib/db/schema';
 import { shotFormAction } from '@/app/(dashboard)/dashboard/videos/actions';
@@ -25,18 +25,16 @@ import { type ActionState, frenchCredits, seconds } from './utils';
 
 /**
  * La provenance d'une durée distingue un devis d'un prix : en pointillés
- * tant que c'est lu dans le texte, plein dès que ça vient de l'audio. Même
- * grammaire visuelle que le bandeau de prix, à petite échelle.
+ * tant que c'est lu dans le texte, plein dès que ça vient de l'audio.
  */
 function DurationBadge({ shot }: { shot: Shot }) {
   const measured = shot.durationSource === 'measured';
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium tabular-nums ${
-        measured
-          ? 'border-green-500/40 bg-green-500/10 text-green-400'
-          : 'border-dashed border-border text-muted-foreground'
-      }`}
+      className={cn(
+        't-data inline-flex items-center rounded-full border px-2 py-0.5 text-[0.6875rem] font-medium',
+        measured ? 'border-ok/40 bg-ok/10 text-ok' : 'border-dashed border-line text-ink-3'
+      )}
     >
       {seconds(shot.durationS)} · {measured ? 'mesurée' : 'estimée'}
     </span>
@@ -47,7 +45,7 @@ function DurationBadge({ shot }: { shot: Shot }) {
 function ShotCredits({ shot, video }: { shot: Shot; video: Video }) {
   const credits = creditsForShot(shot.durationS, shot.type, video.quality);
   return (
-    <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium tabular-nums text-secondary-foreground">
+    <span className="t-data inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-[0.6875rem] font-medium text-ink-2">
       {frenchCredits(credits)} cr
     </span>
   );
@@ -63,20 +61,33 @@ function TypeChoice({
   disabled?: boolean;
 }) {
   return (
-    <RadioGroup name="type" defaultValue={defaultValue} className="flex gap-4" disabled={disabled}>
+    <fieldset disabled={disabled} className="flex gap-2">
+      <legend className="sr-only">Type de plan</legend>
       {[
         { value: 'image', label: 'Image fixe', Icon: ImageIcon },
         { value: 'video', label: 'Plan animé', Icon: VideoIcon },
       ].map(({ value, label, Icon }) => (
-        <div key={value} className="flex items-center gap-2">
-          <RadioGroupItem value={value} id={`${idPrefix}-${value}`} />
-          <Label htmlFor={`${idPrefix}-${value}`} className="gap-1">
-            <Icon className="h-3.5 w-3.5" />
-            {label}
-          </Label>
-        </div>
+        <label
+          key={value}
+          className={cn(
+            'inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-control border border-line bg-surface px-2.5 text-xs text-ink-2',
+            'transition-colors duration-(--t-fast) hover:border-line-strong',
+            'has-checked:border-ink-3 has-checked:bg-surface-2 has-checked:text-ink',
+            disabled && 'cursor-not-allowed opacity-45'
+          )}
+        >
+          <input
+            type="radio"
+            name="type"
+            value={value}
+            defaultChecked={defaultValue === value}
+            className="size-3.5 accent-ink"
+          />
+          <Icon className="size-3.5" aria-hidden="true" />
+          {label}
+        </label>
       ))}
-    </RadioGroup>
+    </fieldset>
   );
 }
 
@@ -97,12 +108,13 @@ function VisualFrame({ shot }: { shot: Shot }) {
 
   return (
     <div
-      className={`flex aspect-video w-full shrink-0 items-center justify-center gap-2 rounded-md lg:w-44 ${
-        ready ? 'border border-primary/30' : 'border border-dashed'
-      }`}
+      className={cn(
+        'flex aspect-video w-full shrink-0 items-center justify-center gap-2 rounded-control lg:w-44',
+        ready ? 'border border-line-strong bg-surface-2' : 'border border-dashed border-line'
+      )}
     >
-      <Icone className={`h-4 w-4 ${ready ? 'text-primary' : 'text-muted-foreground/60'}`} />
-      <span className={`text-xs ${ready ? 'text-muted-foreground' : 'text-muted-foreground/60'}`}>
+      <Icone className={cn('size-4', ready ? 'text-ink-2' : 'text-ink-3')} aria-hidden="true" />
+      <span className={cn('text-xs', ready ? 'text-ink-2' : 'text-ink-3')}>
         {depose
           ? 'Fichier du client'
           : ready
@@ -140,18 +152,18 @@ function AssetPicker({
   const lie = assets.find((asset) => asset.id === shot.sourceAssetId);
 
   return (
-    <div className="space-y-2 rounded-md border border-dashed p-3">
-      <Label htmlFor={`asset-${shot.id}`} className="gap-1">
-        <Paperclip className="h-3.5 w-3.5" />
+    <div className="space-y-2 rounded-control border border-dashed border-line p-3">
+      <label htmlFor={`asset-${shot.id}`} className="flex items-center gap-1.5 text-sm font-medium text-ink">
+        <Paperclip className="size-3.5" aria-hidden="true" />
         Servir cette scène avec un fichier déposé
-      </Label>
+      </label>
       <div className="flex flex-wrap items-center gap-2">
-        <select
+        <Select
           id={`asset-${shot.id}`}
           name="assetId"
           defaultValue={shot.sourceAssetId ? String(shot.sourceAssetId) : ''}
           disabled={disabled}
-          className="h-11 min-h-11 min-w-0 flex-1 cursor-pointer rounded-md border border-input bg-transparent px-3 text-sm transition-colors duration-(--motion-fast) outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-w-0 flex-1"
         >
           <option value="">Aucun — générer le visuel</option>
           {assets.map((asset) => (
@@ -161,19 +173,12 @@ function AssetPicker({
               {asset.durationS ? ` · ${asset.durationS.toFixed(1)} s` : ''}
             </option>
           ))}
-        </select>
-        <Button
-          type="submit"
-          name="intent"
-          value="bind"
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-        >
+        </Select>
+        <Button type="submit" name="intent" value="bind" variant="secondary" size="sm" disabled={disabled}>
           Attacher
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs leading-relaxed text-ink-3">
         {lie
           ? `Servie par « ${lie.originalName ?? `Fichier ${lie.id}`} » : ` +
             'aucun visuel ne sera généré pour cette scène.'
@@ -215,113 +220,111 @@ export function SortableShotCard({
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={isDragging ? 'relative z-10 opacity-80' : undefined}
     >
-      <Card>
-        <CardContent>
-          <form action={formAction} className="space-y-4">
-            <input type="hidden" name="videoId" value={shot.videoId} />
-            <input type="hidden" name="shotId" value={shot.id} />
+      <Card className="p-4 sm:p-5">
+        <form action={formAction} className="space-y-4">
+          <input type="hidden" name="videoId" value={shot.videoId} />
+          <input type="hidden" name="shotId" value={shot.id} />
 
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-3">
-                {editable ? (
-                  <button
-                    type="button"
-                    className="cursor-grab touch-none rounded p-1 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
-                    aria-label={`Déplacer la scène ${index + 1}`}
-                    {...attributes}
-                    {...listeners}
-                  >
-                    <GripVertical className="size-4" />
-                  </button>
-                ) : null}
-                <span className="text-sm font-medium tabular-nums text-brand-accent">
-                  #{String(index + 1).padStart(2, '0')}
-                </span>
-                <TypeChoice defaultValue={shot.type} idPrefix={`shot-${shot.id}`} disabled={!editable} />
-                <DurationBadge shot={shot} />
-                <ShotCredits shot={shot} video={video} />
-              </div>
-
-              {editable && (
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="delete"
-                  variant="ghost"
-                  size="sm"
-                  disabled={isPending}
-                  aria-label={`Supprimer la scène ${index + 1}`}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              {editable ? (
+                <button
+                  type="button"
+                  className="cursor-grab touch-none rounded-control p-1.5 text-ink-3 outline-none transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink active:cursor-grabbing"
+                  aria-label={`Déplacer la scène ${index + 1}`}
+                  {...attributes}
+                  {...listeners}
                 >
-                  <Trash2 className="text-destructive" />
-                </Button>
-              )}
+                  <GripVertical className="size-4" aria-hidden="true" />
+                </button>
+              ) : null}
+              <span className="t-data text-sm font-bold text-ink-2">
+                #{String(index + 1).padStart(2, '0')}
+              </span>
+              <TypeChoice defaultValue={shot.type} idPrefix={`shot-${shot.id}`} disabled={!editable} />
+              <DurationBadge shot={shot} />
+              <ShotCredits shot={shot} video={video} />
             </div>
 
-            <div className="flex flex-col gap-4 lg:flex-row">
-              <VisualFrame shot={shot} />
-              <div className="min-w-0 flex-1 space-y-4">
-                <div>
-                  <Label htmlFor={`narration-${shot.id}`} className="mb-2">
-                    Narration
-                  </Label>
-                  <Textarea
-                    id={`narration-${shot.id}`}
-                    name="narration"
-                    defaultValue={shot.narration ?? ''}
-                    maxLength={2000}
-                    disabled={!editable}
-                    className="min-h-20"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ce que la voix lit. Sa longueur fait la durée de la scène — et le prix. La réécrire
-                    efface l&apos;audio déjà enregistré.
-                  </p>
-                </div>
-                <div>
-                  <Label htmlFor={`prompt-${shot.id}`} className="mb-2">
-                    Prompt visuel
-                  </Label>
-                  <Textarea
-                    id={`prompt-${shot.id}`}
-                    name="prompt"
-                    defaultValue={shot.prompt}
-                    maxLength={1000}
-                    disabled={!editable}
-                    className="min-h-20"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    En anglais : les modèles d&apos;image et de vidéo sont entraînés en anglais.
-                  </p>
-                </div>
-                {/*
-                  Caché quand rien n'a été déposé : un sélecteur vide n'aurait
-                  rien à dire, et il occuperait la place sur le chemin normal
-                  d'une vidéo entièrement générée.
-                */}
-                {editable && assets.length > 0 && (
-                  <AssetPicker shot={shot} assets={assets} disabled={isPending} />
-                )}
+            {editable && (
+              <Button
+                type="submit"
+                name="intent"
+                value="delete"
+                variant="ghost"
+                size="sm"
+                disabled={isPending}
+                aria-label={`Supprimer la scène ${index + 1}`}
+              >
+                <Trash2 className="size-4 text-bad" aria-hidden="true" />
+              </Button>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-4 lg:flex-row">
+            <VisualFrame shot={shot} />
+            <div className="min-w-0 flex-1 space-y-4">
+              <div className="space-y-2">
+                <label htmlFor={`narration-${shot.id}`} className="text-sm font-medium text-ink">
+                  Narration
+                </label>
+                <Textarea
+                  id={`narration-${shot.id}`}
+                  name="narration"
+                  defaultValue={shot.narration ?? ''}
+                  maxLength={2000}
+                  disabled={!editable}
+                  className="min-h-20"
+                />
+                <p className="text-xs leading-relaxed text-ink-3">
+                  Ce que la voix lit. Sa longueur fait la durée de la scène — et le prix. La
+                  réécrire efface l&apos;audio déjà enregistré.
+                </p>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {editable && (
-                <Button type="submit" name="intent" value="save" variant="outline" size="sm" disabled={isPending}>
-                  {isPending ? (
-                    <>
-                      <Loader2 className="animate-spin" />
-                      Enregistrement…
-                    </>
-                  ) : (
-                    'Enregistrer la scène'
-                  )}
-                </Button>
+              <div className="space-y-2">
+                <label htmlFor={`prompt-${shot.id}`} className="text-sm font-medium text-ink">
+                  Prompt visuel
+                </label>
+                <Textarea
+                  id={`prompt-${shot.id}`}
+                  name="prompt"
+                  defaultValue={shot.prompt}
+                  maxLength={1000}
+                  disabled={!editable}
+                  className="min-h-20"
+                />
+                <p className="text-xs leading-relaxed text-ink-3">
+                  En anglais : les modèles d&apos;image et de vidéo sont entraînés en anglais.
+                </p>
+              </div>
+              {/*
+                Caché quand rien n'a été déposé : un sélecteur vide n'aurait
+                rien à dire, et il occuperait la place sur le chemin normal
+                d'une vidéo entièrement générée.
+              */}
+              {editable && assets.length > 0 && (
+                <AssetPicker shot={shot} assets={assets} disabled={isPending} />
               )}
-              {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-              {state?.success && <p className="text-sm text-green-600">{state.success}</p>}
             </div>
-          </form>
-        </CardContent>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {editable && (
+              <Button type="submit" name="intent" value="save" variant="secondary" size="sm" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    Enregistrement…
+                  </>
+                ) : (
+                  'Enregistrer la scène'
+                )}
+              </Button>
+            )}
+            {state?.error && <Notice tone="erreur">{state.error}</Notice>}
+            {state?.success && <Notice tone="ok">{state.success}</Notice>}
+          </div>
+        </form>
       </Card>
     </li>
   );

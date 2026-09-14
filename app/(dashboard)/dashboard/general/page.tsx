@@ -5,9 +5,9 @@ import useSWR from 'swr';
 import { Loader2 } from 'lucide-react';
 import { updateAccount } from '@/app/(login)/actions';
 import type { User } from '@/lib/db/schema';
-import { GxButton } from '@/components/gx/gx-button';
-import { GxField, GxInput } from '@/components/gx/gx-field';
-import { GxPage, GxPageHeader, GxSection, GxNotice } from '@/components/gx/gx-page';
+import { Button } from '@/components/kit/button';
+import { Field, Input } from '@/components/kit/field';
+import { Page, PageHeader, Section, Notice } from '@/components/kit/page';
 import { YoutubeConnection } from '@/components/youtube-connection';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -25,17 +25,17 @@ function Champs({
 }) {
   return (
     <>
-      <GxField label="Nom" htmlFor="name" hint="Le nom affiché aux autres membres de l'espace." required>
-        <GxInput
+      <Field label="Nom" htmlFor="name" hint="Le nom affiché aux autres membres de l'espace." required>
+        <Input
           name="name"
           placeholder="Votre nom"
           autoComplete="name"
           defaultValue={state.name || nameValue}
           required
         />
-      </GxField>
-      <GxField label="E-mail" htmlFor="email" hint="Sert à vous connecter et à recevoir les notifications." required>
-        <GxInput
+      </Field>
+      <Field label="E-mail" htmlFor="email" hint="Sert à vous connecter et à recevoir les notifications." required>
+        <Input
           name="email"
           type="email"
           placeholder="vous@exemple.fr"
@@ -43,7 +43,7 @@ function Champs({
           defaultValue={emailValue}
           required
         />
-      </GxField>
+      </Field>
     </>
   );
 }
@@ -57,41 +57,43 @@ export default function GeneralPage() {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(updateAccount, {});
 
   return (
-    <GxPage className="max-w-3xl">
-      <GxPageHeader
+    <Page className="max-w-3xl">
+      <PageHeader
         eyebrow="Compte"
         titre="Mon compte"
         intro="Votre nom et votre adresse. Le reste des réglages vit dans l'espace de travail."
       />
 
-      <GxSection titre="Informations du compte">
-        <form className="space-y-6" action={formAction}>
-          <Suspense fallback={<Champs state={state} />}>
-            <ChampsAvecDonnees state={state} />
-          </Suspense>
+      <div className="space-y-6">
+        <Section titre="Informations du compte">
+          <form className="space-y-6" action={formAction}>
+            <Suspense fallback={<Champs state={state} />}>
+              <ChampsAvecDonnees state={state} />
+            </Suspense>
 
-          {state.error && <GxNotice tone="erreur">{state.error}</GxNotice>}
-          {state.success && <GxNotice tone="ok">{state.success}</GxNotice>}
+            {state.error && <Notice tone="erreur">{state.error}</Notice>}
+            {state.success && <Notice tone="ok">{state.success}</Notice>}
 
-          <GxButton type="submit" disabled={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                Enregistrement…
-              </>
-            ) : (
-              'Enregistrer'
-            )}
-          </GxButton>
-        </form>
-      </GxSection>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  Enregistrement…
+                </>
+              ) : (
+                'Enregistrer'
+              )}
+            </Button>
+          </form>
+        </Section>
 
-      <GxSection
-        titre="YouTube"
-        aide="Publiez vos vidéos directement sur votre chaîne YouTube."
-      >
-        <YoutubeConnection />
-      </GxSection>
-    </GxPage>
+        <Section
+          titre="YouTube"
+          aide="Publiez vos vidéos directement sur votre chaîne YouTube."
+        >
+          <YoutubeConnection />
+        </Section>
+      </div>
+    </Page>
   );
 }

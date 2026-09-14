@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { PlusCircle } from 'lucide-react';
-import { GxButton } from '@/components/gx/gx-button';
-import { GxTabs } from '@/components/gx/gx-tabs';
-import { GxPage, GxPageHeader, GxFil } from '@/components/gx/gx-page';
-import { EtatBadge } from '@/components/gx/gx-etat';
+import { ButtonLink } from '@/components/kit/button';
+import { Tabs } from '@/components/kit/tabs';
+import { Page, PageHeader, Breadcrumb } from '@/components/kit/page';
+import { EtatBadge } from '@/components/kit/etat';
+import { Empty } from '@/components/kit/badge';
+import { Film } from 'lucide-react';
 import { getUser } from '@/lib/db/queries';
 import { tenantDb } from '@/lib/db/tenant-db';
 import { ProjectError, getProject } from '@/lib/projects';
@@ -38,20 +40,20 @@ export default async function ProjectPage({
   const assets = await listClientAssets(tenantDb(user.tenantId), project.id);
 
   return (
-    <GxPage>
-      <GxFil parent="Projets" parentHref="/dashboard/projects" courant={project.name} />
-      <GxPageHeader
+    <Page>
+      <Breadcrumb parent="Projets" parentHref="/dashboard/projects" courant={project.name} />
+      <PageHeader
         eyebrow="Projet"
         titre={project.name}
         action={
-          <GxButton href={`/dashboard/projects/${project.id}/videos/new`} size="sm">
+          <ButtonLink href={`/dashboard/projects/${project.id}/videos/new`} size="sm">
             <PlusCircle className="size-4" aria-hidden="true" />
             Nouvelle vidéo
-          </GxButton>
+          </ButtonLink>
         }
       />
 
-      <GxTabs
+      <Tabs
         defaultValue="videos"
         tabs={[
           { value: 'videos', label: 'Vidéos', count: videos.length },
@@ -60,37 +62,31 @@ export default async function ProjectPage({
         ]}
         panels={{
           videos: (
-            <div className="mt-6">
+            <div className="mt-5">
               {videos.length === 0 ? (
-                <div className="plate p-8 text-center">
-                  <p className="text-sm leading-relaxed text-paper-3">
-                    Aucune vidéo dans ce projet. Partez d’un sujet : le storyboard reprendra
-                    le style défini dans les réglages.
-                  </p>
-                  <GxButton
-                    href={`/dashboard/projects/${project.id}/videos/new`}
-                    className="mt-5"
-                  >
-                    Créer la première vidéo
-                  </GxButton>
-                </div>
+                <Empty
+                  icon={<Film aria-hidden="true" />}
+                  title="Aucune vidéo dans ce projet"
+                  hint="Partez d’un sujet : le storyboard reprendra le style défini dans les réglages."
+                  action={
+                    <ButtonLink href={`/dashboard/projects/${project.id}/videos/new`}>
+                      Créer la première vidéo
+                    </ButtonLink>
+                  }
+                />
               ) : (
-                <ul className="grid gap-3">
+                <ul className="grid gap-2.5">
                   {videos.map((video) => (
                     <li key={video.id}>
                       <Link
                         href={`/dashboard/videos/${video.id}`}
-                        className="group plate relative flex min-h-11 flex-wrap items-center justify-between gap-3 overflow-hidden p-4 transition-[border-color,transform] duration-(--t-fast) hover:-translate-y-0.5 hover:border-line-hi"
+                        className="flex min-h-11 flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface p-4 transition-colors duration-(--t-fast) hover:border-line-strong"
                       >
-                        <span
-                          aria-hidden="true"
-                          className="mire absolute inset-y-0 left-0 w-[3px] origin-top scale-y-0 transition-transform duration-(--t-fast) group-hover:scale-y-100"
-                        />
-                        <span className="min-w-0 truncate font-display text-sm font-bold">
+                        <span className="min-w-0 truncate text-sm font-semibold text-ink">
                           {video.title}
                         </span>
                         <span className="flex shrink-0 items-center gap-3">
-                          <span className="t-data text-xs text-paper-3">
+                          <span className="t-data text-xs text-ink-3">
                             {video.creditsConsumed > 0
                               ? `${video.creditsConsumed} cr débités`
                               : `${video.creditsEstimated} cr estimés`}
@@ -105,9 +101,9 @@ export default async function ProjectPage({
             </div>
           ),
           fichiers: (
-            <div className="plate mt-6 p-6">
-              <h2 className="font-display text-lg font-bold tracking-tight">Vos fichiers</h2>
-              <p className="mt-1 text-sm text-paper-3">
+            <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-5">
+              <h2 className="t-h3 text-ink">Vos fichiers</h2>
+              <p className="mt-1 text-sm text-ink-2">
                 Les fichiers déposés ici remplacent la génération sur les scènes où vous les
                 choisissez. Vous ne payez que ce qui reste à créer.
               </p>
@@ -117,10 +113,10 @@ export default async function ProjectPage({
             </div>
           ),
           reglages: (
-            <div className="mt-6 space-y-4">
-              <div className="plate p-6">
-                <h2 className="font-display text-lg font-bold tracking-tight">Configuration</h2>
-                <p className="mt-1 text-sm text-paper-3">
+            <div className="mt-5 space-y-4">
+              <div className="rounded-card border border-line bg-surface p-4 sm:p-5">
+                <h2 className="t-h3 text-ink">Configuration</h2>
+                <p className="mt-1 text-sm text-ink-2">
                   Le style et la voix que chaque nouvelle vidéo reprendra.
                 </p>
                 <div className="mt-5">
@@ -128,11 +124,9 @@ export default async function ProjectPage({
                 </div>
               </div>
 
-              <section className="rounded-lg border border-rouge/40 bg-rouge/5 p-6">
-                <h2 className="font-display text-lg font-bold tracking-tight text-danger">
-                  Supprimer le projet
-                </h2>
-                <p className="mt-2 text-sm text-paper-2">
+              <section className="rounded-card border border-bad/40 bg-bad/5 p-4 sm:p-5">
+                <h2 className="t-h3 text-bad">Supprimer le projet</h2>
+                <p className="mt-2 text-sm text-ink-2">
                   Un projet qui contient des vidéos ne peut pas être supprimé : ces vidéos
                   portent des crédits et des liens YouTube. Videz-le d’abord.
                 </p>
@@ -144,6 +138,6 @@ export default async function ProjectPage({
           ),
         }}
       />
-    </GxPage>
+    </Page>
   );
 }

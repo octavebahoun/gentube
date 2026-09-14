@@ -5,23 +5,19 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 import { Activity, Home, LogOut, Settings, Shield, Wallet } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
-import { GxButton } from '@/components/gx/gx-button';
-import { GxMenu, GxMenuItem, GxMenuButton } from '@/components/gx/gx-menu';
-import { BoutonAmbiance } from '@/components/gx/gx-theme';
-import { Ancres } from '@/components/gx/gx-ancres';
+import { Button, ButtonLink } from '@/components/kit/button';
+import { Menu, MenuItem, MenuButton } from '@/components/kit/menu';
+import { Ancres } from '@/components/kit/ancres';
 import { signOut } from '@/app/(login)/actions';
 import type { TenantDataWithMembers, User } from '@/lib/db/schema';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 /*
- * UNE seule barre, à un seul niveau.
- * Sur l'accueil elle porte aussi les ancres de la page : pas de deuxième
- * bandeau collant sous le premier — deux barres empilées, c'est deux fois
- * trop, et c'est ce qui donne la sensation de flotter.
+ * Une seule barre, à un seul niveau. Sur l'accueil elle porte aussi les
+ * ancres de la page. Pas de deuxième bandeau collant sous le premier.
  */
 const ANCRES = [
-  { id: 'mur', label: 'Le mur' },
   { id: 'probleme', label: 'Le problème' },
   { id: 'solution', label: 'La solution' },
   { id: 'preuves', label: 'Preuves' },
@@ -31,14 +27,21 @@ const ANCRES = [
 
 function Marque() {
   return (
-    <Link href="/" className="group flex min-h-11 shrink-0 items-center gap-2.5" aria-label="GenTube — accueil">
-      {/* La mire en carré : le logo est la signature du système. */}
+    <Link
+      href="/"
+      className="group flex min-h-11 shrink-0 items-center gap-2.5"
+      aria-label="GenTube — accueil"
+    >
       <span
         aria-hidden="true"
-        className="mire size-7 rounded-md transition-transform duration-(--t-fast) group-hover:rotate-6"
-      />
-      <span className="font-display text-lg font-bold tracking-tight">
-        Gen<span className="text-marque">Tube</span>
+        className="flex size-6 items-center justify-center rounded-[6px] border border-line-strong bg-surface-2"
+      >
+        <svg width="9" height="10" viewBox="0 0 9 10" fill="none">
+          <path d="M0 0.5 8.5 5 0 9.5V0.5Z" fill="currentColor" className="text-ink-2" />
+        </svg>
+      </span>
+      <span className="text-[17px] font-bold tracking-tight">
+        Gen<span className="text-ink-2">Tube</span>
       </span>
     </Link>
   );
@@ -53,10 +56,10 @@ function SoldeCredits() {
     <Link
       href="/dashboard/billing"
       aria-label={`Solde : ${balance ?? 'inconnu'} crédits. Aller à la facturation`}
-      className="hidden min-h-11 items-center gap-2 rounded-pill border border-line bg-ink-2 px-3.5 transition-colors duration-(--t-fast) hover:border-line-hi sm:inline-flex"
+      className="hidden min-h-11 items-center gap-2 rounded-control border border-line bg-surface px-3 transition-colors duration-(--t-fast) hover:border-line-strong sm:inline-flex"
     >
-      <Wallet className="size-4 text-marque" aria-hidden="true" />
-      <span className="t-data text-sm font-bold">
+      <Wallet className="size-4 text-ink-3" aria-hidden="true" />
+      <span className="t-data text-sm font-bold text-ink">
         {balance === undefined ? '—' : balance.toLocaleString('fr-FR')}
       </span>
     </Link>
@@ -75,42 +78,42 @@ function MenuCompte() {
 
   if (!user) {
     return (
-      <GxButton href="/sign-up" size="sm">
+      <ButtonLink href="/sign-up" size="sm">
         Créer ma vidéo
-      </GxButton>
+      </ButtonLink>
     );
   }
 
   const initiales = user.email.slice(0, 2).toUpperCase();
 
   return (
-    <GxMenu
+    <Menu
       label="Menu du compte"
       trigger={
-        <span className="flex size-9 items-center justify-center rounded-pill border border-line-hi bg-ink-3 font-mono text-xs font-bold text-paper transition-colors duration-(--t-fast) hover:border-marque">
+        <span className="flex size-8 items-center justify-center rounded-full border border-line-strong bg-surface-2 font-mono text-[11px] font-bold text-ink transition-colors duration-(--t-fast) group-hover:border-ink-3">
           {initiales}
         </span>
       }
     >
-      <p className="truncate px-3 py-2 text-xs text-paper-3">{user.email}</p>
-      <GxMenuItem href="/dashboard">
+      <p className="truncate px-3 py-2 text-xs text-ink-3">{user.email}</p>
+      <MenuItem href="/dashboard">
         <Home aria-hidden="true" /> Espace de travail
-      </GxMenuItem>
-      <GxMenuItem href="/dashboard/general">
+      </MenuItem>
+      <MenuItem href="/dashboard/general">
         <Settings aria-hidden="true" /> Mon compte
-      </GxMenuItem>
-      <GxMenuItem href="/dashboard/security">
+      </MenuItem>
+      <MenuItem href="/dashboard/security">
         <Shield aria-hidden="true" /> Sécurité
-      </GxMenuItem>
-      <GxMenuItem href="/dashboard/activity">
+      </MenuItem>
+      <MenuItem href="/dashboard/activity">
         <Activity aria-hidden="true" /> Activité
-      </GxMenuItem>
+      </MenuItem>
       <form action={handleSignOut} className="mt-1 border-t border-line pt-1">
-        <GxMenuButton type="submit">
+        <MenuButton type="submit">
           <LogOut aria-hidden="true" /> Se déconnecter
-        </GxMenuButton>
+        </MenuButton>
       </form>
-    </GxMenu>
+    </Menu>
   );
 }
 
@@ -119,20 +122,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const surAccueil = pathname === '/';
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-ink">
-      <header className="sticky top-0 z-(--z-header) border-b border-line bg-ink/85 backdrop-blur-xl">
-        <div className="gutter mx-auto flex h-(--header-h) w-full max-w-(--content-max) items-center gap-4">
+    <div className="flex min-h-dvh flex-col bg-canvas">
+      <header className="sticky top-0 z-(--z-header) border-b border-line bg-canvas">
+        <div className="mx-auto flex h-(--header-h) w-full max-w-(--content-max) items-center gap-4 px-(--gutter)">
           <Marque />
 
-          {/* Les ancres vivent ici, dans la même barre. */}
           {surAccueil && <Ancres ancres={ANCRES} className="hidden min-w-0 flex-1 lg:flex" />}
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <BoutonAmbiance />
             <Suspense fallback={null}>
               <SoldeCredits />
             </Suspense>
-            <Suspense fallback={<div className="size-9 rounded-pill bg-ink-3" />}>
+            <Suspense fallback={<div className="size-8 rounded-full bg-surface-2" />}>
               <MenuCompte />
             </Suspense>
           </div>

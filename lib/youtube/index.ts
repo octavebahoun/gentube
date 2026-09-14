@@ -1,11 +1,9 @@
-import { google } from 'googleapis';
-import type { Auth } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
+import { youtube as youtubeApi } from '@googleapis/youtube';
 import { eq } from 'drizzle-orm';
 import { tenantDb, type TenantDb } from '@/lib/db/tenant-db';
 import { youtubeTokens, type YoutubeToken } from '@/lib/db/schema';
 import { decrypt, encrypt } from '@/lib/crypto/encryption';
-
-type OAuth2Client = Auth.OAuth2Client;
 
 export class YoutubeConfigError extends Error {
   constructor(message: string) {
@@ -51,7 +49,7 @@ export function createOAuth2Client(): OAuth2Client {
     throw new YoutubeConfigError('BASE_URL must be set for OAuth redirect.');
   }
 
-  return new google.auth.OAuth2(
+  return new OAuth2Client(
     clientId,
     clientSecret,
     `${baseUrl}/api/youtube/callback`
@@ -204,7 +202,7 @@ export async function getAuthenticatedYoutubeClient(tdb: TenantDb) {
     refresh_token: refreshToken,
   });
 
-  return google.youtube({ version: 'v3', auth: oauth2Client });
+  return youtubeApi({ version: 'v3', auth: oauth2Client });
 }
 
 /**

@@ -1,241 +1,269 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ═══════════════════════════════════════════════════════════════════════
-   GenTube — Design System & Visual Engine
-   Univers : AI × Cinema × Motion × Creative Studio
-   Style : Cinématique, premium, sombre, immersif, technologique.
+   GenTube — outil vidéo sombre, dense, rapide.
+   Un seul accent : l'ambre, réservé à l'action principale d'un écran.
+   Aucune police web dans l'application : la pile système, tout de suite.
    ═══════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* Palette officielle GenTube — Direction C (hybrid) */
-  --color-bg-primary: #050608;
-  --color-bg-secondary: #0B0D10;
-  --color-surface: #111419;
-  --color-surface-elevated: #171A20;
-  --color-border-subtle: #292D35;
+  --color-canvas: #0d0d10;
+  --color-surface: #16161b;
+  --color-surface-2: #1e1e25;
+  --color-line: #2a2a33;
+  --color-line-strong: #3a3a45;
 
-  --color-text-primary: #F5F5F5;
-  --color-text-secondary: #A5A7AD;
+  --color-ink: #f2f2f4;
+  --color-ink-2: #a1a1ad;
+  --color-ink-3: #6e6e7a;
 
-  --color-brand-red: #FF3B30;
-  --color-brand-red-deep: #D0021B;
-  --color-ai-purple: #A855F7;
-  --color-amber: #FFB340;
+  --color-brand: #ffb020;
+  --color-brand-hover: #ffc04d;
+  --color-on-brand: #1a1205;
 
-  --color-status-success: #35D07F;
-  --color-status-error: #FF4D5A;
+  --color-ok: #3ecf8e;
+  --color-bad: #f2555a;
 
-  /* Alignment for standard Tailwind utility aliases */
-  --color-background: #050608;
-  --color-foreground: #F5F5F5;
-  --color-card: #111419;
-  --color-card-foreground: #F5F5F5;
-  --color-popover: #171A20;
-  --color-popover-foreground: #F5F5F5;
-  --color-primary: #FF3B30;
-  --color-primary-foreground: #050608;
-  --color-secondary: #A855F7;
-  --color-secondary-foreground: #FFFFFF;
-  --color-muted: #171A20;
-  --color-muted-foreground: #A5A7AD;
-  --color-accent: #A855F7;
-  --color-accent-foreground: #FFFFFF;
-  --color-destructive: #FF4D5A;
-  --color-destructive-foreground: #FFFFFF;
-  --color-border: #292D35;
-  --color-input: #171A20;
-  --color-ring: #FF3B30;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --color-sidebar: #0B0D10;
-  --color-sidebar-foreground: #F5F5F5;
-  --color-sidebar-border: #292D35;
+  --radius-control: 8px;
+  --radius-card: 12px;
+}
 
-  /* Custom Palette Roles for GenTube theme */
-  --color-ink: #050608;
-  --color-ink-2: #0B0D10;
-  --color-ink-3: #111419;
-  --color-ink-4: #171A20;
-  --color-line: #292D35;
-  --color-line-hi: #3D434F;
-  --color-paper: #F5F5F5;
-  --color-paper-2: #D1D3D8;
-  --color-paper-3: #A5A7AD;
-  --color-marque: #FF3B30;
-  --color-ai: #A855F7;
-  --color-info: #FFB340;
-  --color-ok: #35D07F;
-  --color-danger: #FF4D5A;
+/* Repères de mise en page et de mouvement — un seul endroit. */
+:root {
+  --header-h: 3.5rem;
+  --sidebar-w: 14.5rem;
+  --content-max: 80rem;
+  --gutter: 1rem;
+  --z-header: 40;
+  --z-sidebar: 30;
+  --z-bottomnav: 40;
+  --z-pop: 60;
+  --t-fast: 150ms;
+  --t-base: 220ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
 
-  /* Rayons : 10px à 16px */
-  --radius-sm: 0.5rem;
-  --radius: 0.75rem;      /* 12px default */
-  --radius-md: 0.75rem;   /* 12px */
-  --radius-lg: 0.875rem;  /* 14px */
-  --radius-xl: 1rem;      /* 16px */
-  --radius-pill: 999px;
-
-  /* Typography */
-  --font-sans: var(--font-dm), "Inter", "Geist", "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-grotesk), "Inter", "Geist", "Manrope", ui-sans-serif, sans-serif;
-  --font-mono: var(--font-space-mono), ui-monospace, monospace;
-
-  /* Gradients & Glows */
-  --shadow-glow-red: 0 0 25px -5px rgba(255, 59, 48, 0.35);
-  --shadow-glow-purple: 0 0 25px -5px rgba(168, 85, 247, 0.35);
-  --shadow-deep: 0 20px 50px -15px rgba(0, 0, 0, 0.8);
-
-  --gradient-red-purple: linear-gradient(135deg, #FF3B30 0%, #A855F7 100%);
-  --gradient-red-deep: linear-gradient(135deg, #FF3B30 0%, #D0021B 100%);
-  --gradient-subtle: linear-gradient(180deg, rgba(23, 26, 32, 0.6) 0%, rgba(11, 13, 16, 0.9) 100%);
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 2rem;
+  }
 }
 
 @layer base {
-  :root {
-    --gx-ink: #050608;
-    --gx-ink-2: #0B0D10;
-    --gx-ink-3: #111419;
-    --gx-ink-4: #171A20;
-    --gx-sidebar: #0B0D10;
-    --gx-line: #292D35;
-    --gx-line-hi: #3D434F;
-    --gx-paper: #F5F5F5;
-    --gx-paper-2: #D1D3D8;
-    --gx-paper-3: #A5A7AD;
-    --gx-marque: #FF3B30;
-    --gx-ai: #A855F7;
-    --gx-info: #FFB340;
-    --gx-ok: #35D07F;
-    --gx-danger: #FF4D5A;
-    color-scheme: dark;
-  }
-
-  * {
-    border-color: #292D35;
-  }
-
   html {
-    scroll-behavior: smooth;
-    background: #050608;
-    color: #F5F5F5;
+    background: var(--color-canvas);
+    color: var(--color-ink);
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
   }
 
   body {
-    background: #050608;
-    color: #F5F5F5;
+    background: var(--color-canvas);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
   }
 
-  h1, h2, h3, h4 {
-    font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+  h1,
+  h2,
+  h3,
+  h4 {
     text-wrap: balance;
   }
 
   ::selection {
-    background: #FF3B30;
-    color: #050608;
+    background: var(--color-brand);
+    color: var(--color-on-brand);
   }
 
+  /* Le focus est neutre : l'ambre reste à l'action principale. */
   :focus-visible {
-    outline: 2px solid #FF3B30;
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: 4px;
   }
 
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: #050608; }
-  ::-webkit-scrollbar-thumb { background: #292D35; border-radius: 999px; }
-  ::-webkit-scrollbar-thumb:hover { background: #3D434F; }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-canvas);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-2);
+    border: 2px solid var(--color-canvas);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-line-strong);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer utilities {
-  .bg-gradient-gt {
-    background-image: linear-gradient(135deg, #FF3B30 0%, #A855F7 100%);
+  /* La gouttière horizontale, une seule définition. */
+  .gutter {
+    padding-inline: var(--gutter);
   }
 
-  .text-gradient-gt {
-    background-image: linear-gradient(135deg, #FF3B30 0%, #FFB340 50%, #A855F7 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  /* Étiquette de section : petite, espacée, discrète. */
+  .t-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-ink-3);
   }
 
-  .glow-red {
-    box-shadow: 0 0 30px -5px rgba(255, 59, 48, 0.3);
-  }
-
-  .glow-purple {
-    box-shadow: 0 0 30px -5px rgba(168, 85, 247, 0.3);
-  }
-
-  .glow-red-subtle {
-    box-shadow: 0 0 15px 0 rgba(255, 59, 48, 0.15);
-  }
-
-  .glow-purple-subtle {
-    box-shadow: 0 0 15px 0 rgba(168, 85, 247, 0.15);
+  /* Chiffres, timecodes : chasse fixe, alignés. */
+  .t-data {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
 
   .t-display {
     font-family: var(--font-display);
     font-weight: 800;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
     line-height: 1.02;
-    font-size: clamp(3rem, 6.5vw, 4.5rem); /* 56-72px */
+    font-size: clamp(2.5rem, 6vw, 4.25rem);
   }
 
   .t-h1 {
     font-family: var(--font-display);
     font-weight: 700;
-    letter-spacing: -0.035em;
-    line-height: 1.05;
-    font-size: clamp(2.5rem, 5vw, 3.75rem); /* 48-64px */
+    letter-spacing: -0.025em;
+    line-height: 1.06;
+    font-size: clamp(1.875rem, 3.6vw, 2.75rem);
   }
 
   .t-h2 {
     font-family: var(--font-display);
     font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    font-size: clamp(2rem, 3.5vw, 3rem); /* 36-48px */
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    font-size: clamp(1.375rem, 2.4vw, 1.75rem);
   }
 
   .t-h3 {
     font-family: var(--font-display);
     font-weight: 600;
-    letter-spacing: -0.02em;
-    font-size: clamp(1.375rem, 2vw, 1.75rem); /* 22-28px */
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    font-size: 1.0625rem;
   }
 
-  .t-body {
-    font-family: var(--font-sans);
-    font-size: 1.0625rem; /* 17px average (16-18px) */
-    line-height: 1.6;
+  /* La landing a le droit à une display ; l'application, non. */
+  .display-tight {
+    --font-display: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-inter-tight), var(--font-sans);
   }
 
-  .t-small {
-    font-family: var(--font-sans);
-    font-size: 0.8125rem; /* 13px average (12-14px) */
-    line-height: 1.5;
+  .no-bar {
+    scrollbar-width: none;
+  }
+  .no-bar::-webkit-scrollbar {
+    display: none;
   }
 
-  .t-label {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+  /* Attente : une pulsation neutre. Jamais l'ambre. */
+  .pulse-wait {
+    animation: kit-pulse 1.6s var(--ease-out) infinite;
   }
 
-  .glass-studio {
-    background: rgba(17, 20, 25, 0.75);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(41, 45, 53, 0.8);
+  /* La barre de progression d'un travail en cours. */
+  .scan {
+    position: relative;
+    overflow: hidden;
+  }
+  .scan::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    width: 40%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--color-ink) 14%, transparent),
+      transparent
+    );
+    animation: kit-scan 1.8s linear infinite;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 600ms var(--ease-out),
+      transform 600ms var(--ease-out);
+  }
+  .reveal.seen {
+    opacity: 1;
+    transform: none;
+  }
+
+  .marquee {
+    display: flex;
+    width: max-content;
+    animation: kit-marquee var(--marquee-dur, 42s) linear infinite;
+  }
+  .marquee-hold:hover .marquee,
+  .marquee-hold:focus-within .marquee {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes kit-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes kit-scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(350%);
+  }
+}
+
+@keyframes kit-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes kit-meter {
+  from {
+    transform: scaleY(0.4);
+  }
+  to {
+    transform: scaleY(1);
   }
 }

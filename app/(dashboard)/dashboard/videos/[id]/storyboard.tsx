@@ -18,12 +18,13 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Loader2, Trash2, Play, Pause, FastForward, Rewind, Sparkles, Film, Mic, Music, Layers, Wand2, Sliders } from 'lucide-react';
+import { Film, Loader2, Trash2 } from 'lucide-react';
 
-import { GxButton } from '@/components/gx/gx-button';
-import { GxCard, GxCardTitle, GxPerfCard } from '@/components/gx/gx-card';
-import { GxBadge } from '@/components/gx/gx-badge-empty';
-import { StudioTimelineTrack, AIAction } from '@/components/gx/gx-studio-ui';
+import { Button } from '@/components/kit/button';
+import { Card, CardTitle } from '@/components/kit/card';
+import { EtatBadge } from '@/components/kit/etat';
+import { Notice } from '@/components/kit/page';
+import { cn } from '@/lib/utils';
 import type { ClientAsset, Shot, Video } from '@/lib/db/schema';
 import { deleteVideoAction, reorderShotsAction } from '../actions';
 import { PriceStrip } from '@/components/storyboard/price-strip';
@@ -38,7 +39,7 @@ import {
   VisualsForm,
   VoiceoverForm,
 } from '@/components/storyboard/storyboard-forms';
-import { type ActionState } from '@/components/storyboard/utils';
+import { type ActionState, seconds } from '@/components/storyboard/utils';
 
 export function StoryboardEditor({
   video,
@@ -82,7 +83,6 @@ export function StoryboardEditor({
   const [items, setItems] = useState(shots);
   const [reorderError, setReorderError] = useState<string | null>(null);
   const [activeShotId, setActiveShotId] = useState<number | string>(shots[0]?.id ?? '');
-  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     setItems(shots);
@@ -125,80 +125,88 @@ export function StoryboardEditor({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Top Studio Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#292D35] bg-[#111419] p-4 text-[#F5F5F5]">
-        <div className="flex items-center gap-3">
-          <GxBadge tone={video.status === 'rendered' ? 'success' : 'orange'} live>
-            {video.status.toUpperCase()}
-          </GxBadge>
-          <span className="font-display font-bold text-base">{video.title || 'Vidéo GenTube'}</span>
-        </div>
-
-        {/* Video Player Controls */}
-        <div className="flex items-center gap-2 rounded-lg border border-[#292D35] bg-[#050608] px-3 py-1.5">
-          <button className="text-[#A5A7AD] hover:text-[#FF3B30] transition" title="Reculer">
-            <Rewind className="size-4" />
-          </button>
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="flex size-8 items-center justify-center rounded-full bg-[#FF3B30] text-white font-bold hover:bg-[#D0021B] hover:scale-105 transition"
-          >
-            {isPlaying ? <Pause className="size-4" /> : <Play className="size-4 ml-0.5" />}
-          </button>
-          <button className="text-[#A5A7AD] hover:text-[#FF3B30] transition" title="Avancer">
-            <FastForward className="size-4" />
-          </button>
-          <span className="font-mono text-xs text-[#A5A7AD] ml-2">
-            {spokenSeconds > 0 ? `00:00 / 00:${String(Math.round(spokenSeconds)).padStart(2, '0')}` : '00:00 / 00:00'}
+    <div className="space-y-5">
+      {/* Barre d'état : où en est la fabrication, et l'étape suivante. */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <EtatBadge status={video.status} />
+          <span className="t-data text-xs text-ink-3">
+            {items.length} scène{items.length !== 1 ? 's' : ''} · {seconds(spokenSeconds)} de narration
           </span>
         </div>
-
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {editable && items.length === 0 && <GenerateButton videoId={video.id} hasShots={false} />}
           {montable && <RenderForm videoId={video.id} dejaRendu={video.status === 'rendered'} />}
         </div>
       </div>
 
-      {/* Main Studio Viewport (Video Monitor + AI Inspector) */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        {/* Center Monitor Viewport */}
-        <GxPerfCard title="Monitor Studio" timecode={`${items.length} Scènes · Full HD`}>
-          <div className="flex flex-col items-center justify-center min-h-[300px] bg-[#050608] rounded-xl border border-[#292D35] p-4">
+      <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
+        {/* Moniteur + pellicule */}
+        <div className="min-w-0">
+          <div className="relative aspect-video w-full overflow-hidden rounded-card border border-line bg-canvas">
             {activeShot?.assetUrl ? (
-              <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-[#292D35] bg-[#111419]">
-                <img src={activeShot.assetUrl} alt="Visualisation scène" className="size-full object-cover" />
-                <div className="absolute bottom-2 inset-x-2 bg-[#050608]/80 backdrop-blur-md p-2 rounded text-center text-xs text-[#F5F5F5] font-semibold">
-                  "{activeShot.narration || activeShot.prompt}"
-                </div>
-              </div>
+              <img
+                src={activeShot.assetUrl}
+                alt={`Aperçu de la scène ${activeShot.order}`}
+                className="size-full object-cover"
+              />
             ) : (
-              <div className="text-center p-8 space-y-3">
-                <Film className="size-10 text-[#FF3B30] mx-auto opacity-80" />
-                <p className="text-sm text-[#A5A7AD]">
-                  {activeShot ? `Scène #${activeShot.order} : ${activeShot.narration || activeShot.prompt}` : 'Aucun aperçu disponible. Génère ou sélectionne une scène.'}
+              <div className="flex size-full flex-col items-center justify-center gap-2 p-6 text-center">
+                <Film className="size-6 text-ink-3" aria-hidden="true" />
+                <p className="max-w-md text-sm text-ink-2">
+                  {activeShot
+                    ? `Scène ${activeShot.order} : ${activeShot.narration || activeShot.prompt}`
+                    : 'Aucune scène pour l’instant. Écrivez le storyboard ou ajoutez une scène à la main.'}
                 </p>
               </div>
             )}
+            {activeShot?.assetUrl && (
+              <p className="absolute inset-x-0 bottom-0 bg-canvas/85 px-3 py-2 text-xs text-ink">
+                {activeShot.narration || activeShot.prompt}
+              </p>
+            )}
           </div>
-        </GxPerfCard>
 
-        {/* Right AI Assistant & Controls Panel */}
-        <div className="space-y-4">
-          <AIAction
-            label="AI Scene Generator"
-            description="Génère ou modifie la scène active avec l'assistant IA."
+          {items.length > 0 && (
+            <ul className="no-bar mt-3 flex gap-2 overflow-x-auto pb-1">
+              {items.map((shot, index) => {
+                const active = shot.id === activeShotId;
+                return (
+                  <li key={shot.id}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveShotId(shot.id)}
+                      aria-current={active ? 'true' : undefined}
+                      className={cn(
+                        'flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded-control border px-3 text-xs',
+                        'transition-colors duration-(--t-fast)',
+                        active
+                          ? 'border-ink-3 bg-surface-2 text-ink'
+                          : 'border-line bg-surface text-ink-2 hover:border-line-strong'
+                      )}
+                    >
+                      <span className="t-data font-bold">#{String(index + 1).padStart(2, '0')}</span>
+                      <span className="t-data">{shot.durationS}s</span>
+                      <span className="text-ink-3">{shot.type === 'video' ? 'animé' : 'fixe'}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        {/* Panneau d'étapes */}
+        <Card className="h-fit p-4">
+          <PriceStrip
+            credits={creditsEstimated}
+            durationsMeasured={durationsMeasured}
+            spokenSeconds={spokenSeconds}
+            sceneCount={items.length}
+            quality={video.quality}
           />
 
-          <GxCard className="space-y-4">
-            <PriceStrip
-              credits={creditsEstimated}
-              durationsMeasured={durationsMeasured}
-              spokenSeconds={spokenSeconds}
-              sceneCount={items.length}
-              quality={video.quality}
-            />
-
+          <div className="mt-4 space-y-4 border-t border-line pt-4">
             {editable && items.length > 0 && <GenerateButton videoId={video.id} hasShots={true} />}
             {editable && videosApportees.length > 0 && (
               <ApportForm videoId={video.id} videos={videosApportees} hasShots={items.length > 0} />
@@ -222,63 +230,13 @@ export function StoryboardEditor({
                 plans={shots.filter((shot) => shot.type === 'video' && !shot.assetUrl).length}
               />
             )}
-            {reorderError && <p className="text-xs text-[#FF4D5A] font-semibold">{reorderError}</p>}
-          </GxCard>
-        </div>
+            {reorderError && <Notice tone="erreur">{reorderError}</Notice>}
+          </div>
+        </Card>
       </div>
 
-      {/* Multi-Track Studio Timeline */}
-      <GxCard className="space-y-3">
-        <div className="flex items-center justify-between border-b border-[#292D35] pb-2">
-          <p className="t-label text-xs text-[#FF3B30]">Studio Timeline & Tracks</p>
-          <span className="font-mono text-xs text-[#A5A7AD]">3 Tracks Active</span>
-        </div>
-
-        <StudioTimelineTrack
-          label="Piste Vidéo"
-          icon={<Film className="size-4" />}
-          timecode={`${spokenSeconds.toFixed(1)}s`}
-          clips={items.map((shot, idx) => ({
-            id: shot.id,
-            title: `Scène ${idx + 1}`,
-            duration: `${shot.durationS}s`,
-            type: shot.type,
-          }))}
-          activeClipId={activeShotId}
-          onSelectClip={(id) => setActiveShotId(id)}
-        />
-
-        <StudioTimelineTrack
-          label="Piste Voix Off"
-          icon={<Mic className="size-4" />}
-          timecode={`${spokenSeconds.toFixed(1)}s`}
-          clips={items.map((shot, idx) => ({
-            id: `voice-${shot.id}`,
-            title: `Voix ${idx + 1}`,
-            duration: `${shot.durationS}s`,
-            type: 'audio',
-          }))}
-        />
-
-        <StudioTimelineTrack
-          label="Sous-titres"
-          icon={<Layers className="size-4" />}
-          timecode={`${spokenSeconds.toFixed(1)}s`}
-          clips={items.map((shot, idx) => ({
-            id: `caption-${shot.id}`,
-            title: `Karaoké ${idx + 1}`,
-            duration: `${shot.durationS}s`,
-            type: 'caption',
-          }))}
-        />
-      </GxCard>
-
-      {/* Storyboard Shots List Editor */}
-      {items.length === 0 ? (
-        <GxCard className="py-12 text-center text-[#A5A7AD]">
-          Aucune scène générée. Clique sur "Générer le storyboard" avec l'IA pour démarrer.
-        </GxCard>
-      ) : (
+      {/* Les scènes, éditables une par une */}
+      {items.length > 0 && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -286,7 +244,7 @@ export function StoryboardEditor({
           onDragEnd={handleDragEnd}
         >
           <SortableContext items={items.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {items.map((shot, index) => (
                 <SortableShotCard
                   key={shot.id}
@@ -303,10 +261,10 @@ export function StoryboardEditor({
       )}
 
       {editable && (
-        <GxCard>
-          <GxCardTitle className="mb-4">Ajouter une scène manuelle</GxCardTitle>
+        <Card className="p-4 sm:p-5">
+          <CardTitle className="mb-4">Ajouter une scène manuelle</CardTitle>
           <AddShotForm videoId={video.id} />
-        </GxCard>
+        </Card>
       )}
     </div>
   );
@@ -315,23 +273,23 @@ export function StoryboardEditor({
 export function DeleteVideoButton({ videoId, projectId }: { videoId: number; projectId: number }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(deleteVideoAction, {});
   return (
-    <form action={formAction} className="space-y-2">
+    <form action={formAction} className="space-y-3">
       <input type="hidden" name="videoId" value={videoId} />
       <input type="hidden" name="projectId" value={projectId} />
-      <GxButton type="submit" variant="ghost" size="sm" disabled={isPending}>
+      <Button type="submit" variant="danger" size="sm" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="size-3.5 animate-spin" />
+            <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
             Suppression…
           </>
         ) : (
           <>
-            <Trash2 className="size-3.5 text-[#FF4D5A]" />
+            <Trash2 className="size-3.5" aria-hidden="true" />
             Supprimer ce brouillon
           </>
         )}
-      </GxButton>
-      {state?.error && <p className="text-xs text-[#FF4D5A]">{state.error}</p>}
+      </Button>
+      {state?.error && <Notice tone="erreur">{state.error}</Notice>}
     </form>
   );
 }
