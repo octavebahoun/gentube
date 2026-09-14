@@ -30,6 +30,32 @@ import {
 
 const DEFAULT_BASE_URL = 'https://api.replicate.com/v1';
 
+/**
+ * Sous 5 $ de crédit, Replicate plafonne la création de prédictions (6/min,
+ * rafale de 1) et répond 429 avec un `Retry-After`. Les soumissions partent
+ * déjà en série (`lib/storyboard/clips.ts`), donc on absorbe le throttle ici :
+ * on attend le délai annoncé et on rejoue quelques fois, au lieu de faire
+ * échouer le plan. Au-dessus de 5 $, la limite disparaît et ce chemin ne sert
+ * plus.
+ */
+const MAX_429_RETRIES = 5;
+const MAX_BACKOFF_MS = 30_000;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Délai avant de rejouer un 429 : le `Retry-After` annoncé s'il est là, sinon
+ * un repli exponentiel. Une pointe de gigue évite que des appels concurrents
+ * se resynchronisent sur la même seconde.
+ */
+function retryAfterMs(response: Response, attempt: number): number {
+  const header = response.headers?.get?.('retry-after');
+  const seconds = header ? Number(header) : NaN;
+  const base =
+    Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 1000 * 2 ** attempt;
+  return Math.min(base, MAX_BACKOFF_MS) + Math.floor(Math.random() * 500);
+}
+
 export type ReplicateConfig = {
   token: string;
   baseUrl: string;
@@ -162,32 +188,42 @@ export class ReplicateAnimator implements VideoAnimator {
     path: string,
     init: RequestInit = {}
   ): Promise<Record<string, any>> {
-    let response: Response;
-    try {
-      response = await fetch(`${this.config.baseUrl}${path}`, {
-        ...init,
-        headers: {
-          Authorization: `Bearer ${this.config.token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-    } catch (cause) {
-      throw new AnimationError(`Replicate is unreachable: ${cause}`, 504);
-    }
+    for (let attempt = 0; ; attempt++) {
+      let response: Response;
+      try {
+        response = await fetch(`${this.config.baseUrl}${path}`, {
+          ...init,
+          headers: {
+            Authorization: `Bearer ${this.config.token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (cause) {
+        throw new AnimationError(`Replicate is unreachable: ${cause}`, 504);
+      }
 
-    if (!response.ok) {
-      const body = await response.text();
-      // 402 vaut la peine d'être distingué : Replicate ne coupe pas net quand
-      // le crédit s'épuise, il ralentit d'abord (`docs/providers.md`). Un 402
-      // qui remonte jusqu'ici veut dire que le rechargement automatique a
-      // échoué, pas qu'un plan est mal formé.
-      throw new AnimationError(
-        `Replicate ${response.status}: ${body.slice(0, 400)}`,
-        response.status === 402 ? 402 : 502
-      );
-    }
+      // 429 = le throttle sous 5 $ de crédit. On respecte le délai annoncé et
+      // on rejoue : un 429 rejette la requête avant de rien créer, donc
+      // rejouer un POST ne double aucune prédiction.
+      if (response.status === 429 && attempt < MAX_429_RETRIES) {
+        await sleep(retryAfterMs(response, attempt));
+        continue;
+      }
 
-    return (await response.json()) as Record<string, any>;
+      if (!response.ok) {
+        const body = await response.text();
+        // 402 (crédit épuisé) et 429 (throttle non résorbé après reprises) sont
+        // des pannes propres à distinguer d'un 5xx : Replicate ralentit avant
+        // de couper (`docs/providers.md`). Un 402 ici veut dire que le
+        // rechargement automatique a échoué, pas qu'un plan est mal formé.
+        throw new AnimationError(
+          `Replicate ${response.status}: ${body.slice(0, 400)}`,
+          response.status === 402 ? 402 : response.status === 429 ? 429 : 502
+        );
+      }
+
+      return (await response.json()) as Record<string, any>;
+    }
   }
 }
 
