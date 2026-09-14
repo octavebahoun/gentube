@@ -39,7 +39,7 @@ import {
   updateShot,
   validateStoryboard,
 } from '@/lib/storyboard';
-import { renderVideo } from '@/lib/render/sortie';
+import { collectRender, startRender } from '@/lib/render/service';
 import { animateWithNovita } from '@/lib/video/novita';
 import { startProductionWorkflow } from '@/lib/internal/n8n';
 
@@ -416,11 +416,17 @@ export const animateNovitaAction = validatedActionWithUser(
 /**
  * Le montage : la vidéo devient un fichier.
  *
- * L'action **attend** la fin du rendu, une minute environ pour une vidéo d'une
- * minute. C'est tenable pour un essai depuis l'écran, pas pour des clients en
- * parallèle : une action serveur qui bloque tient une connexion ouverte, et le
- * jour où deux rendus se lancent ensemble la machine fait les deux à la fois.
- * Le passage par une file est la suite, pas une option.
+ * **Deux moteurs existent, et l'écran doit appeler le bon.** `lib/render/sortie`
+ * lance `npx hyperframes` en sous-processus : c'est le poste de dev, et sur
+ * l'hébergement il meurt faute d'un `HOME` inscriptible. `lib/render/service`
+ * part sur Lambda par Step Functions — c'est le chemin de production, celui que
+ * `/api/internal/render` emprunte déjà.
+ *
+ * D'où la forme en deux temps. `startRender` rend la main dès que l'exécution
+ * est lancée : une action serveur qui attendrait la fin tiendrait la connexion
+ * une minute par minute de vidéo, et deux montages simultanés se marcheraient
+ * dessus. `collectRenderAction` juste en dessous relève l'état et, une fois le
+ * fichier prêt, le pose sur R2.
  */
 export const renderVideoAction = validatedActionWithUser(
   videoIdentity,
@@ -429,21 +435,66 @@ export const renderVideoAction = validatedActionWithUser(
       const { logActivity } = await import('@/lib/activity');
       const { ActivityType } = await import('@/lib/db/schema');
       const tdb = tenantDb(user.tenantId);
-      
+
       await logActivity(tdb, user.id, ActivityType.RENDER_STARTED);
-      
-      const { durationInSeconds, tookSeconds } = await renderVideo(
-        tdb,
-        data.videoId
-      );
-      
-      await logActivity(tdb, user.id, ActivityType.RENDER_COMPLETED);
-      
+
+      const { job } = await startRender(tdb, data.videoId);
+
       revalidatePath(`/dashboard/videos/${data.videoId}`);
       return {
         success:
-          `Rendered — ${durationInSeconds.toFixed(1)}s of video ` +
-          `in ${tookSeconds.toFixed(1)}s of machine.`,
+          job.attempts && job.attempts > 1
+            ? `Montage relancé (tentative ${job.attempts}).`
+            : 'Montage lancé.',
+      };
+    } catch (error) {
+      return formError(error);
+    }
+  }
+);
+
+/**
+ * Relève un montage en cours.
+ *
+ * Appelée en boucle par l'écran tant que l'exécution tourne. Elle ne coûte
+ * qu'une lecture d'état à Step Functions ; c'est le dernier appel, celui qui
+ * trouve le fichier, qui le descend de S3 pour le poser sur R2.
+ *
+ * `RENDER_COMPLETED` n'est journalisé qu'une fois : la vidéo ne porte son
+ * `outputUrl` qu'au passage où le fichier arrive, et `collectRender` rend la
+ * main sans rien écrire si elle le porte déjà.
+ */
+export const collectRenderAction = validatedActionWithUser(
+  videoIdentity,
+  async (data, _formData, user) => {
+    try {
+      const tdb = tenantDb(user.tenantId);
+      const avant = await collectRender(tdb, data.videoId);
+
+      if (avant.job.status === 'failed') {
+        return { error: avant.job.error ?? "Le montage s'est arrêté." };
+      }
+
+      if (!avant.outputUrl) {
+        const fait = avant.state?.framesRendered ?? 0;
+        const total = avant.state?.totalFrames;
+        return {
+          success: total
+            ? `Montage en cours — ${fait} images sur ${total}.`
+            : 'Montage en cours…',
+        };
+      }
+
+      const { logActivity } = await import('@/lib/activity');
+      const { ActivityType } = await import('@/lib/db/schema');
+      await logActivity(tdb, user.id, ActivityType.RENDER_COMPLETED);
+
+      revalidatePath(`/dashboard/videos/${data.videoId}`);
+      const cout = avant.state?.costUsd;
+      return {
+        success:
+          'Montage terminé.' +
+          (typeof cout === 'number' ? ` Coût machine : ${cout.toFixed(4)} $.` : ''),
       };
     } catch (error) {
       return formError(error);
