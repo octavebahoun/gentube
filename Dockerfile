@@ -19,6 +19,7 @@ WORKDIR /app
 # glibc, et Alpine n'a que musl.
 RUN apk add --no-cache libc6-compat
 
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
@@ -27,6 +28,7 @@ RUN pnpm install --frozen-lockfile
 FROM node:24-alpine AS build
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
 
 COPY --from=deps /app/node_modules ./node_modules
