@@ -1,6 +1,16 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  /**
+   * Sortie autonome, pour l'image Docker.
+   *
+   * Next écrit dans `.next/standalone` un serveur qui embarque ses seules
+   * dépendances utiles : l'image finale n'a pas à copier `node_modules`, qui
+   * pèse plus d'un gigaoctet ici à cause d'hyperframes. Sans effet sur le
+   * déploiement Vercel, qui ignore ce champ.
+   */
+  output: 'standalone',
+
   experimental: {
     ppr: true,
     clientSegmentCache: true,

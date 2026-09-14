@@ -1,0 +1,33 @@
+# Ce qui n'a rien à faire dans le contexte de build.
+#
+# `render/` pèse 144 Mo de vidéos de démonstration et de références visuelles :
+# rien de tout ça ne sert à servir l'application. Le laisser passer ajoutait
+# une minute d'envoi de contexte à chaque build.
+
+node_modules
+.next
+.git
+.github
+.vercel
+
+render/
+design-system/
+docs/
+passation/
+openmontage/
+n8n/
+
+**/*.test.ts
+**/*.test.tsx
+**/*.md
+!README.md
+
+.env
+.env.*
+!.env.example
+
+Dockerfile
+.dockerignore
+docker-compose.yml
+dev_server.log
+tsconfig.tsbuildinfo

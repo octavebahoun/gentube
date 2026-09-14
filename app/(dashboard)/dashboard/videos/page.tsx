@@ -11,6 +11,7 @@ import { getUser } from '@/lib/db/queries';
 import { tenantDb, eq } from '@/lib/db/tenant-db';
 import { projects, shots } from '@/lib/db/schema';
 import { listVideos } from '@/lib/videos';
+import { liensDeLecture } from '@/lib/storage/lecture';
 
 const ETATS = [
   'all',
@@ -47,6 +48,12 @@ export default async function VideosLibraryPage({
     })
   );
   withMeta.sort((a, b) => b.video.updatedAt.getTime() - a.video.updatedAt.getTime());
+
+  // `outputUrl` est une clé de bucket : la vignette la recevait telle quelle
+  // et ne montrait donc jamais le montage. Voir lib/storage/lecture.
+  const montages = await liensDeLecture(
+    withMeta.map(({ video }) => [video.id, video.outputUrl])
+  );
 
   return (
     <Page className="max-w-6xl">
@@ -98,7 +105,7 @@ export default async function VideosLibraryPage({
                 href={`/dashboard/videos/${video.id}`}
                 className="block overflow-hidden rounded-card border border-line bg-surface transition-colors duration-(--t-fast) hover:border-line-strong"
               >
-                <Vignette status={video.status} src={video.outputUrl} titre={video.title} />
+                <Vignette status={video.status} src={montages[video.id]} titre={video.title} />
                 <div className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <h2 className="line-clamp-2 text-sm leading-snug font-semibold text-ink">

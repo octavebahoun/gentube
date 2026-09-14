@@ -1,3 +1,12 @@
+# Deux usages dans un seul fichier.
+#
+#   docker compose up -d postgres        la base de test, pour `pnpm test`
+#   docker compose --profile vps up -d   l'application servie, pour un VPS
+#
+# Le service `app` porte un profil pour qu'il ne démarre pas quand on ne
+# voulait que Postgres : les suites `*.db.test.ts` lancent ce fichier, et
+# construire l'image à chaque `pnpm test` coûterait deux minutes.
+
 services:
   postgres:
     image: postgres:16.4-alpine
@@ -15,6 +24,24 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  app:
+    profiles: ['vps']
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gentube_app
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    # Les secrets ne sont pas dans l'image : elle est construite une fois et
+    # servie partout, ce sont les variables qui changent d'un hôte à l'autre.
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      HOSTNAME: '0.0.0.0'
 
 volumes:
   postgres_data:

@@ -10,36 +10,20 @@ import { DeleteVideoButton, StoryboardEditor } from './storyboard';
 import { VideoSettings } from '@/components/storyboard/video-settings';
 import { listSounds } from '@/lib/sounds';
 import { listClientAssets } from '@/lib/assets';
-import { createAssetStore } from '@/lib/storage';
+import {
+  estUneVideo,
+  lienDeLecture,
+  liensDeLecture,
+} from '@/lib/storage/lecture';
 import { QUALITY_LABEL } from '@/lib/credits/pricing';
 import { Page, Breadcrumb, Notice } from '@/components/kit/page';
 import { EtatBadge } from '@/components/kit/etat';
-
-/** Le temps qu'une lecture tient : assez pour regarder, pas pour partager. */
-const LECTURE_TTL_S = 60 * 60;
 
 const PIPELINE_LABEL: Record<string, string> = {
   image: 'images fixes',
   video: 'plans animés',
   mixed: 'mixte',
 };
-
-/**
- * L'adresse de lecture du montage.
- *
- * `outputUrl` est une clé R2, pas une URL : le navigateur ne peut pas la lire
- * telle quelle. On la signe pour une heure, et on rend `null` si le magasin
- * n'est pas configuré — une instance sans R2 doit afficher la page, pas
- * tomber.
- */
-async function lienDuMontage(cle: string | null): Promise<string | null> {
-  if (!cle) return null;
-  try {
-    return await createAssetStore().signedUrl(cle, LECTURE_TTL_S);
-  } catch {
-    return null;
-  }
-}
 
 export default async function VideoPage({
   params,
@@ -60,7 +44,25 @@ export default async function VideoPage({
     throw error;
   }
 
-  const montage = await lienDuMontage(board.video.outputUrl);
+  const montage = await lienDeLecture(board.video.outputUrl);
+
+  /*
+   * Les aperçus des plans, signés ici.
+   *
+   * `assetUrl` est une clé de bucket ; l'écran la mettait telle quelle dans un
+   * `src` et n'a donc jamais rien affiché. On passe une table à part plutôt
+   * que de réécrire les plans : `shot.assetUrl` reste la clé partout ailleurs,
+   * et un formulaire qui la renverrait ne renverrait pas une URL signée.
+   */
+  const apercus = await liensDeLecture(
+    board.shots.map((shot) => [shot.id, shot.assetUrl ?? shot.sourceImageUrl])
+  );
+  const apercusAnimes = Object.fromEntries(
+    board.shots.map((shot) => [
+      shot.id,
+      estUneVideo(shot.assetUrl ?? shot.sourceImageUrl),
+    ])
+  );
   const project = await getProject(tdb, board.video.projectId);
   const brouillon = board.video.status === 'draft';
 
@@ -152,6 +154,8 @@ export default async function VideoPage({
         <StoryboardEditor
           video={board.video}
           shots={board.shots}
+          apercus={apercus}
+          apercusAnimes={apercusAnimes}
           creditsEstimated={board.creditsEstimated}
           balance={board.balance}
           canAfford={board.canAfford}

@@ -44,6 +44,8 @@ import { type ActionState, seconds } from '@/components/storyboard/utils';
 export function StoryboardEditor({
   video,
   shots,
+  apercus,
+  apercusAnimes,
   creditsEstimated,
   balance,
   canAfford,
@@ -52,6 +54,10 @@ export function StoryboardEditor({
 }: {
   video: Video;
   shots: Shot[];
+  /** Aperçu signé de chaque plan, par identifiant. Voir lib/storage/lecture. */
+  apercus: Record<number, string | null>;
+  /** Si cet aperçu est un clip : un `.mp4` dans un `<img>` n'affiche rien. */
+  apercusAnimes: Record<number, boolean>;
   creditsEstimated: number;
   balance: number;
   canAfford: boolean;
@@ -94,6 +100,7 @@ export function StoryboardEditor({
   }, [shots]);
 
   const activeShot = items.find((s) => s.id === activeShotId) || items[0];
+  const apercuActif = activeShot ? apercus[activeShot.id] : null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -152,12 +159,23 @@ export function StoryboardEditor({
         {/* Moniteur + pellicule */}
         <div className="min-w-0">
           <div className="relative aspect-video w-full overflow-hidden rounded-card border border-line bg-canvas">
-            {activeShot?.assetUrl ? (
-              <img
-                src={activeShot.assetUrl}
-                alt={`Aperçu de la scène ${activeShot.order}`}
-                className="size-full object-cover"
-              />
+            {apercuActif ? (
+              apercusAnimes[activeShot!.id] ? (
+                <video
+                  key={apercuActif}
+                  src={apercuActif}
+                  className="size-full object-cover"
+                  controls
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <img
+                  src={apercuActif}
+                  alt={`Aperçu de la scène ${activeShot!.order}`}
+                  className="size-full object-cover"
+                />
+              )
             ) : (
               <div className="flex size-full flex-col items-center justify-center gap-2 p-6 text-center">
                 <Film className="size-6 text-ink-3" aria-hidden="true" />
@@ -168,7 +186,7 @@ export function StoryboardEditor({
                 </p>
               </div>
             )}
-            {activeShot?.assetUrl && (
+            {apercuActif && !apercusAnimes[activeShot!.id] && (
               <p className="absolute inset-x-0 bottom-0 bg-canvas/85 px-3 py-2 text-xs text-ink">
                 {activeShot.narration || activeShot.prompt}
               </p>
