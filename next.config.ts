@@ -19,7 +19,22 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '100mb',
     },
   },
-  serverExternalPackages: ['esbuild', 'drizzle-kit'],
+  /**
+   * Paquets laissés au `require` du serveur au lieu d'être bundlés.
+   *
+   * `@hyperframes/aws-lambda` n'est appelé qu'en `await import()` derrière un
+   * garde d'environnement, mais un import dynamique à chemin littéral est
+   * bundlé quand même : le graphe tirait tout hyperframes — puppeteer,
+   * ffmpeg-static, onnxruntime, sharp — et le build mourait d'un OOM sur
+   * l'hébergement. Il n'a rien à faire dans le bundle : le rendu s'exécute
+   * sur Lambda, le serveur ne fait que démarrer l'exécution.
+   */
+  serverExternalPackages: [
+    'esbuild',
+    'drizzle-kit',
+    '@hyperframes/aws-lambda',
+    'hyperframes',
+  ],
 };
 
 export default nextConfig;
