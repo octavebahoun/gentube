@@ -148,6 +148,7 @@ export function Breadcrumb({
     <nav aria-label="Fil d’Ariane" className="mb-5 flex items-center gap-2 text-sm">
       <Link
         href={parentHref}
+        aria-label={`Retour à ${parent}`}
         className="inline-flex min-h-11 items-center gap-1.5 text-ink-3 transition-colors duration-(--t-fast) hover:text-ink"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
