@@ -23,6 +23,19 @@ import { PLAN_OFFERS } from '@/lib/billing/plans';
 
 const LOOPS = [1, 2, 3, 4, 5, 6] as const;
 
+/* Le catalogue de mouvements de caméra, monté par le cadreur. Chaque boucle
+ * est un vrai rendu p-video 1080p, compressé pour l'accueil. */
+const EFFETS = [
+  { n: 1, label: 'Panoramique' },
+  { n: 2, label: 'Tilt vertical' },
+  { n: 3, label: 'Travelling vertical' },
+  { n: 4, label: 'Whip pan' },
+  { n: 5, label: 'Crash zoom' },
+  { n: 6, label: 'Travelling latéral' },
+  { n: 7, label: 'Caméra portée' },
+  { n: 8, label: 'Slow motion' },
+] as const;
+
 function minutes(credits: number) {
   return Math.floor(secondsAffordable(credits, 'draft') / 60);
 }
@@ -80,6 +93,31 @@ export default function HomePage() {
               src={`/showcase/loop-${n}.mp4`}
               legend={`Rendu GenTube ${String(n).padStart(2, '0')}`}
               timecode="00:05 · 1080p"
+              className="w-[17rem] shrink-0 sm:w-[21rem]"
+            />
+          ))}
+        </Marquee>
+      </section>
+
+      {/* ── LE CATALOGUE D'EFFETS ────────────────────────────────────── */}
+      <section
+        aria-label="Catalogue de mouvements de caméra"
+        className="border-b border-line py-4"
+      >
+        <div className="mx-auto mb-4 w-full max-w-(--content-max) px-(--gutter)">
+          <p className="t-label">Le catalogue</p>
+          <h2 className="t-h2 mt-2 max-w-2xl">
+            Des mouvements de caméra de cinéma, écrits par un prompt.
+          </h2>
+        </div>
+        <Marquee duration={48} reverse>
+          {EFFETS.map(({ n, label }) => (
+            <Tile
+              key={`effet-${n}`}
+              poster={`/showcase/effet-${n}.webp`}
+              src={`/showcase/effet-${n}.mp4`}
+              legend={label}
+              timecode="1080p"
               className="w-[17rem] shrink-0 sm:w-[21rem]"
             />
           ))}
