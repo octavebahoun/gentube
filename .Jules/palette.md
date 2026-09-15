@@ -1,0 +1,3 @@
+## 2026-09-10 - Breadcrumb accessibility
+**Learning:** Icon-only back links in components like Breadcrumbs are frequently overlooked for screen readers since they rely visually on the icon to indicate their purpose (going back).
+**Action:** Always ensure that icon-only `Link` elements in navigation contexts include an `aria-label` attribute (e.g., `aria-label="Retour à ${parent}"`) to provide descriptive text for screen readers.
