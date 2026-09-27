@@ -310,6 +310,7 @@ export function JobsClient() {
                             <Link
                               href={`/dashboard/admin/jobs/${job.id}`}
                               className="inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-ink-2 transition-colors duration-(--t-fast) hover:text-ink"
+                              aria-label={`Détails de la tâche ${job.id}`}
                             >
                               Détails
                               <ExternalLink className="size-4" aria-hidden="true" />
