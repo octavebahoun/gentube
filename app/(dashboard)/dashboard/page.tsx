@@ -110,7 +110,13 @@ function Membres() {
             {peutGerer && member.id !== currentUser?.id && (
               <form action={removeAction}>
                 <input type="hidden" name="memberId" value={member.id} />
-                <Button type="submit" variant="ghost" size="sm" disabled={isRemovePending}>
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="sm"
+                  disabled={isRemovePending}
+                  aria-label={`Retirer ${nom(member)}`}
+                >
                   {isRemovePending ? 'Retrait…' : 'Retirer'}
                 </Button>
               </form>
