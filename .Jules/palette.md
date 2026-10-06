@@ -1,0 +1,3 @@
+## 2024-05-15 - Focus outlines for custom radio containers
+**Learning:** When styling custom radio or checkbox options using container `<label>` elements (like cards or buttons), the default native browser focus ring on the visually hidden or small nested `<input>` is often insufficient or invisible. Keyboard users can lose track of focus.
+**Action:** Always add `has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink` (or similar Tailwind `has-[:focus-visible]` utilities) to the parent `<label>` to ensure the entire clickable container receives a clear focus ring, consistent with interactive components.
