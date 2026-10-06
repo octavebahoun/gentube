@@ -126,7 +126,8 @@ export function ChoiceGroup({
             className={cn(
               'flex cursor-pointer gap-3 rounded-card border border-line bg-surface p-4',
               'transition-colors duration-(--t-fast) hover:border-line-strong',
-              'has-checked:border-ink-3 has-checked:bg-surface-2'
+              'has-checked:border-ink-3 has-checked:bg-surface-2',
+              'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink'
             )}
           >
             <input

@@ -73,6 +73,7 @@ function TypeChoice({
             'inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-control border border-line bg-surface px-2.5 text-xs text-ink-2',
             'transition-colors duration-(--t-fast) hover:border-line-strong',
             'has-checked:border-ink-3 has-checked:bg-surface-2 has-checked:text-ink',
+            'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink',
             disabled && 'cursor-not-allowed opacity-45'
           )}
         >
