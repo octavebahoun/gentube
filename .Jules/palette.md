@@ -1,0 +1,3 @@
+## 2024-10-07 - Accessibility of disjointed text in mapped lists
+**Learning:** When creating mapped list items (like selection buttons) that contain disjointed/styled text spans (e.g., `#01`, `5s`, `fixe`), screen readers often read these as separate, confusing elements without clear context of what the button does. Furthermore, custom buttons often lack native focus rings when styled.
+**Action:** Always add a descriptive, contextual `aria-label` (e.g., `aria-label={"Sélectionner la scène " + (index + 1)}`) to the parent button to provide a single, clear purpose for screen reader users, and ensure explicit focus styles (`outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink`) are applied for keyboard accessibility.
