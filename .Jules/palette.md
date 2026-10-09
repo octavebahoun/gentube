@@ -1,0 +1,3 @@
+## 2026-10-09 - Accessible Focus States for Custom Radio Buttons
+**Learning:** When creating custom radio or checkbox buttons where the visual styling is applied to the wrapping `<label>` and the native `<input>` is hidden or reduced in prominence, applying focus styles to the `<input>` creates a misaligned or double focus ring that is confusing for keyboard users.
+**Action:** Always apply `has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink` to the wrapping container `<label>` and add `focus-visible:outline-none` to the nested native `<input>` to ensure a clean, accurate focus state while maintaining full keyboard accessibility.

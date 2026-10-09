@@ -124,7 +124,7 @@ export function RadioRow({
               name={name}
               value={o.value}
               defaultChecked={defaultValue === o.value}
-              className="size-4 accent-ink"
+              className="size-4 accent-ink focus-visible:outline-none"
             />
             {o.label}
           </label>
