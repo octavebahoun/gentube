@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 export type Proof = { titre: string; metric: string; detail: string };
 
 const control =
-  'inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-control border border-line bg-surface text-ink-2 transition-colors duration-(--t-fast) hover:border-line-strong hover:text-ink';
+  'inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-control border border-line bg-surface text-ink-2 transition-colors duration-(--t-fast) hover:border-line-strong hover:text-ink outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
 
 export function ProofCarousel({ proofs }: { proofs: Proof[] }) {
   const [index, setIndex] = useState(0);
@@ -71,7 +71,7 @@ export function ProofCarousel({ proofs }: { proofs: Proof[] }) {
               aria-label={`${p.titre} (${i + 1}/${proofs.length})`}
               onClick={() => setIndex(i)}
               className={cn(
-                'h-1.5 cursor-pointer rounded-full transition-all duration-(--t-fast)',
+                'h-1.5 cursor-pointer rounded-full transition-all duration-(--t-fast) outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
                 i === index ? 'w-8 bg-ink' : 'w-1.5 bg-line-strong hover:bg-ink-3'
               )}
             />

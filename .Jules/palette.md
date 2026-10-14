@@ -1,0 +1,3 @@
+## 2026-10-14 - Keyboard accessibility on custom interactive elements
+**Learning:** Custom interactive elements (like the indicators in a carousel or non-standard selection buttons) often lack explicit focus indicators, which severely impacts keyboard navigation and accessibility. They visually hide the `outline` or use custom shapes. Relying only on hover states leaves keyboard users without visual feedback of their current position.
+**Action:** Always verify that custom buttons (e.g., dot indicators, navigation arrows, custom list items) explicitly include keyboard focus visible styles, such as `outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink` in Tailwind CSS.
