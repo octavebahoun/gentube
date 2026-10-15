@@ -126,7 +126,8 @@ export function ChoiceGroup({
             className={cn(
               'flex cursor-pointer gap-3 rounded-card border border-line bg-surface p-4',
               'transition-colors duration-(--t-fast) hover:border-line-strong',
-              'has-checked:border-ink-3 has-checked:bg-surface-2'
+              'has-checked:border-ink-3 has-checked:bg-surface-2',
+              'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink'
             )}
           >
             <input
@@ -134,7 +135,7 @@ export function ChoiceGroup({
               name={name}
               value={o.value}
               defaultChecked={defaultValue === o.value}
-              className="mt-0.5 size-4 shrink-0 accent-ink"
+              className="mt-0.5 size-4 shrink-0 accent-ink focus-visible:outline-none"
             />
             <span className="min-w-0">
               <span className="block text-sm font-semibold text-ink">{o.label}</span>
