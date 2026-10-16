@@ -227,6 +227,7 @@ export function FabricationClient({
               {enriched.length - 6 > 1 ? 's' : ''} —{' '}
               <Link
                 href="/dashboard/videos?etat=all"
+                aria-label="Voir toutes les vidéos dans la bibliothèque"
                 className="text-ink underline underline-offset-2 transition-colors duration-(--t-fast) hover:text-ink-2"
               >
                 voir la bibliothèque
