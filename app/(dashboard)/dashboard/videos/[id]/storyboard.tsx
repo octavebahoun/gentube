@@ -205,10 +205,8 @@ export function StoryboardEditor({
                   <li key={shot.id}>
                     <button
                       type="button"
-                      aria-label={`Afficher la scène ${index + 1}`}
                       onClick={() => setActiveShotId(shot.id)}
                       aria-current={active ? 'true' : undefined}
-                      aria-label={`Afficher la scène ${index + 1}`}
                       className={cn(
                         'flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded-control border px-3 text-xs whitespace-nowrap',
                         'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
