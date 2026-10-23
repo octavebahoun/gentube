@@ -205,7 +205,6 @@ export function StoryboardEditor({
                   <li key={shot.id}>
                     <button
                       type="button"
-                      aria-label={`Afficher la scène ${index + 1}`}
                       onClick={() => setActiveShotId(shot.id)}
                       aria-current={active ? 'true' : undefined}
                       aria-label={`Afficher la scène ${index + 1}`}
