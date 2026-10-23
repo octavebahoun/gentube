@@ -309,7 +309,8 @@ export function JobsClient() {
                           <td className="py-3">
                             <Link
                               href={`/dashboard/admin/jobs/${job.id}`}
-                              className="inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-ink-2 transition-colors duration-(--t-fast) hover:text-ink"
+                              aria-label={`Détails de la tâche ${job.id}`}
+                              className="inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-ink-2 outline-none transition-colors duration-(--t-fast) hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
                             >
                               Détails
                               <ExternalLink className="size-4" aria-hidden="true" />
